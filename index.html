@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Doggyco 3.1</title>
+<title>Doggyco 3.2</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
+
 body{
 overflow:hidden;
 font-family:Segoe UI,sans-serif;
@@ -22,19 +23,37 @@ position:relative;
 width:400px;
 height:650px;
 overflow:hidden;
+border-radius:25px;
+box-shadow:0 20px 50px rgba(0,0,0,0.3);
+background:linear-gradient(#87CEEB,#ffffff);
+}
+
+/* ===== UI PANEL ===== */
+#uiPanel{
+position:absolute;
+top:10px;
+left:10px;
+right:10px;
+display:flex;
+justify-content:space-between;
+background:rgba(255,255,255,0.8);
+backdrop-filter:blur(6px);
+padding:8px 15px;
 border-radius:20px;
-box-shadow:0 15px 40px rgba(0,0,0,0.3);
-background:linear-gradient(#87CEEB,#e0f6ff);
+font-weight:bold;
+color:#333;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
 canvas{display:block;}
 
+/* ===== CONTROL BAR ===== */
 #controlBar{
 position:absolute;
 bottom:0;
 width:100%;
 height:70px;
-background:#222;
+background:#1c1c1c;
 }
 
 #slider{
@@ -43,8 +62,24 @@ bottom:20px;
 left:50%;
 transform:translateX(-50%);
 width:80%;
+appearance:none;
+height:12px;
+border-radius:10px;
+background:linear-gradient(90deg,#4facfe,#0052d4,#4facfe);
+outline:none;
 }
 
+#slider::-webkit-slider-thumb{
+appearance:none;
+width:25px;
+height:25px;
+border-radius:50%;
+background:white;
+border:3px solid #0052d4;
+cursor:pointer;
+}
+
+/* ===== OVERLAY ===== */
 .overlay{
 position:absolute;
 top:0;
@@ -75,6 +110,13 @@ cursor:pointer;
 <body>
 
 <div id="gameWrapper">
+
+<div id="uiPanel">
+<div>⭐ <span id="score">0</span></div>
+<div>❤️ <span id="lives">3</span></div>
+<div>⏱ <span id="time">30</span></div>
+</div>
+
 <canvas id="game" width="400" height="650"></canvas>
 
 <div id="controlBar">
@@ -82,10 +124,7 @@ cursor:pointer;
 </div>
 
 <div class="overlay" id="startScreen">
-<h2>Doggyco 3.1</h2>
-<p>🦴=1 | 🍪=2 | 🍗=3<br>
-30 Sekunden pro Level<br>
-Mindestens 80% sammeln</p>
+<h2>Doggyco 3.2</h2>
 <input id="playerName" placeholder="Dein Name">
 <button onclick="startGame()">Start</button>
 </div>
@@ -95,6 +134,7 @@ Mindestens 80% sammeln</p>
 <p id="finalScore"></p>
 <button onclick="restart()">Nochmal spielen</button>
 </div>
+
 </div>
 
 <script>
@@ -103,25 +143,16 @@ const ctx=canvas.getContext("2d");
 const slider=document.getElementById("slider");
 
 let state="start";
-let score,lives,level,speed,timeLeft;
-let items,totalPoints,collectedPoints;
-let dog,clouds,spawnTimer;
+let score,lives,timeLeft,items,dog,spawnTimer;
+let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 
 function init(){
 score=0;
 lives=3;
-level=1;
-speed=1.8;
 timeLeft=30;
 items=[];
-totalPoints=0;
-collectedPoints=0;
 spawnTimer=0;
 dog={x:180,y:520};
-clouds=[
-{x:50,y:100,size:1},
-{x:250,y:140,size:1.3}
-];
 }
 
 slider.addEventListener("input",e=>{
@@ -143,18 +174,59 @@ state="start";
 }
 
 function spawn(){
-if(items.length>=3) return; // maximal 3 gleichzeitig
-
+if(items.length>=3) return;
 let rand=Math.random();
-let item={x:Math.random()*360,y:-30,speed:speed};
-
-if(rand<0.15){item.type="👮";item.danger=true;item.val=0;}
-else if(rand<0.5){item.type="🦴";item.val=1;}
-else if(rand<0.8){item.type="🍪";item.val=2;}
-else{item.type="🍗";item.val=3;}
-
-if(!item.danger) totalPoints+=item.val;
+let item={x:Math.random()*360,y:-30,speed:2};
+if(rand<0.2){item.type="👮";item.danger=true;item.blink=0;}
+else{item.type=["🦴","🍪","🍗"][Math.floor(Math.random()*3)];
+item.val=item.type==="🦴"?1:item.type==="🍪"?2:3;}
 items.push(item);
+}
+
+function loop(){
+if(state!=="play")return;
+
+ctx.clearRect(0,0,400,650);
+drawBackground();
+
+spawnTimer++;
+if(spawnTimer>80){spawn();spawnTimer=0;}
+
+items.forEach((item,i)=>{
+item.y+=item.speed;
+
+if(item.danger){
+item.blink+=0.1;
+ctx.globalAlpha=Math.abs(Math.sin(item.blink));
+ctx.fillStyle="red";
+}
+
+ctx.font="35px Arial";
+ctx.fillText(item.type,item.x,item.y);
+ctx.globalAlpha=1;
+
+if(item.y>500 && item.y<550 && item.x>dog.x-20 && item.x<dog.x+40){
+if(item.danger){
+lives--;
+playPostmanSound();
+if(lives<=0)return endGame();
+}else{
+score+=item.val;
+playCollectSound();
+}
+items.splice(i,1);
+}
+});
+
+ctx.font="40px Arial";
+ctx.fillText("🐶",dog.x,520);
+
+timeLeft-=1/60;
+if(timeLeft<=0)return endGame();
+
+updateUI();
+
+requestAnimationFrame(loop);
 }
 
 function drawBackground(){
@@ -164,94 +236,42 @@ sky.addColorStop(1,"#ffffff");
 ctx.fillStyle=sky;
 ctx.fillRect(0,0,400,650);
 
-clouds.forEach(c=>{
-ctx.save();
-ctx.scale(c.size,c.size);
-ctx.fillStyle="white";
-ctx.beginPath();
-ctx.arc(c.x,c.y,25,0,Math.PI*2);
-ctx.arc(c.x+30,c.y,35,0,Math.PI*2);
-ctx.arc(c.x+60,c.y,25,0,Math.PI*2);
-ctx.fill();
-ctx.restore();
-});
-
 ctx.fillStyle="#6cc24a";
 ctx.fillRect(0,580,400,70);
 
 ctx.fillStyle="#444";
 ctx.fillRect(0,600,400,50);
-
-ctx.fillStyle="white";
-for(let i=0;i<5;i++){
-ctx.fillRect(170,610+i*10,60,5);
-}
 }
 
-function loop(){
-if(state!=="play")return;
-
-ctx.clearRect(0,0,400,650);
-drawBackground();
-
-clouds.forEach(c=>{
-c.x+=0.1;
-if(c.x>420)c.x=-80;
-});
-
-spawnTimer++;
-if(spawnTimer>70){ // ruhiger
-spawn();
-spawnTimer=0;
+function updateUI(){
+scoreEl.innerText=score;
+livesEl.innerText=lives;
+timeEl.innerText=Math.ceil(timeLeft);
 }
 
-items.forEach((item,i)=>{
-item.y+=item.speed;
-ctx.font="35px Arial";
-ctx.fillText(item.type,item.x,item.y);
+const scoreEl=document.getElementById("score");
+const livesEl=document.getElementById("lives");
+const timeEl=document.getElementById("time");
 
-if(item.y>500 && item.y<550 && item.x>dog.x-20 && item.x<dog.x+40){
-if(item.danger){
-lives--;
-if(lives<=0)return endGame();
-}else{
-score+=item.val;
-collectedPoints+=item.val;
-}
-items.splice(i,1);
-}
-});
+/* ===== Improved Soft Sounds ===== */
 
-ctx.font="40px Arial";
-ctx.fillText("🐶",dog.x,520);
-
-ctx.fillStyle="black";
-ctx.fillText("Score: "+score,10,30);
-ctx.fillText("❤️ "+lives,300,30);
-ctx.fillText("Level "+level,160,30);
-
-timeLeft-=1/60;
-ctx.fillText("⏱ "+Math.ceil(timeLeft),170,60);
-
-if(timeLeft<=0){
-let percent= collectedPoints/Math.max(totalPoints,1);
-if(percent<0.8){
-lives--;
-if(lives<=0)return endGame();
-}
-nextLevel();
+function playCollectSound(){
+let o=audioCtx.createOscillator();
+let g=audioCtx.createGain();
+g.gain.value=0.03;
+o.frequency.value=700;
+o.connect(g);g.connect(audioCtx.destination);
+o.start();o.stop(audioCtx.currentTime+0.08);
 }
 
-requestAnimationFrame(loop);
-}
-
-function nextLevel(){
-level++;
-speed+=0.3;
-timeLeft=30;
-items=[];
-totalPoints=0;
-collectedPoints=0;
+function playPostmanSound(){
+let o=audioCtx.createOscillator();
+let g=audioCtx.createGain();
+g.gain.value=0.05;
+o.frequency.value=120;
+o.type="sawtooth";
+o.connect(g);g.connect(audioCtx.destination);
+o.start();o.stop(audioCtx.currentTime+0.25);
 }
 
 function endGame(){
@@ -263,4 +283,3 @@ document.getElementById("gameOver").style.display="flex";
 
 </body>
 </html>
-
