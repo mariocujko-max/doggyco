@@ -3,154 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Doggyco 3.2 - Spider Update</title>
+    <title>Doggyco 3.2 - Fixed</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
     <style>
-        :root {
-            --retro-yellow: #ffd166;
-            --retro-pink: #ff9ecf;
-            --retro-blue: #4facfe;
-            --retro-green: #06d6a0;
-            --retro-red: #ef476f;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --retro-yellow: #ffd166; --retro-pink: #ff9ecf; --retro-blue: #4facfe; --retro-green: #06d6a0; --retro-red: #ef476f; }
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
         
         body {
             font-family: 'Segoe UI', sans-serif;
-            background: #1a1a2e;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 10px;
+            background: #1a1a2e; color: white;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding: 5px;
         }
 
-        .retro-title {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 1.8rem;
-            color: var(--retro-yellow);
-            text-shadow: 3px 3px 0px var(--retro-red);
-            margin: 15px 0;
-            text-align: center;
-        }
+        .retro-title { font-family: 'Press Start 2P'; font-size: 1.2rem; color: var(--retro-yellow); margin: 10px 0; text-align: center; }
 
         #mainLayout {
-            display: grid;
-            grid-template-columns: 250px 400px 250px;
-            gap: 20px;
-            width: 100%;
-            max-width: 1200px;
-            justify-content: center;
+            display: grid; grid-template-columns: 200px 400px 200px;
+            gap: 15px; width: 100%; max-width: 1200px; justify-content: center;
         }
 
-        /* Side Panels (Rangliste & Info) */
         .side-panel {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 15px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            height: 600px;
-            overflow-y: auto;
+            background: rgba(0,0,0,0.5); padding: 15px; border-radius: 15px;
+            border: 1px solid var(--retro-blue); height: 650px; overflow-y: auto;
         }
 
-        .side-panel h3 {
-            font-family: 'Press Start 2P';
-            font-size: 0.6rem;
-            margin-bottom: 15px;
-            color: var(--retro-pink);
-            text-align: center;
-        }
-
-        .score-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 4px;
-        }
-
-        .info-text { font-size: 0.75rem; line-height: 1.6; color: #ccc; }
-        .info-text b { color: var(--retro-yellow); }
-
-        /* Game Wrapper */
         #gameWrapper {
-            position: relative;
-            width: 400px;
-            height: 600px;
-            border-radius: 20px;
-            background: #87CEEB;
-            overflow: hidden;
-            border: 4px solid #fff;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            position: relative; width: 400px; height: 750px; /* Spielfeld gestreckt */
+            background: #87CEEB; border-radius: 20px; border: 4px solid white;
+            overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
 
         #uiPanel {
-            position: absolute;
-            top: 10px; left: 10px; right: 10px;
-            display: flex; justify-content: space-between;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 8px 12px;
-            border-radius: 10px;
-            color: #333; font-weight: bold; z-index: 10;
+            position: absolute; top: 10px; left: 10px; right: 10px;
+            background: rgba(255,255,255,0.9); color: #333;
+            padding: 8px; border-radius: 10px; display: flex; justify-content: space-between; font-weight: bold; z-index: 10;
         }
-
-        #levelIndicator {
-            position: absolute;
-            top: 60px; left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            padding: 8px;
-            border-radius: 15px;
-            font-size: 0.65rem;
-            text-align: center;
-            width: 80%;
-            z-index: 5;
-        }
-
-        .goal-bar-bg { width: 100%; height: 8px; background: #333; border-radius: 4px; margin-top: 5px; }
-        #goalBarFill { width: 0%; height: 100%; background: var(--retro-green); transition: width 0.3s; }
 
         #controlBar {
-            position: absolute;
-            bottom: 0; width: 100%; height: 60px;
+            position: absolute; bottom: 0; width: 100%; height: 80px;
             background: #111; display: flex; justify-content: center; align-items: center;
         }
 
-        #slider { width: 85%; accent-color: var(--retro-blue); cursor: pointer; }
+        #slider { width: 85%; height: 30px; accent-color: var(--retro-pink); }
 
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 100; text-align: center;
-            padding: 20px;
+            justify-content: center; align-items: center; z-index: 100; text-align: center; padding: 20px;
         }
 
-        button {
-            padding: 12px 24px; border: none; border-radius: 50px;
-            background: linear-gradient(45deg, var(--retro-pink), var(--retro-yellow));
-            font-family: 'Press Start 2P', cursive; font-size: 0.6rem; cursor: pointer; margin-top: 15px;
-        }
+        button { padding: 15px 25px; font-family: 'Press Start 2P'; font-size: 0.7rem; cursor: pointer; background: var(--retro-green); border: none; border-radius: 10px; }
 
-        input {
-            padding: 10px; border-radius: 5px; border: none; text-align: center;
-            font-family: 'Press Start 2P', cursive; font-size: 0.6rem; margin-top: 10px;
-        }
-
-        /* Mobile Adjustments */
-        @media (max-width: 950px) {
-            #mainLayout {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            #gameWrapper { width: 380px; height: 550px; }
-            .side-panel { width: 380px; height: 300px; margin-top: 10px; }
-            #infoPanel { order: 3; }
-            #leaderboard { order: 2; }
+        @media (max-width: 900px) {
+            #mainLayout { display: flex; flex-direction: column; align-items: center; }
+            #gameWrapper { width: 95vw; height: 70vh; }
+            .side-panel { width: 95vw; height: auto; max-height: 200px; }
         }
     </style>
 </head>
@@ -160,8 +68,8 @@
 
     <div id="mainLayout">
         <div id="leaderboard" class="side-panel">
-            <h3>GLOBAL TOP 10 🏆</h3>
-            <div id="scoreList">Lade Scores...</div>
+            <h3 style="font-size:0.6rem; margin-bottom:10px;">TOP 10 🏆</h3>
+            <div id="scoreList">Lade...</div>
         </div>
 
         <div id="gameWrapper">
@@ -170,44 +78,23 @@
                 <div>❤️ <span id="lives">3</span></div>
                 <div>⏱ <span id="time">30</span></div>
             </div>
-
-            <div id="levelIndicator">
-                LVL <span id="lvlNum">1</span> | Ziel: <span id="curTarget">0</span> / 80%
-                <div class="goal-bar-bg"><div id="goalBarFill"></div></div>
-            </div>
-
-            <canvas id="game" width="400" height="600"></canvas>
-
-            <div id="controlBar">
-                <input type="range" id="slider" min="40" max="360" value="180">
-            </div>
+            <canvas id="game"></canvas>
+            <div id="controlBar"><input type="range" id="slider" min="30" max="370"></div>
 
             <div class="overlay" id="startScreen">
-                <p style="font-size:0.6rem; color:var(--retro-pink);">WARNUNG: 🕷️ = -15% FORTSCHRITT</p>
-                <input type="text" id="playerName" placeholder="NAME" maxlength="10">
+                <p>ZIEL: 80% QUOTE</p>
+                <input type="text" id="playerName" placeholder="NAME" style="margin:10px; padding:10px;">
                 <button onclick="startGame()">START</button>
             </div>
-
             <div class="overlay" id="gameOver" style="display:none;">
-                <h2 style="font-family:'Press Start 2P'; color:var(--retro-red);">GAME OVER</h2>
-                <p id="finalScore" style="font-size:2.5rem; margin:10px;"></p>
-                <button onclick="restart()">NOCHMAL</button>
+                <h2>GAME OVER</h2>
+                <button onclick="restart()">RETRY</button>
             </div>
         </div>
 
         <div id="infoPanel" class="side-panel">
-            <h3>ANLEITUNG 📖</h3>
-            <div class="info-text">
-                Bewege den Hund mit dem Slider.<br><br>
-                <b>Ziel:</b> Erreiche 80% Fangquote in 30 Sek.<br><br>
-                🦴 = 2 Pkt.<br>
-                🍪 = 5 Pkt.<br>
-                🍗 = 10 Pkt.<br><br>
-                <b>Gefahren:</b><br>
-                👮 = -1 Leben<br>
-                🕷️ = <b>-15%</b> Level-Fortschritt!<br><br>
-                Spiel endet bei 0 ❤️.
-            </div>
+            <h3 style="font-size:0.6rem;">REGELN 📖</h3>
+            <p style="font-size:0.7rem; margin-top:10px;">80% Quote nötig!<br>🕷️ = -15% Quote<br>👮 = -1 Herz</p>
         </div>
     </div>
 
@@ -215,159 +102,112 @@
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
     const slider = document.getElementById("slider");
-    
-    let state = "start";
-    let score, lives, timeLeft, items, dog, spawnTimer;
-    let currentLevel, itemsSpawned, itemsCaught;
-    let audioCtx;
+    let state = "start", score, lives, timeLeft, items, dog, currentLevel, itemsSpawned, itemsCaught, audioCtx;
 
-    function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    function resize() {
+        canvas.width = document.getElementById("gameWrapper").clientWidth;
+        canvas.height = document.getElementById("gameWrapper").clientHeight - 80;
+        slider.max = canvas.width - 30;
+        slider.min = 30;
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function playNote(f, t, d) {
+        if (!audioCtx) return;
+        let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = t; o.frequency.value = f; g.gain.value = 0.1;
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+        o.stop(audioCtx.currentTime + d);
+    }
 
     async function loadHighscores() {
         try {
             const res = await fetch('save_score.php');
             const data = await res.json();
-            document.getElementById("scoreList").innerHTML = data.map((s, i) => 
-                `<div class="score-row"><span>${i+1}. ${s.name}</span><span>${s.points}</span></div>`
-            ).join("");
-        } catch (e) { document.getElementById("scoreList").innerHTML = "Keine Verbindung..."; }
-    }
-
-    async function saveScore(name, points) {
-        try {
-            await fetch('save_score.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({name: name, score: points})
-            });
-            loadHighscores();
-        } catch (e) {}
-    }
-
-    function init(lvl = 1) {
-        if(lvl === 1) { score = 0; lives = 3; }
-        timeLeft = 30; items = []; spawnTimer = 0;
-        currentLevel = lvl; itemsSpawned = 0; itemsCaught = 0;
-        dog = { x: 180, y: 480 };
-        document.getElementById("lvlNum").innerText = currentLevel;
-        updateGoalUI();
-    }
-
-    slider.addEventListener("input", e => { dog.x = parseInt(e.target.value); });
-
-    function updateGoalUI() {
-        // Prozentberechnung
-        let percent = itemsSpawned > 0 ? Math.round((itemsCaught / itemsSpawned) * 100) : 0;
-        if(percent < 0) percent = 0;
-        document.getElementById("curTarget").innerText = percent;
-        // Bar zeigt Fortschritt zum 80% Ziel
-        let barWidth = (percent / 80) * 100;
-        document.getElementById("goalBarFill").style.width = Math.min(barWidth, 100) + "%";
-        document.getElementById("goalBarFill").style.background = percent >= 80 ? "var(--retro-green)" : "#ff9f1c";
-    }
-
-    function spawn() {
-        let r = Math.random();
-        let item = { x: 40 + Math.random() * 320, y: -40, speed: 3 + (currentLevel * 0.6) };
-        
-        if (r < 0.15) { item.type = "👮"; item.danger = true; }
-        else if (r < 0.25) { item.type = "🕷️"; item.spider = true; }
-        else {
-            item.type = r < 0.5 ? "🍗" : (r < 0.7 ? "🍪" : "🦴");
-            item.val = (item.type === "🍗" ? 10 : (item.type === "🍪" ? 5 : 2));
-            itemsSpawned++; // Nur Leckerlis zählen für die Quote
-        }
-        items.push(item);
+            document.getElementById("scoreList").innerHTML = data.map((s,i) => `<div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:5px;"><span>${i+1}.${s.name}</span><span>${s.points}</span></div>`).join("");
+        } catch (e) { document.getElementById("scoreList").innerHTML = "Offline"; }
     }
 
     function startGame() {
-        if (!document.getElementById("playerName").value.trim()) return alert("Name?");
-        initAudio(); init(1);
+        if (!document.getElementById("playerName").value) return alert("Name!");
+        initAudio(); resize();
+        score = 0; lives = 3; currentLevel = 1;
+        startLevel();
         state = "play";
         document.getElementById("startScreen").style.display = "none";
         loadHighscores();
         loop();
     }
 
+    function startLevel() {
+        timeLeft = 30; items = []; itemsSpawned = 0; itemsCaught = 0;
+        dog = { x: canvas.width/2, y: canvas.height - 80 }; // Hund tief gesetzt
+        slider.value = canvas.width/2;
+    }
+
     function loop() {
         if (state !== "play") return;
-        ctx.clearRect(0,0,400,600);
-        ctx.fillStyle = "#6cc24a"; ctx.fillRect(0, 540, 400, 60);
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+        
+        // Gras & Boden
+        ctx.fillStyle = "#6cc24a"; ctx.fillRect(0, canvas.height-40, canvas.width, 40);
 
-        spawnTimer++;
-        if (spawnTimer > Math.max(15, 40 - currentLevel * 2)) { spawn(); spawnTimer = 0; }
-
-        for (let i = items.length - 1; i >= 0; i--) {
-            let it = items[i];
-            it.y += it.speed;
-            ctx.font = "35px Arial";
-            ctx.fillText(it.type, it.x - 17, it.y);
-
-            if (it.y > 460 && it.y < 510 && it.x > dog.x - 35 && it.x < dog.x + 35) {
-                if (it.danger) {
-                    lives--;
-                    if (lives <= 0) return endGame();
-                } else if (it.spider) {
-                    // SPINNEN-ABZUG: 15% Abzug von der Quote
-                    let penalty = Math.ceil(itemsSpawned * 0.15);
-                    itemsCaught = Math.max(0, itemsCaught - penalty);
-                } else {
-                    itemsCaught++;
-                    score += it.val;
-                }
-                items.splice(i, 1);
-                updateGoalUI();
-            } else if (it.y > 600) {
-                items.splice(i, 1);
-                updateGoalUI();
-            }
+        if (Math.random() < 0.03) {
+            let r = Math.random();
+            let type = "🦴", danger = false, spider = false, val = 2;
+            if (r < 0.1) { type = "👮"; danger = true; }
+            else if (r < 0.2) { type = "🕷️"; spider = true; }
+            else if (r < 0.4) { type = "🍗"; val = 10; }
+            
+            items.push({ x: 30 + Math.random()*(canvas.width-60), y: -50, type, danger, spider, val, speed: 2 + currentLevel * 0.5 });
+            if (!danger && !spider) itemsSpawned++;
         }
 
-        ctx.font = "50px Arial";
-        ctx.fillText("🐶", dog.x - 25, dog.y + 25);
+        items.forEach((it, i) => {
+            it.y += it.speed;
+            ctx.font = "40px Arial";
+            ctx.fillText(it.type, it.x - 20, it.y);
+
+            // Kollision
+            if (it.y > dog.y - 20 && it.y < dog.y + 40 && it.x > dog.x - 30 && it.x < dog.x + 30) {
+                if (it.danger) { lives--; playNote(100, 'sawtooth', 0.3); }
+                else if (it.spider) { itemsCaught = Math.max(0, itemsCaught - Math.ceil(itemsSpawned * 0.15)); playNote(150, 'square', 0.2); }
+                else { itemsCaught++; score += it.val; playNote(600, 'sine', 0.1); }
+                items.splice(i, 1);
+            } else if (it.y > canvas.height) { items.splice(i, 1); }
+        });
+
+        dog.x = parseInt(slider.value);
+        ctx.font = "55px Arial";
+        ctx.fillText("🐶", dog.x - 27, dog.y + 20);
 
         timeLeft -= 1/60;
         document.getElementById("score").innerText = score;
         document.getElementById("lives").innerText = lives;
-        document.getElementById("time").innerText = Math.max(0, Math.ceil(timeLeft));
+        document.getElementById("time").innerText = Math.ceil(timeLeft);
 
+        if (lives <= 0) return endGame();
         if (timeLeft <= 0) {
-            checkLevelProgress();
-        } else {
-            requestAnimationFrame(loop);
+            if (itemsCaught/itemsSpawned >= 0.8) { currentLevel++; startLevel(); playNote(800, 'sine', 0.5); alert("LEVEL UP!"); }
+            else { lives--; if(lives > 0) startLevel(); else endGame(); }
         }
+        requestAnimationFrame(loop);
     }
 
-    function checkLevelProgress() {
-        if ((itemsCaught / itemsSpawned) >= 0.8) {
-            alert("LEVEL GESCHAFFT!");
-            init(currentLevel + 1);
-            requestAnimationFrame(loop);
-        } else {
-            lives--;
-            if (lives > 0) {
-                alert("Quote unter 80%! Ein Leben verloren.");
-                init(currentLevel);
-                requestAnimationFrame(loop);
-            } else {
-                endGame();
-            }
-        }
-    }
-
-    function endGame() {
+    async function endGame() {
         state = "over";
-        saveScore(document.getElementById("playerName").value, score);
-        document.getElementById("finalScore").innerText = score;
+        await fetch('save_score.php', { method: 'POST', body: JSON.stringify({name: document.getElementById("playerName").value, score: score}) });
         document.getElementById("gameOver").style.display = "flex";
-    }
-
-    function restart() {
-        document.getElementById("gameOver").style.display = "none";
-        document.getElementById("startScreen").style.display = "flex";
         loadHighscores();
     }
 
+    function restart() { location.reload(); }
     loadHighscores();
 </script>
 </body>
