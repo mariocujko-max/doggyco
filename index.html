@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Doggyco 2.0 – Cute Arcade</title>
+<title>Doggyco 2.1 – Cute Arcade</title>
 
 <style>
 :root{
---bg:#1f1f2e;
---panel:#2b2b3d;
+--bg:#181824;
+--panel:#24243a;
 --accent:#ff9ecf;
 --gold:#ffd166;
 --danger:#ff6b6b;
@@ -16,8 +16,8 @@
 
 body{
 margin:0;
+font-family:Segoe UI, sans-serif;
 background:linear-gradient(180deg,#1f1f2e,#12121c);
-font-family:'Segoe UI',sans-serif;
 color:white;
 display:flex;
 flex-direction:column;
@@ -25,8 +25,8 @@ align-items:center;
 }
 
 header{
-text-align:center;
 padding:15px;
+text-align:center;
 }
 
 h1{
@@ -44,25 +44,15 @@ max-width:420px;
 display:flex;
 justify-content:space-between;
 background:var(--panel);
-padding:10px;
+padding:8px;
 border-radius:10px 10px 0 0;
-font-size:14px;
+font-size:13px;
 }
 
 canvas{
 width:100%;
 background:radial-gradient(circle,#2d2d44,#141421);
 border-radius:0 0 10px 10px;
-}
-
-button{
-background:linear-gradient(45deg,#ff9ecf,#ffd166);
-border:none;
-padding:12px 20px;
-border-radius:20px;
-font-weight:bold;
-cursor:pointer;
-margin-top:10px;
 }
 
 .overlay{
@@ -78,6 +68,25 @@ justify-content:center;
 align-items:center;
 text-align:center;
 padding:20px;
+box-sizing:border-box;
+}
+
+input,select{
+padding:10px;
+margin:6px 0;
+border-radius:8px;
+border:none;
+width:80%;
+}
+
+button{
+background:linear-gradient(45deg,#ff9ecf,#ffd166);
+border:none;
+padding:12px 20px;
+border-radius:20px;
+font-weight:bold;
+cursor:pointer;
+margin-top:10px;
 }
 
 #leaderboard{
@@ -88,6 +97,7 @@ background:var(--panel);
 padding:15px;
 border-radius:10px;
 }
+
 .entry{
 display:flex;
 justify-content:space-between;
@@ -99,8 +109,8 @@ border-bottom:1px solid #444;
 <body>
 
 <header>
-<h1>🐶 Doggyco 2.0</h1>
-<p>Catch the treats. Avoid the postman!</p>
+<h1>🐶 Doggyco 2.1</h1>
+<p>Cute Arcade Challenge</p>
 </header>
 
 <div id="game-container">
@@ -114,10 +124,10 @@ border-bottom:1px solid #444;
 
 <canvas id="game" width="400" height="500"></canvas>
 
-<div class="overlay" id="start">
+<div class="overlay" id="startScreen">
 <h2>Start Game</h2>
-<input id="name" placeholder="Name">
-<select id="flag">
+<input id="playerName" placeholder="Dein Name">
+<select id="playerFlag">
 <option value="🇩🇪">🇩🇪</option>
 <option value="🇦🇹">🇦🇹</option>
 <option value="🇨🇭">🇨🇭</option>
@@ -125,84 +135,104 @@ border-bottom:1px solid #444;
 <option value="🇫🇷">🇫🇷</option>
 <option value="🇪🇸">🇪🇸</option>
 </select>
-<button onclick="startGame()">Play</button>
+<button id="startBtn">Play</button>
 </div>
 
-<div class="overlay" id="gameover" style="display:none;">
+<div class="overlay" id="gameOverScreen" style="display:none;">
 <h2>Game Over</h2>
 <p id="finalScore"></p>
-<button onclick="restart()">Play Again</button>
+<button id="restartBtn">Play Again</button>
 </div>
 
 </div>
 
 <div id="leaderboard">
 <h2>🏆 Leaderboard</h2>
-<div id="list"></div>
+<div id="leaderboardList"></div>
 </div>
 
 <script>
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
-
-let score=0,lives=3,level=1,combo=0,comboMulti=1;
-let active=false;
-let items=[];
-let speed=2;
-let dog={x:180,y:420};
-let xp=0;
-
-canvas.addEventListener("mousemove",e=>{
-let rect=canvas.getBoundingClientRect();
-dog.x=(e.clientX-rect.left)*(400/rect.width)-20;
-});
-canvas.addEventListener("touchmove",e=>{
-let rect=canvas.getBoundingClientRect();
-dog.x=(e.touches[0].clientX-rect.left)*(400/rect.width)-20;
-},{passive:false});
-
-function startGame(){
-if(!name.value) return alert("Enter name");
-score=0;lives=3;level=1;combo=0;comboMulti=1;speed=2;
-active=true;
-items=[];
-document.getElementById("start").style.display="none";
-loop();
-spawn();
-}
-
-function restart(){
-document.getElementById("gameover").style.display="none";
-document.getElementById("start").style.display="flex";
-}
-
-function spawn(){
-if(!active)return;
-let rand=Math.random();
-let item={
-x:Math.random()*360,
-y:-40,
-speed:speed
+/* ===== GAME STATE ===== */
+const STATE = {
+START: "start",
+PLAYING: "playing",
+GAMEOVER: "gameover"
 };
-if(rand<0.2){item.type="👮";item.danger=true;}
-else{item.type="🦴";item.val=1;}
-items.push(item);
-setTimeout(spawn,800-Math.min(level*50,500));
+
+let gameState = STATE.START;
+
+/* ===== CANVAS ===== */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+/* ===== GAME VARIABLES ===== */
+let score, lives, level, combo, comboMulti, xp, speed;
+let items = [];
+let spawnTimer = 0;
+let player = { name:"", flag:"" };
+let dog = { x:180, y:420, width:40 };
+
+/* ===== INPUT ===== */
+canvas.addEventListener("mousemove", moveDog);
+canvas.addEventListener("touchmove", moveDog, {passive:false});
+
+function moveDog(e){
+if(gameState !== STATE.PLAYING) return;
+let rect = canvas.getBoundingClientRect();
+let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+dog.x = (clientX - rect.left)*(400/rect.width) - 20;
+dog.x = Math.max(0, Math.min(360, dog.x));
 }
 
+/* ===== START GAME ===== */
+document.getElementById("startBtn").addEventListener("click", ()=>{
+const nameInput = document.getElementById("playerName").value.trim();
+if(!nameInput){
+alert("Bitte Namen eingeben 🐶");
+return;
+}
+player.name = nameInput;
+player.flag = document.getElementById("playerFlag").value;
+initGame();
+});
+
+function initGame(){
+score=0;
+lives=3;
+level=1;
+combo=0;
+comboMulti=1;
+xp=0;
+speed=2;
+items=[];
+spawnTimer=0;
+
+gameState = STATE.PLAYING;
+document.getElementById("startScreen").style.display="none";
+loop();
+}
+
+/* ===== MAIN LOOP ===== */
 function loop(){
-if(!active)return;
-ctx.clearRect(0,0,400,500);
+if(gameState !== STATE.PLAYING) return;
 
-ctx.font="40px Arial";
-ctx.fillText("🐶",dog.x,dog.y);
+update();
+draw();
+requestAnimationFrame(loop);
+}
 
-for(let i=items.length-1;i>=0;i--){
-items[i].y+=items[i].speed;
-ctx.fillText(items[i].type,items[i].x,items[i].y);
+function update(){
+spawnTimer++;
+if(spawnTimer > 60 - level*3){
+spawnItem();
+spawnTimer=0;
+}
 
-if(items[i].y>dog.y-20 && items[i].y<dog.y+20 && items[i].x>dog.x-20 && items[i].x<dog.x+20){
-if(items[i].danger){
+items.forEach(item=> item.y += item.speed);
+
+items = items.filter(item=>{
+if(checkCollision(item)){
+if(item.danger){
 lives--;
 combo=0;
 comboMulti=1;
@@ -211,54 +241,104 @@ endGame();
 }
 }else{
 combo++;
-if(combo>=3)comboMulti=2;
-if(combo>=6)comboMulti=3;
-score+=1*comboMulti;
+if(combo>=3) comboMulti=2;
+if(combo>=6) comboMulti=3;
+score+=comboMulti;
 xp++;
 if(xp%20===0){
 level++;
-speed+=0.5;
+speed+=0.4;
 }
 }
-items.splice(i,1);
+return false;
 }
+return item.y < 520;
+});
+
+updateUI();
 }
 
+function draw(){
+ctx.clearRect(0,0,400,500);
+
+ctx.font="40px Arial";
+ctx.fillText("🐶",dog.x,dog.y);
+
+items.forEach(item=>{
+ctx.fillText(item.type,item.x,item.y);
+});
+}
+
+/* ===== SPAWN ===== */
+function spawnItem(){
+let rand = Math.random();
+items.push({
+x:Math.random()*360,
+y:-30,
+speed:speed,
+type: rand<0.2 ? "👮" : "🦴",
+danger: rand<0.2
+});
+}
+
+/* ===== COLLISION ===== */
+function checkCollision(item){
+return(
+item.y > dog.y-20 &&
+item.y < dog.y+20 &&
+item.x > dog.x-20 &&
+item.x < dog.x+20
+);
+}
+
+/* ===== UI ===== */
+function updateUI(){
 document.getElementById("score").innerText=score;
 document.getElementById("level").innerText=level;
 document.getElementById("combo").innerText="x"+comboMulti;
 document.getElementById("lives").innerText=lives;
-
-requestAnimationFrame(loop);
 }
 
+/* ===== GAME OVER ===== */
 function endGame(){
-active=false;
+gameState = STATE.GAMEOVER;
 document.getElementById("finalScore").innerText="Score: "+score;
 saveScore();
-document.getElementById("gameover").style.display="flex";
+document.getElementById("gameOverScreen").style.display="flex";
 }
 
+document.getElementById("restartBtn").addEventListener("click", ()=>{
+document.getElementById("gameOverScreen").style.display="none";
+document.getElementById("startScreen").style.display="flex";
+gameState = STATE.START;
+});
+
+/* ===== LEADERBOARD ===== */
 function saveScore(){
-let board=JSON.parse(localStorage.getItem("doggy2"))||[];
-board.push({name:name.value,flag:flag.value,score:score});
+let board = JSON.parse(localStorage.getItem("doggyPro")) || [];
+board.push({name:player.name, flag:player.flag, score:score});
 board.sort((a,b)=>b.score-a.score);
-board=board.slice(0,10);
-localStorage.setItem("doggy2",JSON.stringify(board));
-render();
+board = board.slice(0,10);
+localStorage.setItem("doggyPro", JSON.stringify(board));
+renderLeaderboard();
 }
 
-function render(){
-let board=JSON.parse(localStorage.getItem("doggy2"))||[];
-let list=document.getElementById("list");
+function renderLeaderboard(){
+let board = JSON.parse(localStorage.getItem("doggyPro")) || [];
+let list = document.getElementById("leaderboardList");
 list.innerHTML="";
 board.forEach((p,i)=>{
-list.innerHTML+=`<div class="entry">${i+1}. ${p.flag} ${p.name} <span>${p.score}</span></div>`;
+list.innerHTML+=`
+<div class="entry">
+<span>${i+1}. ${p.flag} ${p.name}</span>
+<span>${p.score}</span>
+</div>
+`;
 });
 }
-render();
+
+renderLeaderboard();
 </script>
 
 </body>
 </html>
-
