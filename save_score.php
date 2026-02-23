@@ -1,40 +1,16 @@
 <?php
-// Dateiname der Datenbank
+header('Content-Type: application/json');
 $file = 'scores.json';
-
-// Daten vom Spiel empfangen
 $data = json_decode(file_get_contents('php://input'), true);
 
-if ($data && isset($data['name']) && isset($data['score'])) {
-    // Vorhandene Scores laden
-    $scores = [];
-    if (file_exists($file)) {
-        $scores = json_decode(file_get_contents($file), true);
-    }
-
-    // Neuen Score hinzufügen
-    $scores[] = [
-        'name' => htmlspecialchars($data['name']),
-        'points' => (int)$data['score']
-    ];
-
-    // Sortieren (Höchste zuerst)
-    usort($scores, function($a, $b) {
-        return $b['points'] - $a['points'];
-    });
-
-    // Nur Top 10 behalten
+if ($data) {
+    $scores = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
+    $scores[] = ['name' => htmlspecialchars($data['name']), 'points' => (int)$data['score']];
+    usort($scores, function($a, $b) { return $b['points'] - $a['points']; });
     $scores = array_slice($scores, 0, 10);
-
-    // Speichern
     file_put_contents($file, json_encode($scores));
-    echo json_encode(['status' => 'success']);
+    echo json_encode($scores);
 } else {
-    // Wenn kein POST, dann einfach die Liste ausgeben
-    if (file_exists($file)) {
-        echo file_get_contents($file);
-    } else {
-        echo "[]";
-    }
+    echo file_exists($file) ? file_get_contents($file) : json_encode([]);
 }
 ?>
