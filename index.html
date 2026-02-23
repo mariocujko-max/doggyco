@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doggyco - Die Bitcoin Arcade</title>
+    <style>
+        :root {
+            --btc-orange: #f7931a;
+            --arcade-blue: #1a1a2e;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: white;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Header & Logo */
+        header {
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            background: linear-gradient(to bottom, #111, #000);
+            border-bottom: 2px solid var(--btc-orange);
+        }
+
+        .logo-area img {
+            width: 150px;
+            border-radius: 50%;
+            border: 3px solid var(--btc-orange);
+            box-shadow: 0 0 20px rgba(247, 147, 26, 0.4);
+        }
+
+        /* Spiel-Bereich */
+        #main-stage {
+            max-width: 800px;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            background: #111;
+            padding: 15px 25px;
+            border: 3px solid var(--btc-orange);
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+        }
+
+        #gameCanvas {
+            background: var(--arcade-blue);
+            border: 3px solid var(--btc-orange);
+            display: block;
+            cursor: crosshair;
+        }
+
+        /* LNbits Paywall Overlay */
+        #pay-modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .coin-btn {
+            background: var(--btc-orange);
+            color: black;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+
+        .coin-btn:hover { transform: scale(1.05); background: white; }
+
+        /* Footer & Rechtliches */
+        footer {
+            margin-top: 50px;
+            padding: 40px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            width: 100%;
+            border-top: 1px solid #222;
+        }
+
+        footer a { color: #888; text-decoration: none; margin: 0 10px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-area">
+        <h1 style="color:var(--btc-orange); margin: 10px 0;">DOGGYCO</h1>
+        <p>Echte Bitcoin-Arcade | Made in Germany</p>
+    </div>
+</header>
+
+<div id="main-stage">
+    <div class="game-header">
+        <span>🦴 SCORE: <span id="score">0</span></span>
+        <span>❤️ LIVES: <span id="lives">3</span></span>
+        <span>⚡ LVL: <span id="level">1</span></span>
+    </div>
+
+    <canvas id="gameCanvas" width="750" height="600"></canvas>
+
+    <div id="pay-modal">
+        <h2 style="color:var(--btc-orange)">SPIEL STARTEN</h2>
+        <p>Wähle deinen Einsatz (Satoshi via Lightning):</p>
+        <div style="display:flex;">
+            <button class="coin-btn" onclick="requestInvoice(10, 3)">10 SATs<br><small>3 Leben</small></button>
+            <button class="coin-btn" onclick="requestInvoice(50, 5)">50 SATs<br><small>5 Leben</small></button>
+        </div>
+        <div id="invoice-display" style="display:none; margin-top:20px;">
+            <p>Scan den QR-Code mit deiner Wallet:</p>
+            <div id="qr-code-box" style="background:white; padding:10px; border-radius:5px;">
+                <img id="qr-img" src="" alt="QR Code">
+            </div>
+            <p id="ln-string" style="font-size:10px; word-break:break-all; max-width:300px; margin-top:10px; color:#aaa;"></p>
+        </div>
+    </div>
+</div>
+
+<section style="max-width: 600px; text-align: center; line-height: 1.6;">
+    <h3>So funktioniert's:</h3>
+    <p>Doggyco nutzt das <b>Lightning Network</b>. Das bedeutet, du zahlst Bruchteile eines Cents für dein Spielvergnügen. Lade eine Wallet wie <i>Alby, Phoenix oder BlueWallet</i> auf dein Handy, um SATs zu senden.</p>
+</section>
+
+<footer>
+    <p>&copy; 2026 DOGGYCO.DE - Deine Bitcoin Gaming Plattform</p>
+    <a href="#">Impressum</a> | <a href="#">Datenschutz</a> | <a href="#">Kontakt</a>
+</footer>
+
+<script>
+    // --- LNBITS KONFIGURATION ---
+    const LNBITS_URL = "https://legend.lnbits.com"; // Oder deine Instanz
+    const INVOICE_KEY = "DEIN_LNBITS_INVOICE_READ_KEY"; // Findest du in LNbits unter API-Info
+
+    // --- SPIEL LOGIK ---
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    let score = 0, lives = 0, level = 1, active = false;
+    let items = [];
+    const dogHead = { x: 325, y: 500, size: 80 };
+
+    async function requestInvoice(amount, startLives) {
+        // In einer echten Umgebung rufst du hier dein Backend oder LNbits API auf
+        document.getElementById('invoice-display').style.display = 'block';
+        const qrImg = document.getElementById('qr-img');
+        const lnString = document.getElementById('ln-string');
+        
+        // Simulation einer Invoice
+        const fakeInvoice = "lnbc" + amount + "n1p3..."; 
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=lightning:${fakeInvoice}`;
+        lnString.innerText = fakeInvoice;
+
+        // SIMULATION: Zahlungserfolg nach 3 Sekunden
+        setTimeout(() => {
+            alert("Zahlung empfangen! Viel Glück.");
+            startGame(startLives);
+        }, 3000);
+    }
+
+    function startGame(startLives) {
+        document.getElementById('pay-modal').style.display = 'none';
+        lives = startLives;
+        score = 0;
+        level = 1;
+        active = true;
+        updateUI();
+        gameLoop();
+        spawnItem();
+    }
+
+    function updateUI() {
+        document.getElementById('score').innerText = score;
+        document.getElementById('lives').innerText = lives;
+        document.getElementById('level').innerText = level;
+    }
+
+    function spawnItem() {
+        if(!active) return;
+        const type = Math.random() < 0.3 ? "post" : "bone";
+        items.push({
+            x: Math.random() * (canvas.width - 50),
+            y: -50,
+            type: type,
+            speed: 3 + level
+        });
+        setTimeout(spawnItem, 1000 - (level * 50));
+    }
+
+    function gameLoop() {
+        if(!active) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Hundekopf zeichnen
+        ctx.font = "70px Arial";
+        ctx.fillText("🐶", dogHead.x, dogHead.y);
+
+        // Items bewegen & prüfen
+        for(let i = items.length - 1; i >= 0; i--) {
+            items[i].y += items[i].speed;
+            ctx.font = "40px Arial";
+            ctx.fillText(items[i].type === "post" ? "👮‍♂️" : "🦴", items[i].x, items[i].y);
+
+            // Kollision
+            if(items[i].y > dogHead.y - 40 && items[i].y < dogHead.y + 20 &&
+               items[i].x > dogHead.x - 20 && items[i].x < dogHead.x + 60) {
+                if(items[i].type === "bone") {
+                    score += 10;
+                } else {
+                    lives--;
+                    if(lives <= 0) active = false;
+                }
+                items.splice(i, 1);
+                updateUI();
+            }
+        }
+
+        if(active) requestAnimationFrame(gameLoop);
+        else location.reload(); // Einfacher Neustart bei Game Over
+    }
+
+    // Steuerung
+    window.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        dogHead.x = e.clientX - rect.left - 40;
+    });
+</script>
+
+</body>
+</html>
