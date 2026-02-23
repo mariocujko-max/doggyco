@@ -3,202 +3,195 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Doggyco – Arcade Leaderboard</title>
+<title>Doggyco 2.0 – Cute Arcade</title>
 
 <style>
 :root{
---btc-orange:#f7931a;
---dark:#0a0a0a;
---panel:#111;
---gold:#ffcc00;
---danger:#ff4444;
+--bg:#1f1f2e;
+--panel:#2b2b3d;
+--accent:#ff9ecf;
+--gold:#ffd166;
+--danger:#ff6b6b;
 }
 
 body{
 margin:0;
-background:var(--dark);
+background:linear-gradient(180deg,#1f1f2e,#12121c);
+font-family:'Segoe UI',sans-serif;
 color:white;
-font-family:Segoe UI, sans-serif;
 display:flex;
 flex-direction:column;
 align-items:center;
 }
 
 header{
-width:100%;
-background:#111;
 text-align:center;
-padding:15px 0;
-border-bottom:3px solid var(--btc-orange);
+padding:15px;
 }
 
 h1{
 margin:0;
-color:var(--btc-orange);
+color:var(--accent);
 }
 
 #game-container{
-width:95vw;
-max-width:450px;
-margin-top:10px;
 position:relative;
+width:95vw;
+max-width:420px;
 }
 
-.stats-bar{
+.stats{
 display:flex;
 justify-content:space-between;
-padding:10px;
 background:var(--panel);
-border:2px solid var(--btc-orange);
-border-bottom:none;
-font-family:monospace;
+padding:10px;
+border-radius:10px 10px 0 0;
+font-size:14px;
 }
 
 canvas{
 width:100%;
-background:radial-gradient(circle,#1a1a2e 0%,#050505 100%);
-border:2px solid var(--btc-orange);
-display:block;
+background:radial-gradient(circle,#2d2d44,#141421);
+border-radius:0 0 10px 10px;
 }
 
 button{
-background:linear-gradient(45deg,#f7931a,#ffcc00);
+background:linear-gradient(45deg,#ff9ecf,#ffd166);
 border:none;
-padding:12px;
-border-radius:8px;
+padding:12px 20px;
+border-radius:20px;
 font-weight:bold;
 cursor:pointer;
 margin-top:10px;
 }
 
-#start-screen, #game-over{
+.overlay{
 position:absolute;
 top:0;
 left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.95);
+background:rgba(0,0,0,0.9);
 display:flex;
 flex-direction:column;
 justify-content:center;
 align-items:center;
 text-align:center;
 padding:20px;
-box-sizing:border-box;
-}
-
-input, select{
-padding:8px;
-margin:5px 0;
-width:80%;
-border-radius:6px;
-border:none;
 }
 
 #leaderboard{
 margin-top:20px;
 width:95vw;
-max-width:450px;
-background:#111;
+max-width:420px;
+background:var(--panel);
 padding:15px;
-border:2px solid var(--btc-orange);
+border-radius:10px;
 }
-
-.leader-entry{
+.entry{
 display:flex;
 justify-content:space-between;
 padding:5px 0;
-border-bottom:1px solid #333;
+border-bottom:1px solid #444;
 }
 </style>
 </head>
 <body>
 
 <header>
-<h1>DOGGYCO</h1>
-<p>Arcade Challenge 🐶</p>
+<h1>🐶 Doggyco 2.0</h1>
+<p>Catch the treats. Avoid the postman!</p>
 </header>
 
 <div id="game-container">
 
-<div class="stats-bar">
-<div>SCORE: <span id="score">0</span></div>
+<div class="stats">
+<div>Score: <span id="score">0</span></div>
+<div>Level: <span id="level">1</span></div>
+<div>Combo: <span id="combo">x1</span></div>
 <div>❤️ <span id="lives">3</span></div>
 </div>
 
-<canvas id="gameCanvas" width="400" height="500"></canvas>
+<canvas id="game" width="400" height="500"></canvas>
 
-<div id="start-screen">
-<h2>SPIEL STARTEN</h2>
-<input id="playerName" placeholder="Dein Name">
-<select id="country">
-<option value="🇩🇪">🇩🇪 Deutschland</option>
-<option value="🇦🇹">🇦🇹 Österreich</option>
-<option value="🇨🇭">🇨🇭 Schweiz</option>
-<option value="🇺🇸">🇺🇸 USA</option>
-<option value="🇫🇷">🇫🇷 Frankreich</option>
-<option value="🇪🇸">🇪🇸 Spanien</option>
+<div class="overlay" id="start">
+<h2>Start Game</h2>
+<input id="name" placeholder="Name">
+<select id="flag">
+<option value="🇩🇪">🇩🇪</option>
+<option value="🇦🇹">🇦🇹</option>
+<option value="🇨🇭">🇨🇭</option>
+<option value="🇺🇸">🇺🇸</option>
+<option value="🇫🇷">🇫🇷</option>
+<option value="🇪🇸">🇪🇸</option>
 </select>
-<button onclick="startGame()">START</button>
+<button onclick="startGame()">Play</button>
 </div>
 
-<div id="game-over" style="display:none;">
-<h2>GAME OVER</h2>
-<button onclick="restart()">Nochmal spielen</button>
+<div class="overlay" id="gameover" style="display:none;">
+<h2>Game Over</h2>
+<p id="finalScore"></p>
+<button onclick="restart()">Play Again</button>
 </div>
 
 </div>
 
 <div id="leaderboard">
-<h2>🏆 RANGLISTE</h2>
-<div id="leaderboard-list"></div>
+<h2>🏆 Leaderboard</h2>
+<div id="list"></div>
 </div>
 
 <script>
-const canvas=document.getElementById("gameCanvas");
+const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
-let score=0,lives=3,active=false;
+let score=0,lives=3,level=1,combo=0,comboMulti=1;
+let active=false;
 let items=[];
-let dog={x:180,y:420,size:50};
+let speed=2;
+let dog={x:180,y:420};
+let xp=0;
+
+canvas.addEventListener("mousemove",e=>{
+let rect=canvas.getBoundingClientRect();
+dog.x=(e.clientX-rect.left)*(400/rect.width)-20;
+});
+canvas.addEventListener("touchmove",e=>{
+let rect=canvas.getBoundingClientRect();
+dog.x=(e.touches[0].clientX-rect.left)*(400/rect.width)-20;
+},{passive:false});
 
 function startGame(){
-if(!playerName.value) return alert("Bitte Name eingeben!");
-score=0;
-lives=3;
+if(!name.value) return alert("Enter name");
+score=0;lives=3;level=1;combo=0;comboMulti=1;speed=2;
 active=true;
 items=[];
-document.getElementById("start-screen").style.display="none";
+document.getElementById("start").style.display="none";
 loop();
 spawn();
 }
 
 function restart(){
-document.getElementById("game-over").style.display="none";
-document.getElementById("start-screen").style.display="flex";
+document.getElementById("gameover").style.display="none";
+document.getElementById("start").style.display="flex";
 }
 
-canvas.addEventListener("mousemove",e=>{
-const rect=canvas.getBoundingClientRect();
-dog.x=(e.clientX-rect.left)*(400/rect.width)-25;
-});
-
 function spawn(){
-if(!active) return;
+if(!active)return;
 let rand=Math.random();
 let item={
 x:Math.random()*360,
 y:-40,
-speed:3
+speed:speed
 };
 if(rand<0.2){item.type="👮";item.danger=true;}
 else{item.type="🦴";item.val=1;}
 items.push(item);
-setTimeout(spawn,1000);
+setTimeout(spawn,800-Math.min(level*50,500));
 }
 
 function loop(){
-if(!active) return;
+if(!active)return;
 ctx.clearRect(0,0,400,500);
 
 ctx.font="40px Arial";
@@ -208,56 +201,64 @@ for(let i=items.length-1;i>=0;i--){
 items[i].y+=items[i].speed;
 ctx.fillText(items[i].type,items[i].x,items[i].y);
 
-if(items[i].y>dog.y-20 && items[i].y<dog.y+30 && items[i].x>dog.x-20 && items[i].x<dog.x+30){
+if(items[i].y>dog.y-20 && items[i].y<dog.y+20 && items[i].x>dog.x-20 && items[i].x<dog.x+20){
 if(items[i].danger){
 lives--;
+combo=0;
+comboMulti=1;
 if(lives<=0){
-active=false;
-saveScore();
-document.getElementById("game-over").style.display="flex";
+endGame();
 }
 }else{
-score++;
+combo++;
+if(combo>=3)comboMulti=2;
+if(combo>=6)comboMulti=3;
+score+=1*comboMulti;
+xp++;
+if(xp%20===0){
+level++;
+speed+=0.5;
+}
 }
 items.splice(i,1);
 }
 }
 
 document.getElementById("score").innerText=score;
+document.getElementById("level").innerText=level;
+document.getElementById("combo").innerText="x"+comboMulti;
 document.getElementById("lives").innerText=lives;
 
 requestAnimationFrame(loop);
 }
 
+function endGame(){
+active=false;
+document.getElementById("finalScore").innerText="Score: "+score;
+saveScore();
+document.getElementById("gameover").style.display="flex";
+}
+
 function saveScore(){
-let leaderboard=JSON.parse(localStorage.getItem("doggyLeaderboard"))||[];
-leaderboard.push({
-name:playerName.value,
-country:country.value,
-score:score
-});
-leaderboard.sort((a,b)=>b.score-a.score);
-leaderboard=leaderboard.slice(0,10);
-localStorage.setItem("doggyLeaderboard",JSON.stringify(leaderboard));
-renderLeaderboard();
+let board=JSON.parse(localStorage.getItem("doggy2"))||[];
+board.push({name:name.value,flag:flag.value,score:score});
+board.sort((a,b)=>b.score-a.score);
+board=board.slice(0,10);
+localStorage.setItem("doggy2",JSON.stringify(board));
+render();
 }
 
-function renderLeaderboard(){
-let leaderboard=JSON.parse(localStorage.getItem("doggyLeaderboard"))||[];
-let list=document.getElementById("leaderboard-list");
+function render(){
+let board=JSON.parse(localStorage.getItem("doggy2"))||[];
+let list=document.getElementById("list");
 list.innerHTML="";
-leaderboard.forEach((p,i)=>{
-list.innerHTML+=`
-<div class="leader-entry">
-<div>${i+1}. ${p.country} ${p.name}</div>
-<div>${p.score}</div>
-</div>
-`;
+board.forEach((p,i)=>{
+list.innerHTML+=`<div class="entry">${i+1}. ${p.flag} ${p.name} <span>${p.score}</span></div>`;
 });
 }
-
-renderLeaderboard();
+render();
 </script>
 
 </body>
 </html>
+
