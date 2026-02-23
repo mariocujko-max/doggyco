@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Doggyco 3.0</title>
+<title>Doggyco 3.1</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{
 overflow:hidden;
 font-family:Segoe UI,sans-serif;
-background:linear-gradient(#89cff0,#cdefff);
+background:linear-gradient(#87CEEB,#e0f6ff);
 display:flex;
-flex-direction:column;
+justify-content:center;
 align-items:center;
-touch-action:none;
+height:100vh;
 }
 
 #gameWrapper{
@@ -22,9 +22,9 @@ position:relative;
 width:400px;
 height:650px;
 overflow:hidden;
-border-radius:15px;
-box-shadow:0 10px 30px rgba(0,0,0,0.3);
-background:linear-gradient(#89cff0,#cdefff);
+border-radius:20px;
+box-shadow:0 15px 40px rgba(0,0,0,0.3);
+background:linear-gradient(#87CEEB,#e0f6ff);
 }
 
 canvas{display:block;}
@@ -75,7 +75,6 @@ cursor:pointer;
 <body>
 
 <div id="gameWrapper">
-
 <canvas id="game" width="400" height="650"></canvas>
 
 <div id="controlBar">
@@ -83,10 +82,10 @@ cursor:pointer;
 </div>
 
 <div class="overlay" id="startScreen">
-<h2>Doggyco 3.0</h2>
+<h2>Doggyco 3.1</h2>
 <p>🦴=1 | 🍪=2 | 🍗=3<br>
 30 Sekunden pro Level<br>
-Mindestens 80% sammeln!</p>
+Mindestens 80% sammeln</p>
 <input id="playerName" placeholder="Dein Name">
 <button onclick="startGame()">Start</button>
 </div>
@@ -96,7 +95,6 @@ Mindestens 80% sammeln!</p>
 <p id="finalScore"></p>
 <button onclick="restart()">Nochmal spielen</button>
 </div>
-
 </div>
 
 <script>
@@ -107,19 +105,23 @@ const slider=document.getElementById("slider");
 let state="start";
 let score,lives,level,speed,timeLeft;
 let items,totalPoints,collectedPoints;
-let dog,clouds;
+let dog,clouds,spawnTimer;
 
 function init(){
 score=0;
 lives=3;
 level=1;
-speed=2;
+speed=1.8;
 timeLeft=30;
 items=[];
 totalPoints=0;
 collectedPoints=0;
+spawnTimer=0;
 dog={x:180,y:520};
-clouds=[{x:50,y:80},{x:200,y:120},{x:320,y:60}];
+clouds=[
+{x:50,y:100,size:1},
+{x:250,y:140,size:1.3}
+];
 }
 
 slider.addEventListener("input",e=>{
@@ -141,38 +143,67 @@ state="start";
 }
 
 function spawn(){
+if(items.length>=3) return; // maximal 3 gleichzeitig
+
 let rand=Math.random();
 let item={x:Math.random()*360,y:-30,speed:speed};
+
 if(rand<0.15){item.type="👮";item.danger=true;item.val=0;}
 else if(rand<0.5){item.type="🦴";item.val=1;}
 else if(rand<0.8){item.type="🍪";item.val=2;}
 else{item.type="🍗";item.val=3;}
+
 if(!item.danger) totalPoints+=item.val;
 items.push(item);
 }
 
 function drawBackground(){
+let sky=ctx.createLinearGradient(0,0,0,650);
+sky.addColorStop(0,"#87CEEB");
+sky.addColorStop(1,"#ffffff");
+ctx.fillStyle=sky;
+ctx.fillRect(0,0,400,650);
+
+clouds.forEach(c=>{
+ctx.save();
+ctx.scale(c.size,c.size);
+ctx.fillStyle="white";
+ctx.beginPath();
+ctx.arc(c.x,c.y,25,0,Math.PI*2);
+ctx.arc(c.x+30,c.y,35,0,Math.PI*2);
+ctx.arc(c.x+60,c.y,25,0,Math.PI*2);
+ctx.fill();
+ctx.restore();
+});
+
 ctx.fillStyle="#6cc24a";
 ctx.fillRect(0,580,400,70);
+
 ctx.fillStyle="#444";
 ctx.fillRect(0,600,400,50);
+
 ctx.fillStyle="white";
-clouds.forEach(c=>{
-ctx.beginPath();
-ctx.arc(c.x,c.y,20,0,Math.PI*2);
-ctx.arc(c.x+20,c.y,25,0,Math.PI*2);
-ctx.arc(c.x+40,c.y,20,0,Math.PI*2);
-ctx.fill();
-});
+for(let i=0;i<5;i++){
+ctx.fillRect(170,610+i*10,60,5);
+}
 }
 
 function loop(){
 if(state!=="play")return;
+
 ctx.clearRect(0,0,400,650);
 drawBackground();
 
-clouds.forEach(c=>{c.x+=0.2;if(c.x>450)c.x=-50;});
-if(Math.random()<0.04)spawn();
+clouds.forEach(c=>{
+c.x+=0.1;
+if(c.x>420)c.x=-80;
+});
+
+spawnTimer++;
+if(spawnTimer>70){ // ruhiger
+spawn();
+spawnTimer=0;
+}
 
 items.forEach((item,i)=>{
 item.y+=item.speed;
@@ -182,12 +213,10 @@ ctx.fillText(item.type,item.x,item.y);
 if(item.y>500 && item.y<550 && item.x>dog.x-20 && item.x<dog.x+40){
 if(item.danger){
 lives--;
-playPostmanSound();
 if(lives<=0)return endGame();
 }else{
 score+=item.val;
 collectedPoints+=item.val;
-playCollectSound();
 }
 items.splice(i,1);
 }
@@ -205,10 +234,9 @@ timeLeft-=1/60;
 ctx.fillText("⏱ "+Math.ceil(timeLeft),170,60);
 
 if(timeLeft<=0){
-let percent= collectedPoints/totalPoints;
+let percent= collectedPoints/Math.max(totalPoints,1);
 if(percent<0.8){
 lives--;
-playLifeLostSound();
 if(lives<=0)return endGame();
 }
 nextLevel();
@@ -219,7 +247,7 @@ requestAnimationFrame(loop);
 
 function nextLevel(){
 level++;
-speed+=0.5;
+speed+=0.3;
 timeLeft=30;
 items=[];
 totalPoints=0;
@@ -231,38 +259,8 @@ state="over";
 document.getElementById("finalScore").innerText="Score: "+score;
 document.getElementById("gameOver").style.display="flex";
 }
-
-/* Leise Sounds */
-function playCollectSound(){
-const a=new AudioContext();
-const o=a.createOscillator();
-const g=a.createGain();
-g.gain.value=0.05;
-o.frequency.value=500;
-o.connect(g);g.connect(a.destination);
-o.start();o.stop(a.currentTime+0.1);
-}
-
-function playPostmanSound(){
-const a=new AudioContext();
-const o=a.createOscillator();
-const g=a.createGain();
-g.gain.value=0.08;
-o.frequency.value=150;
-o.connect(g);g.connect(a.destination);
-o.start();o.stop(a.currentTime+0.3);
-}
-
-function playLifeLostSound(){
-const a=new AudioContext();
-const o=a.createOscillator();
-const g=a.createGain();
-g.gain.value=0.07;
-o.frequency.value=90;
-o.connect(g);g.connect(a.destination);
-o.start();o.stop(a.currentTime+0.4);
-}
 </script>
 
 </body>
 </html>
+
