@@ -3,60 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Doggyco 3.2 - Final Ground Fix</title>
+    <title>Doggyco 3.2 - Absolute Ground Fix</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root { 
             --retro-yellow: #ffd166; --retro-pink: #ff9ecf; 
             --retro-blue: #4facfe; --retro-green: #06d6a0; --retro-red: #ef476f; 
         }
-        /* Verhindert Scrollen und fixiert die Ansicht */
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
         
         body {
             font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white;
             display: flex; flex-direction: column; align-items: center; 
-            height: 100vh; width: 100vw; overflow: hidden;
+            min-height: 100vh; width: 100vw; overflow: hidden; padding: 5px;
         }
 
-        .retro-title { 
-            font-family: 'Press Start 2P'; color: var(--retro-yellow); 
-            font-size: 1.2rem; margin-top: 10px; text-shadow: 2px 2px #000;
+        .retro-title { font-family: 'Press Start 2P'; color: var(--retro-yellow); font-size: 1.2rem; margin: 10px 0; }
+
+        #mainContainer {
+            display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 450px; flex-grow: 1;
         }
 
-        /* Das Spielfeld nutzt jetzt dynamisch den verfügbaren Platz */
+        /* Spielfeld füllt den verfügbaren Platz zwischen Titel und Slider */
         #gameWrapper {
-            position: relative; 
-            width: 95vw; 
-            max-width: 420px;
-            flex: 1; /* Nimmt allen freien Platz ein */
-            margin: 10px 0;
-            background: #87CEEB; 
-            border-radius: 20px; 
-            border: 4px solid #fff;
-            overflow: hidden; 
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            position: relative; width: 100%; flex-grow: 1; min-height: 400px;
+            background: #87CEEB; border-radius: 20px; border: 4px solid #fff;
+            overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
         #topBar {
-            position: absolute; top: 0; left: 0; width: 100%; height: 45px;
+            position: absolute; top: 0; left: 0; width: 100%; height: 40px;
             background: rgba(0,0,0,0.4); z-index: 10;
         }
         #innerBar { height: 100%; width: 0%; transition: width 0.4s ease; background: var(--retro-green); border-bottom: 2px solid white;}
 
         #uiPanel {
-            position: absolute; top: 12px; left: 15px; right: 15px;
+            position: absolute; top: 8px; left: 10px; right: 10px;
             display: flex; justify-content: space-between; align-items: center; z-index: 20;
-            font-family: 'Press Start 2P'; font-size: 0.6rem; color: white;
+            font-family: 'Press Start 2P'; font-size: 0.55rem; color: white; pointer-events: none;
         }
 
-        /* Die Steuerung bleibt immer unten fixiert */
         #controlArea {
-            width: 95vw; max-width: 420px; background: #222; padding: 20px; 
-            border-radius: 20px; border: 2px solid #444; margin-bottom: 10px;
+            width: 100%; background: #222; padding: 15px; border-radius: 20px; border: 2px solid #444; margin: 10px 0;
         }
         #slider { width: 100%; height: 30px; appearance: none; background: #333; border-radius: 15px; outline: none; }
-        #slider::-webkit-slider-thumb { appearance: none; width: 60px; height: 60px; border-radius: 50%; background: var(--retro-pink); border: 3px solid white; cursor: pointer; }
+        #slider::-webkit-slider-thumb { appearance: none; width: 55px; height: 55px; border-radius: 50%; background: var(--retro-pink); border: 3px solid white; cursor: pointer; }
 
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -65,7 +56,7 @@
         }
 
         button {
-            padding: 20px 40px; font-family: 'Press Start 2P'; font-size: 1rem;
+            padding: 15px 30px; font-family: 'Press Start 2P'; font-size: 1rem;
             background: var(--retro-green); border: none; border-radius: 15px; color: white; cursor: pointer;
         }
     </style>
@@ -74,29 +65,31 @@
 
     <h1 class="retro-title">DOGGYCO 3.2</h1>
 
-    <div id="gameWrapper">
-        <div id="topBar"><div id="innerBar"></div></div>
-        <div id="uiPanel">
-            <div>⭐ <span id="score">0</span></div>
-            <div id="heartContainer">❤️ ❤️ ❤️</div>
-            <div>LVL <span id="lvlDisplay">1</span></div>
-        </div>
-        
-        <canvas id="game"></canvas>
+    <div id="mainContainer">
+        <div id="gameWrapper">
+            <div id="topBar"><div id="innerBar"></div></div>
+            <div id="uiPanel">
+                <div>⭐ <span id="score">0</span></div>
+                <div id="heartContainer">❤️ ❤️ ❤️</div>
+                <div>LVL <span id="lvlDisplay">1</span></div>
+            </div>
+            
+            <canvas id="game"></canvas>
 
-        <div class="overlay" id="startScreen">
-            <input type="text" id="playerName" placeholder="NAME" maxlength="10" style="margin-bottom:20px; padding:15px; text-align:center; font-family:'Press Start 2P'; font-size:0.8rem; border-radius: 10px; width: 80%;">
-            <button onclick="startGame()">START!</button>
+            <div class="overlay" id="startScreen">
+                <input type="text" id="playerName" placeholder="NAME" maxlength="10" style="margin-bottom:20px; padding:15px; text-align:center; font-family:'Press Start 2P'; font-size:0.8rem; width: 80%;">
+                <button onclick="startGame()">START!</button>
+            </div>
+            
+            <div class="overlay" id="gameOver" style="display:none;">
+                <h2 style="font-family:'Press Start 2P'; color:var(--retro-red); margin-bottom:20px;">GAME OVER</h2>
+                <button onclick="location.reload()">RETRY</button>
+            </div>
         </div>
-        
-        <div class="overlay" id="gameOver" style="display:none;">
-            <h2 style="font-family:'Press Start 2P'; color:var(--retro-red); margin-bottom:20px;">GAME OVER</h2>
-            <button onclick="location.reload()">RETRY</button>
-        </div>
-    </div>
 
-    <div id="controlArea">
-        <input type="range" id="slider" min="40" max="380" value="210">
+        <div id="controlArea">
+            <input type="range" id="slider" min="40" max="380" value="210">
+        </div>
     </div>
 
 <script>
@@ -110,8 +103,8 @@
     let currentLevel = 1, spiders = [{ x: 80, t: 0 }, { x: 300, t: Math.PI }];
     let audioCtx;
 
+    // Diese Funktion ist entscheidend: Sie misst den Canvas neu
     function resize() {
-        // Setzt die Canvas-Auflösung auf die exakte CSS-Größe
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.clientHeight;
         slider.max = canvas.width - 40;
@@ -137,27 +130,23 @@
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         state = "play";
         document.getElementById("startScreen").style.display = "none";
-        resize();
+        resize(); // Nochmal messen, falls sich die UI verschoben hat
         loop();
     }
 
     function loop() {
         if (state !== "play") return;
         
-        // 1. Hintergrund zeichnen (Himmel)
+        // 1. Hintergrund (Himmel füllt alles)
         ctx.fillStyle = "#87CEEB"; ctx.fillRect(0,0,canvas.width, canvas.height);
         
-        // --- STRASSE GANZ UNTEN ---
-        const asphaltHeight = 40;
+        // --- BODEN-LOGIK (Berechnet vom unteren Rand) ---
+        const asphaltHeight = 50;
         const grasHeight = 30;
-        const totalGround = asphaltHeight + grasHeight;
+        const groundY = canvas.height - (asphaltHeight + grasHeight);
         
-        // Gras
-        ctx.fillStyle = "#6cc24a"; 
-        ctx.fillRect(0, canvas.height - totalGround, canvas.width, grasHeight);
-        // Asphalt
-        ctx.fillStyle = "#333"; 
-        ctx.fillRect(0, canvas.height - asphaltHeight, canvas.width, asphaltHeight);
+        ctx.fillStyle = "#6cc24a"; ctx.fillRect(0, groundY, canvas.width, grasHeight); // Gras
+        ctx.fillStyle = "#333"; ctx.fillRect(0, canvas.height - asphaltHeight, canvas.width, asphaltHeight); // Straße
 
         // 2. Hunde-Physik
         dog.targetX = parseInt(slider.value);
@@ -165,27 +154,26 @@
         dog.vx *= 0.8;
         dog.x += dog.vx;
 
-        // 3. Spinnen Logic
+        // 3. Spinnen Logic (Fallen relativ zur Canvas-Höhe)
         spiders.forEach(s => {
             s.t += 0.02 + (currentLevel * 0.002);
             if (Math.sin(s.t) < -0.99) s.x = 40 + Math.random() * (canvas.width - 80);
             
-            // Spinne seilt sich bis fast zum Boden ab
-            let sy = 40 + (Math.sin(s.t) + 1) / 2 * (canvas.height - totalGround - 100);
+            // Spinne seilt sich bis knapp über den Hund ab
+            let sy = 40 + (Math.sin(s.t) + 1) / 2 * (canvas.height - 200);
             
             ctx.strokeStyle = "rgba(255,255,255,0.7)"; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
             ctx.font = "30px Arial"; ctx.fillText("🕷️", s.x - 15, sy + 10);
             
-            if (Math.abs(s.x - dog.x) < 35 && Math.abs(sy - (canvas.height - totalGround - 20)) < 40) {
+            if (Math.abs(s.x - dog.x) < 35 && Math.abs(sy - (groundY + 10)) < 40) {
                 itemsCaught = Math.max(0, itemsCaught - 2);
-                dog.hit = 15;
-                playSfx(150, 'sawtooth', 0.2);
+                dog.hit = 15; playSfx(140, 'sawtooth', 0.2);
                 s.t += 0.5;
             }
         });
 
-        // 4. Items Logic
+        // 4. Items Spawning
         if (Math.random() < 0.035) {
             let laneWidth = canvas.width / 5;
             let lane = Math.floor(Math.random() * 5) * laneWidth + laneWidth/2;
@@ -201,11 +189,11 @@
 
         items.forEach((it, i) => {
             it.y += it.speed;
-            ctx.font = it.danger ? "50px Arial" : "35px Arial";
+            ctx.font = it.danger ? "55px Arial" : "35px Arial";
             ctx.fillText(it.type, it.x - 20, it.y);
             
-            // FANG-ZONE (genau über dem Boden)
-            if (it.y > canvas.height - totalGround - 50 && it.y < canvas.height - totalGround + 10 && Math.abs(it.x - dog.x) < 35) {
+            // FANG-ZONE (Kurz vor dem Boden)
+            if (it.y > groundY - 30 && it.y < groundY + 30 && Math.abs(it.x - dog.x) < 35) {
                 if (it.danger) {
                     lives--; updateHearts(); playSfx(80, 'square', 0.4);
                     if(lives <= 0) endGame();
@@ -216,15 +204,15 @@
             } else if (it.y > canvas.height) items.splice(i, 1);
         });
 
-        // 5. Hund Zeichnen (FIXIERT AM BODEN)
+        // 5. Hund (FIXIERT AUF DEM GRAS)
         ctx.save();
         if(dog.hit > 0) { ctx.filter = "brightness(2) sepia(1)"; dog.hit--; }
-        ctx.font = "70px Arial";
-        // Hund sitzt auf dem Gras-Rand
-        ctx.fillText("🐶", dog.x - 35, canvas.height - totalGround + 10 + Math.sin(Date.now()*0.01)*4);
+        ctx.font = "75px Arial";
+        // Der Hund sitzt nun mathematisch sicher auf dem Boden-Y
+        ctx.fillText("🐶", dog.x - 35, groundY + 25 + Math.sin(Date.now()*0.01)*4);
         ctx.restore();
 
-        // 6. UI Update
+        // 6. Quote
         let pct = itemsSpawned > 0 ? (itemsCaught / itemsSpawned) * 100 : 0;
         innerBar.style.width = Math.min(pct, 100) + "%";
         innerBar.style.background = pct >= 50 ? "var(--retro-green)" : "var(--retro-red)";
@@ -261,4 +249,3 @@
 </script>
 </body>
 </html>
-
