@@ -2,8 +2,8 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Doggyco 3.2 - Professional Arcade</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Doggyco 3.2 - Slim & Mobile</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -14,59 +14,72 @@
         
         body {
             font-family: 'Segoe UI', sans-serif; background: #121212; color: white;
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px;
-            overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; 
+            min-height: 100vh; width: 100vw; overflow-x: hidden; padding: 5px;
         }
 
-        .retro-title { font-family: 'Press Start 2P'; font-size: 1.5rem; color: var(--retro-yellow); margin-bottom: 20px; text-shadow: 3px 3px #000; }
+        .retro-title { font-family: 'Press Start 2P'; color: var(--retro-yellow); font-size: 1rem; margin: 10px 0; }
 
-        #container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        #mainLayout {
+            display: flex; flex-direction: row; gap: 15px; align-items: flex-start; justify-content: center;
+            width: 100%; max-width: 1100px;
+        }
+
+        #leaderboard {
+            width: 180px; background: rgba(0,0,0,0.6); padding: 12px; border-radius: 12px;
+            border: 1px solid var(--retro-blue); font-size: 0.65rem; max-height: 550px; overflow-y: auto;
+        }
+
+        #gameArea {
+            display: flex; flex-direction: column; width: 100%; max-width: 400px; gap: 10px;
+        }
 
         #gameWrapper {
-            position: relative; width: 480px; height: 720px; 
-            border-radius: 20px; border: 6px solid #333; overflow: hidden;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5); background: #87CEEB;
+            position: relative; width: 100%; height: 55vh; min-height: 420px;
+            background: #87CEEB; border-radius: 15px; border: 3px solid #fff;
+            overflow: hidden; box-shadow: 0 0 25px rgba(0,0,0,0.5);
         }
 
-        /* Quote-Balken oben im Spiel */
         #topBar {
-            position: absolute; top: 0; left: 0; width: 100%; height: 50px;
-            background: rgba(0,0,0,0.4); z-index: 10; display: flex; align-items: center;
+            position: absolute; top: 0; left: 0; width: 100%; height: 35px;
+            background: rgba(0,0,0,0.4); z-index: 10;
         }
-        #innerBar { height: 100%; width: 0%; transition: width 0.4s ease, background 0.4s; }
+        #innerBar { height: 100%; width: 0%; transition: width 0.4s ease; background: var(--retro-green); border-bottom: 2px solid white;}
 
         #uiPanel {
-            position: absolute; top: 10px; left: 15px; right: 15px;
+            position: absolute; top: 8px; left: 10px; right: 10px;
             display: flex; justify-content: space-between; align-items: center; z-index: 20;
-            font-family: 'Press Start 2P'; font-size: 0.7rem; color: white; pointer-events: none;
+            font-family: 'Press Start 2P'; font-size: 0.5rem; color: white; pointer-events: none;
         }
 
-        /* Externer Slider unter dem Spiel */
         #controlArea {
-            width: 480px; background: #222; padding: 20px; border-radius: 20px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3); border: 2px solid #444;
+            width: 100%; background: #222; padding: 15px; border-radius: 12px; border: 1px solid #444;
         }
-        #slider { width: 100%; height: 20px; appearance: none; background: #444; border-radius: 10px; outline: none; }
-        #slider::-webkit-slider-thumb { appearance: none; width: 50px; height: 50px; border-radius: 50%; background: var(--retro-pink); border: 4px solid white; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-
-        .heart { display: inline-block; transition: all 0.5s ease; margin-left: 5px; color: var(--retro-red); }
-        .heart.pop { transform: scale(3); opacity: 0; }
+        #slider { width: 100%; height: 15px; appearance: none; background: #333; border-radius: 10px; outline: none; }
+        #slider::-webkit-slider-thumb { appearance: none; width: 45px; height: 45px; border-radius: 50%; background: var(--retro-pink); border: 3px solid white; cursor: pointer; }
 
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center;
+            background: rgba(0,0,0,0.9); display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; z-index: 100; text-align: center;
         }
 
         #levelUpMsg {
             position: absolute; top: 40%; width: 100%; text-align: center;
-            font-family: 'Press Start 2P'; font-size: 2rem; color: var(--retro-yellow);
-            display: none; z-index: 150; animation: levelAnim 1s ease-in-out;
+            font-family: 'Press Start 2P'; font-size: 1.2rem; color: var(--retro-yellow);
+            display: none; z-index: 150; animation: bounce 1s;
         }
-        @keyframes levelAnim { 0% { transform: scale(0.5); opacity:0; } 50% { opacity:1; } 100% { transform: scale(1.2); opacity:0; } }
+        @keyframes bounce { 0%, 100% {transform: scale(1);} 50% {transform: scale(1.3);} }
 
         button {
-            padding: 20px 40px; font-family: 'Press Start 2P'; font-size: 1rem;
-            background: var(--retro-green); border: none; border-radius: 15px; cursor: pointer; color: white;
+            padding: 12px 25px; font-family: 'Press Start 2P'; font-size: 0.7rem;
+            background: var(--retro-green); border: none; border-radius: 10px; color: white; cursor: pointer;
+        }
+
+        @media (max-width: 700px) {
+            #mainLayout { flex-direction: column; align-items: center; }
+            #leaderboard { width: 100%; max-width: 400px; height: 120px; order: 3; }
+            #gameArea { order: 1; }
         }
     </style>
 </head>
@@ -74,32 +87,38 @@
 
     <h1 class="retro-title">DOGGYCO 3.2</h1>
 
-    <div id="container">
-        <div id="gameWrapper">
-            <div id="topBar"><div id="innerBar"></div></div>
-            <div id="uiPanel">
-                <div>⭐ <span id="score">0</span></div>
-                <div id="heartContainer"><span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span></div>
-                <div>LVL <span id="lvlDisplay">1</span></div>
-                <div>⏱ <span id="time">30</span></div>
-            </div>
-            
-            <div id="levelUpMsg">LEVEL UP!</div>
-
-            <canvas id="game"></canvas>
-
-            <div class="overlay" id="startScreen">
-                <button onclick="startGame()">START</button>
-            </div>
-            
-            <div class="overlay" id="gameOver" style="display:none;">
-                <h2 style="font-family:'Press Start 2P'; color:var(--retro-red); margin-bottom: 20px;">GAME OVER</h2>
-                <button onclick="location.reload()">RETRY</button>
-            </div>
+    <div id="mainLayout">
+        <div id="leaderboard">
+            <h3 style="color:var(--retro-pink); margin-bottom:8px; text-align:center;">TOP 10 🏆</h3>
+            <div id="scoreList">Lade...</div>
         </div>
 
-        <div id="controlArea">
-            <input type="range" id="slider" min="50" max="430" value="240">
+        <div id="gameArea">
+            <div id="gameWrapper">
+                <div id="topBar"><div id="innerBar"></div></div>
+                <div id="uiPanel">
+                    <div>⭐ <span id="score">0</span></div>
+                    <div id="heartContainer">❤️ ❤️ ❤️</div>
+                    <div>LVL <span id="lvlDisplay">1</span></div>
+                </div>
+                
+                <div id="levelUpMsg">LEVEL UP!</div>
+                <canvas id="game"></canvas>
+
+                <div class="overlay" id="startScreen">
+                    <input type="text" id="playerName" placeholder="NAME" maxlength="10" style="margin-bottom:15px; padding:10px; text-align:center; font-family:'Press Start 2P'; font-size:0.6rem; border-radius:5px;">
+                    <button onclick="startGame()">START!</button>
+                </div>
+                
+                <div class="overlay" id="gameOver" style="display:none;">
+                    <h2 style="font-family:'Press Start 2P'; color:var(--retro-red); margin-bottom:15px;">GAME OVER</h2>
+                    <button onclick="location.reload()">RETRY</button>
+                </div>
+            </div>
+
+            <div id="controlArea">
+                <input type="range" id="slider" min="30" max="370" value="200">
+            </div>
         </div>
     </div>
 
@@ -110,13 +129,29 @@
     const innerBar = document.getElementById("innerBar");
 
     let state = "start", score = 0, lives = 3, timeLeft = 30, items = [], itemsSpawned = 0, itemsCaught = 0;
-    let dog = { x: 240, targetX: 240, vx: 0, hit: 0, tail: 0, dust: [] };
-    let currentLevel = 1;
-    let spiders = [{ x: 100, t: 0 }, { x: 380, t: Math.PI }];
+    let dog = { x: 200, targetX: 200, vx: 0, hit: 0, tail: 0 };
+    let currentLevel = 1, spiders = [{ x: 80, t: 0 }, { x: 320, t: Math.PI }];
     let audioCtx;
 
-    function resize() { canvas.width = 480; canvas.height = 720; }
-    resize();
+    function resize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        slider.max = canvas.width - 40;
+        slider.min = 40;
+    }
+
+    window.onload = () => { resize(); loadHighscores(); };
+    window.onresize = resize;
+
+    async function loadHighscores() {
+        try {
+            const res = await fetch('save_score.php?t=' + Date.now());
+            const data = await res.json();
+            document.getElementById("scoreList").innerHTML = data.map((s,i) => 
+                `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>${i+1}.${s.name}</span><span>${s.points}</span></div>`
+            ).join("");
+        } catch (e) { document.getElementById("scoreList").innerHTML = "Offline"; }
+    }
 
     function playSfx(f, t, d) {
         if (!audioCtx) return;
@@ -128,135 +163,113 @@
     }
 
     function startGame() {
-        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(!document.getElementById("playerName").value) return alert("Name?");
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         state = "play";
         document.getElementById("startScreen").style.display = "none";
         loop();
     }
 
-    function nextLevel() {
-        currentLevel++;
-        document.getElementById("lvlDisplay").innerText = currentLevel;
-        const msg = document.getElementById("levelUpMsg");
-        msg.style.display = "block";
-        setTimeout(() => msg.style.display = "none", 1000);
-        itemsSpawned = 0; itemsCaught = 0; timeLeft = 30;
-        playSfx(800, 'sine', 0.5);
-    }
-
     function loop() {
         if (state !== "play") return;
-        drawBackground();
+        
+        ctx.fillStyle = "#87CEEB"; ctx.fillRect(0,0,canvas.width, canvas.height);
+        const groundY = canvas.height - 60;
+        ctx.fillStyle = "#6cc24a"; ctx.fillRect(0, groundY, canvas.width, 60);
+        ctx.fillStyle = "#333"; ctx.fillRect(0, canvas.height - 35, canvas.width, 35);
 
-        // 1. Hunde-Physik (Trägheit)
         dog.targetX = parseInt(slider.value);
-        dog.vx += (dog.targetX - dog.x) * 0.12;
-        dog.vx *= 0.82;
+        dog.vx += (dog.targetX - dog.x) * 0.15;
+        dog.vx *= 0.8;
         dog.x += dog.vx;
 
-        // Staub-Effekt beim Laufen
-        if (Math.abs(dog.vx) > 2) {
-            dog.dust.push({x: dog.x, y: 680, r: 5, o: 1});
-        }
-        dog.dust.forEach((d, i) => {
-            d.y -= 1; d.o -= 0.05;
-            ctx.fillStyle = `rgba(255,255,255,${d.o})`;
-            ctx.beginPath(); ctx.arc(d.x + (dog.vx > 0 ? -30 : 30), d.y, d.r, 0, 7); ctx.fill();
-            if(d.o <= 0) dog.dust.splice(i, 1);
-        });
-
-        // 2. Spinnen-Duo
         spiders.forEach(s => {
             s.t += 0.02 + (currentLevel * 0.002);
-            if (Math.sin(s.t) < -0.99) s.x = 60 + Math.random() * 360;
-            let sy = 50 + (Math.sin(s.t) + 1) / 2 * 550;
+            if (Math.sin(s.t) < -0.99) s.x = 40 + Math.random() * (canvas.width - 80);
+            let sy = 40 + (Math.sin(s.t) + 1) / 2 * (canvas.height - 160);
             ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
-            ctx.font = "40px Arial"; ctx.fillText("🕷️", s.x - 20, sy + 15);
-            if (Math.abs(s.x - dog.x) < 40 && Math.abs(sy - 630) < 50) {
+            ctx.font = "30px Arial"; ctx.fillText("🕷️", s.x - 15, sy + 10);
+            if (Math.abs(s.x - dog.x) < 35 && Math.abs(sy - (canvas.height-75)) < 40) {
                 itemsCaught = Math.max(0, itemsCaught - 2);
-                dog.hit = 20; playSfx(100, 'sawtooth', 0.2);
-                s.t += 1;
+                dog.hit = 15; playSfx(120, 'sawtooth', 0.2);
+                s.t += 0.5;
             }
         });
 
-        // 3. Spawning (Bahn-System gegen Überschneidung)
-        if (Math.random() < 0.03) {
-            let lanes = [60, 150, 240, 330, 420];
-            let lane = lanes[Math.floor(Math.random() * lanes.length)];
-            let collision = items.some(it => it.x === lane && it.y < 120);
-            if (!collision) {
-                let r = Math.random();
-                let it = { x: lane, y: -50, speed: 3 + currentLevel * 0.5 };
-                if (r < 0.15) { it.type = "👮"; it.danger = true; }
-                else if (r < 0.35) { it.type = "🍗"; it.val = 3; }
-                else if (r < 0.65) { it.type = "🍪"; it.val = 2; }
-                else { it.type = "🦴"; it.val = 1; }
-                items.push(it);
-                if (!it.danger) itemsSpawned++;
-            }
+        if (Math.random() < 0.035) {
+            let laneWidth = canvas.width / 5;
+            let lane = Math.floor(Math.random() * 5) * laneWidth + laneWidth/2;
+            let r = Math.random();
+            let it = { x: lane, y: -50, speed: 2.5 + currentLevel * 0.5 };
+            if (r < 0.15) { it.type = "👮"; it.danger = true; }
+            else if (r < 0.35) { it.type = "🍗"; it.val = 3; }
+            else if (r < 0.65) { it.type = "🍪"; it.val = 2; }
+            else { it.type = "🦴"; it.val = 1; }
+            items.push(it);
+            if (!it.danger) itemsSpawned++;
         }
 
-        // 4. Items bewegen & Polizei-Design
         items.forEach((it, i) => {
             it.y += it.speed;
-            if (it.danger) {
-                ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
-                let s = 30 + Math.sin(Date.now() * 0.01) * 10;
-                ctx.beginPath(); ctx.arc(it.x, it.y - 15, s, 0, 7); ctx.fill();
-            }
-            ctx.font = "45px Arial"; ctx.fillText(it.type, it.x - 22, it.y);
-            
-            if (it.y > 620 && it.y < 690 && Math.abs(it.x - dog.x) < 40) {
-                if (it.danger) { loseLife(); } 
-                else { itemsCaught++; score += it.val; dog.tail = 15; playSfx(600, 'sine', 0.1); }
+            ctx.font = it.danger ? "50px Arial" : "32px Arial";
+            ctx.fillText(it.type, it.x - 18, it.y);
+            if (it.y > canvas.height - 95 && it.y < canvas.height - 35 && Math.abs(it.x - dog.x) < 35) {
+                if (it.danger) {
+                    lives--; updateHearts(); playSfx(80, 'square', 0.4);
+                    if(lives <= 0) endGame();
+                } else {
+                    itemsCaught++; score += it.val; dog.tail = 10; playSfx(600, 'sine', 0.05);
+                }
                 items.splice(i, 1);
-            } else if (it.y > 720) items.splice(i, 1);
+            } else if (it.y > canvas.height) items.splice(i, 1);
         });
 
-        drawDog();
+        ctx.save();
+        if(dog.hit > 0) { ctx.filter = "brightness(2) sepia(1)"; dog.hit--; }
+        ctx.translate(dog.x, canvas.height - 65);
+        if (dog.tail > 0) { ctx.rotate(Math.sin(Date.now()*0.1)*0.15); dog.tail--; }
+        ctx.font = "60px Arial";
+        ctx.fillText("🐶", -30, 20 + Math.sin(Date.now()*0.01)*3);
+        ctx.restore();
 
-        // 5. Quote-Balken
         let pct = itemsSpawned > 0 ? (itemsCaught / itemsSpawned) * 100 : 0;
         innerBar.style.width = Math.min(pct, 100) + "%";
         innerBar.style.background = pct >= 50 ? "var(--retro-green)" : "var(--retro-red)";
-
         timeLeft -= 1/60;
         document.getElementById("score").innerText = score;
-        document.getElementById("time").innerText = Math.max(0, Math.ceil(timeLeft));
 
-        if (lives <= 0) { state = "over"; document.getElementById("gameOver").style.display = "flex"; return; }
         if (timeLeft <= 0) {
-            if (pct >= 50) nextLevel();
-            else { loseLife(); if(lives > 0) { itemsSpawned = 0; itemsCaught = 0; timeLeft = 30; } }
+            if (pct >= 50) { 
+                currentLevel++; document.getElementById("lvlDisplay").innerText = currentLevel;
+                const msg = document.getElementById("levelUpMsg");
+                msg.style.display = "block"; setTimeout(()=>msg.style.display="none", 1000);
+                itemsSpawned = 0; itemsCaught = 0; timeLeft = 30; playSfx(850, 'sine', 0.4);
+            } else { lives--; updateHearts(); if(lives > 0) { itemsSpawned = 0; itemsCaught = 0; timeLeft = 30; } else endGame(); }
         }
-        requestAnimationFrame(loop);
+        if(state === "play") requestAnimationFrame(loop);
     }
 
-    function drawBackground() {
-        let g = ctx.createLinearGradient(0, 0, 0, 720);
-        g.addColorStop(0, "#4facfe"); g.addColorStop(1, "#a8e0ff");
-        ctx.fillStyle = g; ctx.fillRect(0,0,480,720);
-        ctx.fillStyle = "#6cc24a"; ctx.fillRect(0, 680, 480, 40); // Gras
-        ctx.fillStyle = "#333"; ctx.fillRect(0, 695, 480, 25); // Asphalt
+    function updateHearts() {
+        let h = "";
+        for(let i=0; i<3; i++) h += i < lives ? "❤️ " : "🖤 ";
+        document.getElementById("heartContainer").innerHTML = h;
     }
 
-    function drawDog() {
-        ctx.save();
-        if(dog.hit > 0) { ctx.filter = "brightness(2) sepia(1) saturate(20) hue-rotate(-50deg)"; dog.hit--; }
-        ctx.translate(dog.x, 650);
-        let bounce = Math.sin(Date.now() * 0.01) * 3;
-        if (dog.tail > 0) { ctx.rotate(Math.sin(Date.now()*0.1)*0.2); dog.tail--; }
-        ctx.font = "85px Arial"; ctx.fillText("🐶", -42, 25 + bounce);
-        ctx.restore();
-    }
-
-    function loseLife() {
-        lives--;
-        playSfx(80, 'sawtooth', 0.4);
-        const hearts = document.getElementsByClassName("heart");
-        if(hearts[lives]) hearts[lives].classList.add("pop");
+    async function endGame() {
+        state = "over";
+        const name = document.getElementById("playerName").value;
+        try {
+            await fetch('save_score.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name: name, score: score})
+            });
+            loadHighscores();
+        } catch (e) {}
+        document.getElementById("gameOver").style.display = "flex";
     }
 </script>
 </body>
 </html>
+
