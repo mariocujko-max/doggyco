@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Doggyco 3.2 - Absolute Fix</title>
+    <title>Doggyco 3.2 - Bottom-Up Fix</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -13,59 +13,59 @@
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
         
         body {
-            font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white;
+            font-family: 'Segoe UI', sans-serif; background: #121212; color: white;
             display: flex; flex-direction: column; align-items: center; 
-            min-height: 100vh; width: 100vw; overflow-x: hidden; padding-top: 10px;
+            min-height: 100vh; width: 100vw; overflow-x: hidden; padding: 10px;
         }
 
-        .retro-title { font-family: 'Press Start 2P'; color: var(--retro-yellow); font-size: 1.2rem; margin-bottom: 10px; text-shadow: 2px 2px #000; }
+        .retro-title { font-family: 'Press Start 2P'; color: var(--retro-yellow); font-size: 1.4rem; margin-bottom: 15px; text-shadow: 3px 3px #000; }
 
-        #mainContainer {
-            display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 450px;
+        /* Das Haupt-Spiel-Modul */
+        #gameArea {
+            display: flex; flex-direction: column; width: 100%; max-width: 450px; gap: 10px;
         }
 
-        /* Spielfeld mit fester Mindesthöhe für Handys */
         #gameWrapper {
-            position: relative; width: 95vw; max-width: 420px; height: 65vh; min-height: 450px;
+            position: relative; width: 100%; height: 60vh; min-height: 480px;
             background: #87CEEB; border-radius: 20px; border: 4px solid #fff;
-            overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,0.6);
         }
 
         #topBar {
-            position: absolute; top: 0; left: 0; width: 100%; height: 40px;
+            position: absolute; top: 0; left: 0; width: 100%; height: 45px;
             background: rgba(0,0,0,0.4); z-index: 10;
         }
         #innerBar { height: 100%; width: 0%; transition: width 0.4s ease; background: var(--retro-green); border-bottom: 2px solid white;}
 
         #uiPanel {
-            position: absolute; top: 8px; left: 10px; right: 10px;
+            position: absolute; top: 12px; left: 15px; right: 15px;
             display: flex; justify-content: space-between; align-items: center; z-index: 20;
-            font-family: 'Press Start 2P'; font-size: 0.55rem; color: white; pointer-events: none;
+            font-family: 'Press Start 2P'; font-size: 0.6rem; color: white; pointer-events: none;
         }
 
-        /* Steuerung deutlich unter dem Spiel */
+        /* Steuerung als massiver Block unten */
         #controlArea {
-            width: 95vw; max-width: 420px; background: #222; padding: 25px; 
-            border-radius: 20px; border: 2px solid #444; margin-top: 15px;
+            width: 100%; background: #222; padding: 20px; 
+            border-radius: 20px; border: 2px solid #444;
         }
-        #slider { width: 100%; height: 30px; appearance: none; background: #333; border-radius: 15px; outline: none; }
-        #slider::-webkit-slider-thumb { appearance: none; width: 60px; height: 60px; border-radius: 50%; background: var(--retro-pink); border: 4px solid white; cursor: pointer; box-shadow: 0 0 10px #000; }
+        #slider { width: 100%; height: 35px; appearance: none; background: #333; border-radius: 15px; outline: none; }
+        #slider::-webkit-slider-thumb { appearance: none; width: 60px; height: 60px; border-radius: 50%; background: var(--retro-pink); border: 4px solid white; cursor: pointer; box-shadow: 0 0 15px #000; }
 
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: flex; flex-direction: column; 
+            background: rgba(0,0,0,0.9); display: flex; flex-direction: column; 
             justify-content: center; align-items: center; z-index: 100; text-align: center;
         }
 
         button {
-            padding: 20px 40px; font-family: 'Press Start 2P'; font-size: 1rem;
+            padding: 20px 40px; font-family: 'Press Start 2P'; font-size: 1.1rem;
             background: var(--retro-green); border: none; border-radius: 15px; color: white; cursor: pointer;
             box-shadow: 0 5px 0 #047a5b;
         }
 
         #leaderboard {
-            width: 95vw; max-width: 420px; background: rgba(0,0,0,0.5); padding: 10px; 
-            border-radius: 15px; margin-top: 15px; font-size: 0.7rem; border: 1px solid var(--retro-blue);
+            width: 100%; background: rgba(0,0,0,0.5); padding: 15px; 
+            border-radius: 15px; margin-top: 15px; font-size: 0.8rem; border: 2px solid var(--retro-blue);
         }
     </style>
 </head>
@@ -73,7 +73,7 @@
 
     <h1 class="retro-title">DOGGYCO 3.2</h1>
 
-    <div id="mainContainer">
+    <div id="gameArea">
         <div id="gameWrapper">
             <div id="topBar"><div id="innerBar"></div></div>
             <div id="uiPanel">
@@ -85,7 +85,7 @@
             <canvas id="game"></canvas>
 
             <div class="overlay" id="startScreen">
-                <input type="text" id="playerName" placeholder="NAME" maxlength="10" style="margin-bottom:20px; padding:15px; text-align:center; font-family:'Press Start 2P'; font-size:0.8rem; width: 80%;">
+                <input type="text" id="playerName" placeholder="NAME" maxlength="10" style="margin-bottom:20px; padding:15px; text-align:center; font-family:'Press Start 2P'; font-size:0.8rem; border-radius: 10px; width: 80%;">
                 <button onclick="startGame()">START!</button>
             </div>
             
@@ -96,12 +96,12 @@
         </div>
 
         <div id="controlArea">
-            <input type="range" id="slider" min="40" max="380" value="210">
+            <input type="range" id="slider" min="40" max="410" value="225">
         </div>
 
         <div id="leaderboard">
-            <h3 style="color:var(--retro-pink); text-align:center; margin-bottom:5px;">TOP 10 🏆</h3>
-            <div id="scoreList">Lade...</div>
+            <h3 style="color:var(--retro-pink); text-align:center; margin-bottom:10px;">TOP 10 🏆</h3>
+            <div id="scoreList">Lade Bestenliste...</div>
         </div>
     </div>
 
@@ -112,36 +112,31 @@
     const innerBar = document.getElementById("innerBar");
 
     let state = "start", score = 0, lives = 3, timeLeft = 30, items = [], itemsSpawned = 0, itemsCaught = 0;
-    let dog = { x: 210, targetX: 210, vx: 0, hit: 0 };
+    let dog = { x: 225, targetX: 225, vx: 0, hit: 0 };
     let currentLevel = 1, spiders = [{ x: 80, t: 0 }, { x: 300, t: Math.PI }];
     let audioCtx;
 
     function resize() {
-        // Setzt die tatsächliche Pixelgröße des Canvas basierend auf der CSS-Anzeige
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
-        slider.max = canvas.width - 40;
-        slider.min = 40;
+        // Berechnet die physische Auflösung basierend auf der CSS-Größe
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        slider.max = canvas.width - 45;
+        slider.min = 45;
     }
 
     window.onload = () => { resize(); loadHighscores(); };
     window.onresize = resize;
 
-    // Sound-Funktion mit Fehlerabfang
     function playSfx(freq, type, duration) {
         if (!audioCtx) return;
-        try {
-            let o = audioCtx.createOscillator();
-            let g = audioCtx.createGain();
-            o.type = type;
-            o.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-            o.connect(g);
-            g.connect(audioCtx.destination);
-            o.start();
-            o.stop(audioCtx.currentTime + duration);
-        } catch(e) { console.error("Sound Fehler", e); }
+        let o = audioCtx.createOscillator();
+        let g = audioCtx.createGain();
+        o.type = type; o.frequency.value = freq;
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + duration);
     }
 
     async function loadHighscores() {
@@ -149,62 +144,66 @@
             const res = await fetch('save_score.php?t=' + Date.now());
             const data = await res.json();
             document.getElementById("scoreList").innerHTML = data.map((s,i) => 
-                `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>${i+1}.${s.name}</span><span>${s.points}</span></div>`
+                `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${i+1}.${s.name}</span><span>${s.points}</span></div>`
             ).join("");
-        } catch (e) { document.getElementById("scoreList").innerHTML = "Offline"; }
+        } catch (e) { document.getElementById("scoreList").innerHTML = "Keine Verbindung"; }
     }
 
     function startGame() {
-        if(!document.getElementById("playerName").value) return alert("Wie heißt du?");
-        
-        // SOUND AKTIVIERUNG: Muss innerhalb der Klick-Funktion sein!
+        if(!document.getElementById("playerName").value) return alert("Name?");
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        
         state = "play";
         document.getElementById("startScreen").style.display = "none";
-        resize(); // Nochmal sichergehen, dass die Größe stimmt
+        resize(); // WICHTIG: Erneutes Messen nach Button-Klick
         loop();
-        playSfx(600, 'sine', 0.2); // Start-Ton
+        playSfx(500, 'sine', 0.2);
     }
 
     function loop() {
         if (state !== "play") return;
         
+        // 1. Hintergrund (Füllt den ganzen Canvas)
         ctx.fillStyle = "#87CEEB"; ctx.fillRect(0,0,canvas.width, canvas.height);
         
-        // GRAS & STRASSE (Fixiert am unteren Rand des Canvas)
-        const groundY = canvas.height - 70;
-        ctx.fillStyle = "#6cc24a"; ctx.fillRect(0, groundY, canvas.width, 70);
-        ctx.fillStyle = "#333"; ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+        // BODEN-BEREICH (Wird immer vom unteren Rand berechnet)
+        const grasHeight = 70;
+        const asphaltHeight = 45;
+        ctx.fillStyle = "#6cc24a"; ctx.fillRect(0, canvas.height - grasHeight, canvas.width, grasHeight);
+        ctx.fillStyle = "#333"; ctx.fillRect(0, canvas.height - asphaltHeight, canvas.width, asphaltHeight);
 
+        // 2. Hund-Position & Physik
         dog.targetX = parseInt(slider.value);
         dog.vx += (dog.targetX - dog.x) * 0.15;
         dog.vx *= 0.8;
         dog.x += dog.vx;
 
-        // Spinnen
+        // 3. Spinnen Logic (Fahren fast bis zum Boden)
         spiders.forEach(s => {
             s.t += 0.02 + (currentLevel * 0.002);
             if (Math.sin(s.t) < -0.99) s.x = 40 + Math.random() * (canvas.width - 80);
+            
+            // Die Spinnen nutzen die volle Höhe des Canvas minus dem Boden
             let sy = 40 + (Math.sin(s.t) + 1) / 2 * (canvas.height - 180);
+            
             ctx.strokeStyle = "rgba(255,255,255,0.7)"; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
-            ctx.font = "30px Arial"; ctx.fillText("🕷️", s.x - 15, sy + 10);
-            if (Math.abs(s.x - dog.x) < 35 && Math.abs(sy - (canvas.height - 80)) < 40) {
+            ctx.font = "35px Arial"; ctx.fillText("🕷️", s.x - 17, sy + 12);
+            
+            // Kollision (Wird an der Position des Hundes gemessen)
+            if (Math.abs(s.x - dog.x) < 40 && Math.abs(sy - (canvas.height - 90)) < 45) {
                 itemsCaught = Math.max(0, itemsCaught - 2);
                 dog.hit = 15;
-                playSfx(150, 'sawtooth', 0.2);
+                playSfx(140, 'sawtooth', 0.2);
                 s.t += 0.5;
             }
         });
 
-        // Items
+        // 4. Items Logic
         if (Math.random() < 0.035) {
             let laneWidth = canvas.width / 5;
             let lane = Math.floor(Math.random() * 5) * laneWidth + laneWidth/2;
+            let it = { x: lane, y: -50, speed: 2.8 + currentLevel * 0.5 };
             let r = Math.random();
-            let it = { x: lane, y: -50, speed: 2.5 + currentLevel * 0.5 };
             if (r < 0.15) { it.type = "👮"; it.danger = true; }
             else if (r < 0.35) { it.type = "🍗"; it.val = 3; }
             else if (r < 0.65) { it.type = "🍪"; it.val = 2; }
@@ -215,27 +214,30 @@
 
         items.forEach((it, i) => {
             it.y += it.speed;
-            ctx.font = it.danger ? "50px Arial" : "35px Arial";
+            ctx.font = it.danger ? "55px Arial" : "38px Arial";
             ctx.fillText(it.type, it.x - 20, it.y);
             
-            if (it.y > canvas.height - 100 && it.y < canvas.height - 30 && Math.abs(it.x - dog.x) < 35) {
+            // Fang-Zone (Direkt über dem Boden)
+            if (it.y > canvas.height - 120 && it.y < canvas.height - 40 && Math.abs(it.x - dog.x) < 40) {
                 if (it.danger) {
                     lives--; updateHearts(); playSfx(80, 'square', 0.4);
                     if(lives <= 0) endGame();
                 } else {
-                    itemsCaught++; score += it.val; playSfx(800, 'sine', 0.05);
+                    itemsCaught++; score += it.val; playSfx(850, 'sine', 0.05);
                 }
                 items.splice(i, 1);
             } else if (it.y > canvas.height) items.splice(i, 1);
         });
 
-        // HUND ZEICHNEN (Zentriert auf groundY)
+        // 5. Hund Zeichnen (FIXIERT AM BODEN)
         ctx.save();
-        if(dog.hit > 0) { ctx.filter = "brightness(2) red(1)"; dog.hit--; }
-        ctx.font = "70px Arial";
-        ctx.fillText("🐶", dog.x - 35, canvas.height - 60 + Math.sin(Date.now()*0.01)*4);
+        if(dog.hit > 0) { ctx.filter = "brightness(2) sepia(1)"; dog.hit--; }
+        ctx.font = "75px Arial";
+        // Zeichnet den Hund immer 75 Pixel über dem absoluten Canvas-Boden
+        ctx.fillText("🐶", dog.x - 37, canvas.height - 70 + Math.sin(Date.now()*0.01)*5);
         ctx.restore();
 
+        // 6. UI Update
         let pct = itemsSpawned > 0 ? (itemsCaught / itemsSpawned) * 100 : 0;
         innerBar.style.width = Math.min(pct, 100) + "%";
         innerBar.style.background = pct >= 50 ? "var(--retro-green)" : "var(--retro-red)";
@@ -245,7 +247,7 @@
         if (timeLeft <= 0) {
             if (pct >= 50) { 
                 currentLevel++; document.getElementById("lvlDisplay").innerText = currentLevel;
-                itemsSpawned = 0; itemsCaught = 0; timeLeft = 30; playSfx(1000, 'sine', 0.3);
+                itemsSpawned = 0; itemsCaught = 0; timeLeft = 30; playSfx(1000, 'sine', 0.4);
             } else { lives--; updateHearts(); if(lives > 0) { itemsSpawned = 0; itemsCaught = 0; timeLeft = 30; } else endGame(); }
         }
         if(state === "play") requestAnimationFrame(loop);
