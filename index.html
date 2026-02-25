@@ -2,47 +2,49 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Doggyco 4.0 – Arcade Boost</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doggyco 5.0 – Neon Glow</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
 :root{
---yellow:#ffd166;
---pink:#ff9ecf;
---green:#06d6a0;
---red:#ef476f;
+--neon:#00fff7;
+--pink:#ff00c8;
+--green:#00ff88;
+--red:#ff2e63;
 }
 
 *{margin:0;padding:0;box-sizing:border-box;}
 
 body{
-background:linear-gradient(180deg,#0f0f1a,#000);
+background:#000;
 color:white;
-display:flex;
-flex-direction:column;
-align-items:center;
-height:100vh;
-overflow:hidden;
 font-family:sans-serif;
+overflow:hidden;
+}
+
+body.gameover{
+overflow:auto;
 }
 
 h1{
+text-align:center;
 font-family:'Press Start 2P';
-color:var(--yellow);
+color:var(--neon);
+text-shadow:0 0 15px var(--neon);
 margin:15px 0;
-text-shadow:0 0 10px var(--yellow);
 }
 
 #gameWrapper{
 position:relative;
 width:100%;
 max-width:420px;
-flex:1;
+height:70vh;
+margin:auto;
 border-radius:30px;
 overflow:hidden;
-border:4px solid white;
-box-shadow:0 0 40px rgba(255,255,255,0.3);
+border:3px solid var(--neon);
+box-shadow:0 0 30px var(--neon);
 }
 
 canvas{width:100%;height:100%;display:block;}
@@ -55,16 +57,17 @@ justify-content:space-between;
 font-family:'Press Start 2P';
 font-size:0.6rem;
 z-index:10;
+text-shadow:0 0 10px white;
 }
 
 .overlay{
 position:absolute;
 inset:0;
-background:rgba(0,0,0,0.85);
+background:rgba(0,0,0,0.9);
 display:flex;
+flex-direction:column;
 justify-content:center;
 align-items:center;
-flex-direction:column;
 z-index:20;
 }
 
@@ -75,30 +78,31 @@ background:var(--green);
 border:none;
 border-radius:20px;
 cursor:pointer;
-font-size:1rem;
 }
 
-#sliderArea{
-width:100%;
-max-width:420px;
-padding:20px;
-background:#111;
+.bubble{
+position:absolute;
+font-family:'Press Start 2P';
+font-size:0.8rem;
+pointer-events:none;
+animation:floatUp 1s forwards;
 }
 
-#slider{
-width:100%;
+@keyframes floatUp{
+0%{opacity:1;transform:translateY(0);}
+100%{opacity:0;transform:translateY(-50px);}
 }
 </style>
 </head>
 <body>
 
-<h1>DOGGYCO 4.0</h1>
+<h1>DOGGYCO 5.0</h1>
 
 <div id="gameWrapper">
 <div id="ui">
 <div>⭐ <span id="score">0</span></div>
-<div id="hearts">❤️ ❤️ ❤️</div>
-<div>LVL <span id="lvl">1</span></div>
+<div>❤️ <span id="life">100</span>%</div>
+<div>🏆 <span id="high">0</span></div>
 </div>
 
 <canvas id="game"></canvas>
@@ -113,48 +117,52 @@ width:100%;
 </div>
 </div>
 
-<div id="sliderArea">
-<input type="range" id="slider" min="0" max="1000" value="500">
-</div>
-
 <script>
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
-const slider=document.getElementById("slider");
 
 let state="start";
-let score=0,lives=3,level=1;
-let items=[],spiders=[];
-let spawnTimer=0;
-let audioCtx;
+let score=0;
+let life=100;
+let high=localStorage.getItem("doggyHigh")||0;
+document.getElementById("high").innerText=high;
 
-let dog={x:200,vx:0,bounce:0};
+let items=[],spiders=[];
+let dog={x:200};
+let audioCtx,bgOsc;
 
 function resize(){
-const dpr=window.devicePixelRatio||1;
 const rect=canvas.getBoundingClientRect();
-canvas.width=rect.width*dpr;
-canvas.height=rect.height*dpr;
-ctx.setTransform(dpr,0,0,dpr,0,0);
+canvas.width=rect.width;
+canvas.height=rect.height;
 }
 window.addEventListener("resize",resize);
 
-function playTone(freq,dur=0.1){
-if(!audioCtx)return;
-let o=audioCtx.createOscillator();
+function bubble(text,x,y,color){
+const b=document.createElement("div");
+b.className="bubble";
+b.style.left=x+"px";
+b.style.top=y+"px";
+b.style.color=color;
+b.innerText=text;
+document.getElementById("gameWrapper").appendChild(b);
+setTimeout(()=>b.remove(),1000);
+}
+
+function startMusic(){
+bgOsc=audioCtx.createOscillator();
 let g=audioCtx.createGain();
-o.frequency.value=freq;
-o.type="square";
-g.gain.setValueAtTime(0.05,audioCtx.currentTime);
-g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
-o.connect(g);
+bgOsc.type="sawtooth";
+bgOsc.frequency.value=120;
+g.gain.value=0.02;
+bgOsc.connect(g);
 g.connect(audioCtx.destination);
-o.start();
-o.stop(audioCtx.currentTime+dur);
+bgOsc.start();
 }
 
 function startGame(){
 audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+startMusic();
 state="play";
 document.getElementById("start").style.display="none";
 resize();
@@ -163,136 +171,120 @@ loop();
 }
 
 function initSpiders(){
-spiders=[];
 for(let i=0;i<2;i++){
-spiders.push({
-x:Math.random()*0.8+0.1,
-t:Math.random()*Math.PI
+spiders.push({x:Math.random()*0.8+0.1,t:Math.random()*3});
+}
+}
+
+canvas.addEventListener("touchmove",e=>{
+let rect=canvas.getBoundingClientRect();
+dog.x=e.touches[0].clientX-rect.left;
 });
-}
-}
+
+canvas.addEventListener("mousemove",e=>{
+dog.x=e.offsetX;
+});
 
 function loop(){
 if(state!=="play")return;
 
-const W=canvas.width/(window.devicePixelRatio||1);
-const H=canvas.height/(window.devicePixelRatio||1);
-const ground=H-80;
+const W=canvas.width;
+const H=canvas.height;
+const ground=H-70;
 
 ctx.clearRect(0,0,W,H);
 
-/* Himmel animiert */
+/* Neon Himmel */
 let grad=ctx.createLinearGradient(0,0,0,H);
-grad.addColorStop(0,"#4facfe");
-grad.addColorStop(1,"#1c6dd0");
+grad.addColorStop(0,"#001");
+grad.addColorStop(1,"#020024");
 ctx.fillStyle=grad;
 ctx.fillRect(0,0,W,H);
 
-/* Sonne */
-ctx.fillStyle="rgba(255,255,0,0.2)";
+/* Sonne Glow */
+ctx.shadowBlur=30;
+ctx.shadowColor="yellow";
+ctx.fillStyle="yellow";
 ctx.beginPath();
 ctx.arc(W-60,60,40+Math.sin(Date.now()*0.002)*5,0,7);
 ctx.fill();
+ctx.shadowBlur=0;
 
-/* Boden */
-ctx.fillStyle="#4caf50";
-ctx.fillRect(0,ground,W,80);
+/* Boden Neon */
+ctx.fillStyle="#111";
+ctx.fillRect(0,ground,W,70);
+ctx.strokeStyle="#0ff";
+ctx.strokeRect(0,ground,W,70);
 
-/* Hund Bewegung */
-const target=(slider.value/1000)*(W-80)+40;
-let ax=(target-dog.x)*0.1;
-dog.vx+=ax;
-dog.vx*=0.85;
-dog.x+=dog.vx;
-dog.bounce=Math.sin(Date.now()*0.01)*5;
-
-/* Items Spawn (mehr aber kontrolliert) */
-spawnTimer+=1/60;
-let spawnRate=Math.max(0.6,1.1-(level*0.07));
-
-if(spawnTimer>=spawnRate){
-spawnTimer=0;
+/* Items */
+if(Math.random()<0.04){
 let r=Math.random();
-let it={
-xPct:Math.random()*0.8+0.1,
-y:-40,
-speed:3+(level*0.5)
-};
-
-if(r<0.12){it.type="👮";it.bad=true;}
-else if(r<0.35){it.type="🍗";it.val=3;}
-else if(r<0.65){it.type="🍪";it.val=2;}
-else{it.type="🦴";it.val=1;}
-
+let it={x:Math.random()*W,y:-20,speed:3};
+if(r<0.1){it.bad=true;it.type="👮";}
+else if(r<0.4){it.val=3;it.type="🍗";}
+else if(r<0.7){it.val=2;it.type="🍪";}
+else{it.val=1;it.type="🦴";}
 items.push(it);
 }
 
-/* Items Bewegung */
 items.forEach((it,i)=>{
 it.y+=it.speed;
-let x=it.xPct*W;
-ctx.font=it.bad?"55px Arial":"42px Arial";
-ctx.fillText(it.type,x-20,it.y);
+ctx.font="40px Arial";
+ctx.fillText(it.type,it.x,it.y);
 
-if(it.y>ground-40&&Math.abs(x-dog.x)<40){
+if(it.y>ground-30&&Math.abs(it.x-dog.x)<40){
 if(it.bad){
-lives--;
-playTone(120);
-if(lives<=0)endGame();
+life-=10;
+bubble("-10%",it.x,it.y,"red");
 }else{
 score+=it.val;
-playTone(800);
+bubble("+"+it.val,it.x,it.y,"#0f0");
 }
 items.splice(i,1);
 }
 });
 
-/* Spinnen Animation */
+/* Spinnen */
 spiders.forEach(s=>{
-s.t+=0.02+(level*0.002);
+s.t+=0.02;
 let sx=s.x*W;
-let sy=50+(Math.sin(s.t)+1)/2*(ground-120);
-
+let sy=(Math.sin(s.t)+1)/2*ground;
 ctx.strokeStyle="white";
 ctx.beginPath();
 ctx.moveTo(sx,0);
 ctx.lineTo(sx,sy);
 ctx.stroke();
-
 ctx.font="35px Arial";
-ctx.fillText("🕷️",sx-17,sy+15);
+ctx.fillText("🕷️",sx-15,sy+10);
 
-if(Math.abs(sx-dog.x)<40&&Math.abs(sy-(ground-20))<40){
-playTone(80);
-lives--;
-if(lives<=0)endGame();
+if(Math.abs(sx-dog.x)<40&&Math.abs(sy-ground)<40){
+life-=10;
+bubble("-10%",sx,sy,"red");
+s.x=Math.random()*0.8+0.1;
 }
 });
 
-/* Hund zeichnen */
-ctx.save();
-ctx.translate(dog.x,ground);
+/* Hund */
 ctx.font="80px Arial";
-ctx.fillText("🐶",-40,dog.bounce);
-ctx.restore();
+ctx.fillText("🐶",dog.x-40,ground);
 
-/* UI Update */
 document.getElementById("score").innerText=score;
-document.getElementById("lvl").innerText=level;
-updateHearts();
+document.getElementById("life").innerText=life;
+
+if(life<=0){
+endGame();
+}
 
 requestAnimationFrame(loop);
 }
 
-function updateHearts(){
-let h="";
-for(let i=0;i<3;i++)h+=i<lives?"❤️ ":"🖤 ";
-document.getElementById("hearts").innerHTML=h;
-}
-
 function endGame(){
 state="over";
+document.body.classList.add("gameover");
 document.getElementById("gameOver").style.display="flex";
+if(score>high){
+localStorage.setItem("doggyHigh",score);
+}
 }
 </script>
 </body>
