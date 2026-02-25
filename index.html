@@ -3,89 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Doggyco 10.0 – 90s Arcade</title>
+<title>Doggyco 12.0 – Arcade Deluxe</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#222;overflow:hidden;font-family:sans-serif;}
+body{background:#111;overflow:hidden;font-family:sans-serif;}
 h1{
 text-align:center;
 font-family:'Press Start 2P';
 font-size:0.9rem;
-color:#fff;
+color:white;
 margin:10px 0;
 }
 #wrap{
 position:relative;
 width:100%;
-max-width:420px;
-height:88vh;
+max-width:430px;
+height:90vh;
 margin:auto;
 border-radius:25px;
 overflow:hidden;
-box-shadow:0 0 30px rgba(0,0,0,0.6);
+box-shadow:0 0 40px rgba(0,0,0,0.7);
+background:#000;
 }
 canvas{width:100%;height:100%;display:block;}
+
 #ui{
 position:absolute;
-top:5px;left:0;right:0;
+top:8px;
+left:0;right:0;
 display:flex;
 justify-content:space-around;
 font-family:'Press Start 2P';
-font-size:0.6rem;
+font-size:0.75rem;
 color:white;
 z-index:10;
 }
-#levelBar{
+
+#progressBar{
 position:absolute;
-bottom:0;
-left:0;
-height:8px;
-width:100%;
+top:50px;
+left:8%;
+width:84%;
+height:10px;
 background:#333;
+border-radius:10px;
+overflow:hidden;
 }
 #progress{
 height:100%;
 width:0%;
-background:linear-gradient(to right, red, yellow, lime);
+background:linear-gradient(to right, red, orange, yellow, lime);
+transition:width 0.3s;
 }
+
 .overlay{
 position:absolute;
 inset:0;
-background:rgba(0,0,0,0.8);
+background:linear-gradient(to bottom,#000000dd,#111111ee);
 display:flex;
 justify-content:center;
 align-items:center;
 flex-direction:column;
+color:white;
+font-family:'Press Start 2P';
 z-index:20;
 }
+
 button{
-padding:18px 30px;
+margin-top:15px;
+padding:15px 25px;
 border:none;
 border-radius:20px;
 background:#4caf50;
 font-family:'Press Start 2P';
 cursor:pointer;
 }
+
+input{
+margin-top:10px;
+padding:10px;
+border-radius:10px;
+border:none;
+text-align:center;
+}
 </style>
 </head>
 <body>
 
-<h1>DOGGYCO 10.0</h1>
+<h1>DOGGYCO 12.0</h1>
 
 <div id="wrap">
 <div id="ui">
 <div>⭐ <span id="score">0</span></div>
 <div>❤️ <span id="hearts">3</span></div>
-<div>LEVEL <span id="lvl">1</span></div>
+<div>🏁 <span id="lvl">1</span></div>
+<div>🔥 <span id="combo">x1</span></div>
 </div>
+
+<div id="progressBar"><div id="progress"></div></div>
 
 <canvas id="game"></canvas>
 
-<div id="levelBar"><div id="progress"></div></div>
-
 <div class="overlay" id="start">
 <button onclick="startGame()">START</button>
+</div>
+
+<div class="overlay" id="gameOver" style="display:none;">
+<div>GAME OVER</div>
+<div style="margin-top:10px;">Score: <span id="finalScore"></span></div>
+<input id="playerName" placeholder="Dein Name">
+<button onclick="saveScore()">Speichern</button>
+<div id="leaderboard" style="margin-top:15px;font-size:0.6rem;"></div>
+<button onclick="restartGame()">Neu Starten</button>
 </div>
 
 </div>
@@ -97,11 +127,12 @@ const ctx=canvas.getContext("2d");
 let W,H;
 let lanes=6,laneW;
 let dogLane=3,dogX=0,targetX=0;
-let items=[],spiders=[],bubbles=[],clouds=[],birds=[];
-let score=0,level=1,hearts=3;
+let items=[],bubbles=[],clouds=[],birds=[],particles=[];
+let score=0,level=1,hearts=3,combo=1;
 let levelTimer=0;
 let state="start";
-let audioCtx, bgOsc;
+let animationId;
+let audioCtx;
 
 /* Resize */
 function resize(){
@@ -114,48 +145,48 @@ dogX=laneW*dogLane+laneW/2;
 }
 window.addEventListener("resize",resize);
 
-/* Sound */
+/* Music */
 function startMusic(){
-bgOsc=audioCtx.createOscillator();
-let gain=audioCtx.createGain();
-bgOsc.type="triangle";
-bgOsc.frequency.value=120;
-gain.gain.value=0.03;
-bgOsc.connect(gain);
-gain.connect(audioCtx.destination);
-bgOsc.start();
-}
-function playTone(freq){
+audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+let notes=[220,262,330,392];
+let i=0;
+setInterval(()=>{
 let o=audioCtx.createOscillator();
 let g=audioCtx.createGain();
-o.type="sine";
-o.frequency.value=freq;
-g.gain.value=0.08;
+o.type="square";
+o.frequency.value=notes[i%notes.length];
+g.gain.value=0.03;
 o.connect(g);g.connect(audioCtx.destination);
-o.start();
-o.stop(audioCtx.currentTime+0.15);
+o.start();o.stop(audioCtx.currentTime+0.2);
+i++;
+},400);
 }
 
 /* Start */
 function startGame(){
-audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 resize();
 initBackground();
-initSpiders();
 startMusic();
 state="play";
 document.getElementById("start").style.display="none";
 loop();
 }
 
-/* Controls Drag */
+/* Restart */
+function restartGame(){
+score=0;level=1;hearts=3;combo=1;levelTimer=0;
+items=[];bubbles=[];birds=[];particles=[];
+state="play";
+document.getElementById("gameOver").style.display="none";
+loop();
+}
+
+/* Controls */
 let dragging=false;
 canvas.addEventListener("mousedown",()=>dragging=true);
 canvas.addEventListener("mouseup",()=>dragging=false);
 canvas.addEventListener("mousemove",e=>{
-if(dragging){
-dogLane=Math.floor(e.offsetX/laneW);
-}
+if(dragging)dogLane=Math.floor(e.offsetX/laneW);
 });
 canvas.addEventListener("touchstart",()=>dragging=true);
 canvas.addEventListener("touchend",()=>dragging=false);
@@ -167,48 +198,58 @@ dogLane=Math.floor(x/laneW);
 
 /* Background */
 function initBackground(){
-for(let i=0;i<3;i++)clouds.push({x:Math.random()*W,y:80+i*40});
+for(let i=0;i<3;i++)clouds.push({x:Math.random()*W,y:60+i*40});
 }
+
 function drawBackground(){
-let grad=ctx.createLinearGradient(0,0,0,H);
-grad.addColorStop(0,"#87ceeb");
-grad.addColorStop(1,"#e0f7fa");
-ctx.fillStyle=grad;
+let sky=ctx.createLinearGradient(0,0,0,H);
+if(level<4){
+sky.addColorStop(0,"#87ceeb");
+sky.addColorStop(1,"#e6f7ff");
+}else{
+sky.addColorStop(0,"#ff9966");
+sky.addColorStop(1,"#ff5e62");
+}
+ctx.fillStyle=sky;
 ctx.fillRect(0,0,W,H);
 
-ctx.fillStyle="#81c784";
+ctx.fillStyle="#8bc34a";
 ctx.beginPath();
 ctx.arc(W/2,H-150,300,Math.PI,0);
 ctx.fill();
 
-ctx.fillStyle="#555";
+ctx.fillStyle="#444";
 ctx.fillRect(0,H-120,W,120);
+ctx.fillStyle="#fff";
+for(let i=0;i<W;i+=40){
+ctx.fillRect(i,H-65,20,5);
+}
 
 clouds.forEach(c=>{
-c.x+=0.3;
-if(c.x>W+50)c.x=-50;
-ctx.fillStyle="rgba(255,255,255,0.8)";
+c.x+=0.2;
+if(c.x>W+60)c.x=-60;
+ctx.fillStyle="rgba(255,255,255,0.9)";
 ctx.beginPath();
 ctx.arc(c.x,c.y,25,0,7);
+ctx.arc(c.x+30,c.y+5,20,0,7);
+ctx.arc(c.x-30,c.y+5,20,0,7);
 ctx.fill();
 });
-}
 
-/* Spiders */
-function initSpiders(){
-for(let i=0;i<2;i++){
-spiders.push({x:Math.random()*W,t:Math.random()*3});
+if(Math.random()<0.002){
+birds.push({x:-20,y:50+Math.random()*100});
 }
+birds.forEach((b,i)=>{
+b.x+=1;
+ctx.fillText("🐦",b.x,b.y);
+if(b.x>W+20)birds.splice(i,1);
+});
 }
 
 /* Spawn */
 function spawn(){
-let freeLanes=[];
-for(let i=0;i<lanes;i++){
-if(!items.some(it=>it.lane===i && it.y<150))freeLanes.push(i);
-}
-if(freeLanes.length===0)return;
-let lane=freeLanes[Math.floor(Math.random()*freeLanes.length)];
+let lane=Math.floor(Math.random()*lanes);
+if(items.some(it=>it.lane===lane && it.y<100))return;
 let r=Math.random();
 let it={lane:lane,y:-40};
 if(r<0.1){it.type="👮";it.bad=true;}
@@ -221,64 +262,51 @@ items.push(it);
 /* Loop */
 function loop(){
 if(state!=="play")return;
-
+animationId=requestAnimationFrame(loop);
 ctx.clearRect(0,0,W,H);
 drawBackground();
 
-/* Level Timer */
+/* Level Progress */
 levelTimer+=1/60;
 let percent=Math.min(levelTimer/30,1);
 document.getElementById("progress").style.width=(percent*100)+"%";
-
-if(levelTimer>=30){
-level++;
-levelTimer=0;
-}
+if(levelTimer>=30){level++;levelTimer=0;}
 
 /* Spawn */
 if(Math.random()<0.02+level*0.005)spawn();
 
 /* Items */
 items.forEach((it,i)=>{
-it.y+=2+level*0.4;
+it.y+=2+level*0.5;
 let x=it.lane*laneW+laneW/2;
-ctx.font="38px Arial";
-ctx.fillText(it.type,x-20,it.y);
+ctx.font="36px Arial";
+ctx.fillText(it.type,x-18,it.y);
 
 if(it.y>H-130 && it.lane===dogLane){
 if(it.bad){
 hearts--;
-playTone(100);
+combo=1;
 }else{
-let pts=it.val*level;
+let pts=it.val*level*combo;
 score+=pts;
-playTone(300+pts*50);
-bubbles.push({x,y:it.y,text:"+"+pts,life:60});
+combo++;
+bubbles.push({x:x,y:it.y,text:"+"+pts,life:60});
 }
 items.splice(i,1);
 }
 });
 
-/* Spiders */
-spiders.forEach(s=>{
-s.t+=0.02;
-s.x+=Math.sin(s.t)*0.8;
-let sy=(Math.sin(s.t)+1)/2*(H-150);
-ctx.fillText("🕷️",s.x,sy);
-});
-
 /* Dog */
 targetX=dogLane*laneW+laneW/2;
 dogX+=(targetX-dogX)*0.15;
-ctx.font="70px Arial";
-ctx.fillText("🐶",dogX-35,H-120);
+ctx.fillText("🐶",dogX-32,H-120);
 
 /* Bubbles */
 bubbles.forEach((b,i)=>{
 b.y-=1;
 b.life--;
-ctx.fillStyle="black";
-ctx.fillText(b.text,b.x,b.y);
+ctx.fillStyle="rgba(0,0,0,"+(b.life/60)+")";
+ctx.fillText(b.text,b.x-10,b.y);
 if(b.life<=0)bubbles.splice(i,1);
 });
 
@@ -286,16 +314,15 @@ if(b.life<=0)bubbles.splice(i,1);
 document.getElementById("score").innerText=score;
 document.getElementById("hearts").innerText=hearts;
 document.getElementById("lvl").innerText=level;
+document.getElementById("combo").innerText="x"+combo;
 
 if(hearts<=0){
 state="over";
-bgOsc.stop();
-setTimeout(()=>alert("Game Over"),200);
+cancelAnimationFrame(animationId);
+document.getElementById("finalScore").innerText=score;
+document.getElementById("gameOver").style.display="flex";
 }
-
-requestAnimationFrame(loop);
 }
 </script>
-
 </body>
 </html>
