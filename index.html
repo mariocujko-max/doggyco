@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Doggyco 21.0 - Nature Polish</title>
+<title>Doggyco 22.0 - Final Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
 <style>
     *{margin:0;padding:0;box-sizing:border-box;touch-action:none;}
@@ -16,9 +15,8 @@
         max-width:480px;
         margin:auto;
         overflow:hidden;
-        background: linear-gradient(to bottom, #1e3c72 0%, #2a5298 40%, #f39c12 100%);
-        border: 4px solid #222;
-        box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        background: linear-gradient(to bottom, #1e3c72 0%, #2a5298 50%, #f39c12 100%);
+        border: 4px solid #333;
     }
 
     canvas{width:100%;height:100%;display:block;}
@@ -27,25 +25,26 @@
         position:absolute; top:15px; width:100%; text-align:center; color:white; z-index:10; pointer-events:none;
     }
 
-    #hearts { font-size:45px; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
-    .stats-row { display: flex; justify-content: space-around; font-size: 22px; font-weight: 900; text-shadow: 2px 2px 4px #000; }
+    #hearts { font-size:45px; text-shadow: 0 0 10px rgba(0,0,0,0.5); transition: all 0.3s; }
+    .stats-row { display: flex; justify-content: space-around; font-size: 22px; font-weight: 900; }
 
     #lvlBarWrap {
-        width:75%; height:12px; background:rgba(0,0,0,0.4); margin:12px auto; border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,0.3);
+        width:75%; height:12px; background:rgba(0,0,0,0.4); margin:12px auto; border-radius:20px; overflow:hidden; border:2px solid #fff;
     }
-    #lvlBar { height:100%; width:100%; background: linear-gradient(to right, #00ff88, #fbff00, #ff4d4d); transition: width 0.1s linear; }
+    #lvlBar { height:100%; width:100%; background: #00ff88; transition: width 0.1s linear; }
 
     .overlay {
         position:absolute; inset:0; background:rgba(0,0,0,0.8); display:flex; flex-direction:column;
-        justify-content:center; align-items:center; color:white; z-index:20;
+        justify-content:center; align-items:center; color:white; z-index:20; text-align: center;
     }
 
     button {
         padding:18px 50px; font-size:24px; border:none; background:#f1c40f; color:#1a1a2e;
-        border-radius:50px; cursor:pointer; font-family: 'Orbitron'; font-weight: 900; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-        transition: transform 0.1s;
+        border-radius:50px; cursor:pointer; font-family: 'Orbitron'; font-weight: 900;
     }
-    button:active { transform: scale(0.95); }
+    
+    .danger { color: #ff4d4d; animation: shake 0.2s infinite; }
+    @keyframes shake { 0% { transform: translateX(0); } 50% { transform: translateX(5px); } 100% { transform: translateX(0); } }
 </style>
 </head>
 <body>
@@ -55,7 +54,7 @@
         <div id="hearts">❤️❤️❤️</div>
         <div class="stats-row">
             <div>⭐ <span id="score">0</span></div>
-            <div>LVL <span id="lvl">1</span></div>
+            <div>⏳ <span id="timer">30</span>s</div>
         </div>
         <div id="lvlBarWrap"><div id="lvlBar"></div></div>
     </div>
@@ -63,15 +62,15 @@
     <canvas id="game"></canvas>
 
     <div class="overlay" id="startScreen">
-        <h1 style="font-size: 48px; color: #f1c40f; margin-bottom:10px; text-shadow: 0 0 20px rgba(241,196,15,0.5);">DOGGYCO</h1>
-        <p style="letter-spacing: 3px; margin-bottom: 30px;">PREMIUM EDITION</p>
+        <h1 style="color:#f1c40f; font-size: 40px; margin-bottom:20px;">DOGGYCO 22.0</h1>
+        <p style="margin-bottom:30px;">Überlebe die 30 Sekunden!</p>
         <button onclick="startGame()">START</button>
     </div>
 
     <div class="overlay" id="gameOver" style="display:none;">
-        <h2 style="font-size: 40px; color: #ff4d4d;">GAME OVER</h2>
-        <h1 id="finalScore" style="font-size:50px; margin:20px 0; color: #f1c40f;">0</h1>
-        <button onclick="location.reload()">RETRY</button>
+        <h2 style="color:#ff4d4d; font-size: 40px;">GAME OVER</h2>
+        <h1 id="finalScore" style="font-size:50px; margin:20px 0;">0</h1>
+        <button onclick="location.reload()">NEUSTART</button>
     </div>
 </div>
 
@@ -81,20 +80,34 @@ const ctx=canvas.getContext("2d");
 
 let W,H, lanes=5, laneW;
 let dogLane=2, dogX=0;
-let items=[], spiders=[], birds=[], clouds=[], trees=[], floatingTexts=[];
+let items=[], spiders=[], birds=[], clouds=[], floatingTexts=[];
 let score=0, hearts=3, timeLeft=30, level=1;
 let active=false, lastTime=0;
+let heartLostByTime = false; // Verhindert mehrfachen Abzug bei 50%
 
-// Audio
+// --- AUDIO SYSTEM ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSound(f, type, d, v=0.1) {
+
+function playSynth(freq, type, dur, vol=0.1) {
     if(audioCtx.state === 'suspended') audioCtx.resume();
     let o=audioCtx.createOscillator(), g=audioCtx.createGain();
-    o.type=type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-    g.gain.setValueAtTime(v, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+d);
+    o.type=type; o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    g.gain.setValueAtTime(vol, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
     o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime+d);
+    o.start(); o.stop(audioCtx.currentTime+dur);
+}
+
+// Hintergrundmusik-Loop (Retro Lofi Style)
+function startMusic() {
+    let notes = [110, 130, 110, 164]; // Bass-Noten
+    let i = 0;
+    setInterval(() => {
+        if(active) {
+            playSynth(notes[i % notes.length], 'triangle', 0.8, 0.05);
+            i++;
+        }
+    }, 600);
 }
 
 function resize(){
@@ -108,151 +121,130 @@ function startGame(){
     document.getElementById("startScreen").style.display="none";
     active=true;
     lastTime=performance.now();
-    // Init Assets
-    for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: 50+Math.random()*150, s: 0.1+Math.random()*0.2, w: 80+Math.random()*40});
-    for(let i=0; i<4; i++) trees.push({x: Math.random()*W, y: H-140, type: Math.random()>0.5?'pine':'round', s: 1+Math.random()});
-    for(let i=0; i<2; i++) spiders.push({x: Math.random()*W, t: Math.random()*Math.PI, s: 0.01, targetX: Math.random()*W});
     
-    // Background Music Beat
-    setInterval(() => { if(active) playSound(60, 'sine', 0.5, 0.05); }, 800);
+    // Spinnen-Setup
+    for(let i=0; i<2; i++) spiders.push({x: laneW * (1+i*2), t: Math.random()*Math.PI, s: 0.012 + (level*0.002)});
+    // Wolken
+    for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: 50+Math.random()*100, s: 0.2+Math.random()*0.3});
+    
+    startMusic();
     requestAnimationFrame(loop);
 }
 
+// Input
 const handleInput = (e) => {
-    let rect = canvas.getBoundingClientRect();
-    let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    let x = (e.touches ? e.touches[0].clientX : e.clientX) - canvas.getBoundingClientRect().left;
     dogLane = Math.floor(x/laneW);
     dogLane = Math.max(0, Math.min(lanes-1, dogLane));
 }
 canvas.onmousemove = handleInput;
 canvas.ontouchmove = (e) => { e.preventDefault(); handleInput(e); };
 
-function drawCloud(c) {
-    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-    ctx.beginPath();
-    ctx.arc(c.x, c.y, c.w*0.4, 0, Math.PI*2);
-    ctx.arc(c.x+c.w*0.3, c.y-c.w*0.1, c.w*0.3, 0, Math.PI*2);
-    ctx.arc(c.x+c.w*0.5, c.y+c.w*0.1, c.w*0.35, 0, Math.PI*2);
-    ctx.fill();
-}
-
-function drawTree(t) {
-    ctx.fillStyle = "#2d4a22";
-    if(t.type === 'pine') {
-        ctx.beginPath();
-        ctx.moveTo(t.x, t.y); ctx.lineTo(t.x-20*t.s, t.y+40); ctx.lineTo(t.x+20*t.s, t.y+40);
-        ctx.fill();
-    } else {
-        ctx.beginPath(); ctx.arc(t.x, t.y+20, 20*t.s, 0, Math.PI*2); ctx.fill();
+function drawScene() {
+    // Feste Bäume im Hintergrund
+    ctx.fillStyle = "#1d3a12";
+    for(let i=0; i<4; i++) {
+        let tx = 40 + i*110;
+        ctx.beginPath(); ctx.moveTo(tx, H-140); ctx.lineTo(tx-25, H-90); ctx.lineTo(tx+25, H-90); ctx.fill();
+        ctx.fillRect(tx-5, H-90, 10, 20); // Stamm
+    }
+    // Feste Straße
+    ctx.fillStyle = "#333";
+    ctx.fillRect(0, H-140, W, 140);
+    ctx.strokeStyle = "rgba(255,255,255,0.2)";
+    ctx.lineWidth = 2;
+    for(let i=1; i<lanes; i++) {
+        ctx.beginPath(); ctx.moveTo(i*laneW, H-140); ctx.lineTo(i*laneW, H); ctx.stroke();
     }
 }
 
 function loop(t){
     if(!active) return;
     let delta=(t-lastTime)/1000;
-    if(delta > 0.1) delta = 0.016;
     lastTime=t;
     ctx.clearRect(0,0,W,H);
 
-    // Clouds
+    // Wolken & Vögel
+    ctx.fillStyle = "rgba(255,255,255,0.2)";
     clouds.forEach(c => {
-        c.x += c.s; if(c.x > W+100) c.x = -100;
-        drawCloud(c);
+        c.x += c.s; if(c.x > W+50) c.x = -50;
+        ctx.beginPath(); ctx.arc(c.x, c.y, 25, 0, Math.PI*2); ctx.fill();
     });
-
-    // Vögel
-    if(Math.random() < 0.004) birds.push({x: W+50, y: 60+Math.random()*120, s: 1.2+level*0.1});
+    if(Math.random() < 0.003) birds.push({x: W+50, y: 50+Math.random()*100, s: 1.5});
     birds.forEach((b, i) => {
-        b.x -= b.s;
-        ctx.font="26px Arial"; ctx.fillText("🐦", b.x, b.y);
+        b.x -= b.s; ctx.font="20px Arial"; ctx.fillText("🐦", b.x, b.y);
         if(b.x < -50) birds.splice(i,1);
     });
 
-    // Trees
-    trees.forEach(tr => {
-        tr.x -= (1 + level*0.5); if(tr.x < -50) tr.x = W+50;
-        drawTree(tr);
-    });
+    drawScene();
 
-    // Straße (Premium Look)
-    ctx.fillStyle = "#333";
-    ctx.fillRect(0, H-140, W, 140);
-    ctx.fillStyle = "#444";
-    ctx.fillRect(0, H-145, W, 5); // Bordstein Kante
-    ctx.strokeStyle = "rgba(255,255,255,0.4)";
-    ctx.setLineDash([30, 30]);
-    for(let i=1; i<lanes; i++) {
-        ctx.beginPath(); ctx.moveTo(i*laneW, H-140); ctx.lineTo(i*laneW, H); ctx.stroke();
-    }
-    ctx.setLineDash([]);
-
-    // Timer / Level
+    // Timer Logik (30 -> 0)
     timeLeft -= delta;
-    document.getElementById("lvlBar").style.width = (timeLeft/30*100) + "%";
+    let progress = (timeLeft / 30) * 100;
+    document.getElementById("lvlBar").style.width = progress + "%";
+    document.getElementById("timer").innerText = Math.ceil(timeLeft);
+
+    // Herz-Logik bei Zeitverlust
+    if(progress < 50 && !heartLostByTime) {
+        loseHeart();
+        heartLostByTime = true;
+    }
+    if(progress < 80) document.getElementById("lvlBar").style.background = "#ff4d4d";
+    else document.getElementById("lvlBar").style.background = "#00ff88";
+
     if(timeLeft <= 0) {
-        level++; timeLeft = 30; playSound(1000, 'sine', 0.2, 0.1);
-        document.getElementById("lvl").innerText = level;
+        level++; timeLeft = 30; heartLostByTime = false;
+        playSynth(800, 'square', 0.2);
     }
 
     // Items
-    if(Math.random() < 0.02 + level*0.003){
-        let l = Math.floor(Math.random()*lanes);
-        let tooClose = items.some(it => it.lane === l && it.y < 180);
-        if(!tooClose) items.push({lane: l, y: -60, type: Math.random()<0.15 ? "👮" : (Math.random()<0.3 ? "🍖" : "🦴")});
+    if(Math.random() < 0.02 + level*0.005){
+        let type = ["🦴","🍗","🍪","👮"][Math.floor(Math.random()*4)];
+        items.push({lane: Math.floor(Math.random()*lanes), y: -50, type});
     }
 
     for(let i=items.length-1; i>=0; i--){
         let it=items[i];
-        it.y += (200 + level*35) * delta;
-        let x = it.lane*laneW + laneW/2;
-        ctx.font="50px Arial"; ctx.textAlign="center";
-        ctx.fillText(it.type, x, it.y);
+        it.y += (200 + level*30) * delta;
+        let ix = it.lane*laneW + laneW/2;
+        ctx.font="45px Arial"; ctx.textAlign="center"; ctx.fillText(it.type, ix, it.y);
 
-        if(it.lane===dogLane && it.y > H-155 && it.y < H-75){
-            if(it.type==="👮") {
-                hearts--; playSound(120, 'sawtooth', 0.4);
-            } else {
-                let p = it.type==="🍖" ? 50 : 10;
-                score += p;
-                playSound(600 + p*2, 'sine', 0.15);
-                floatingTexts.push({x, y: it.y, txt: "+"+p, life: 1, c: it.type==="🍖"?'#f1c40f':'#fff'});
+        if(it.lane===dogLane && it.y > H-150 && it.y < H-80){
+            if(it.type==="👮") loseHeart();
+            else {
+                let pts = it.type==="🍗"?50:10;
+                score += pts;
+                playSynth(400+pts, 'sine', 0.1);
+                floatingTexts.push({x:ix, y:it.y, txt:"+"+pts, life:1});
             }
             items.splice(i,1);
         } else if(it.y > H) items.splice(i,1);
     }
 
-    // Spinnen (Größer & Langsamer absinkend)
+    // Spinnen (Gehen bis zur Straße)
     spiders.forEach(s => {
         s.t += s.s;
-        let sy = (Math.sin(s.t)+1)/2 * (H-180);
-        if(sy < 10) s.targetX = Math.random() * W;
-        if(sy < 150) s.x += (s.targetX - s.x) * 0.015;
+        let sy = (Math.sin(s.t)+1)/2 * (H-110); // Bis auf Straßenhöhe
+        ctx.strokeStyle="white"; ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
+        ctx.font="35px Arial"; ctx.fillText("🕷️", s.x, sy+25);
 
-        ctx.strokeStyle="rgba(255,255,255,0.6)"; ctx.lineWidth=2;
-        ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
-        ctx.font="45px Arial"; ctx.fillText("🕷️", s.x, sy+35);
-
-        if(Math.abs(s.x - dogX) < 45 && sy > H-180 && sy < H-70) {
-            timeLeft -= 0.08;
-            ctx.fillStyle = "rgba(255,255,255,0.15)"; ctx.fillRect(0,0,W,H);
+        if(Math.abs(s.x - dogX) < 40 && sy > H-160 && sy < H-70) {
+            timeLeft -= 0.1; // Zeit-Strafe bei Berührung
+            ctx.fillStyle="rgba(255,0,0,0.2)"; ctx.fillRect(0,0,W,H);
         }
     });
 
     // Dog
     let targetX = dogLane*laneW+laneW/2;
-    dogX += (targetX - dogX) * 0.22;
-    ctx.font="70px Arial"; ctx.fillText("🐶", dogX, H-75);
+    dogX += (targetX - dogX) * 0.2;
+    ctx.font="60px Arial"; ctx.fillText("🐶", dogX, H-75);
 
-    // Animierte aufsteigende Punkte
+    // Floating Points
     for(let i=floatingTexts.length-1; i>=0; i--) {
-        let f = floatingTexts[i];
-        f.y -= 2.5; f.life -= 0.015;
-        ctx.globalAlpha = f.life;
-        ctx.fillStyle = f.c;
-        ctx.font = "bold " + (20+f.life*10) + "px Orbitron";
-        ctx.fillText(f.txt, f.x, f.y);
-        ctx.globalAlpha = 1;
-        if(f.life <= 0) floatingTexts.splice(i, 1);
+        let f = floatingTexts[i]; f.y-=2; f.life-=0.02;
+        ctx.globalAlpha=f.life; ctx.font="bold 20px Orbitron"; ctx.fillStyle="#fff";
+        ctx.fillText(f.txt, f.x, f.y); ctx.globalAlpha=1;
+        if(f.life<=0) floatingTexts.splice(i,1);
     }
 
     document.getElementById("score").innerText = score;
@@ -264,6 +256,13 @@ function loop(t){
     } else {
         requestAnimationFrame(loop);
     }
+}
+
+function loseHeart() {
+    hearts--;
+    playSynth(100, 'sawtooth', 0.4);
+    document.getElementById("hearts").style.transform = "scale(1.5)";
+    setTimeout(()=> document.getElementById("hearts").style.transform = "scale(1)", 200);
 }
 </script>
 </body>
