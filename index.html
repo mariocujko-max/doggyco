@@ -1,62 +1,60 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Doggyco: Evolved V27</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<title>Doggyco: Forest Ranger V29</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
 <style>
-    :root { --neon-blue: #00f2ff; --neon-red: #ff0055; --glass: rgba(0, 15, 30, 0.8); }
+    :root { --forest-green: #2d5a27; --glow: #a4ff8e; --neon-red: #ff3131; }
     * { margin:0; padding:0; box-sizing:border-box; touch-action:none; }
-    body { overflow:hidden; font-family:'Orbitron', sans-serif; background:#000; color: white; }
+    body { overflow:hidden; font-family:'Orbitron', sans-serif; background:#0a1a05; color: white; }
 
     #wrap {
         position:relative; height:100vh; max-width:500px; margin:auto; overflow:hidden;
-        background: linear-gradient(to bottom, #1a0a2e 0%, #4a1d4d 50%, #e67e22 100%);
-        border: 2px solid #333;
+        background: linear-gradient(to bottom, #051a02 0%, #1a3c15 100%);
+        border: 3px solid var(--forest-green);
     }
 
-    /* Modernes Glas-HUD */
+    /* HUD Design */
     #hud {
-        position: absolute; top: 20px; width: 100%; display: flex; 
-        justify-content: space-around; align-items: center; z-index: 60; padding: 0 10px;
+        position: absolute; top: 15px; width: 100%; display: flex; 
+        justify-content: space-around; align-items: center; z-index: 60;
     }
 
-    .glass-box {
-        background: var(--glass); border: 1px solid var(--neon-blue);
-        padding: 8px 15px; border-radius: 12px; backdrop-filter: blur(8px);
-        text-align: center; box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    .glass {
+        background: rgba(0, 40, 0, 0.7); border: 1px solid var(--glow);
+        padding: 5px 12px; border-radius: 10px; backdrop-filter: blur(5px);
+        text-align: center; min-width: 80px;
     }
 
-    #hearts-container { font-size: 26px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .label { font-size: 10px; color: var(--neon-blue); letter-spacing: 1px; display: block; margin-bottom: 2px; }
-    .value { font-size: 18px; font-weight: 900; }
+    #hearts-ui { font-size: 22px; color: var(--neon-red); text-shadow: 0 0 10px var(--neon-red); }
+    .label { font-size: 9px; color: var(--glow); text-transform: uppercase; display: block; }
+    .val { font-size: 16px; font-weight: 900; }
 
-    #progress-wrap {
-        position: absolute; top: 95px; left: 15%; width: 70%; height: 12px; 
-        background: rgba(0,0,0,0.4); border: 1px solid white; border-radius: 20px; overflow: hidden; z-index: 60;
+    #energy-wrap {
+        position: absolute; top: 80px; left: 15%; width: 70%; height: 14px; 
+        background: rgba(0,0,0,0.5); border: 2px solid white; border-radius: 20px; overflow: hidden; z-index: 60;
     }
-    #progress-bar { height: 100%; width: 100%; background: linear-gradient(to right, #00ff88, #fbff00, #ff0055); transition: width 0.1s linear; }
+    #energy-bar { height: 100%; width: 100%; background: linear-gradient(to right, #ff3131, #fbff00, #00ff88); transition: width 0.1s linear; }
 
     canvas { width: 100%; height: 100%; display: block; }
 
     .overlay {
-        position:absolute; inset:0; background:rgba(0,0,0,0.85); display:flex; flex-direction:column;
-        justify-content:center; align-items:center; z-index:100; text-align: center; padding: 30px;
+        position:absolute; inset:0; background:rgba(0,10,0,0.9); display:flex; flex-direction:column;
+        justify-content:center; align-items:center; z-index:100; text-align: center; padding: 20px;
     }
 
-    .btn-main {
-        padding: 15px 50px; font-size: 20px; background: transparent; color: var(--neon-blue);
-        border: 2px solid var(--neon-blue); border-radius: 50px; cursor: pointer; font-family: 'Orbitron';
-        font-weight: 900; text-transform: uppercase; transition: 0.3s; margin-top: 20px;
+    .btn-forest {
+        padding: 15px 40px; font-size: 18px; background: transparent; color: var(--glow);
+        border: 2px solid var(--glow); border-radius: 50px; cursor: pointer; font-family: 'Orbitron';
+        font-weight: 900; text-transform: uppercase; transition: 0.3s;
     }
-    .btn-main:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 30px var(--neon-blue); }
+    .btn-forest:hover { background: var(--glow); color: #051a02; box-shadow: 0 0 20px var(--glow); }
 
-    #lvl-msg {
+    #pop-up {
         position: absolute; top: 40%; width: 100%; text-align: center;
-        font-size: 45px; font-weight: 900; color: white; text-shadow: 0 0 20px var(--neon-blue);
-        display: none; z-index: 80; pointer-events: none;
+        font-size: 40px; font-weight: 900; color: var(--glow); display: none; z-index: 80; pointer-events: none;
     }
 </style>
 </head>
@@ -64,32 +62,32 @@
 
 <div id="wrap">
     <div id="hud">
-        <div class="glass-box" id="hearts-container">❤️❤️❤️</div>
-        <div class="glass-box">
-            <span class="label">SEC</span>
-            <span class="value" id="timer-val">30</span>
+        <div class="glass" id="hearts-ui">❤️❤️❤️</div>
+        <div class="glass">
+            <span class="label">LVL</span>
+            <span class="val" id="lvl-val">1</span>
         </div>
-        <div class="glass-box">
+        <div class="glass">
             <span class="label">SCORE</span>
-            <span class="value" id="score-val">0</span>
+            <span class="val" id="score-val">0</span>
         </div>
     </div>
 
-    <div id="progress-wrap"><div id="progress-bar"></div></div>
-    <div id="lvl-msg">LEVEL UP!</div>
+    <div id="energy-wrap"><div id="energy-bar"></div></div>
+    <div id="pop-up">LEVEL UP!</div>
 
     <canvas id="game"></canvas>
 
     <div class="overlay" id="start-screen">
-        <h1 style="color:var(--neon-blue); font-size: 38px; margin-bottom: 10px;">DOGGYCO</h1>
-        <p style="color:#aaa; font-size: 12px; letter-spacing: 2px;">ULTIMATE EVOLUTION V27</p>
-        <button class="btn-main" onclick="initGame()">ENGINE START</button>
+        <h1 style="color:var(--glow); font-size: 32px; margin-bottom: 5px;">DOGGYCO</h1>
+        <p style="color:#888; font-size: 11px; letter-spacing: 2px; margin-bottom: 25px;">FOREST RANGER V29</p>
+        <button class="btn-forest" onclick="initGame()">Eintreten</button>
     </div>
 
     <div class="overlay" style="display:none;" id="game-over">
-        <h2 style="color:var(--neon-red); letter-spacing: 4px;">SYSTEM CRITICAL</h2>
-        <div style="font-size: 50px; margin: 20px 0;" id="final-score">0</div>
-        <button class="btn-main" onclick="location.reload()">REBOOT</button>
+        <h2 style="color:var(--neon-red);">MISSION GESCHEITERT</h2>
+        <div style="font-size: 45px; margin: 20px 0;" id="final-score">0</div>
+        <button class="btn-forest" onclick="location.reload()">RETRY</button>
     </div>
 </div>
 
@@ -98,14 +96,14 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 let W, H, lanes = 5, laneW;
-let dogLane = 2, dogX = 0, targetX = 0;
-let items = [], spiders = [], clouds = [], birds = [], particles = [];
-let score = 0, hearts = 3, timeLeft = 30, level = 1, active = false;
-let lastTime = 0, heartCheck = false;
+let dogLane = 2, dogX = 0;
+let items = [], spiders = [], clouds = [], birds = [], floaters = [];
+let score = 0, hearts = 3, energy = 100, level = 1, active = false;
+let lastTime = 0, heartInLevelSpawned = false;
 
-// Audio Synth
+// Audio
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playAudio(f, t, d, v=0.06) {
+function playSound(f, t, d, v=0.06) {
     if(audioCtx.state === 'suspended') audioCtx.resume();
     let o=audioCtx.createOscillator(), g=audioCtx.createGain();
     o.type=t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
@@ -123,38 +121,32 @@ function resize() {
 window.onresize = resize; resize();
 
 // Steuerung
-const moveHandler = (e) => {
+const move = (e) => {
     let x = (e.touches ? e.touches[0].clientX : e.clientX) - canvas.getBoundingClientRect().left;
     dogLane = Math.floor(x / laneW);
     dogLane = Math.max(0, Math.min(lanes - 1, dogLane));
 }
-canvas.onmousemove = moveHandler;
-canvas.ontouchmove = (e) => { e.preventDefault(); moveHandler(e); };
-window.addEventListener('keydown', (e) => {
-    if(e.key === 'ArrowLeft') dogLane = Math.max(0, dogLane - 1);
-    if(e.key === 'ArrowRight') dogLane = Math.min(lanes - 1, dogLane + 1);
-});
+canvas.onmousemove = move;
+canvas.ontouchmove = (e) => { e.preventDefault(); move(e); };
 
 function initGame() {
     document.getElementById("start-screen").style.display = "none";
     active = true;
     lastTime = performance.now();
-    
-    // Assets initialisieren
-    for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: 120+Math.random()*100, s: 0.2+Math.random()*0.3});
-    for(let i=0; i<2; i++) spiders.push({ x: laneW*(1+i), t: Math.random()*6, s: 0.012, targetX: Math.random()*W });
-    
-    // Dezentere Hintergrundmusik
-    setInterval(() => { if(active) playAudio(90 + (level*5), 'sine', 0.8, 0.03); }, 800);
+    // Ambient Music Loop
+    setInterval(() => { if(active) playSound(150 - (energy/2), 'sine', 1, 0.03); }, 800);
     requestAnimationFrame(loop);
 }
 
-function triggerHeartLoss() {
-    hearts--;
-    playAudio(120, 'sawtooth', 0.4, 0.1);
-    const container = document.getElementById('hearts-container');
-    container.style.transform = "scale(1.6)";
-    setTimeout(() => container.style.transform = "scale(1)", 300);
+function spawnItem() {
+    if(Math.random() < 0.03){
+        let type = "🦴";
+        let r = Math.random();
+        if(r < 0.1) type = "👮";
+        else if(r < 0.2) type = "🍪";
+        else if(r < 0.25 && !heartInLevelSpawned) { type = "❤️"; heartInLevelSpawned = true; }
+        items.push({lane: Math.floor(Math.random()*lanes), y: -60, type});
+    }
 }
 
 function loop(t) {
@@ -163,112 +155,92 @@ function loop(t) {
     lastTime = t;
     ctx.clearRect(0,0,W,H);
 
-    // Parallax Wolken
-    ctx.fillStyle = "rgba(255,255,255,0.15)";
-    clouds.forEach(c => {
-        c.x += c.s; if(c.x > W+60) c.x = -60;
-        ctx.beginPath(); ctx.arc(c.x, c.y, 35, 0, Math.PI*2); ctx.fill();
-    });
-
-    // Deko Vögel
-    if(Math.random() < 0.004) birds.push({x: W+50, y: 100+Math.random()*100, s: 1.5});
-    birds.forEach((b, i) => {
-        b.x -= b.s; ctx.font="20px Arial"; ctx.fillText("🐦", b.x, b.y);
-        if(b.x < -50) birds.splice(i,1);
-    });
-
-    // Cyber Straße
-    ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0, H-150, W, 150);
-    ctx.strokeStyle = "rgba(0, 242, 255, 0.3)";
-    for(let i=0; i<=lanes; i++) {
-        ctx.beginPath(); ctx.moveTo(i*laneW, H-150); ctx.lineTo(i*laneW, H); ctx.stroke();
+    // Wald-Hintergrund zeichnen
+    ctx.fillStyle = "#0a1a05";
+    for(let i=0; i<lanes; i++) {
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(i*laneW + 10, 0, 2, H); // "Bäume"
+        ctx.globalAlpha = 1;
     }
 
-    // Timer & Logik
-    timeLeft -= delta;
-    let progress = (timeLeft / 30) * 100;
-    document.getElementById("progress-bar").style.width = progress + "%";
-    document.getElementById("timer-val").innerText = Math.ceil(timeLeft);
-
-    // Spezial-Regel: Unter 50% Zeit -> Herz-Verlust
-    if(progress < 50 && !heartCheck) {
-        triggerHeartLoss();
-        heartCheck = true;
+    // Energie-Balken Logik
+    energy -= (2 + level) * delta;
+    document.getElementById("energy-bar").style.width = energy + "%";
+    
+    if(energy < 20) {
+        hearts--; energy = 60; playSound(100, 'sawtooth', 0.5);
+        if(hearts <= 0) active = false;
     }
+    if(energy <= 0) energy = 0;
 
-    if(timeLeft <= 0) {
-        level++; timeLeft = 30; heartCheck = false;
-        playAudio(800, 'square', 0.2);
-        const msg = document.getElementById('lvl-msg');
-        msg.style.display = 'block'; setTimeout(() => msg.style.display = 'none', 1000);
-    }
-
-    // Items spawnen
-    if(Math.random() < 0.02 + level*0.005){
-        let type = Math.random() < 0.1 ? "👮" : (Math.random() < 0.3 ? "🍗" : "🦴");
-        items.push({lane: Math.floor(Math.random()*lanes), y: -60, type});
-    }
-
-    // Items Loop
+    // Items
+    spawnItem();
     for(let i=items.length-1; i>=0; i--){
-        let it=items[i];
-        it.y += (220 + level*40) * delta;
+        let it = items[i];
+        it.y += (200 + level*40) * delta;
         let ix = it.lane*laneW + laneW/2;
-        ctx.font="50px Arial"; ctx.textAlign="center";
+        ctx.font="40px Arial"; ctx.textAlign="center";
         ctx.fillText(it.type, ix, it.y);
 
-        if(it.lane===dogLane && it.y > H-160 && it.y < H-80){
-            if(it.type==="👮") triggerHeartLoss();
-            else {
-                let p = it.type==="🍗"?50:10; score += p;
-                playAudio(400+p, 'sine', 0.1);
-                particles.push({x:ix, y:it.y, l:1, val:"+"+p});
+        if(it.lane===dogLane && it.y > H-150 && it.y < H-80){
+            if(it.type === "👮") { hearts--; playSound(150, 'sawtooth', 0.4); }
+            else if(it.type === "❤️") { 
+                if(hearts < 3) hearts++; 
+                score += 50 * level;
+                playSound(800, 'sine', 0.3);
+            } else {
+                let p = it.type === "🍪" ? 20 : 10;
+                score += p; energy = Math.min(100, energy + 15);
+                playSound(400+p*5, 'sine', 0.1);
+                floaters.push({x:ix, y:it.y, v:"+"+p, l:1});
             }
             items.splice(i,1);
         } else if(it.y > H) items.splice(i,1);
     }
 
-    // Spinnen (Ziehen bis ganz nach unten)
+    // Spinnen
+    if(spiders.length < 2) spiders.push({x: Math.random()*W, t: 0, s: 0.02, targetX: Math.random()*W});
     spiders.forEach(s => {
-        s.t += s.s;
-        let sy = (Math.sin(s.t)+1)/2 * (H-110);
-        if(sy < 20) s.targetX = Math.random()*W;
-        if(sy < 150) s.x += (s.targetX - s.x) * 0.02;
-
-        ctx.strokeStyle = "rgba(0, 242, 255, 0.4)";
-        ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
-        ctx.font="35px Arial"; ctx.fillText("🕷️", s.x, sy+25);
-
-        if(Math.abs(s.x - dogX) < 40 && sy > H-160 && sy < H-70) { timeLeft -= 0.1; }
+        s.t += s.s; let sy = (Math.sin(s.t)+1)/2 * (H-120);
+        ctx.strokeStyle = "rgba(164, 255, 142, 0.4)";
+        ctx.beginPath(); ctx.moveTo(s.x,0); ctx.lineTo(s.x,sy); ctx.stroke();
+        ctx.fillText("🕷️", s.x, sy+25);
+        if(Math.abs(s.x - (dogLane*laneW+laneW/2)) < 40 && sy > H-160) energy -= 0.5;
     });
 
-    // Hund
-    targetX = dogLane*laneW+laneW/2;
-    dogX += (targetX - dogX) * 0.25;
-    ctx.font="65px Arial";
-    ctx.shadowBlur = 15; ctx.shadowColor = "#00f2ff";
-    ctx.fillText("🐶", dogX, H-75); ctx.shadowBlur = 0;
+    // Dog
+    let targetX = dogLane*laneW+laneW/2;
+    dogX += (targetX - dogX) * 0.2;
+    ctx.font="60px Arial"; ctx.fillText("🐶", dogX, H-70);
 
-    // Aufsteigende Punkte
-    for(let i=particles.length-1; i>=0; i--) {
-        let p = particles[i]; p.y -= 2; p.l -= 0.02;
-        ctx.globalAlpha = p.l;
-        ctx.fillStyle = (Math.floor(t/100)%2) ? "#fff" : "#00f2ff";
-        ctx.font = "bold 20px Orbitron"; ctx.fillText(p.val, p.x, p.y);
-        ctx.globalAlpha = 1;
-        if(p.l <= 0) particles.splice(i,1);
+    // Level-Up Check (Alle 100 Punkte)
+    if(score >= level * 200) {
+        level++; energy = 100; heartInLevelSpawned = false;
+        document.getElementById("pop-up").style.display = "block";
+        setTimeout(()=> document.getElementById("pop-up").style.display = "none", 1000);
+    }
+
+    // Floating Points
+    for(let i=floaters.length-1; i>=0; i--) {
+        let f = floaters[i]; f.y -= 2; f.l -= 0.02;
+        ctx.globalAlpha = f.l; ctx.fillStyle = varColor('--glow');
+        ctx.fillText(f.v, f.x, f.y); ctx.globalAlpha = 1;
+        if(f.l <= 0) floaters.splice(i,1);
     }
 
     document.getElementById("score-val").innerText = score;
-    document.getElementById("hearts-container").innerText = "❤️".repeat(Math.max(0, hearts));
+    document.getElementById("hearts-ui").innerText = "❤️".repeat(Math.max(0, hearts));
+    document.getElementById("lvl-val").innerText = level;
 
-    if(hearts <= 0) {
-        active = false; document.getElementById("game-over").style.display = "flex";
+    if(!active) {
+        document.getElementById("game-over").style.display = "flex";
         document.getElementById("final-score").innerText = score;
     } else {
         requestAnimationFrame(loop);
     }
 }
+
+function varColor(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 </script>
 </body>
 </html>
