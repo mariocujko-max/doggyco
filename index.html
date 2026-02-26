@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Doggyco Stable</title>
+<title>Doggyco Ultimate</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;touch-action:none;}
 body{
-background:#111;
+background:radial-gradient(circle at top,#1b2735,#090a0f);
 overflow:hidden;
-font-family:Arial, sans-serif;
+font-family:Arial,sans-serif;
+color:white;
 }
 
 #wrap{
@@ -18,7 +19,6 @@ position:relative;
 max-width:480px;
 height:100vh;
 margin:auto;
-background:linear-gradient(#1e2a38,#0b0f14);
 overflow:hidden;
 }
 
@@ -33,15 +33,15 @@ position:absolute;
 top:10px;
 width:100%;
 text-align:center;
-color:white;
 z-index:5;
 }
 
-#heartDisplay{font-size:30px;margin-bottom:5px;}
+#heartDisplay{font-size:28px;}
 
 .stats{
 display:flex;
 justify-content:space-around;
+margin-top:5px;
 font-size:16px;
 }
 
@@ -49,7 +49,7 @@ font-size:16px;
 width:80%;
 height:8px;
 background:#333;
-margin:10px auto;
+margin:8px auto;
 border-radius:10px;
 overflow:hidden;
 }
@@ -57,33 +57,38 @@ overflow:hidden;
 #bar{
 height:100%;
 width:100%;
-background:lime;
+background:linear-gradient(to right,#00f2fe,#00ff00);
 }
 
 .overlay{
 position:absolute;
 inset:0;
-background:rgba(0,0,0,0.9);
+background:rgba(0,0,0,0.85);
 display:flex;
 flex-direction:column;
 justify-content:center;
 align-items:center;
-color:white;
 z-index:10;
 }
 
 button{
-padding:15px 30px;
+padding:12px 30px;
 font-size:18px;
-border:none;
 background:#00ccff;
-color:black;
-border-radius:8px;
+border:none;
+border-radius:6px;
+margin-top:15px;
 cursor:pointer;
-margin-top:20px;
 }
 
-.hidden{display:none;}
+#ranking{
+position:absolute;
+bottom:10px;
+width:100%;
+text-align:center;
+font-size:14px;
+opacity:0.8;
+}
 </style>
 </head>
 <body>
@@ -102,15 +107,17 @@ margin-top:20px;
 <canvas id="game"></canvas>
 
 <div class="overlay" id="startScreen">
-<h1>DOGGYCO</h1>
+<h1>DOGGYCO ULTIMATE</h1>
 <button onclick="startGame()">START</button>
 </div>
 
-<div class="overlay hidden" id="gameOver">
+<div class="overlay" id="gameOver" style="display:none;">
 <h2>GAME OVER</h2>
 <div id="final"></div>
 <button onclick="location.reload()">NEUSTART</button>
 </div>
+
+<div id="ranking"></div>
 
 </div>
 
@@ -118,23 +125,15 @@ margin-top:20px;
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
-let W,H,laneW;
-let lanes=5;
-let dogLane=2;
-let dogX=0;
+let W,H,laneW,lanes=5;
+let dogLane=2,dogX=0;
+let items=[],spiders=[];
+let score=0,level=1,hearts=3,timeLeft=30,combo=0;
+let highscore=0,ranking=[];
+let active=false,lastTime=0;
+let audioCtx=null;
 
-let items=[];
-let score=0;
-let level=1;
-let hearts=3;
-let timeLeft=30;
-let highscore=0;
-let combo=0;
-
-let active=false;
-let lastTime=0;
-
-/* ===== Resize ===== */
+/* Resize */
 function resize(){
 W=canvas.width=canvas.parentElement.offsetWidth;
 H=canvas.height=canvas.parentElement.offsetHeight;
@@ -144,90 +143,112 @@ dogX=dogLane*laneW+laneW/2;
 window.addEventListener("resize",resize);
 resize();
 
-/* ===== Input ===== */
-function move(e){
-if(!active)return;
-let x=(e.touches?e.touches[0].clientX:e.clientX)
--canvas.getBoundingClientRect().left;
-dogLane=Math.max(0,Math.min(lanes-1,Math.floor(x/laneW)));
+/* Audio */
+function initAudio(){
+if(!audioCtx)
+audioCtx=new(window.AudioContext||window.webkitAudioContext)();
 }
-canvas.onmousemove=move;
-canvas.ontouchmove=e=>{e.preventDefault();move(e);};
+function beep(f){
+if(!audioCtx)return;
+if(audioCtx.state==="suspended")audioCtx.resume();
+let o=audioCtx.createOscillator();
+let g=audioCtx.createGain();
+o.type="sine";
+o.frequency.value=f;
+g.gain.value=0.05;
+o.connect(g);g.connect(audioCtx.destination);
+o.start();
+o.stop(audioCtx.currentTime+0.1);
+}
 
-/* ===== Start ===== */
+/* Start */
 function startGame(){
+initAudio();
+document.getElementById("startScreen").style.display="none";
 highscore=localStorage.getItem("doggyHigh")||0;
-document.getElementById("startScreen").classList.add("hidden");
-
-score=0;level=1;hearts=3;timeLeft=30;combo=0;
-items=[];
+ranking=JSON.parse(localStorage.getItem("doggyRank"))||[];
 active=true;
-
+score=0;level=1;hearts=3;timeLeft=30;combo=0;
+items=[];spiders=[];
 lastTime=performance.now();
 requestAnimationFrame(loop);
 }
 
-/* ===== Loop ===== */
+/* Input */
+canvas.onmousemove=e=>{
+if(!active)return;
+let x=e.clientX-canvas.getBoundingClientRect().left;
+dogLane=Math.floor(x/laneW);
+};
+canvas.ontouchmove=e=>{
+e.preventDefault();
+let x=e.touches[0].clientX-canvas.getBoundingClientRect().left;
+dogLane=Math.floor(x/laneW);
+};
+
+/* Loop */
 function loop(t){
 if(!active)return;
 let delta=(t-lastTime)/1000;
 lastTime=t;
-
 ctx.clearRect(0,0,W,H);
 
 /* Timer */
 timeLeft-=delta;
-document.getElementById("bar").style.width=
-Math.max(0,(timeLeft/30)*100)+"%";
-
+document.getElementById("bar").style.width=(timeLeft/30)*100+"%";
 if(timeLeft<=0){
-level++;
-timeLeft=30;
+level++;timeLeft=30;
 document.getElementById("lvl").innerText=level;
 }
 
-/* Spawn */
-if(Math.random()<0.02+level*0.005){
-items.push({
-lane:Math.floor(Math.random()*lanes),
-y:-40,
-type:Math.random()<0.2?"👮":"🦴"
-});
+/* Spawn Items */
+if(Math.random()<0.03){
+let types=["🦴","🍖","🍪","👮"];
+let type=types[Math.floor(Math.random()*types.length)];
+items.push({lane:Math.floor(Math.random()*lanes),y:-40,type});
 }
 
-/* Items */
+/* Spawn Spiders */
+if(Math.random()<0.01){
+spiders.push({x:Math.random()*W,y:0});
+}
+
+/* Draw Items */
 for(let i=items.length-1;i>=0;i--){
 let it=items[i];
 it.y+=200*delta*(1+level*0.2);
-
 let x=it.lane*laneW+laneW/2;
 ctx.font="40px Arial";
 ctx.textAlign="center";
 ctx.fillText(it.type,x,it.y);
 
 if(it.lane===dogLane&&it.y>H-120&&it.y<H-60){
-if(it.type==="👮"){
-hearts--;
-combo=0;
-document.getElementById("heartDisplay")
-.innerText="❤️".repeat(hearts);
-}else{
-combo++;
-score+=10*combo;
-}
+if(it.type==="🦴"){score+=1;beep(400);}
+if(it.type==="🍖"){score+=5;beep(500);}
+if(it.type==="🍪"){score+=3;beep(450);}
+if(it.type==="👮"){hearts--;combo=0;}
 items.splice(i,1);
 }
-else if(it.y>H+40)items.splice(i,1);
+}
+
+/* Spiders */
+for(let i=spiders.length-1;i>=0;i--){
+let s=spiders[i];
+s.y+=150*delta;
+ctx.fillText("🕷️",s.x,s.y);
+if(Math.abs(s.x-dogX)<30&&s.y>H-140)timeLeft-=1;
+if(s.y>H)spiders.splice(i,1);
 }
 
 /* Dog */
-let targetX=dogLane*laneW+laneW/2;
-dogX+=(targetX-dogX)*10*delta;
+let target=dogLane*laneW+laneW/2;
+dogX+=(target-dogX)*10*delta;
 ctx.font="60px Arial";
 ctx.fillText("🐶",dogX,H-70);
 
-/* Score */
-document.getElementById("score").innerText=score+" x"+combo;
+/* UI */
+document.getElementById("score").innerText=score;
+document.getElementById("heartDisplay").innerText="❤️".repeat(hearts);
 
 if(score>highscore){
 highscore=score;
@@ -237,12 +258,18 @@ localStorage.setItem("doggyHigh",highscore);
 /* Game Over */
 if(hearts<=0){
 active=false;
-document.getElementById("gameOver")
-.classList.remove("hidden");
+ranking.push(score);
+ranking.sort((a,b)=>b-a);
+ranking=ranking.slice(0,5);
+localStorage.setItem("doggyRank",JSON.stringify(ranking));
+document.getElementById("gameOver").style.display="flex";
 document.getElementById("final").innerHTML=
-"Score: "+score+
-"<br>Highscore: "+highscore;
+"Score: "+score+"<br>Highscore: "+highscore;
 }
+
+/* Ranking anzeigen */
+document.getElementById("ranking").innerHTML=
+"Top 5: "+ranking.join(" | ");
 
 requestAnimationFrame(loop);
 }
