@@ -1,13 +1,14 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Doggyco 20.0 - Sunset Edition</title>
+<title>Doggyco 21.0 - Nature Polish</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
 <style>
     *{margin:0;padding:0;box-sizing:border-box;touch-action:none;}
-    body{overflow:hidden;font-family:'Orbitron', sans-serif;background:#2c3e50;}
+    body{overflow:hidden;font-family:'Orbitron', sans-serif;background:#1a1a2e;}
 
     #wrap{
         position:relative;
@@ -15,33 +16,36 @@
         max-width:480px;
         margin:auto;
         overflow:hidden;
-        background: linear-gradient(to bottom, #1e3c72, #2a5298, #f39c12); /* Schöner Sunset */
-        border: 3px solid rgba(255,255,255,0.2);
+        background: linear-gradient(to bottom, #1e3c72 0%, #2a5298 40%, #f39c12 100%);
+        border: 4px solid #222;
+        box-shadow: 0 0 50px rgba(0,0,0,0.5);
     }
 
     canvas{width:100%;height:100%;display:block;}
 
     #ui {
-        position:absolute; top:10px; width:100%; text-align:center; color:white; z-index:10; pointer-events:none;
+        position:absolute; top:15px; width:100%; text-align:center; color:white; z-index:10; pointer-events:none;
     }
 
-    #hearts { font-size:42px; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
-    .stats-row { display: flex; justify-content: space-around; font-size: 20px; margin-top: 5px; font-weight: 900; }
+    #hearts { font-size:45px; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
+    .stats-row { display: flex; justify-content: space-around; font-size: 22px; font-weight: 900; text-shadow: 2px 2px 4px #000; }
 
     #lvlBarWrap {
-        width:70%; height:10px; background:rgba(0,0,0,0.3); margin:10px auto; border-radius:10px; overflow:hidden; border:1px solid white;
+        width:75%; height:12px; background:rgba(0,0,0,0.4); margin:12px auto; border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,0.3);
     }
-    #lvlBar { height:100%; width:100%; background: linear-gradient(to right, #00ff00, #ffff00, #ff0000); }
+    #lvlBar { height:100%; width:100%; background: linear-gradient(to right, #00ff88, #fbff00, #ff4d4d); transition: width 0.1s linear; }
 
     .overlay {
-        position:absolute; inset:0; background:rgba(0,0,0,0.7); display:flex; flex-direction:column;
+        position:absolute; inset:0; background:rgba(0,0,0,0.8); display:flex; flex-direction:column;
         justify-content:center; align-items:center; color:white; z-index:20;
     }
 
     button {
-        padding:15px 40px; font-size:22px; border:none; background:#f1c40f; color:#2c3e50;
-        border-radius:50px; cursor:pointer; font-family: 'Orbitron'; font-weight: 900; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        padding:18px 50px; font-size:24px; border:none; background:#f1c40f; color:#1a1a2e;
+        border-radius:50px; cursor:pointer; font-family: 'Orbitron'; font-weight: 900; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        transition: transform 0.1s;
     }
+    button:active { transform: scale(0.95); }
 </style>
 </head>
 <body>
@@ -59,14 +63,14 @@
     <canvas id="game"></canvas>
 
     <div class="overlay" id="startScreen">
-        <h1 style="font-size: 40px; margin-bottom:10px;">DOGGYCO</h1>
-        <p>V20.0 - Sunset Retro</p>
+        <h1 style="font-size: 48px; color: #f1c40f; margin-bottom:10px; text-shadow: 0 0 20px rgba(241,196,15,0.5);">DOGGYCO</h1>
+        <p style="letter-spacing: 3px; margin-bottom: 30px;">PREMIUM EDITION</p>
         <button onclick="startGame()">START</button>
     </div>
 
     <div class="overlay" id="gameOver" style="display:none;">
-        <h2>GAME OVER</h2>
-        <h1 id="finalScore" style="font-size:40px; margin:20px 0;"></h1>
+        <h2 style="font-size: 40px; color: #ff4d4d;">GAME OVER</h2>
+        <h1 id="finalScore" style="font-size:50px; margin:20px 0; color: #f1c40f;">0</h1>
         <button onclick="location.reload()">RETRY</button>
     </div>
 </div>
@@ -77,11 +81,11 @@ const ctx=canvas.getContext("2d");
 
 let W,H, lanes=5, laneW;
 let dogLane=2, dogX=0;
-let items=[], spiders=[], birds=[], clouds=[], floatingTexts=[];
+let items=[], spiders=[], birds=[], clouds=[], trees=[], floatingTexts=[];
 let score=0, hearts=3, timeLeft=30, level=1;
 let active=false, lastTime=0;
 
-// --- AUDIO ---
+// Audio
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(f, type, d, v=0.1) {
     if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -91,12 +95,6 @@ function playSound(f, type, d, v=0.1) {
     g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+d);
     o.connect(g); g.connect(audioCtx.destination);
     o.start(); o.stop(audioCtx.currentTime+d);
-}
-
-function startMusic() {
-    setInterval(() => {
-        if(active) playSound(110, 'sine', 0.8, 0.03); // Dezentere Bassline
-    }, 600);
 }
 
 function resize(){
@@ -110,14 +108,16 @@ function startGame(){
     document.getElementById("startScreen").style.display="none";
     active=true;
     lastTime=performance.now();
-    // Spiders mit Positionswechsel-Logik
-    for(let i=0; i<2; i++) spiders.push({x: Math.random()*W, t: Math.random()*Math.PI, s: 0.015, laneTarget: Math.random()*W});
-    for(let i=0; i<5; i++) clouds.push({x: Math.random()*W, y: Math.random()*H*0.4, s: 0.2+Math.random()*0.3});
-    startMusic();
+    // Init Assets
+    for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: 50+Math.random()*150, s: 0.1+Math.random()*0.2, w: 80+Math.random()*40});
+    for(let i=0; i<4; i++) trees.push({x: Math.random()*W, y: H-140, type: Math.random()>0.5?'pine':'round', s: 1+Math.random()});
+    for(let i=0; i<2; i++) spiders.push({x: Math.random()*W, t: Math.random()*Math.PI, s: 0.01, targetX: Math.random()*W});
+    
+    // Background Music Beat
+    setInterval(() => { if(active) playSound(60, 'sine', 0.5, 0.05); }, 800);
     requestAnimationFrame(loop);
 }
 
-// Input
 const handleInput = (e) => {
     let rect = canvas.getBoundingClientRect();
     let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
@@ -127,6 +127,26 @@ const handleInput = (e) => {
 canvas.onmousemove = handleInput;
 canvas.ontouchmove = (e) => { e.preventDefault(); handleInput(e); };
 
+function drawCloud(c) {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, c.w*0.4, 0, Math.PI*2);
+    ctx.arc(c.x+c.w*0.3, c.y-c.w*0.1, c.w*0.3, 0, Math.PI*2);
+    ctx.arc(c.x+c.w*0.5, c.y+c.w*0.1, c.w*0.35, 0, Math.PI*2);
+    ctx.fill();
+}
+
+function drawTree(t) {
+    ctx.fillStyle = "#2d4a22";
+    if(t.type === 'pine') {
+        ctx.beginPath();
+        ctx.moveTo(t.x, t.y); ctx.lineTo(t.x-20*t.s, t.y+40); ctx.lineTo(t.x+20*t.s, t.y+40);
+        ctx.fill();
+    } else {
+        ctx.beginPath(); ctx.arc(t.x, t.y+20, 20*t.s, 0, Math.PI*2); ctx.fill();
+    }
+}
+
 function loop(t){
     if(!active) return;
     let delta=(t-lastTime)/1000;
@@ -134,26 +154,33 @@ function loop(t){
     lastTime=t;
     ctx.clearRect(0,0,W,H);
 
-    // Wolken & Sonne
-    ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+    // Clouds
     clouds.forEach(c => {
-        c.x += c.s; if(c.x > W+50) c.x = -50;
-        ctx.beginPath(); ctx.arc(c.x, c.y, 25, 0, Math.PI*2); ctx.fill();
+        c.x += c.s; if(c.x > W+100) c.x = -100;
+        drawCloud(c);
     });
 
-    // Vögel (Rechts nach Links)
-    if(Math.random() < 0.003) birds.push({x: W+50, y: 50+Math.random()*150, s: 1+level*0.1});
+    // Vögel
+    if(Math.random() < 0.004) birds.push({x: W+50, y: 60+Math.random()*120, s: 1.2+level*0.1});
     birds.forEach((b, i) => {
         b.x -= b.s;
-        ctx.font="24px Arial"; ctx.fillText("🐦", b.x, b.y);
+        ctx.font="26px Arial"; ctx.fillText("🐦", b.x, b.y);
         if(b.x < -50) birds.splice(i,1);
     });
 
-    // Straße
-    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    // Trees
+    trees.forEach(tr => {
+        tr.x -= (1 + level*0.5); if(tr.x < -50) tr.x = W+50;
+        drawTree(tr);
+    });
+
+    // Straße (Premium Look)
+    ctx.fillStyle = "#333";
     ctx.fillRect(0, H-140, W, 140);
-    ctx.strokeStyle = "rgba(255,255,255,0.3)";
-    ctx.setLineDash([20, 20]);
+    ctx.fillStyle = "#444";
+    ctx.fillRect(0, H-145, W, 5); // Bordstein Kante
+    ctx.strokeStyle = "rgba(255,255,255,0.4)";
+    ctx.setLineDash([30, 30]);
     for(let i=1; i<lanes; i++) {
         ctx.beginPath(); ctx.moveTo(i*laneW, H-140); ctx.lineTo(i*laneW, H); ctx.stroke();
     }
@@ -163,77 +190,68 @@ function loop(t){
     timeLeft -= delta;
     document.getElementById("lvlBar").style.width = (timeLeft/30*100) + "%";
     if(timeLeft <= 0) {
-        level++; timeLeft = 30; playSound(880, 'sine', 0.2, 0.1);
+        level++; timeLeft = 30; playSound(1000, 'sine', 0.2, 0.1);
         document.getElementById("lvl").innerText = level;
     }
 
-    // Spawn Items mit Abstand
+    // Items
     if(Math.random() < 0.02 + level*0.003){
         let l = Math.floor(Math.random()*lanes);
-        let canSpawn = true;
-        items.forEach(it => { if(it.lane === l && it.y < 150) canSpawn = false; });
-        if(canSpawn) {
-            let typeRnd = Math.random();
-            let type = "🦴";
-            if(typeRnd < 0.15) type = "👮";
-            else if(typeRnd < 0.3) type = "🍖";
-            else if(typeRnd < 0.45) type = "🍪";
-            items.push({lane: l, y: -50, type});
-        }
+        let tooClose = items.some(it => it.lane === l && it.y < 180);
+        if(!tooClose) items.push({lane: l, y: -60, type: Math.random()<0.15 ? "👮" : (Math.random()<0.3 ? "🍖" : "🦴")});
     }
 
-    // Items Draw & Collide
     for(let i=items.length-1; i>=0; i--){
         let it=items[i];
-        it.y += (180 + level*40) * delta;
+        it.y += (200 + level*35) * delta;
         let x = it.lane*laneW + laneW/2;
-        ctx.font="45px Arial"; ctx.textAlign="center";
+        ctx.font="50px Arial"; ctx.textAlign="center";
         ctx.fillText(it.type, x, it.y);
 
-        if(it.lane===dogLane && it.y > H-150 && it.y < H-70){
+        if(it.lane===dogLane && it.y > H-155 && it.y < H-75){
             if(it.type==="👮") {
-                hearts--; playSound(100, 'sawtooth', 0.3);
+                hearts--; playSound(120, 'sawtooth', 0.4);
             } else {
-                let p = it.type==="🍖" ? 50 : (it.type==="🍪" ? 30 : 10);
+                let p = it.type==="🍖" ? 50 : 10;
                 score += p;
-                playSound(500 + p, 'sine', 0.1);
-                floatingTexts.push({x, y: it.y, txt: "+"+p, life: 1});
+                playSound(600 + p*2, 'sine', 0.15);
+                floatingTexts.push({x, y: it.y, txt: "+"+p, life: 1, c: it.type==="🍖"?'#f1c40f':'#fff'});
             }
             items.splice(i,1);
         } else if(it.y > H) items.splice(i,1);
     }
 
-    // Spinnen mit Positionswechsel
+    // Spinnen (Größer & Langsamer absinkend)
     spiders.forEach(s => {
         s.t += s.s;
-        let sy = (Math.sin(s.t)+1)/2 * (H-150);
-        
-        // Wenn Spinne ganz oben ist, Zielposition ändern
-        if(sy < 10) s.laneTarget = Math.random() * W;
-        // Elegante Seitwärtsbewegung oben
-        if(sy < 100) s.x += (s.laneTarget - s.x) * 0.02;
+        let sy = (Math.sin(s.t)+1)/2 * (H-180);
+        if(sy < 10) s.targetX = Math.random() * W;
+        if(sy < 150) s.x += (s.targetX - s.x) * 0.015;
 
-        ctx.strokeStyle="white"; ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
-        ctx.font="30px Arial"; ctx.fillText("🕷️", s.x, sy+25);
+        ctx.strokeStyle="rgba(255,255,255,0.6)"; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
+        ctx.font="45px Arial"; ctx.fillText("🕷️", s.x, sy+35);
 
-        let sLane = Math.floor(s.x/laneW);
-        if(sLane === dogLane && sy > H-180 && sy < H-70) {
-            timeLeft -= 0.05; // Zeitabzug
-            ctx.fillStyle = "rgba(255,255,255,0.2)"; ctx.fillRect(0,0,W,H);
+        if(Math.abs(s.x - dogX) < 45 && sy > H-180 && sy < H-70) {
+            timeLeft -= 0.08;
+            ctx.fillStyle = "rgba(255,255,255,0.15)"; ctx.fillRect(0,0,W,H);
         }
     });
 
     // Dog
     let targetX = dogLane*laneW+laneW/2;
-    dogX += (targetX - dogX) * 0.2;
-    ctx.font="65px Arial"; ctx.fillText("🐶", dogX, H-75);
+    dogX += (targetX - dogX) * 0.22;
+    ctx.font="70px Arial"; ctx.fillText("🐶", dogX, H-75);
 
-    // Aufsteigende Punkte
+    // Animierte aufsteigende Punkte
     for(let i=floatingTexts.length-1; i>=0; i--) {
         let f = floatingTexts[i];
-        f.y -= 2; f.life -= 0.02;
-        ctx.fillStyle = `rgba(255, 255, 255, ${f.life})`;
-        ctx.font = "bold 20px Orbitron"; ctx.fillText(f.txt, f.x, f.y);
+        f.y -= 2.5; f.life -= 0.015;
+        ctx.globalAlpha = f.life;
+        ctx.fillStyle = f.c;
+        ctx.font = "bold " + (20+f.life*10) + "px Orbitron";
+        ctx.fillText(f.txt, f.x, f.y);
+        ctx.globalAlpha = 1;
         if(f.life <= 0) floatingTexts.splice(i, 1);
     }
 
