@@ -3,78 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Doggyco: Final Master Edition</title>
+    <title>Doggyco: Grand Finale Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --gold: #ffd700; --red: #ff3131; --green: #00ff88; }
+        :root { --neon: #00f2ff; --gold: #ffd700; --silver: #c0c0c0; --bronze: #cd7f32; --red: #ff3131; --green: #00ff88; }
         * { margin:0; padding:0; box-sizing:border-box; touch-action:none; }
-        body { background:#f5f5f5; color: #222; font-family: 'Orbitron', sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+        body { background:#f8f9fa; color: #222; font-family: 'Orbitron', sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
         
         #game-wrap {
-            position:relative; height:85vh; width:100vw; max-width:500px;
-            background: #fff; border: 4px solid var(--neon); border-radius: 20px; 
-            overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            position:relative; height:90vh; width:100vw; max-width:500px;
+            background: #fff; border: 5px solid #333; border-radius: 25px; 
+            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
 
         #game-bg {
             position: absolute; inset: 0;
             background: url('hintergrund.png') center/cover;
-            filter: blur(6px) brightness(1.15);
+            filter: blur(4px) brightness(1.1);
             z-index: 1;
         }
 
-        #progress-container {
-            position: absolute; top: 12px; left: 5%; width: 90%; height: 24px;
-            background: rgba(255,255,255,0.9); border: 2px solid #333; border-radius: 12px; z-index: 100;
-        }
-        #progress-bar { 
-            height: 100%; width: 100%; background: var(--green); 
-            transition: width 0.3s ease, background 0.4s;
+        /* Milchglas-Ebene unten */
+        #floor-glass {
+            position: absolute; bottom: 0; width: 100%; height: 14.28%; /* 1/7 des Screens */
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(10px);
+            border-top: 2px solid rgba(255,255,255,0.5); z-index: 5;
         }
 
-        #stats {
-            position: absolute; top: 45px; width: 100%; display: flex; 
+        #progress-container {
+            position: absolute; top: 15px; left: 5%; width: 90%; height: 28px;
+            background: rgba(255,255,255,0.8); border: 3px solid #000; border-radius: 15px; z-index: 100;
+        }
+        #progress-bar { height: 100%; width: 100%; background: var(--green); transition: width 0.3s ease; }
+
+        #hud {
+            position: absolute; top: 55px; width: 100%; display: flex; 
             justify-content: space-between; padding: 0 20px; z-index: 100;
         }
-        .stat-box { background: rgba(255,255,255,0.95); padding: 4px 12px; border-radius: 8px; font-weight: 900; border: 1px solid #ccc; color: #000; }
+        .stat-badge { background: #fff; padding: 6px 15px; border-radius: 12px; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #ddd; color: #000; }
+        #timer-box { color: var(--red); font-weight: 900; }
 
         canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 10; }
 
-        .overlay { position:absolute; inset:0; background:rgba(255,255,255,0.94); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:200; text-align: center; padding: 20px; }
-        .btn { padding: 18px 50px; font-size: 22px; background: #000; color: #fff; border: none; cursor: pointer; font-family: 'Orbitron'; font-weight:900; border-radius: 15px; }
-        
-        #leaderboard-box { margin-top: 10px; width: 100%; max-width: 500px; padding: 10px; font-size: 13px; color: #444; }
-        .rank-item { display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 2px 0; }
+        .overlay { position:absolute; inset:0; background:rgba(255,255,255,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:200; text-align: center; padding: 30px; }
+        .btn { padding: 20px 60px; font-size: 24px; background: #000; color: #fff; border: none; cursor: pointer; font-family: 'Orbitron'; font-weight:900; border-radius: 20px; box-shadow: 0 10px 0 #333; }
+        .btn:active { transform: translateY(5px); box-shadow: 0 5px 0 #333; }
+
+        #leaderboard { margin-top: 10px; width: 95%; max-width: 500px; padding: 15px; background: white; border-radius: 15px; border: 2px solid #eee; }
+        .rank-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+        .medal { font-size: 20px; margin-right: 10px; }
     </style>
 </head>
 <body>
 
 <div id="game-wrap">
     <div id="game-bg"></div>
+    <div id="floor-glass"></div>
     <div id="progress-container"><div id="progress-bar"></div></div>
-    <div id="stats">
-        <div id="heart-display" style="font-size: 26px;">❤️❤️❤️</div>
-        <div class="stat-box">LVL <span id="lvl-ui">1</span></div>
-        <div class="stat-box">SCORE: <span id="score-ui">0</span></div>
+    <div id="hud">
+        <div id="heart-display" style="font-size: 30px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">❤️❤️❤️</div>
+        <div class="stat-badge" id="timer-box">30s</div>
+        <div class="stat-badge">LVL <span id="lvl-ui">1</span></div>
     </div>
     <canvas id="game"></canvas>
 
     <div class="overlay" id="startScreen">
-        <h1 style="color:#000; letter-spacing: 4px; font-size: 34px;">DOGGYCO</h1>
-        <p style="margin-bottom: 20px; color: #555;">GIB DEINEN NAMEN EIN:</p>
-        <input type="text" id="playerName" maxlength="10" value="Spieler" style="padding:10px; border:2px solid #000; border-radius:8px; margin-bottom:20px; text-align:center; font-family:'Orbitron';">
-        <button class="btn" onclick="startGame()">START MISSION</button>
+        <h1 style="font-size: 40px; margin-bottom: 5px;">DOGGYCO</h1>
+        <p style="color:#888; margin-bottom: 30px;">GRAND FINALE</p>
+        <input type="text" id="playerName" maxlength="10" value="SPIELER" style="padding:15px; border:3px solid #000; border-radius:15px; text-align:center; font-family:'Orbitron'; font-size:20px; margin-bottom:20px; width: 80%;">
+        <button class="btn" onclick="startGame()">START</button>
+    </div>
+
+    <div class="overlay" id="levelUp" style="display:none; background: rgba(0,255,136,0.2);">
+        <h1 style="font-size: 60px; color: #000;">NÄCHSTES LEVEL!</h1>
+        <p style="font-size: 20px;">DIE JAGD GEHT WEITER...</p>
     </div>
 
     <div class="overlay" id="gameOver" style="display:none;">
-        <h2 style="color:var(--red); font-size: 30px;">GAME OVER</h2>
-        <h1 id="final-score" style="font-size:60px; color:#000; margin:15px 0;">0</h1>
-        <button class="btn" onclick="location.reload()">NEUSTART</button>
+        <h2 style="color:var(--red); font-size: 40px;">MISSION ENDE</h2>
+        <h1 id="final-score" style="font-size:70px; margin:20px 0;">0</h1>
+        <button class="btn" onclick="location.reload()">RETRY</button>
     </div>
 </div>
 
-<div id="leaderboard-box">
-    <h3 style="border-bottom: 2px solid #000; margin-bottom: 5px;">🏆 TOP 5 RANGLISTE</h3>
+<div id="leaderboard">
+    <h3 style="text-align: center; margin-bottom: 10px;">🏆 HALL OF FAME</h3>
     <div id="rank-list"></div>
 </div>
 
@@ -82,20 +95,19 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 let W, H, laneW, dogX, dogLane = 2, active = false;
-let items = [], spiders = [], floaters = [], score = 0, hearts = 3, energy = 100, level = 1, levelTime = 30;
-let lastTime = 0, audioCtx, musicInterval;
-let levelSpawned = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
+let items = [], spiders = [], floaters = [], score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
+let lastTime = 0, audioCtx, bgMusic;
+let spawnCounters = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
 
-function playSound(f, type, d, v=0.1) {
+// Sound-Effekte (Synthetisch)
+function sfx(f, type, d, v=0.1) {
     if (!audioCtx) return;
-    try {
-        let o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(v, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + d);
-    } catch(e) {}
+    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+    g.gain.setValueAtTime(v, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + d);
 }
 
 function resize() {
@@ -116,20 +128,26 @@ canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handle(e); }, 
 
 function startGame() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // MP3 Musik laden & starten
+    bgMusic = new Audio('musik.mp3');
+    bgMusic.loop = true;
+    bgMusic.volume = 0.3; // Dezent im Hintergrund
+    bgMusic.play().catch(() => console.log("Musik-Datei 'musik.mp3' fehlt."));
+
     document.getElementById("startScreen").style.display = "none";
     active = true;
-    
-    // Hintergrund Sound
-    musicInterval = setInterval(() => {
-        if(active) playSound(100 + (level*10), 'sine', 1.2, 0.04);
-    }, 1000);
-
     requestAnimationFrame(loop);
 }
 
 function updateRanks() {
-    let s = JSON.parse(localStorage.getItem('doggyFinal') || '[]');
-    document.getElementById("rank-list").innerHTML = s.map((x,i)=>`<div class="rank-item"><span>#${i+1} ${x.n}</span><span>${x.s}</span></div>`).join('');
+    let s = JSON.parse(localStorage.getItem('doggyV40') || '[]');
+    const icons = ["🪙", "🥈", "🥉", "🐾", "🐾"];
+    document.getElementById("rank-list").innerHTML = s.map((x,i)=>`
+        <div class="rank-row">
+            <span><span class="medal">${icons[i] || '🐾'}</span> <b>${x.n}</b></span>
+            <span style="font-weight:900; color:#444;">${x.s}</span>
+        </div>`).join('');
 }
 updateRanks();
 
@@ -140,8 +158,11 @@ function loop(t) {
     lastTime = t;
     ctx.clearRect(0,0,W,H);
 
-    levelTime -= dt;
-    energy -= (4.5 + level * 2) * dt;
+    timeLeft -= dt;
+    document.getElementById("timer-box").innerText = Math.ceil(timeLeft) + "s";
+    
+    // Energie/Punkte Balken
+    energy -= (4 + level * 2) * dt;
     let bar = document.getElementById("progress-bar");
     bar.style.width = energy + "%";
     
@@ -149,83 +170,100 @@ function loop(t) {
     let g = energy > 50 ? 255 : Math.floor(energy*5);
     bar.style.background = `rgb(${r}, ${g}, 0)`;
 
-    if(energy < 20) { hearts--; energy = 75; addFloater(dogX, H-120, "-1 ❤️", "red"); playSound(150, 'sawtooth', 0.5, 0.2); }
-    if(levelTime <= 0) { level++; levelTime = 30; energy = 100; levelSpawned = { heart:0, cop:0, bone:0, cookie:0, meat:0 }; playSound(800, 'sine', 0.5, 0.1); }
+    // Herzverlust bei < 20%
+    if(energy < 20) { hearts--; energy = 70; sfx(120, 'sawtooth', 0.5, 0.2); addFloater(dogX, H-150, "PLATZT! -1❤️", "red"); }
 
-    // SPAWNING (Regeln: 1❤️, 3👮, 30🦴, 20🍪, 10🍗)
-    if(Math.random() < 0.06) {
+    // Level Up
+    if(timeLeft <= 0) {
+        level++; timeLeft = 30; energy = 100;
+        spawnCounters = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
+        sfx(880, 'sine', 0.8, 0.1);
+        document.getElementById("lvl-ui").innerText = level;
+        document.getElementById("levelUp").style.display = "flex";
+        setTimeout(()=> document.getElementById("levelUp").style.display = "none", 1500);
+    }
+
+    // Spawning Regeln (Auf 30s verteilt)
+    if(Math.random() < 0.05) {
         let type = "";
-        if(levelSpawned.heart < 1 && Math.random() < 0.01) { type = "❤️"; levelSpawned.heart++; }
-        else if(levelSpawned.cop < 3 && Math.random() < 0.04) { type = "👮"; levelSpawned.cop++; }
-        else if(levelSpawned.meat < 10 && Math.random() < 0.1) { type = "🍗"; levelSpawned.meat++; }
-        else if(levelSpawned.cookie < 20 && Math.random() < 0.15) { type = "🍪"; levelSpawned.cookie++; }
-        else if(levelSpawned.bone < 30) { type = "🦴"; levelSpawned.bone++; }
+        if(spawnCounters.heart < 1 && Math.random() < 0.005) { type = "❤️"; spawnCounters.heart++; }
+        else if(spawnCounters.cop < 3 && Math.random() < 0.04) { type = "👮"; spawnCounters.cop++; }
+        else if(spawnCounters.meat < 10 && Math.random() < 0.08) { type = "🍗"; spawnCounters.meat++; }
+        else if(spawnCounters.cookie < 20 && Math.random() < 0.12) { type = "🍪"; spawnCounters.cookie++; }
+        else if(spawnCounters.bone < 30) { type = "🦴"; spawnCounters.bone++; }
         if(type) items.push({lane: Math.floor(Math.random()*5), y: -60, type: type});
     }
 
+    // Items Bewegung (Flüssig)
     for(let i=items.length-1; i>=0; i--) {
         let it = items[i];
         it.y += (280 * (1 + (level-1)*0.5)) * dt; 
         let ix = it.lane*laneW + laneW/2;
-        ctx.font = "42px Arial"; ctx.textAlign = "center";
+        ctx.font = "45px Arial"; ctx.textAlign = "center";
         ctx.fillText(it.type, ix, it.y);
 
-        if(it.lane === dogLane && it.y > H-135 && it.y < H-65) {
-            if(it.type === '👮') { hearts--; energy -= 15; addFloater(ix, it.y, "-1 ❤️", "red"); playSound(90, 'square', 0.4, 0.2); }
-            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); addFloater(ix, it.y, "+1 ❤️", "green"); playSound(600, 'sine', 0.4, 0.1); }
+        if(it.lane === dogLane && it.y > H-160 && it.y < H-90) {
+            if(it.type === '👮') { hearts--; energy -= 15; sfx(80, 'square', 0.4); addFloater(ix, it.y, "-1❤️", "red"); }
+            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); sfx(600, 'sine', 0.4); addFloater(ix, it.y, "EXTRA!", "green"); }
             else {
                 let p = it.type === '🍗' ? 30 : (it.type === '🍪' ? 20 : 10);
                 score += p; energy = Math.min(100, energy + 6);
-                addFloater(ix, it.y, "+" + p, "black"); playSound(400 + p*5, 'sine', 0.1, 0.1);
+                sfx(400 + p*5, 'sine', 0.1); addFloater(ix, it.y, "+"+p, "#000");
             }
             items.splice(i, 1);
         } else if(it.y > H) items.splice(i, 1);
     }
 
-    // SPINNEN (20% Abzug)
-    if(spiders.length < 2) spiders.push({x: Math.random()*W, t: Math.random()*Math.PI, s: 0.02});
+    // Spinnen (KI: Lane-Wechsel oben)
+    if(spiders.length < 2) spiders.push({lane: Math.floor(Math.random()*5), t: Math.random()*Math.PI, s: 0.018});
     spiders.forEach(s => {
         s.t += s.s;
         let sy = (Math.sin(s.t) + 1) / 2 * (H - 120);
-        ctx.strokeStyle = "rgba(0,0,0,0.1)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
-        ctx.fillText("🕷️", s.x, sy + 30);
-        if(Math.abs(s.x - dogX) < 42 && sy > H-150 && sy < H-65) { 
+        let sx = s.lane * laneW + laneW/2;
+        if(sy < 10 && Math.abs(Math.sin(s.t)) > 0.95) s.lane = Math.floor(Math.random()*5); // Lane-Wechsel oben
+
+        ctx.strokeStyle = "rgba(0,0,0,0.1)"; ctx.lineWidth = 3; ctx.beginPath(); 
+        ctx.moveTo(sx, 0); ctx.lineTo(sx, sy); ctx.stroke();
+        ctx.fillText("🕷️", sx, sy + 35);
+        
+        if(s.lane === dogLane && sy > H-180 && sy < H-80) { 
             energy -= 1.0; 
-            if(Math.random() < 0.02) { addFloater(dogX, H-140, "-20%", "red"); playSound(120, 'sawtooth', 0.2, 0.1); }
+            if(Math.random() < 0.05) { addFloater(sx, sy, "-20%", "red"); sfx(100, 'sawtooth', 0.1, 0.1); }
         }
     });
 
+    // Floater Animation
     for(let i=floaters.length-1; i>=0; i--) {
-        let f = floaters[i]; f.y -= 2; f.life -= 0.02;
-        ctx.fillStyle = f.color; ctx.font = "bold 24px Orbitron"; ctx.globalAlpha = Math.max(0, f.life); ctx.fillText(f.txt, f.x, f.y); ctx.globalAlpha = 1;
+        let f = floaters[i]; f.y -= 2; f.x += f.vx; f.life -= 0.02;
+        ctx.fillStyle = f.c; ctx.font = "bold 24px Orbitron"; ctx.globalAlpha = Math.max(0, f.life);
+        ctx.fillText(f.t, f.x, f.y); ctx.globalAlpha = 1;
         if(f.life <= 0) floaters.splice(i, 1);
     }
 
-    // HUND
+    // Hund (Position tiefer & flüssig)
     let targetX = dogLane * laneW + laneW/2;
-    dogX += (targetX - dogX) * 0.22; 
-    ctx.font = "65px Arial"; ctx.fillText("🐶", dogX, H - 85);
+    dogX += (targetX - dogX) * 0.25; 
+    ctx.font = "75px Arial"; ctx.fillText("🐶", dogX, H - 40); // Tiefer gesetzt
 
     document.getElementById("score-ui").innerText = score;
-    document.getElementById("lvl-ui").innerText = level;
     document.getElementById("heart-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
     if(hearts <= 0) {
-        active = false; clearInterval(musicInterval);
+        active = false; if(bgMusic) bgMusic.pause();
         saveScore();
         document.getElementById("gameOver").style.display = "flex";
         document.getElementById("final-score").innerText = score;
     } else requestAnimationFrame(loop);
 }
 
-function addFloater(x, y, txt, color) { floaters.push({x:x, y:y, txt:txt, color:color, life:1.2}); }
+function addFloater(x, y, t, c) { floaters.push({x:x, y:y, t:t, c:c, life:1.2, vx: (Math.random()-0.5)*2}); }
 
 function saveScore() {
-    let name = document.getElementById("playerName").value || "Spieler";
-    let s = JSON.parse(localStorage.getItem('doggyFinal') || '[]');
-    s.push({n: name, s: score});
+    let n = document.getElementById("playerName").value || "SPIELER";
+    let s = JSON.parse(localStorage.getItem('doggyV40') || '[]');
+    s.push({n: n, s: score});
     s.sort((a,b)=>b.s-a.s);
-    localStorage.setItem('doggyFinal', JSON.stringify(s.slice(0,5)));
+    localStorage.setItem('doggyV40', JSON.stringify(s.slice(0,5)));
     updateRanks();
 }
 </script>
