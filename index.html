@@ -4,78 +4,217 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Doggyco: Evolved HD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --glass: rgba(0, 20, 10, 0.7); }
+        :root { --neon: #00f2ff; --red: #ff3131; --glass: rgba(0, 15, 30, 0.75); }
         * { margin:0; padding:0; box-sizing:border-box; touch-action:none; }
-        body { background:#000; color: white; font-family: sans-serif; overflow: hidden; }
+        body { background:#000; color: white; font-family: 'Orbitron', sans-serif; overflow: hidden; }
+        
         #wrap {
             position:relative; height:100vh; max-width:500px; margin:auto;
             background-image: url('hintergrund.png');
             background-size: cover; background-position: center;
-            border: 4px solid #333;
+            border: 4px solid #333; box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
-        canvas { width: 100%; height: 100%; display: block; }
+
+        /* HUD */
+        #hud {
+            position: absolute; top: 20px; width: 100%; display: flex; 
+            justify-content: space-around; align-items: center; z-index: 60;
+        }
+        .hud-box {
+            background: var(--glass); border: 1px solid var(--neon);
+            padding: 8px 15px; border-radius: 10px; backdrop-filter: blur(10px);
+            text-align: center; min-width: 90px;
+        }
+        #hearts-ui { font-size: 20px; color: var(--red); text-shadow: 0 0 10px var(--red); }
+        .label { font-size: 9px; color: var(--neon); text-transform: uppercase; display: block; }
+        .val { font-size: 16px; font-weight: 900; }
+
+        #energy-wrap {
+            position: absolute; top: 90px; left: 15%; width: 70%; height: 12px; 
+            background: rgba(0,0,0,0.6); border: 1px solid white; border-radius: 20px; overflow: hidden; z-index: 60;
+        }
+        #energy-bar { height: 100%; width: 100%; background: linear-gradient(to right, #ff3131, #fbff00, #00ff88); transition: width 0.1s linear; }
+
+        canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
+
         .overlay {
-            position:absolute; inset:0; background:rgba(0,0,0,0.8);
+            position:absolute; inset:0; background:rgba(0,10,20,0.9);
             display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:100;
         }
         .btn {
-            padding: 15px 40px; font-size: 20px; background: transparent; color: var(--neon);
-            border: 2px solid var(--neon); cursor: pointer; text-transform: uppercase;
+            padding: 18px 50px; font-size: 22px; background: transparent; color: var(--neon);
+            border: 2px solid var(--neon); cursor: pointer; text-transform: uppercase; font-family: 'Orbitron';
+            font-weight: 900; transition: 0.3s;
         }
+        .btn:hover { background: var(--neon); color: #000; box-shadow: 0 0 30px var(--neon); }
     </style>
 </head>
 <body>
 <div id="wrap">
+    <div id="hud">
+        <div class="hud-box" id="hearts-ui">❤️❤️❤️</div>
+        <div class="hud-box"><span class="label">SCORE</span><span class="val" id="score-val">0</span></div>
+        <div class="hud-box"><span class="label">LEVEL</span><span class="val" id="lvl-val">1</span></div>
+    </div>
+    <div id="energy-wrap"><div id="energy-bar"></div></div>
     <canvas id="game"></canvas>
+
     <div class="overlay" id="startScreen">
-        <h1 style="color:var(--neon); margin-bottom:20px;">DOGGYCO HD</h1>
+        <h1 style="color:var(--neon); font-size: 35px; margin-bottom:30px; letter-spacing: 5px;">DOGGYCO HD</h1>
         <button class="btn" onclick="initGame()">Start Engine</button>
+    </div>
+
+    <div class="overlay" style="display:none;" id="gameOver">
+        <h2 style="color:var(--red); font-size: 30px;">MISSION FAILED</h2>
+        <h1 id="final-score" style="font-size:60px; margin:20px 0; color:var(--neon);">0</h1>
+        <button class="btn" onclick="location.reload()">Reboot</button>
     </div>
 </div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-let active = false;
+
+let W, H, lanes = 5, laneW;
+let dogLane = 2, dogX = 0, targetX = 0;
+let items = [], spiders = [], particles = [];
+let score = 0, hearts = 3, energy = 100, level = 1, active = false;
+let lastTime = 0;
+
+// BILDER INITIALISIEREN
+const imgs = {};
+const assets = {
+    shiba: 'imgShiba.png',
+    bone: 'imgBone.png',
+    cookie: 'imgCookie.png',
+    meat: 'imgMeat.png',
+    police: 'imgPolice.png',
+    heart: 'imgHeart.png',
+    spider: 'imgSpider.png'
+};
+
+Object.entries(assets).forEach(([key, src]) => {
+    imgs[key] = new Image();
+    imgs[key].src = src;
+});
 
 // SOUND SYSTEM
 let audioCtx;
-function playSound(freq, type, duration, vol=0.1) {
-    if (!audioCtx) return;
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+function playSFX(freq, type, duration, vol=0.1) {
+    if (!audioCtx || audioCtx.state === 'suspended') return;
     let osc = audioCtx.createOscillator();
     let gain = audioCtx.createGain();
     osc.type = type;
     osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
     gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
     osc.connect(gain); gain.connect(audioCtx.destination);
     osc.start(); osc.stop(audioCtx.currentTime + duration);
 }
 
+function resize() {
+    W = canvas.width = canvas.parentElement.offsetWidth;
+    H = canvas.height = canvas.parentElement.offsetHeight;
+    laneW = W / lanes;
+}
+window.onresize = resize; resize();
+
+const handleMove = (e) => {
+    if(!active) return;
+    let rect = canvas.getBoundingClientRect();
+    let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    dogLane = Math.floor(x / laneW);
+    dogLane = Math.max(0, Math.min(lanes - 1, dogLane));
+}
+canvas.onmousemove = handleMove;
+canvas.ontouchmove = (e) => { e.preventDefault(); handleMove(e); };
+
 function initGame() {
-    // Audio initialisieren bei Klick
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
     document.getElementById("startScreen").style.display = "none";
     active = true;
+    lastTime = performance.now();
     
-    // Test-Sound beim Start
-    playSound(440, 'sine', 0.5);
-    
-    // Hintergrund-Loop (leises Rauschen/Wald)
+    // Musik-Loop
     setInterval(() => {
-        if(active) playSound(100, 'sine', 1, 0.02);
+        if(active) playSFX(150 + (level*10), 'sine', 0.8, 0.03);
     }, 1000);
     
     requestAnimationFrame(loop);
 }
 
-function loop() {
+function spawnItem() {
+    if(Math.random() < 0.02 + level*0.005) {
+        let types = ['bone', 'cookie', 'meat', 'police', 'heart'];
+        let type = types[Math.floor(Math.random()*types.length)];
+        items.push({lane: Math.floor(Math.random()*lanes), y: -100, type: type});
+    }
+}
+
+function loop(t) {
     if(!active) return;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    // Hier kommt deine Spiel-Logik rein...
-    requestAnimationFrame(loop);
+    let delta = (t - lastTime) / 1000;
+    lastTime = t;
+    ctx.clearRect(0,0,W,H);
+
+    // Energie-Logik
+    energy -= (2.5 + level) * delta;
+    document.getElementById("energy-bar").style.width = energy + "%";
+    if(energy <= 0) { hearts--; energy = 80; playSFX(100, 'sawtooth', 0.5); }
+
+    // Items
+    spawnItem();
+    for(let i=items.length-1; i>=0; i--) {
+        let it = items[i];
+        it.y += (220 + level*50) * delta;
+        let ix = it.lane*laneW + laneW/2;
+        
+        ctx.drawImage(imgs[it.type] || imgs.bone, ix - 30, it.y - 30, 60, 60);
+
+        if(it.lane === dogLane && it.y > H-160 && it.y < H-60) {
+            if(it.type === 'police') { hearts--; energy = 40; playSFX(80, 'square', 0.4); }
+            else if(it.type === 'heart') { if(hearts < 3) hearts++; playSFX(600, 'sine', 0.3); }
+            else {
+                let p = it.type === 'meat' ? 50 : (it.type === 'cookie' ? 25 : 10);
+                score += p; energy = Math.min(100, energy + 15);
+                playSFX(400 + p*2, 'sine', 0.1);
+            }
+            items.splice(i, 1);
+        } else if(it.y > H) items.splice(i, 1);
+    }
+
+    // Spinnen
+    if(spiders.length < 2) spiders.push({x: Math.random()*W, t: Math.random()*10, s: 0.015});
+    spiders.forEach(s => {
+        s.t += s.s; let sy = (Math.sin(s.t)+1)/2 * (H-180);
+        ctx.strokeStyle = "rgba(0, 242, 255, 0.3)";
+        ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
+        ctx.drawImage(imgs.spider, s.x - 25, sy, 50, 50);
+        if(Math.abs(s.x - dogX) < 40 && sy > H-180 && sy < H-60) energy -= 0.8;
+    });
+
+    // Hund
+    targetX = dogLane * laneW + laneW / 2;
+    dogX += (targetX - dogX) * 0.2;
+    ctx.drawImage(imgs.shiba, dogX - 45, H - 130, 90, 90);
+
+    // UI & Level
+    document.getElementById("score-val").innerText = score;
+    document.getElementById("hearts-ui").innerText = "❤️".repeat(Math.max(0, hearts));
+    document.getElementById("lvl-val").innerText = level;
+    if(score > level * 700) level++;
+
+    if(hearts <= 0) {
+        active = false;
+        document.getElementById("gameOver").style.display = "flex";
+        document.getElementById("final-score").innerText = score;
+    } else {
+        requestAnimationFrame(loop);
+    }
 }
 </script>
 </body>
