@@ -3,83 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Doggyco: Professional V36</title>
+    <title>Doggyco: Evolved V37 - Smooth Edition with Blur</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --gold: #ffd700; --red: #ff3131; --green: #00ff88; }
         * { margin:0; padding:0; box-sizing:border-box; touch-action:none; }
-        body { background:#000; color: white; font-family: 'Orbitron', sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+        body { background:#eee; color: white; font-family: 'Orbitron', sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
         
         #game-wrap {
-            position:relative; height:80vh; width:100vw; max-width:500px;
-            background: #050505 url('hintergrund.png') center/cover;
+            position:relative; height:85vh; width:100vw; max-width:500px;
+            background: #fff;
             border: 4px solid var(--neon); border-radius: 15px; overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
         }
 
-        /* PROGRESS BAR OBEN */
+        /* NEUER HINTERGRUND-CONTAINER MIT WEICHZEICHNER */
+        #game-background {
+            position: absolute; inset: 0;
+            background: url('hintergrund.png') center/cover;
+            backdrop-filter: blur(10px); /* WEICHZEICHNER-EFFEKT */
+            z-index: 1; /* HINTERGRUND-EBENE */
+        }
+
+        /* HELLERES HUD */
         #progress-container {
-            position: absolute; top: 10px; left: 5%; width: 90%; height: 25px;
-            background: rgba(0,0,0,0.8); border: 2px solid #fff; border-radius: 15px; z-index: 100;
+            position: absolute; top: 10px; left: 5%; width: 90%; height: 20px;
+            background: rgba(255,255,255,0.8); border: 2px solid #333; border-radius: 10px; z-index: 100;
         }
         #progress-bar { 
             height: 100%; width: 100%; background: var(--green); 
-            transition: width 0.3s ease, background 0.5s ease;
-            box-shadow: 0 0 15px var(--green);
+            transition: width 0.3s ease;
         }
 
         #stats {
-            position: absolute; top: 45px; width: 100%; display: flex; 
-            justify-content: space-between; padding: 0 20px; z-index: 100;
+            position: absolute; top: 40px; width: 100%; display: flex; 
+            justify-content: space-between; padding: 0 15px; z-index: 100;
         }
-        .stat-box { background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 8px; border: 1px solid var(--neon); }
-        #heart-display { font-size: 28px; transition: transform 0.3s ease; }
-        .burst { transform: scale(2); opacity: 0; } /* Platz-Effekt */
+        .stat-box { background: rgba(255,255,255,0.9); color: #000; padding: 5px 10px; border-radius: 5px; font-weight: 900; border: 1px solid var(--neon); }
 
-        canvas { width: 100%; height: 100%; display: block; }
+        canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 10; /* VORDERGRUND-EBENE */ }
 
-        .overlay { position:absolute; inset:0; background:rgba(0,0,0,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:200; text-align: center; padding: 20px; }
-        .btn { padding: 15px 40px; font-size: 20px; background: transparent; color: var(--neon); border: 2px solid var(--neon); cursor: pointer; font-family: 'Orbitron'; font-weight:900; }
-        
-        #leaderboard { margin-top: 10px; width: 90%; max-width: 500px; background: rgba(20,20,20,0.9); padding: 10px; border-radius: 10px; font-size: 12px; border: 1px solid #333; }
-        .rule-box { font-size: 10px; color: #aaa; margin-top: 10px; line-height: 1.4; }
+        .overlay { position:absolute; inset:0; background:rgba(255,255,255,0.9); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:200; text-align: center; color: #333; }
+        .btn { padding: 15px 40px; font-size: 20px; background: #000; color: #fff; border: none; cursor: pointer; font-family: 'Orbitron'; font-weight:900; border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <div id="game-wrap">
+    <div id="game-background"></div> /* HINTERGRUND-CONTAINER */
     <div id="progress-container"><div id="progress-bar"></div></div>
     <div id="stats">
-        <div id="heart-display">❤️❤️❤️</div>
-        <div class="stat-box">LVL <span id="lvl-ui" style="color:var(--neon)">1</span></div>
-        <div class="stat-box"><span id="score-ui" style="color:var(--gold)">0</span></div>
+        <div id="heart-display" style="font-size: 24px;">❤️❤️❤️</div>
+        <div class="stat-box">LVL <span id="lvl-ui">1</span></div>
+        <div class="stat-box">SCORE: <span id="score-ui">0</span></div>
     </div>
     <canvas id="game"></canvas>
 
     <div class="overlay" id="startScreen">
-        <h1 style="color:var(--neon); letter-spacing: 5px;">DOGGYCO V36</h1>
-        <p style="font-size: 12px; margin: 15px 0;">30s pro Level | 0.5x Speed Up</p>
-        <button class="btn" onclick="startGame()">START</button>
-    </div>
-
-    <div class="overlay" id="levelUpOverlay" style="display:none; background: rgba(0,242,255,0.2);">
-        <h1 style="color:white; font-size: 50px;">LEVEL UP!</h1>
-        <p>Speed +50%</p>
+        <h1 style="color:#000; letter-spacing: 2px;">DOGGYCO V37</h1>
+        <p style="margin: 10px 0;">FLÜSSIGE STEUERUNG | MOBILE OPTIMIERT</p>
+        <button class="btn" onclick="startGame()">START ENGINE</button>
     </div>
 
     <div class="overlay" id="gameOver" style="display:none;">
         <h2 style="color:var(--red);">GAME OVER</h2>
-        <h1 id="final-score" style="font-size:50px;">0</h1>
-        <button class="btn" onclick="location.reload()">NEUSTART</button>
-    </div>
-</div>
-
-<div id="leaderboard">
-    <h3 style="color:var(--gold); font-size: 14px; border-bottom: 1px solid #444;">🏆 TOP 5 RANGLISTE</h3>
-    <ul id="score-list" style="list-style: none; padding: 5px 0;"></ul>
-    <div class="rule-box">
-        <b>REGELN:</b> Pro Level: 1❤️, 3👮, 30🦴, 20🍪, 10🍗. <br>
-        Balken unter 20% = ❤️ verloren! Balken voll = Level-Max erreicht. <br>
-        Alle 30s steigt die Geschwindigkeit um 0,5x.
+        <h1 id="final-score" style="font-size:50px; color:#000;">0</h1>
+        <button class="btn" onclick="location.reload()">RETRY</button>
     </div>
 </div>
 
@@ -87,19 +76,10 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 let W, H, laneW, dogX, dogLane = 2, active = false;
-let items = [], spiders = [], score = 0, hearts = 3, energy = 100, level = 1, levelTime = 30;
+let items = [], spiders = [], floaters = [], score = 0, hearts = 3, energy = 100, level = 1, levelTime = 30;
 let lastTime = 0, audioCtx;
-let levelItemsSpawned = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
-
-function playSound(f, type, d, v=0.1) {
-    if(!audioCtx) return;
-    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = type; o.frequency.value = f;
-    g.gain.setValueAtTime(v, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + d);
-}
+let levelConfig = { heart:1, cop:3, bone:30, cookie:20, meat:10 };
+let levelSpawned = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
 
 function resize() {
     W = canvas.width = canvas.parentElement.offsetWidth;
@@ -109,10 +89,11 @@ function resize() {
 }
 window.onresize = resize; resize();
 
+// STEUERUNG
 const handle = (e) => {
     let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    let x = clientX - canvas.getBoundingClientRect().left;
-    dogLane = Math.max(0, Math.min(4, Math.floor(x / laneW)));
+    let rect = canvas.getBoundingClientRect();
+    dogLane = Math.max(0, Math.min(4, Math.floor((clientX - rect.left) / laneW)));
 };
 canvas.addEventListener('mousemove', handle);
 canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handle(e); }, {passive:false});
@@ -121,17 +102,7 @@ function startGame() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     document.getElementById("startScreen").style.display = "none";
     active = true;
-    updateLeaderboard();
-    
-    // Hintergrundmusik-Loop (Chill Electronic)
-    setInterval(() => { if(active) playSound(70 + (level*10), 'sine', 1.5, 0.05); }, 1200);
-    
     requestAnimationFrame(loop);
-}
-
-function updateLeaderboard() {
-    let s = JSON.parse(localStorage.getItem('doggyV36') || '[]');
-    document.getElementById("score-list").innerHTML = s.map((x,i)=>`<li>#${i+1} ${x.n}: ${x.s}</li>`).join('');
 }
 
 function loop(t) {
@@ -142,97 +113,82 @@ function loop(t) {
     ctx.clearRect(0,0,W,H);
 
     levelTime -= dt;
+    energy -= (4 + level * 2) * dt;
+    document.getElementById("progress-bar").style.width = energy + "%";
 
-    // Energie-Logik (Punkte-Balken)
-    energy -= (5 + level * 2) * dt; 
-    let bar = document.getElementById("progress-bar");
-    bar.style.width = energy + "%";
-    
-    // Farbumschlag: Rot (0) -> Gelb -> Grün (100)
-    let r = energy < 50 ? 255 : Math.floor(255 - (energy-50)*5.1);
-    let g = energy > 50 ? 255 : Math.floor(energy*5.1);
-    bar.style.background = `rgb(${r}, ${g}, 0)`;
+    if(energy < 20) { hearts--; energy = 70; addFloater(dogX, H-100, "-1 ❤️", "red"); }
+    if(levelTime <= 0) { level++; levelTime = 30; energy = 100; levelSpawned = { heart:0, cop:0, bone:0, cookie:0, meat:0 }; }
 
-    // Herz-Verlust wenn < 20%
-    if(energy < 20) {
-        hearts--; energy = 60;
-        playSound(100, 'sawtooth', 0.5, 0.2);
-        let hDisplay = document.getElementById("heart-display");
-        hDisplay.style.transform = "scale(2)";
-        setTimeout(() => hDisplay.style.transform = "scale(1)", 300);
-    }
-
-    // Level-Up System
-    if(levelTime <= 0) {
-        level++; levelTime = 30; energy = 100;
-        levelItemsSpawned = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
-        document.getElementById("levelUpOverlay").style.display = "flex";
-        setTimeout(() => document.getElementById("levelUpOverlay").style.display = "none", 1000);
-        playSound(880, 'sine', 0.8, 0.1);
-    }
-
-    // Spawning nach deinen Regeln
-    if(Math.random() < 0.04) {
+    // SPAWNING
+    if(Math.random() < 0.05) {
         let type = "";
-        if(levelItemsSpawned.heart < 1 && Math.random() < 0.01) { type = "❤️"; levelItemsSpawned.heart++; }
-        else if(levelItemsSpawned.cop < 3 && Math.random() < 0.05) { type = "👮"; levelItemsSpawned.cop++; }
-        else if(levelItemsSpawned.meat < 10 && Math.random() < 0.1) { type = "🍗"; levelItemsSpawned.meat++; }
-        else if(levelItemsSpawned.cookie < 20 && Math.random() < 0.15) { type = "🍪"; levelItemsSpawned.cookie++; }
-        else if(levelItemsSpawned.bone < 30) { type = "🦴"; levelItemsSpawned.bone++; }
-
+        if(levelSpawned.heart < 1 && Math.random() < 0.005) { type = "❤️"; levelSpawned.heart++; }
+        else if(levelSpawned.cop < 3 && Math.random() < 0.03) { type = "👮"; levelSpawned.cop++; }
+        else if(levelSpawned.meat < 10 && Math.random() < 0.08) { type = "🍗"; levelSpawned.meat++; }
+        else if(levelSpawned.cookie < 20 && Math.random() < 0.12) { type = "🍪"; levelSpawned.cookie++; }
+        else if(levelSpawned.bone < 30) { type = "🦴"; levelSpawned.bone++; }
         if(type) items.push({lane: Math.floor(Math.random()*5), y: -50, type: type});
     }
 
-    // Items
+    // ITEMS & COLLISION
     for(let i=items.length-1; i>=0; i--) {
         let it = items[i];
-        it.y += (250 + (level-1) * 125) * dt; // 0.5x Steigerung pro Level
+        it.y += (280 + (level-1) * 140) * dt; 
         let ix = it.lane*laneW + laneW/2;
         ctx.font = "40px Arial"; ctx.textAlign = "center";
         ctx.fillText(it.type, ix, it.y);
 
         if(it.lane === dogLane && it.y > H-130 && it.y < H-70) {
-            if(it.type === '👮') { hearts--; playSound(80, 'square', 0.4); energy -= 15; }
-            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); playSound(600, 'sine', 0.3); }
+            if(it.type === '👮') { hearts--; energy -= 10; addFloater(ix, it.y, "-1 ❤️", "red"); }
+            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); addFloater(ix, it.y, "+1 ❤️", "green"); }
             else {
                 let p = it.type === '🍗' ? 30 : (it.type === '🍪' ? 20 : 10);
-                score += p; energy = Math.min(100, energy + (p/5));
-                playSound(400 + p*5, 'sine', 0.1);
+                score += p; energy = Math.min(100, energy + 5);
+                addFloater(ix, it.y, "+" + p, "gold");
             }
             items.splice(i, 1);
         } else if(it.y > H) items.splice(i, 1);
     }
 
-    // Spinnen (Langsamere Bewegung wie gewünscht)
-    if(spiders.length < 2) spiders.push({x: Math.random()*W, t: Math.random()*Math.PI, s: 0.015});
+    // SPINNEN (Gehen jetzt ganz runter)
+    if(spiders.length < 2) spiders.push({x: Math.random()*W, t: Math.random()*Math.PI, s: 0.02});
     spiders.forEach(s => {
         s.t += s.s;
-        let sy = (Math.sin(s.t) + 1) / 2 * (H - 200);
-        ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath();
-        ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
+        let sy = (Math.sin(s.t) + 1) / 2 * (H - 120);
+        ctx.strokeStyle = "rgba(0,0,0,0.2)"; ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
         ctx.fillText("🕷️", s.x, sy + 30);
-        if(Math.abs(s.x - dogX) < 40 && sy > H-150 && sy < H-70) { energy -= 0.5; }
+        if(Math.abs(s.x - dogX) < 40 && sy > H-150 && sy < H-70) { 
+            energy -= 0.8; // Zieht Punkte ab
+            if(Math.random() < 0.05) addFloater(dogX, H-120, "-20%", "red");
+        }
     });
 
-    // Hund
-    dogX += (dogLane * laneW + laneW/2 - dogX) * 0.3;
+    // FLOATERS (Feedback-Symbole)
+    for(let i=floaters.length-1; i>=0; i--) {
+        let f = floaters[i]; f.y -= 2; f.life -= 0.02;
+        ctx.fillStyle = f.color; ctx.font = "bold 20px Orbitron";
+        ctx.globalAlpha = f.life; ctx.fillText(f.txt, f.x, f.y); ctx.globalAlpha = 1;
+        if(f.life <= 0) floaters.splice(i, 1);
+    }
+
+    // HUND (Interpolierte/Flüssige Bewegung)
+    let targetX = dogLane * laneW + laneW/2;
+    dogX += (targetX - dogX) * 0.2; 
     ctx.font = "60px Arial"; ctx.fillText("🐶", dogX, H - 80);
 
-    // UI
+    // UI UPDATES
     document.getElementById("score-ui").innerText = score;
     document.getElementById("lvl-ui").innerText = level;
     document.getElementById("heart-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
     if(hearts <= 0) {
         active = false;
-        let s = JSON.parse(localStorage.getItem('doggyV36') || '[]');
-        s.push({n: "Spieler", s: score});
-        s.sort((a,b)=>b.s-a.s);
-        localStorage.setItem('doggyV36', JSON.stringify(s.slice(0,5)));
         document.getElementById("gameOver").style.display = "flex";
         document.getElementById("final-score").innerText = score;
     } else requestAnimationFrame(loop);
 }
+
+function addFloater(x, y, txt, color) { floaters.push({x:x, y:y, txt:txt, color:color, life:1.0}); }
 </script>
 </body>
 </html>
