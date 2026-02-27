@@ -3,71 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Doggyco: Ultimate Fix V42</title>
+    <title>Doggyco: Emergency Fix V43</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --gold: #ffd700; --red: #ff3131; --green: #00ff88; }
         * { margin:0; padding:0; box-sizing:border-box; touch-action:none; }
-        
-        body { 
-            background: radial-gradient(circle, #ffffff, #e0e0e0); 
-            color: #222; 
-            font-family: 'Orbitron', sans-serif; 
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
-            height: 100vh;
-        }
-        
-        #game-wrap {
-            position:relative; 
-            height: 90vh; 
-            width: 95vw; 
-            max-width: 450px;
-            background: #fff; 
-            border: 6px solid #222; 
-            border-radius: 40px; 
-            overflow: hidden; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-        }
-
-        #game-bg {
-            position: absolute; inset: 0;
-            background: url('hintergrund.png') center/cover;
-            filter: blur(5px) brightness(1.1);
-            z-index: 1;
-        }
-
-        #floor-glass {
-            position: absolute; bottom: 0; width: 100%; height: 15%;
-            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(15px);
-            border-top: 2px solid rgba(255,255,255,0.5); z-index: 5;
-        }
-
-        #progress-container {
-            position: absolute; top: 20px; left: 5%; width: 90%; height: 20px;
-            background: rgba(255,255,255,0.8); border: 2px solid #000; border-radius: 10px; z-index: 100;
-        }
-        #progress-bar { height: 100%; width: 100%; background: var(--green); transition: width 0.3s ease; }
-
-        #hud {
-            position: absolute; top: 55px; width: 100%; display: flex; 
-            justify-content: space-between; padding: 0 20px; z-index: 100;
-        }
-        .stat-badge { background: #fff; padding: 5px 12px; border-radius: 10px; font-weight: 900; border: 2px solid #000; font-size: 14px; }
-
-        canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 10; }
-
-        .overlay { position:absolute; inset:0; background:rgba(255,255,255,0.96); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:200; text-align: center; padding: 30px; }
-        .btn { padding: 18px 45px; font-size: 22px; background: #000; color: #fff; border: none; cursor: pointer; font-family: 'Orbitron'; font-weight:900; border-radius: 20px; transition: 0.2s; }
-        .btn:hover { transform: scale(1.05); }
-
-        #leaderboard { margin-top: 10px; width: 90%; max-width: 450px; background: white; padding: 15px; border-radius: 20px; border: 1px solid #ddd; }
-        .rank-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
+        body { background:#111; color: #222; font-family: 'Orbitron', sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        #game-wrap { position:relative; height: 90vh; width: 95vw; max-width: 450px; background: #333; border: 5px solid #000; border-radius: 30px; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        #game-bg { position: absolute; inset: 0; background: #444 url('hintergrund.png') center/cover; filter: blur(5px) brightness(1.1); z-index: 1; }
+        #floor-glass { position: absolute; bottom: 0; width: 100%; height: 15%; background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px); border-top: 1px solid white; z-index: 5; }
+        #progress-container { position: absolute; top: 20px; left: 5%; width: 90%; height: 18px; background: rgba(0,0,0,0.5); border: 2px solid #fff; border-radius: 10px; z-index: 100; }
+        #progress-bar { height: 100%; width: 100%; background: var(--green); transition: width 0.3s; }
+        #hud { position: absolute; top: 50px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 100; }
+        .stat-badge { background: #fff; padding: 4px 10px; border-radius: 8px; font-weight: 900; border: 2px solid #000; font-size: 12px; }
+        canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 20; }
+        .overlay { position:absolute; inset:0; background:rgba(255,255,255,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:200; text-align: center; padding: 20px; }
+        .btn { padding: 15px 40px; font-size: 20px; background: #000; color: #fff; border: none; cursor: pointer; font-family: 'Orbitron'; font-weight:900; border-radius: 15px; }
+        input { padding:10px; border:2px solid #000; border-radius:10px; text-align:center; font-family:'Orbitron'; font-size:16px; margin-bottom:15px; width: 80%; }
     </style>
 </head>
 <body>
@@ -77,29 +29,24 @@
     <div id="floor-glass"></div>
     <div id="progress-container"><div id="progress-bar"></div></div>
     <div id="hud">
-        <div id="heart-display" style="font-size: 24px;">❤️❤️❤️</div>
+        <div id="heart-display" style="font-size: 22px;">❤️❤️❤️</div>
         <div class="stat-badge" id="timer-box">30s</div>
         <div class="stat-badge">LVL <span id="lvl-ui">1</span></div>
     </div>
     <canvas id="game"></canvas>
 
     <div class="overlay" id="startScreen">
-        <h1 style="font-size: 36px; color:#000; letter-spacing: 2px;">DOGGYCO</h1>
-        <p style="color:#666; margin-bottom: 20px;">MASTER EDITION V42</p>
-        <input type="text" id="playerName" maxlength="10" value="SPIELER" style="padding:12px; border:2px solid #000; border-radius:12px; text-align:center; font-family:'Orbitron'; font-size:18px; margin-bottom:20px; width: 80%;">
-        <button class="btn" id="startBtn">START MISSION</button>
+        <h1 style="font-size: 30px; letter-spacing: 2px;">DOGGYCO</h1>
+        <p style="color:#666; margin-bottom: 20px;">V43 EMERGENCY FIX</p>
+        <input type="text" id="playerName" maxlength="10" value="SPIELER">
+        <button class="btn" id="realStartBtn">START JETZT</button>
     </div>
 
     <div class="overlay" id="gameOver" style="display:none;">
-        <h2 style="color:var(--red); font-size: 32px;">MISSION ENDE</h2>
-        <h1 id="final-score" style="font-size:60px; color:#000; margin:15px 0;">0</h1>
+        <h2 style="color:var(--red);">GAME OVER</h2>
+        <h1 id="final-score" style="font-size:50px;">0</h1>
         <button class="btn" onclick="location.reload()">RETRY</button>
     </div>
-</div>
-
-<div id="leaderboard">
-    <h3 style="text-align: center; font-size: 14px; margin-bottom: 5px;">🏆 HALL OF FAME</h3>
-    <div id="rank-list"></div>
 </div>
 
 <script>
@@ -108,171 +55,130 @@ const ctx = canvas.getContext("2d");
 let W, H, laneW, dogX, dogLane = 2, active = false;
 let items = [], spiders = [], floaters = [], score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
 let lastTime = 0, audioCtx, bgMusic;
-let spawnCounters = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
 
 function resize() {
-    W = canvas.width = canvas.parentElement.offsetWidth;
-    H = canvas.height = canvas.parentElement.offsetHeight;
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
     laneW = W / 5;
     dogX = W / 2;
 }
-window.onresize = resize; resize();
+window.addEventListener('resize', resize);
+resize();
 
-// AUDIO SYSTEM (Robust & Dezent)
+// AUDIO
 function sfx(f, type, d, v=0.1) {
     if (!audioCtx) return;
-    try {
-        let o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(v, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + d);
-    } catch(e){}
+    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+    g.gain.setValueAtTime(v, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + d);
 }
 
-// SPIEL START LOGIK
-document.getElementById('startBtn').addEventListener('click', () => {
-    // 1. Audio initialisieren
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// DER START-BUTTON DER FUNKTIONIERT
+document.getElementById('realStartBtn').addEventListener('click', function() {
+    console.log("Start geklickt...");
+    resize();
     
-    // 2. Musik laden (Optional, Spiel startet trotzdem)
-    bgMusic = new Audio('musik.mp3');
-    bgMusic.loop = true;
-    bgMusic.volume = 0.05; // SEHR LEISE
-    bgMusic.play().catch(e => console.log("Musikdatei nicht gefunden - Spiel läuft stumm."));
+    // Audio Start
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        bgMusic = new Audio('musik.mp3');
+        bgMusic.loop = true;
+        bgMusic.volume = 0.05;
+        bgMusic.play().catch(e => console.log("Musik fehlt"));
+    } catch(e) { console.log("Audio Fehler"); }
 
-    // 3. UI ausblenden & Start
     document.getElementById("startScreen").style.display = "none";
     active = true;
+    lastTime = performance.now();
     requestAnimationFrame(loop);
 });
 
 const handle = (e) => {
-    let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    let clientX = (e.touches ? e.touches[0].clientX : e.clientX);
     let rect = canvas.getBoundingClientRect();
     dogLane = Math.max(0, Math.min(4, Math.floor((clientX - rect.left) / laneW)));
 };
 canvas.addEventListener('mousemove', handle);
+canvas.addEventListener('touchstart', handle);
 canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handle(e); }, {passive:false});
-
-function updateRanks() {
-    let s = JSON.parse(localStorage.getItem('doggyFinalV42') || '[]');
-    const icons = ["🪙", "🥈", "🥉", "🐾", "🐾"];
-    document.getElementById("rank-list").innerHTML = s.map((x,i)=>`
-        <div class="rank-row">
-            <span><span style="font-size:16px; margin-right:10px;">${icons[i]}</span> <b>${x.n}</b></span>
-            <span style="font-weight:900;">${x.s}</span>
-        </div>`).join('');
-}
-updateRanks();
 
 function loop(t) {
     if(!active) return;
     let dt = (t - lastTime) / 1000;
     if(dt > 0.1) dt = 0.016; 
     lastTime = t;
+
+    // GRAFIK CLEAR
     ctx.clearRect(0,0,W,H);
 
+    // LOGIK
     timeLeft -= dt;
     document.getElementById("timer-box").innerText = Math.ceil(timeLeft) + "s";
-    
-    energy -= (4.5 + level * 2) * dt;
-    let bar = document.getElementById("progress-bar");
-    bar.style.width = Math.max(0, energy) + "%";
-    
-    let r = energy < 50 ? 255 : Math.floor(255 - (energy-50)*5);
-    let g = energy > 50 ? 255 : Math.floor(energy*5);
-    bar.style.background = `rgb(${r}, ${g}, 0)`;
+    energy -= (4 + level) * dt;
+    document.getElementById("progress-bar").style.width = Math.max(0, energy) + "%";
 
-    if(energy < 20) { hearts--; energy = 75; sfx(120, 'sawtooth', 0.5, 0.2); addFloater(dogX, H-150, "PLATZT! -1❤️", "red"); }
+    if(energy < 20) { hearts--; energy = 70; sfx(120, 'sawtooth', 0.5, 0.2); }
+    if(timeLeft <= 0) { level++; timeLeft = 30; energy = 100; sfx(800, 'sine', 0.5, 0.1); }
 
-    if(timeLeft <= 0) {
-        level++; timeLeft = 30; energy = 100;
-        spawnCounters = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
-        sfx(880, 'sine', 0.8, 0.1);
-        document.getElementById("lvl-ui").innerText = level;
-    }
-
+    // SPAWN
     if(Math.random() < 0.05) {
-        let type = "";
-        if(spawnCounters.heart < 1 && Math.random() < 0.005) { type = "❤️"; spawnCounters.heart++; }
-        else if(spawnCounters.cop < 3 && Math.random() < 0.04) { type = "👮"; spawnCounters.cop++; }
-        else if(spawnCounters.meat < 10 && Math.random() < 0.08) { type = "🍗"; spawnCounters.meat++; }
-        else if(spawnCounters.cookie < 20 && Math.random() < 0.12) { type = "🍪"; spawnCounters.cookie++; }
-        else if(spawnCounters.bone < 30) { type = "🦴"; spawnCounters.bone++; }
-        if(type) items.push({lane: Math.floor(Math.random()*5), y: -60, type: type});
+        let types = ['🦴', '🍪', '🍗', '👮', '❤️'];
+        items.push({lane: Math.floor(Math.random()*5), y: -50, type: types[Math.floor(Math.random()*5)]});
     }
 
-    for(let i=items.length-1; i>=0; i--) {
-        let it = items[i];
-        it.y += (280 * (1 + (level-1)*0.4)) * dt; 
+    // DRAW ITEMS
+    items.forEach((it, i) => {
+        it.y += (250 * (1 + (level-1)*0.3)) * dt;
         let ix = it.lane*laneW + laneW/2;
-        ctx.font = "42px Arial"; ctx.textAlign = "center";
+        ctx.font = "40px Arial"; ctx.textAlign = "center";
         ctx.fillText(it.type, ix, it.y);
 
         if(it.lane === dogLane && it.y > H-150 && it.y < H-80) {
-            if(it.type === '👮') { hearts--; energy -= 15; sfx(80, 'square', 0.4); addFloater(ix, it.y, "-1❤️", "red"); }
-            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); sfx(600, 'sine', 0.4); addFloater(ix, it.y, "EXTRA!", "green"); }
+            if(it.type === '👮') { hearts--; energy -= 15; sfx(80, 'square', 0.4); }
+            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); sfx(600, 'sine', 0.4); }
             else {
                 let p = it.type === '🍗' ? 30 : (it.type === '🍪' ? 20 : 10);
-                score += p; energy = Math.min(100, energy + 6);
-                sfx(400 + p*5, 'sine', 0.1); addFloater(ix, it.y, "+"+p, "#333");
+                score += p; energy = Math.min(100, energy + 5);
+                sfx(400 + p*5, 'sine', 0.1);
             }
             items.splice(i, 1);
-        } else if(it.y > H) items.splice(i, 1);
-    }
+        }
+    });
+    items = items.filter(it => it.y < H);
 
-    if(spiders.length < 2) spiders.push({lane: Math.floor(Math.random()*5), t: Math.random()*Math.PI, s: 0.015});
+    // SPINNEN
+    if(spiders.length < 2) spiders.push({lane: Math.floor(Math.random()*5), t: Math.random()*Math.PI, s: 0.02});
     spiders.forEach(s => {
         s.t += s.s;
         let sy = (Math.sin(s.t) + 1) / 2 * (H - 120);
         let sx = s.lane * laneW + laneW/2;
         if(sy < 10 && Math.abs(Math.sin(s.t)) > 0.98) s.lane = Math.floor(Math.random()*5);
-
-        ctx.strokeStyle = "rgba(0,0,0,0.1)"; ctx.lineWidth = 2; ctx.beginPath(); 
-        ctx.moveTo(sx, 0); ctx.lineTo(sx, sy); ctx.stroke();
+        ctx.strokeStyle = "rgba(0,0,0,0.2)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, sy); ctx.stroke();
         ctx.fillText("🕷️", sx, sy + 30);
-        
-        if(s.lane === dogLane && sy > H-180 && sy < H-70) { 
-            energy -= 1.0; 
-            if(Math.random() < 0.02) { addFloater(sx, sy, "DANGER!", "red"); sfx(100, 'sawtooth', 0.1, 0.1); }
-        }
+        if(s.lane === dogLane && sy > H-160 && sy < H-70) { energy -= 0.5; }
     });
 
-    for(let i=floaters.length-1; i>=0; i--) {
-        let f = floaters[i]; f.y -= 1.5; f.life -= 0.02;
-        ctx.fillStyle = f.c; ctx.font = "bold 22px Orbitron"; ctx.globalAlpha = Math.max(0, f.life);
-        ctx.fillText(f.t, f.x, f.y); ctx.globalAlpha = 1;
-        if(f.life <= 0) floaters.splice(i, 1);
-    }
-
-    // Hund flüssig & tief (in der milchigen Ebene)
+    // DOG
     let targetX = dogLane * laneW + laneW/2;
-    dogX += (targetX - dogX) * 0.25; 
-    ctx.font = "70px Arial"; ctx.fillText("🐶", dogX, H - 35); 
+    dogX += (targetX - dogX) * 0.2; 
+    ctx.font = "60px Arial"; ctx.fillText("🐶", dogX, H - 40); 
 
+    // UI
     document.getElementById("score-ui").innerText = score;
     document.getElementById("heart-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
     if(hearts <= 0) {
-        active = false; if(bgMusic) bgMusic.pause();
-        saveScore();
+        active = false;
         document.getElementById("gameOver").style.display = "flex";
         document.getElementById("final-score").innerText = score;
-    } else requestAnimationFrame(loop);
-}
-
-function addFloater(x, y, t, c) { floaters.push({x:x, y:y, t:t, c:c, life:1.2}); }
-
-function saveScore() {
-    let n = document.getElementById("playerName").value || "SPIELER";
-    let s = JSON.parse(localStorage.getItem('doggyFinalV42') || '[]');
-    s.push({n: n, s: score});
-    s.sort((a,b)=>b.s-a.s);
-    localStorage.setItem('doggyFinalV42', JSON.stringify(s.slice(0,5)));
-    updateRanks();
+    } else {
+        requestAnimationFrame(loop);
+    }
 }
 </script>
 </body>
 </html>
+
