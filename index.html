@@ -3,76 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Doggyco: Ultimate Edition</title>
+    <title>Doggyco: Professional V36</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --gold: #ffd700; --red: #ff3131; --glass: rgba(0, 20, 40, 0.8); }
+        :root { --neon: #00f2ff; --gold: #ffd700; --red: #ff3131; --green: #00ff88; }
         * { margin:0; padding:0; box-sizing:border-box; touch-action:none; }
         body { background:#000; color: white; font-family: 'Orbitron', sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
         
         #game-wrap {
-            position:relative; height:90vh; width:100vw; max-width:500px;
+            position:relative; height:80vh; width:100vw; max-width:500px;
             background: #050505 url('hintergrund.png') center/cover;
-            border: 3px solid var(--neon); border-radius: 20px; overflow: hidden;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+            border: 4px solid var(--neon); border-radius: 15px; overflow: hidden;
         }
 
-        #ui-layer { position: absolute; top: 0; width: 100%; z-index: 100; pointer-events: none; padding: 15px; }
-        
-        #energy-container {
-            width: 100%; height: 12px; background: rgba(255,255,255,0.1); 
-            border: 1px solid white; border-radius: 10px; overflow: hidden; margin-bottom: 10px;
+        /* PROGRESS BAR OBEN */
+        #progress-container {
+            position: absolute; top: 10px; left: 5%; width: 90%; height: 25px;
+            background: rgba(0,0,0,0.8); border: 2px solid #fff; border-radius: 15px; z-index: 100;
         }
-        #energy-bar { height: 100%; width: 100%; background: #00ff88; transition: width 0.3s ease, background 0.3s; }
+        #progress-bar { 
+            height: 100%; width: 100%; background: var(--green); 
+            transition: width 0.3s ease, background 0.5s ease;
+            box-shadow: 0 0 15px var(--green);
+        }
 
-        #stats-row { display: flex; justify-content: space-between; align-items: center; }
-        #score-ui { font-size: 24px; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+        #stats {
+            position: absolute; top: 45px; width: 100%; display: flex; 
+            justify-content: space-between; padding: 0 20px; z-index: 100;
+        }
+        .stat-box { background: rgba(0,0,0,0.6); padding: 5px 12px; border-radius: 8px; border: 1px solid var(--neon); }
+        #heart-display { font-size: 28px; transition: transform 0.3s ease; }
+        .burst { transform: scale(2); opacity: 0; } /* Platz-Effekt */
 
         canvas { width: 100%; height: 100%; display: block; }
 
-        .overlay {
-            position:absolute; inset:0; background:rgba(0,0,0,0.9);
-            display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:200;
-        }
-        .btn { 
-            padding: 18px 45px; font-size: 22px; background: transparent; color: var(--neon); 
-            border: 2px solid var(--neon); cursor: pointer; font-family: 'Orbitron'; font-weight: 900;
-            text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
-        }
-        .btn:hover { background: var(--neon); color: #000; box-shadow: 0 0 20px var(--neon); }
+        .overlay { position:absolute; inset:0; background:rgba(0,0,0,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:200; text-align: center; padding: 20px; }
+        .btn { padding: 15px 40px; font-size: 20px; background: transparent; color: var(--neon); border: 2px solid var(--neon); cursor: pointer; font-family: 'Orbitron'; font-weight:900; }
+        
+        #leaderboard { margin-top: 10px; width: 90%; max-width: 500px; background: rgba(20,20,20,0.9); padding: 10px; border-radius: 10px; font-size: 12px; border: 1px solid #333; }
+        .rule-box { font-size: 10px; color: #aaa; margin-top: 10px; line-height: 1.4; }
     </style>
 </head>
 <body>
 
 <div id="game-wrap">
-    <div id="ui-layer">
-        <div id="energy-container"><div id="energy-bar"></div></div>
-        <div id="stats-row">
-            <span id="hearts-ui" style="font-size: 20px;">❤️❤️❤️</span>
-            <span id="score-ui">0</span>
-        </div>
+    <div id="progress-container"><div id="progress-bar"></div></div>
+    <div id="stats">
+        <div id="heart-display">❤️❤️❤️</div>
+        <div class="stat-box">LVL <span id="lvl-ui" style="color:var(--neon)">1</span></div>
+        <div class="stat-box"><span id="score-ui" style="color:var(--gold)">0</span></div>
     </div>
     <canvas id="game"></canvas>
 
     <div class="overlay" id="startScreen">
-        <h1 style="color:var(--neon); font-size: 32px; margin-bottom:5px; letter-spacing: 5px;">DOGGYCO</h1>
-        <p style="color:var(--gold); font-size: 12px; margin-bottom: 30px;">ULTIMATE EDITION</p>
-        <button class="btn" onclick="init()">START MISSION</button>
+        <h1 style="color:var(--neon); letter-spacing: 5px;">DOGGYCO V36</h1>
+        <p style="font-size: 12px; margin: 15px 0;">30s pro Level | 0.5x Speed Up</p>
+        <button class="btn" onclick="startGame()">START</button>
+    </div>
+
+    <div class="overlay" id="levelUpOverlay" style="display:none; background: rgba(0,242,255,0.2);">
+        <h1 style="color:white; font-size: 50px;">LEVEL UP!</h1>
+        <p>Speed +50%</p>
     </div>
 
     <div class="overlay" id="gameOver" style="display:none;">
-        <h2 style="color:var(--red); letter-spacing: 5px;">MISSION FAILED</h2>
-        <h1 id="final-score" style="font-size:60px; margin: 20px 0;">0</h1>
-        <button class="btn" onclick="location.reload()">TRY AGAIN</button>
+        <h2 style="color:var(--red);">GAME OVER</h2>
+        <h1 id="final-score" style="font-size:50px;">0</h1>
+        <button class="btn" onclick="location.reload()">NEUSTART</button>
+    </div>
+</div>
+
+<div id="leaderboard">
+    <h3 style="color:var(--gold); font-size: 14px; border-bottom: 1px solid #444;">🏆 TOP 5 RANGLISTE</h3>
+    <ul id="score-list" style="list-style: none; padding: 5px 0;"></ul>
+    <div class="rule-box">
+        <b>REGELN:</b> Pro Level: 1❤️, 3👮, 30🦴, 20🍪, 10🍗. <br>
+        Balken unter 20% = ❤️ verloren! Balken voll = Level-Max erreicht. <br>
+        Alle 30s steigt die Geschwindigkeit um 0,5x.
     </div>
 </div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-let W, H, lanes = 5, laneW, dogX, dogLane = 2, active = false;
-let items = [], spiders = [], score = 0, hearts = 3, energy = 100, level = 1;
-let lastTime = 0, audioCtx, shake = 0;
+let W, H, laneW, dogX, dogLane = 2, active = false;
+let items = [], spiders = [], score = 0, hearts = 3, energy = 100, level = 1, levelTime = 30;
+let lastTime = 0, audioCtx;
+let levelItemsSpawned = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
 
 function playSound(f, type, d, v=0.1) {
     if(!audioCtx) return;
@@ -87,33 +104,34 @@ function playSound(f, type, d, v=0.1) {
 function resize() {
     W = canvas.width = canvas.parentElement.offsetWidth;
     H = canvas.height = canvas.parentElement.offsetHeight;
-    laneW = W / lanes;
+    laneW = W / 5;
     dogX = W / 2;
 }
 window.onresize = resize; resize();
 
-// Liquid-Steuerung (Maus & Touch)
-const handleMove = (e) => {
-    if(!active) return;
+const handle = (e) => {
     let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    let rect = canvas.getBoundingClientRect();
-    let x = clientX - rect.left;
-    dogLane = Math.max(0, Math.min(lanes - 1, Math.floor(x / laneW)));
+    let x = clientX - canvas.getBoundingClientRect().left;
+    dogLane = Math.max(0, Math.min(4, Math.floor(x / laneW)));
 };
-window.addEventListener('mousemove', handleMove);
-window.addEventListener('touchmove', (e) => { e.preventDefault(); handleMove(e); }, {passive:false});
+canvas.addEventListener('mousemove', handle);
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handle(e); }, {passive:false});
 
-function init() {
+function startGame() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     document.getElementById("startScreen").style.display = "none";
     active = true;
+    updateLeaderboard();
     
-    // Background Beat
-    setInterval(() => {
-        if(active) playSound(60 + (level*2), 'triangle', 0.6, 0.04);
-    }, 800);
-
+    // Hintergrundmusik-Loop (Chill Electronic)
+    setInterval(() => { if(active) playSound(70 + (level*10), 'sine', 1.5, 0.05); }, 1200);
+    
     requestAnimationFrame(loop);
+}
+
+function updateLeaderboard() {
+    let s = JSON.parse(localStorage.getItem('doggyV36') || '[]');
+    document.getElementById("score-list").innerHTML = s.map((x,i)=>`<li>#${i+1} ${x.n}: ${x.s}</li>`).join('');
 }
 
 function loop(t) {
@@ -121,99 +139,100 @@ function loop(t) {
     let dt = (t - lastTime) / 1000;
     if(dt > 0.1) dt = 0.016; 
     lastTime = t;
-    
-    // Screen Shake Effekt
-    ctx.save();
-    if(shake > 0) {
-        ctx.translate(Math.random()*shake - shake/2, Math.random()*shake - shake/2);
-        shake *= 0.9;
-    }
     ctx.clearRect(0,0,W,H);
 
-    // Energie-Verlust
-    energy -= (4 + level) * dt;
-    let bar = document.getElementById("energy-bar");
+    levelTime -= dt;
+
+    // Energie-Logik (Punkte-Balken)
+    energy -= (5 + level * 2) * dt; 
+    let bar = document.getElementById("progress-bar");
     bar.style.width = energy + "%";
-    bar.style.background = energy > 60 ? "#00ff88" : (energy > 30 ? "#fbff00" : "#ff3131");
+    
+    // Farbumschlag: Rot (0) -> Gelb -> Grün (100)
+    let r = energy < 50 ? 255 : Math.floor(255 - (energy-50)*5.1);
+    let g = energy > 50 ? 255 : Math.floor(energy*5.1);
+    bar.style.background = `rgb(${r}, ${g}, 0)`;
 
-    if(energy <= 0) { hearts--; energy = 100; playSound(100, 'sawtooth', 0.5, 0.2); shake = 10; }
-
-    // Item Spawning (Keine Überschneidungen)
-    if(Math.random() < 0.02 + (level*0.005)) {
-        let types = ['🦴', '🍪', '🍗', '👮', '❤️'];
-        let lane = Math.floor(Math.random()*lanes);
-        let tooClose = items.some(it => it.lane === lane && it.y < 100);
-        if(!tooClose) {
-            items.push({lane: lane, y: -60, type: types[Math.floor(Math.random()*5)]});
-        }
+    // Herz-Verlust wenn < 20%
+    if(energy < 20) {
+        hearts--; energy = 60;
+        playSound(100, 'sawtooth', 0.5, 0.2);
+        let hDisplay = document.getElementById("heart-display");
+        hDisplay.style.transform = "scale(2)";
+        setTimeout(() => hDisplay.style.transform = "scale(1)", 300);
     }
 
-    // Items zeichnen & bewegen
-    ctx.shadowBlur = 10; ctx.shadowColor = "rgba(255,255,255,0.5)";
+    // Level-Up System
+    if(levelTime <= 0) {
+        level++; levelTime = 30; energy = 100;
+        levelItemsSpawned = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
+        document.getElementById("levelUpOverlay").style.display = "flex";
+        setTimeout(() => document.getElementById("levelUpOverlay").style.display = "none", 1000);
+        playSound(880, 'sine', 0.8, 0.1);
+    }
+
+    // Spawning nach deinen Regeln
+    if(Math.random() < 0.04) {
+        let type = "";
+        if(levelItemsSpawned.heart < 1 && Math.random() < 0.01) { type = "❤️"; levelItemsSpawned.heart++; }
+        else if(levelItemsSpawned.cop < 3 && Math.random() < 0.05) { type = "👮"; levelItemsSpawned.cop++; }
+        else if(levelItemsSpawned.meat < 10 && Math.random() < 0.1) { type = "🍗"; levelItemsSpawned.meat++; }
+        else if(levelItemsSpawned.cookie < 20 && Math.random() < 0.15) { type = "🍪"; levelItemsSpawned.cookie++; }
+        else if(levelItemsSpawned.bone < 30) { type = "🦴"; levelItemsSpawned.bone++; }
+
+        if(type) items.push({lane: Math.floor(Math.random()*5), y: -50, type: type});
+    }
+
+    // Items
     for(let i=items.length-1; i>=0; i--) {
         let it = items[i];
-        it.y += (320 + level * 30) * dt; 
+        it.y += (250 + (level-1) * 125) * dt; // 0.5x Steigerung pro Level
         let ix = it.lane*laneW + laneW/2;
-        ctx.font = "45px Arial"; ctx.textAlign = "center";
+        ctx.font = "40px Arial"; ctx.textAlign = "center";
         ctx.fillText(it.type, ix, it.y);
 
-        if(it.lane === dogLane && it.y > H-140 && it.y < H-60) {
-            if(it.type === '👮') { hearts--; playSound(80, 'square', 0.5, 0.2); shake = 15; }
-            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); playNote(600, 0.3); }
+        if(it.lane === dogLane && it.y > H-130 && it.y < H-70) {
+            if(it.type === '👮') { hearts--; playSound(80, 'square', 0.4); energy -= 15; }
+            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); playSound(600, 'sine', 0.3); }
             else {
-                let p = it.type === '🍗' ? 3 : (it.type === '🍪' ? 2 : 1);
-                score += p * level; energy = Math.min(100, energy + 12);
-                playSound(400 + p*150, 'sine', 0.15, 0.1);
+                let p = it.type === '🍗' ? 30 : (it.type === '🍪' ? 20 : 10);
+                score += p; energy = Math.min(100, energy + (p/5));
+                playSound(400 + p*5, 'sine', 0.1);
             }
             items.splice(i, 1);
         } else if(it.y > H) items.splice(i, 1);
     }
-    ctx.shadowBlur = 0;
 
-    // Spinnen-Gefahr
-    if(spiders.length < 2) spiders.push({x: Math.random()*W, t: Math.random()*Math.PI, s: 0.025});
+    // Spinnen (Langsamere Bewegung wie gewünscht)
+    if(spiders.length < 2) spiders.push({x: Math.random()*W, t: Math.random()*Math.PI, s: 0.015});
     spiders.forEach(s => {
         s.t += s.s;
-        let sy = (Math.sin(s.t) + 1) / 2 * (H - 150);
-        if(sy < 10) s.x = Math.random()*W;
-
-        ctx.strokeStyle = "rgba(0, 242, 255, 0.4)"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
-        ctx.font = "38px Arial"; ctx.fillText("🕷️", s.x, sy + 35);
-
-        if(Math.abs(s.x - dogX) < 45 && sy > H-160 && sy < H-60) {
-            energy -= 20; 
-            playSound(120, 'sawtooth', 0.3, 0.3);
-            shake = 12;
-            s.t = Math.PI * 1.5; 
-        }
+        let sy = (Math.sin(s.t) + 1) / 2 * (H - 200);
+        ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath();
+        ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
+        ctx.fillText("🕷️", s.x, sy + 30);
+        if(Math.abs(s.x - dogX) < 40 && sy > H-150 && sy < H-70) { energy -= 0.5; }
     });
 
-    // Hund-Animation & Bewegung
-    let targetX = dogLane * laneW + laneW/2;
-    dogX += (targetX - dogX) * 0.25; 
-    let dogPulse = 1 + Math.sin(t*0.01)*0.05;
-    ctx.save();
-    ctx.translate(dogX, H-90);
-    ctx.scale(dogPulse, dogPulse);
-    ctx.font = "65px Arial"; ctx.fillText("🐶", 0, 0);
-    ctx.restore();
+    // Hund
+    dogX += (dogLane * laneW + laneW/2 - dogX) * 0.3;
+    ctx.font = "60px Arial"; ctx.fillText("🐶", dogX, H - 80);
 
-    ctx.restore(); // Ende Shake
-
-    // UI Refresh
+    // UI
     document.getElementById("score-ui").innerText = score;
-    document.getElementById("hearts-ui").innerText = "❤️".repeat(Math.max(0, hearts));
-    if(score > level * 350) level++;
+    document.getElementById("lvl-ui").innerText = level;
+    document.getElementById("heart-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
     if(hearts <= 0) {
         active = false;
+        let s = JSON.parse(localStorage.getItem('doggyV36') || '[]');
+        s.push({n: "Spieler", s: score});
+        s.sort((a,b)=>b.s-a.s);
+        localStorage.setItem('doggyV36', JSON.stringify(s.slice(0,5)));
         document.getElementById("gameOver").style.display = "flex";
         document.getElementById("final-score").innerText = score;
     } else requestAnimationFrame(loop);
 }
-
-function playNote(f, d) { playSound(f, 'sine', d, 0.1); }
 </script>
 </body>
 </html>
