@@ -3,104 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Doggyco: Evolved V33 - Fixed & Enhanced</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>Doggyco: Evolved V34</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00f2ff; --gold: #ffd700; --red: #ff3131; --glass: rgba(0, 10, 20, 0.85); }
+        :root { --neon: #00f2ff; --gold: #ffd700; --red: #ff3131; }
         * { margin:0; padding:0; box-sizing:border-box; touch-action:none; }
-        body { background:#050505; color: white; font-family: 'Orbitron', sans-serif; display: flex; flex-direction: column; align-items: center; padding-top: 10px; overflow-x: hidden; }
+        body { background:#000; color: white; font-family: 'Orbitron', sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
         
-        #game-container { 
-            position:relative; height:75vh; width:95vw; max-width:500px; 
-            overflow:hidden; border: 3px solid var(--neon); 
+        #game-wrap {
+            position:relative; height:85vh; width:100vw; max-width:500px;
             background: #111 url('hintergrund.png') center/cover;
-            border-radius: 15px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+            border: 3px solid var(--neon); overflow: hidden;
         }
 
-        /* HUD */
-        #hud { position: absolute; top: 0; width: 100%; display: flex; justify-content: space-between; padding: 10px 15px; z-index: 60; background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent); }
-        .hud-item { text-align: center; }
-        #timer-ui { color: var(--neon); font-size: 18px; font-weight: 900; }
-        #score-ui { font-size: 22px; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-        #hearts-ui { font-size: 16px; }
+        #energy-container {
+            position: absolute; top: 15px; left: 10%; width: 80%; height: 20px;
+            background: rgba(0,0,0,0.7); border: 2px solid white; border-radius: 10px; z-index: 100;
+        }
+        #energy-bar { height: 100%; width: 100%; background: #00ff88; transition: width 0.2s, background 0.3s; }
+
+        #stats {
+            position: absolute; top: 45px; width: 100%; display: flex; 
+            justify-content: space-around; z-index: 100; font-size: 18px; font-weight: 900;
+        }
 
         canvas { width: 100%; height: 100%; display: block; }
 
-        /* UNTEN: RANGLISTE & INFO */
-        #ui-bottom { width: 95vw; max-width: 500px; margin-top: 15px; }
-        .panel { background: var(--glass); border: 1px solid #222; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-        h3 { color: var(--neon); font-size: 12px; letter-spacing: 2px; margin-bottom: 8px; border-bottom: 1px solid #333; }
-        
-        #leaderboard-list { list-style: none; font-size: 13px; }
-        #leaderboard-list li { display: flex; justify-content: space-between; padding: 3px 0; opacity: 0.9; }
-
-        .guide { display: flex; justify-content: space-between; font-size: 11px; flex-wrap: wrap; gap: 5px; }
-
-        /* OVERLAYS */
-        .overlay { position:absolute; inset:0; background:rgba(0,0,0,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:100; text-align: center; }
-        input { background: #000; border: 1px solid var(--neon); color: white; padding: 10px; font-family: 'Orbitron'; margin-bottom: 15px; width: 70%; text-align: center; }
-        .btn { padding: 12px 35px; font-size: 16px; background: transparent; color: var(--neon); border: 2px solid var(--neon); cursor: pointer; font-weight: 900; }
+        .overlay {
+            position:absolute; inset:0; background:rgba(0,0,0,0.9);
+            display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:200;
+        }
+        .btn { padding: 15px 40px; font-size: 20px; background: transparent; color: var(--neon); border: 2px solid var(--neon); cursor: pointer; font-family: 'Orbitron'; }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <div id="hud">
-            <div id="hearts-ui">❤️❤️❤️</div>
-            <div id="score-ui">0</div>
-            <div id="timer-ui">30s</div>
-        </div>
-        <canvas id="game"></canvas>
+<div id="game-wrap">
+    <div id="energy-container"><div id="energy-bar"></div></div>
+    <div id="stats">
+        <span id="hearts-ui">❤️❤️❤️</span>
+        <span id="score-ui" style="color:var(--gold)">0</span>
+    </div>
+    <canvas id="game"></canvas>
 
-        <div class="overlay" id="startScreen">
-            <h1 style="color:var(--neon); font-size: 28px; letter-spacing: 5px; margin-bottom: 5px;">DOGGYCO</h1>
-            <p style="color:var(--gold); font-size: 10px; margin-bottom: 25px;">EVOLVED V33</p>
-            <input type="text" id="playerName" maxlength="10" placeholder="DEIN NAME">
-            <button class="btn" onclick="startGame()">MISSION START</button>
-        </div>
-
-        <div class="overlay" style="display:none;" id="gameOver">
-            <h2 style="color:var(--red);">GAME OVER</h2>
-            <h1 id="final-score" style="font-size:45px; margin:15px 0;">0</h1>
-            <button class="btn" onclick="location.reload()">REBOOT</button>
-        </div>
+    <div class="overlay" id="startScreen">
+        <h1 style="color:var(--neon); margin-bottom:20px;">DOGGYCO V34</h1>
+        <button class="btn" onclick="init()">START ENGINE</button>
     </div>
 
-    <div id="ui-bottom">
-        <div class="panel">
-            <h3>🏆 TOP AGENTS</h3>
-            <ul id="leaderboard-list"></ul>
-        </div>
-        <div class="panel">
-            <div class="guide">
-                <span>🦴 1</span> <span>🍪 2</span> <span>🍗 3</span> <span>❤️ +1</span> <span style="color:var(--red)">👮 -LIFE</span>
-            </div>
-        </div>
+    <div class="overlay" id="gameOver" style="display:none;">
+        <h2 style="color:var(--red);">ENGINE FAILURE</h2>
+        <h1 id="final-score" style="font-size:50px;">0</h1>
+        <button class="btn" onclick="location.reload()">REBOOT</button>
     </div>
+</div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+let W, H, lanes = 5, laneW, dogX, dogLane = 2, active = false;
+let items = [], spiders = [], score = 0, hearts = 3, energy = 100, level = 1;
+let lastTime = 0, audioCtx;
 
-let W, H, lanes = 5, laneW;
-let dogX = 0, targetX = 0, dogLane = 2;
-let items = [], spiders = [];
-let score = 0, hearts = 3, timeLeft = 30, level = 1, active = false, playerName = "Agent";
-let audioCtx;
-
-// SOUND ENGINE - Repariert & Stabil
-function playNote(freq, type, duration, vol) {
-    if (!audioCtx) return;
-    try {
-        let osc = audioCtx.createOscillator();
-        let gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + duration);
-    } catch(e) { console.log("Audio Error"); }
+function playSFX(f, type, d, v=0.1) {
+    if(!audioCtx) return;
+    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(v, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + d);
 }
 
 function resize() {
@@ -111,108 +83,97 @@ function resize() {
 }
 window.onresize = resize; resize();
 
-// Steuerung (PC & Mobile)
-const input = (e) => {
+const handle = (e) => {
     let x = (e.touches ? e.touches[0].clientX : e.clientX) - canvas.getBoundingClientRect().left;
     dogLane = Math.max(0, Math.min(lanes - 1, Math.floor(x / laneW)));
 };
-canvas.addEventListener('mousemove', input);
-canvas.addEventListener('touchmove', (e) => { e.preventDefault(); input(e); }, {passive:false});
+canvas.addEventListener('mousemove', handle);
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handle(e); }, {passive:false});
 
-function startGame() {
-    let n = document.getElementById("playerName").value;
-    if(n) playerName = n;
-    
-    // Audio erst bei Klick aktivieren
+function init() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
     document.getElementById("startScreen").style.display = "none";
     active = true;
     
-    // Hintergrund-Melodie (Lo-Fi Style)
+    // Hintergrund Musik-Loop
     setInterval(() => {
-        if(active) {
-            playNote(110 + (level*5), 'sine', 1.2, 0.05); // Bass
-            if(Math.random() > 0.5) setTimeout(() => playNote(220, 'sine', 0.6, 0.03), 400);
-        }
+        if(active) playSFX(80 + (level*5), 'sine', 1, 0.05);
     }, 1000);
 
-    updateLeaderboard();
     requestAnimationFrame(loop);
 }
 
-function updateLeaderboard() {
-    let s = JSON.parse(localStorage.getItem('doggyV33') || '[]');
-    document.getElementById("leaderboard-list").innerHTML = s.map((x,i)=>`<li><span>#${i+1} ${x.n}</span><span>${x.s}</span></li>`).join('');
-}
-
-let lastT = 0;
 function loop(t) {
     if(!active) return;
-    let delta = (t - lastT) / 1000;
-    if(delta > 0.1) delta = 0.016; // Fix für Ruckler
-    lastT = t;
+    let dt = (t - lastTime) / 1000;
+    if(dt > 0.1) dt = 0.016; 
+    lastTime = t;
     ctx.clearRect(0,0,W,H);
 
-    timeLeft -= delta;
-    document.getElementById("timer-ui").innerText = Math.ceil(timeLeft) + "s";
-    
-    if(timeLeft <= 0) {
-        level++; timeLeft = 30;
-        playNote(440, 'sine', 0.5, 0.1);
+    // Energy Logik
+    energy -= (3 + level) * dt;
+    let bar = document.getElementById("energy-bar");
+    bar.style.width = energy + "%";
+    bar.style.background = energy > 60 ? "#00ff88" : (energy > 30 ? "#fbff00" : "#ff3131");
+
+    if(energy <= 0) { hearts--; energy = 100; playSFX(100, 'sawtooth', 0.5); }
+
+    // Spawning
+    if(Math.random() < 0.02) {
+        let types = ['🦴', '🍪', '🍗', '👮', '❤️'];
+        items.push({lane: Math.floor(Math.random()*lanes), y: -50, type: types[Math.floor(Math.random()*5)]});
     }
 
-    if(Math.random() < 0.02 + (level*0.003)) {
-        let r = Math.random();
-        let type = r < 0.4 ? '🦴' : (r < 0.7 ? '🍪' : (r < 0.85 ? '🍗' : (r < 0.95 ? '👮' : '❤️')));
-        items.push({lane: Math.floor(Math.random()*lanes), y: -50, type: type});
-    }
-
+    // Items
     for(let i=items.length-1; i>=0; i--) {
         let it = items[i];
-        it.y += (4.5 + level * 0.5);
+        it.y += (300 + level * 40) * dt; 
         let ix = it.lane*laneW + laneW/2;
-        ctx.font = "35px Arial"; ctx.textAlign = "center";
+        ctx.font = "40px Arial"; ctx.textAlign = "center";
         ctx.fillText(it.type, ix, it.y);
 
-        if(it.lane === dogLane && it.y > H-120 && it.y < H-60) {
-            if(it.type === '👮') {
-                hearts--; playNote(80, 'sawtooth', 0.4, 0.2);
-            } else if(it.type === '❤️') {
-                if(hearts < 3) hearts++; else score += 10;
-                playNote(600, 'sine', 0.3, 0.1);
-            } else {
-                let p = it.type === '🦴' ? 1 : (it.type === '🍪' ? 2 : 3);
-                score += p * level;
-                playNote(300 + (p*100), 'sine', 0.1, 0.1);
+        if(it.lane === dogLane && it.y > H-130 && it.y < H-70) {
+            if(it.type === '👮') { hearts--; playSFX(80, 'square', 0.4); }
+            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); playSFX(600, 'sine', 0.2); }
+            else {
+                let p = it.type === '🍗' ? 3 : (it.type === '🍪' ? 2 : 1);
+                score += p * level; energy = Math.min(100, energy + 10);
+                playSFX(400 + p*100, 'sine', 0.1);
             }
             items.splice(i, 1);
         } else if(it.y > H) items.splice(i, 1);
     }
 
-    // Spinne (Gegner)
-    if(spiders.length < 2) spiders.push({x: Math.random()*W, t: Math.random()*5, s: 0.02});
+    // Spinnen AI (Gehen jetzt weit runter)
+    if(spiders.length < 2) spiders.push({x: Math.random()*W, t: Math.random()*Math.PI, s: 0.02});
     spiders.forEach(s => {
-        s.t += s.s; let sy = (Math.sin(s.t)+1)/2 * (H-200);
-        if(sy < 5) s.x = Math.random()*W;
-        ctx.strokeStyle = "rgba(0,242,255,0.3)"; ctx.beginPath(); ctx.moveTo(s.x,0); ctx.lineTo(s.x,sy); ctx.stroke();
-        ctx.fillText("🕷️", s.x, sy+20);
-        if(Math.abs(s.x - dogX) < 35 && sy > H-130 && sy < H-60) timeLeft -= 0.15;
+        s.t += s.s;
+        let sy = (Math.sin(s.t) + 1) / 2 * (H - 150); // Geht bis zum Hund runter
+        if(sy < 10) s.x = Math.random()*W;
+
+        ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.beginPath();
+        ctx.moveTo(s.x, 0); ctx.lineTo(s.x, sy); ctx.stroke();
+        ctx.fillText("🕷️", s.x, sy + 30);
+
+        if(Math.abs(s.x - dogX) < 40 && sy > H-150 && sy < H-70) {
+            energy -= 20; // 20% Abzug
+            playSFX(120, 'sawtooth', 0.3, 0.2);
+            s.t = Math.PI * 1.5; // Spinne zieht sich nach Treffer zurück
+        }
     });
 
-    targetX = dogLane * laneW + laneW/2;
+    // Hund
+    let targetX = dogLane * laneW + laneW/2;
     dogX += (targetX - dogX) * 0.2;
-    ctx.fillText("🐶", dogX, H - 70);
+    ctx.fillText("🐶", dogX, H - 80);
 
+    // UI & Level
     document.getElementById("score-ui").innerText = score;
     document.getElementById("hearts-ui").innerText = "❤️".repeat(Math.max(0, hearts));
+    if(score > level * 200) level++;
 
     if(hearts <= 0) {
         active = false;
-        let s = JSON.parse(localStorage.getItem('doggyV33') || '[]');
-        s.push({n: playerName, s: score});
-        s.sort((a,b)=>b.s-a.s);
-        localStorage.setItem('doggyV33', JSON.stringify(s.slice(0,5)));
         document.getElementById("gameOver").style.display = "flex";
         document.getElementById("final-score").innerText = score;
     } else requestAnimationFrame(loop);
@@ -220,4 +181,3 @@ function loop(t) {
 </script>
 </body>
 </html>
-
