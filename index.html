@@ -3,244 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Doggyco V46 - Ultra Optimization</title>
+    <title>Doggyco.de - Official Royale</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd700; --neon: #00f2ff; --red: #ff3131; }
-        * { margin:0; padding:0; box-sizing:border-box; touch-action:none; }
-        
+        * { margin:0; padding:0; box-sizing:border-box; }
         body { 
-            background: #1a1a1a; 
-            font-family: 'Orbitron', sans-serif; 
-            overflow: hidden; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh;
-            color: #fff;
+            background: #eef2f3; font-family: 'Orbitron', sans-serif; 
+            overflow-y: auto; display: flex; flex-direction: column; align-items: center; 
         }
         
-        #game-wrap { 
-            position:relative; 
-            width: 100vw; 
-            height: 100vh; 
-            max-width: 500px; 
-            max-height: 900px;
-            background: #000; 
-            border: 4px solid #333; 
-            border-radius: 20px; 
-            overflow: hidden; 
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        /* Das Spielfeld-Gehäuse */
+        #game-container { 
+            position:relative; width: 100vw; height: 85vh; max-width: 480px; 
+            background: #000; border: 8px solid #222; border-radius: 0 0 40px 40px; 
+            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
         }
 
-        #bg-img { 
-            position: absolute; inset: 0; 
-            background: url('hintergrund.png') center/cover; 
-            filter: blur(5px) brightness(0.8); 
-            z-index: 1; 
-        }
+        #bg-canvas { position: absolute; inset: 0; z-index: 1; }
+        #game-canvas { position: absolute; inset: 0; z-index: 20; background: transparent; }
 
-        /* Transparenter Übergang unten */
-        #floor-gradient { 
-            position: absolute; bottom: 0; width: 100%; height: 20%; 
-            background: linear-gradient(to top, rgba(255,255,255,0.2), transparent); 
-            backdrop-filter: blur(8px);
-            z-index: 5; 
-        }
+        /* HUD & UI */
+        #hud { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; z-index: 100; }
+        .badge { background: rgba(255,255,255,0.9); color: #000; padding: 5px 10px; border-radius: 8px; font-weight: 900; border: 2px solid #000; }
+        
+        #progress-wrap { position: absolute; top: 50px; left: 5%; width: 90%; height: 12px; background: rgba(0,0,0,0.3); border-radius: 6px; z-index: 100; overflow: hidden; border: 1px solid #fff; }
+        #progress-bar { height: 100%; width: 100%; background: #00ff88; transition: width 0.3s; }
 
-        #progress-container { 
-            position: absolute; top: 15px; left: 5%; width: 90%; height: 18px; 
-            background: rgba(0,0,0,0.5); border: 1px solid #fff; border-radius: 10px; z-index: 100; 
-        }
-        #bar { height: 100%; width: 100%; background: #00ff88; transition: width 0.3s; }
+        /* Milchglas unten */
+        #glass-floor { position: absolute; bottom: 0; width: 100%; height: 15%; background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); z-index: 5; border-top: 1px solid rgba(255,255,255,0.5); }
 
-        #hud { 
-            position: absolute; top: 45px; width: 100%; display: flex; 
-            justify-content: space-between; padding: 0 20px; z-index: 100; 
-        }
-        .badge { background: rgba(0,0,0,0.7); padding: 5px 12px; border: 1px solid var(--neon); border-radius: 8px; font-weight: 900; }
+        /* Controls */
+        #controls { position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: space-around; z-index: 200; }
+        .btn-move { width: 60px; height: 60px; background: rgba(255,255,255,0.3); border: 2px solid #fff; border-radius: 50%; color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-        canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 20; }
+        /* Info Bereich unter dem Spiel */
+        #info-section { width: 95vw; max-width: 480px; padding: 20px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 50px; }
+        h2 { border-bottom: 2px solid #000; margin-bottom: 10px; padding-bottom: 5px; }
+        .rule-item { margin: 10px 0; font-size: 14px; line-height: 1.4; color: #444; }
+        
+        .overlay { position:absolute; inset:0; background:rgba(255,255,255,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:400; text-align: center; }
+        .start-btn { padding: 15px 40px; background: #000; color: #fff; border-radius: 30px; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; border: none; font-size: 20px; }
 
-        /* Overlays */
-        .overlay { 
-            position:absolute; inset:0; background:rgba(0,0,0,0.85); 
-            display:flex; flex-direction:column; justify-content:center; 
-            align-items:center; z-index:200; text-align: center; padding: 30px; 
-        }
-
-        input { 
-            padding:15px; border:2px solid var(--neon); border-radius:10px; 
-            background: transparent; color: #fff; text-align:center; 
-            font-family:'Orbitron'; font-size:20px; margin-bottom:25px; width: 80%; 
-        }
-
-        .btn-start { 
-            padding: 20px 50px; font-size: 26px; background: var(--neon); 
-            color: #000; border: none; cursor: pointer; border-radius: 50px; 
-            font-weight: 900; font-family: 'Orbitron';
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(0, 242, 255, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); }
-        }
+        .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-weight: 700; }
     </style>
 </head>
 <body>
 
-<div id="game-wrap">
-    <div id="bg-img"></div>
-    <div id="floor-gradient"></div>
-    <div id="progress-container"><div id="bar"></div></div>
+<div id="game-container">
+    <canvas id="bg-canvas"></canvas>
+    <div id="glass-floor"></div>
     <div id="hud">
         <div id="hearts">❤️❤️❤️</div>
-        <div class="badge" id="timer">30s</div>
-        <div class="badge">LVL <span id="lvl">1</span></div>
+        <div class="badge" id="lvl-txt">LVL 1</div>
+        <div class="badge" id="timer-txt">30s</div>
     </div>
-    <canvas id="game"></canvas>
+    <div id="progress-wrap"><div id="progress-bar"></div></div>
+    
+    <canvas id="game-canvas"></canvas>
 
-    <div class="overlay" id="startScreen">
-        <h1 style="font-size: 40px; color:var(--neon); margin-bottom: 30px;">DOGGYCO</h1>
-        <input type="text" id="pName" placeholder="NAME..." maxlength="10">
-        <button class="btn-start" onclick="initGame()">START</button>
+    <div id="controls">
+        <div class="btn-move" onmousedown="moveLeft()" ontouchstart="moveLeft()">◀</div>
+        <div class="btn-move" onmousedown="moveRight()" ontouchstart="moveRight()">▶</div>
     </div>
 
-    <div class="overlay" id="gameOver" style="display:none;">
-        <h2 style="color:var(--red); font-size: 30px;">MISSION ENDE</h2>
-        <h1 id="fScore" style="font-size:60px; margin:20px 0; color:var(--gold);">0</h1>
-        <button class="btn-start" onclick="location.reload()" style="animation:none;">RETRY</button>
+    <div class="overlay" id="start-screen">
+        <h1 style="font-size: 35px; color:#000;">DOGGYCO.DE</h1>
+        <p style="margin: 15px 0; color: #666;">Willkommen zurück!</p>
+        <input type="text" id="pName" placeholder="DEIN NAME" maxlength="10" style="padding:12px; margin-bottom:20px; text-align:center; border-radius:10px; width:70%; font-family:'Orbitron';">
+        <button class="start-btn" onclick="startGame()">MISSION START</button>
     </div>
 </div>
 
+<div id="info-section">
+    <h2>🏆 BESTENLISTE</h2>
+    <div id="leaderboard"></div>
+
+    <h2 style="margin-top: 30px;">📖 ANLEITUNG</h2>
+    <div class="rule-item"><b>Level-Regel:</b> Pro Level erscheint 1❤️, 3👮, 30🦴, 20🍪 und 10🍗.</div>
+    <div class="rule-item"><b>Energie:</b> Sammle Items, um den Balken grün zu halten. Sinkt er unter 20%, platzt ein Herz!</div>
+    <div class="rule-item"><b>Gefahr:</b> Spinnen rauben Energie. Weiche Polizisten aus!</div>
+</div>
+
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+const bgCanvas = document.getElementById("bg-canvas");
+const gameCanvas = document.getElementById("game-canvas");
+const bctx = bgCanvas.getContext("2d");
+const gctx = gameCanvas.getContext("2d");
+
 let W, H, laneW, dogX, dogLane = 2, active = false;
-let items = [], spiders = [], score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
-let audioCtx, bgMusic;
-let levelLogic = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
+let items = [], spiders = [], clouds = [], birds = [], floaters = [];
+let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
+let levelItems = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
 
 function resize() {
-    W = canvas.width = canvas.offsetWidth;
-    H = canvas.height = canvas.offsetHeight;
+    W = bgCanvas.width = gameCanvas.width = document.getElementById("game-container").offsetWidth;
+    H = bgCanvas.height = gameCanvas.height = document.getElementById("game-container").offsetHeight;
     laneW = W / 5;
-    dogX = W / 2;
+    dogX = laneW * dogLane + laneW/2;
 }
-window.onload = resize; window.onresize = resize;
+window.onload = () => { resize(); initWorld(); updateRanks(); };
 
-function sfx(f, type, d, v=0.1) {
-    if (!audioCtx) return;
-    try {
-        let o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(v, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + d);
-    } catch(e){}
+function initWorld() {
+    for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: Math.random()*H/3, s: 0.2 + Math.random()*0.5});
 }
 
-function initGame() {
-    resize();
-    try {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        bgMusic = new Audio('musik.mp3');
-        bgMusic.loop = true;
-        bgMusic.volume = 0.05;
-        bgMusic.play().catch(() => {});
-    } catch(e) {}
-    document.getElementById("startScreen").style.display = "none";
+function startGame() {
+    document.getElementById("start-screen").style.display = "none";
     active = true;
-    gameLoop();
+    requestAnimationFrame(loop);
 }
 
-const move = (e) => {
-    let x = (e.touches ? e.touches[0].clientX : e.clientX) - canvas.getBoundingClientRect().left;
-    dogLane = Math.max(0, Math.min(4, Math.floor(x / laneW)));
-};
-canvas.addEventListener('mousemove', move);
-canvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e); }, {passive:false});
+function moveLeft() { if(dogLane > 0) dogLane--; }
+function moveRight() { if(dogLane < 4) dogLane++; }
+window.addEventListener('keydown', (e) => {
+    if(e.key === "ArrowLeft") moveLeft();
+    if(e.key === "ArrowRight") moveRight();
+});
 
-function gameLoop() {
+function loop() {
     if(!active) return;
-    ctx.clearRect(0, 0, W, H);
+    
+    // Background (Clouds & Birds)
+    bctx.fillStyle = "#87CEEB";
+    bctx.fillRect(0,0,W,H);
+    bctx.fillStyle = "rgba(255,255,255,0.8)";
+    clouds.forEach(c => {
+        c.x += c.s; if(c.x > W) c.x = -100;
+        bctx.font = "50px Arial"; bctx.fillText("☁️", c.x, c.y);
+    });
+    if(Math.random() < 0.002) birds.push({x: W, y: Math.random()*H/2, s: 2});
+    birds.forEach((b, i) => {
+        b.x -= b.s; bctx.fillText("🐦", b.x, b.y);
+        if(b.x < -50) birds.splice(i, 1);
+    });
 
+    gctx.clearRect(0,0,W,H);
+    
     timeLeft -= 0.016;
-    energy -= (0.05 + level * 0.02);
-    document.getElementById("timer").innerText = Math.ceil(timeLeft) + "s";
-    document.getElementById("bar").style.width = Math.max(0, energy) + "%";
+    energy -= (0.05 + level * 0.01);
+    document.getElementById("timer-txt").innerText = Math.ceil(timeLeft) + "s";
+    document.getElementById("progress-bar").style.width = Math.max(0, energy) + "%";
 
     if(timeLeft <= 0) {
         level++; timeLeft = 30; energy = 100;
-        levelLogic = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
-        document.getElementById("lvl").innerText = level;
-        sfx(880, 'sine', 0.5, 0.1);
+        levelItems = { heart:0, cop:0, bone:0, cookie:0, meat:0 };
+        document.getElementById("lvl-txt").innerText = "LVL " + level;
     }
 
-    // Spawning nach deinen exakten Regeln
+    // Spawning (Keine Überschneidungen durch Lane-Check)
     if(Math.random() < 0.05) {
         let type = "";
-        if(levelLogic.heart < 1 && Math.random() < 0.005) { type = "❤️"; levelLogic.heart++; }
-        else if(levelLogic.cop < 3 && Math.random() < 0.04) { type = "👮"; levelLogic.cop++; }
-        else if(levelLogic.bone < 30 && Math.random() < 0.15) { type = "🦴"; levelLogic.bone++; }
-        else if(levelLogic.cookie < 20 && Math.random() < 0.12) { type = "🍪"; levelLogic.cookie++; }
-        else if(levelLogic.meat < 10 && Math.random() < 0.08) { type = "🍗"; levelLogic.meat++; }
-        
-        if(type) items.push({lane: Math.floor(Math.random()*5), y: -60, type: type});
+        if(levelItems.heart < 1 && Math.random() < 0.01) { type = "❤️"; levelItems.heart++; }
+        else if(levelItems.cop < 3 && Math.random() < 0.04) { type = "👮"; levelItems.cop++; }
+        else if(levelItems.bone < 30) { type = "🦴"; levelItems.bone++; }
+        else if(levelItems.cookie < 20) { type = "🍪"; levelItems.cookie++; }
+        else if(levelItems.meat < 10) { type = "🍗"; levelItems.meat++; }
+
+        if(type) {
+            let lane = Math.floor(Math.random()*5);
+            let tooClose = items.some(it => it.lane === lane && it.y < 100);
+            if(!tooClose) items.push({lane: lane, y: -50, type: type});
+        }
     }
 
     items.forEach((it, i) => {
-        it.y += (3.5 + level * 0.5);
+        it.y += 4; // Konstante Geschwindigkeit
         let ix = it.lane * laneW + laneW/2;
-        ctx.font = "45px Arial"; ctx.textAlign = "center";
-        ctx.fillText(it.type, ix, it.y);
-
-        if(it.lane === dogLane && it.y > H-150 && it.y < H-80) {
-            if(it.type === '👮') { hearts--; energy -= 20; sfx(80, 'square', 0.4); }
-            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); sfx(600, 'sine', 0.4); }
+        gctx.font = "40px Arial"; gctx.textAlign = "center";
+        gctx.fillText(it.type, ix, it.y);
+        
+        if(it.lane === dogLane && it.y > H-160 && it.y < H-90) {
+            if(it.type === '👮') { hearts--; energy -= 20; addFloater(ix, it.y, "-1❤️", "red"); }
+            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); addFloater(ix, it.y, "+1❤️", "green"); }
             else {
                 let pts = it.type === '🍗' ? 30 : (it.type === '🍪' ? 20 : 10);
-                score += pts; energy = Math.min(100, energy + 6);
-                sfx(400 + pts*5, 'sine', 0.1);
+                score += pts; energy = Math.min(100, energy + 8);
+                addFloater(ix, it.y, "+"+pts, "#000");
             }
             items.splice(i, 1);
         }
-        if(it.y > H) items.splice(i, 1);
     });
+    items = items.filter(it => it.y < H);
 
-    // Spinnen bis ganz runter
+    // Spinnen (Keine Lane-Überschneidung)
     if(spiders.length < 2 && Math.random() < 0.01) {
-        spiders.push({lane: Math.floor(Math.random()*5), y: 0, dir: 1, speed: 2 + level});
+        let l = Math.floor(Math.random()*5);
+        if(!spiders.some(s => s.lane === l)) spiders.push({lane: l, y: 0, dir: 1});
     }
     spiders.forEach((s, i) => {
-        s.y += (s.speed * s.dir);
-        if(s.y > H - 120) s.dir = -1; // Reicht bis zum Hund
+        s.y += (2 * s.dir);
+        if(s.y > H - 150) s.dir = -1;
         if(s.y < 0) spiders.splice(i, 1);
         let sx = s.lane * laneW + laneW/2;
-        ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath();
-        ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
-        ctx.fillText("🕷️", sx, s.y + 30);
-        if(s.lane === dogLane && s.y > H-160 && s.y < H-60) { energy -= 0.8; }
+        gctx.strokeStyle = "#fff"; gctx.lineWidth = 1;
+        gctx.beginPath(); gctx.moveTo(sx, 0); gctx.lineTo(sx, s.y); gctx.stroke();
+        gctx.font = "35px Arial"; gctx.fillText("🕷️", sx, s.y + 25);
+        if(s.lane === dogLane && s.y > H-180 && s.y < H-90) energy -= 0.6;
     });
 
-    // Hund flüssig gleitend
+    // Floaters & Dog
+    floaters.forEach((f, i) => {
+        f.y -= 2; f.life -= 0.02; gctx.fillStyle = f.col; gctx.font = "bold 20px Orbitron";
+        gctx.globalAlpha = f.life; gctx.fillText(f.txt, f.x, f.y); gctx.globalAlpha = 1;
+        if(f.life <= 0) floaters.splice(i, 1);
+    });
+
     let targetX = dogLane * laneW + laneW/2;
-    dogX += (targetX - dogX) * 0.25;
-    ctx.font = "75px Arial"; ctx.fillText("🐶", dogX, H - 40);
+    dogX += (targetX - dogX) * 0.2;
+    gctx.font = "70px Arial"; gctx.fillText("🐶", dogX, H - 105);
 
     document.getElementById("hearts").innerText = "❤️".repeat(Math.max(0, hearts));
 
-    if(hearts <= 0 || energy <= 0) {
-        active = false;
-        document.getElementById("gameOver").style.display = "flex";
-        document.getElementById("fScore").innerText = score;
-    } else {
-        requestAnimationFrame(gameLoop);
-    }
+    if(hearts <= 0 || energy <= 0) gameOver();
+    else requestAnimationFrame(loop);
+}
+
+function addFloater(x, y, txt, col) { floaters.push({x:x + (Math.random()-0.5)*30, y:y, txt:txt, col:col, life:1}); }
+
+function gameOver() {
+    active = false;
+    let n = document.getElementById("pName").value || "SPIELER";
+    let s = JSON.parse(localStorage.getItem('doggyScores') || '[]');
+    s.push({n: n, s: score}); s.sort((a,b)=>b.s-a.s);
+    localStorage.setItem('doggyScores', JSON.stringify(s.slice(0,5)));
+    document.getElementById("gameOver").style.display = "flex";
+    document.getElementById("fScore").innerText = score;
+    updateRanks();
+}
+
+function updateRanks() {
+    let s = JSON.parse(localStorage.getItem('doggyScores') || '[]');
+    const medals = ["🪙", "🥈", "🥉", "🐾", "🐾"];
+    document.getElementById("leaderboard").innerHTML = s.map((x,i)=>`
+        <div class="rank-item"><span>${medals[i]} ${x.n}</span><span>${x.s}</span></div>`).join('');
 }
 </script>
+
+<div class="overlay" id="gameOver" style="display:none;">
+    <h2 style="color:var(--red);">ENDE</h2>
+    <h1 id="fScore" style="font-size:60px;">0</h1>
+    <button class="start-btn" onclick="location.reload()">NEUSTART</button>
+</div>
+
 </body>
 </html>
+
