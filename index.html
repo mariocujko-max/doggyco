@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doggyco V82 - Final Celebration</title>
+    <title>Doggyco V85 - The Everything Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -57,8 +57,6 @@
         
         #controls { position: absolute; bottom: 5px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; pointer-events: none; }
         .btn-arrow { width: 80px; height: 80px; background: rgba(0,0,0,0.7); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; transition: 0.2s; }
-        
-        /* BLAUES AUFLEUCHTEN */
         .btn-arrow:active { background: var(--blue); border-color: #fff; box-shadow: 0 0 35px var(--blue); transform: scale(0.9); }
     </style>
 </head>
@@ -114,7 +112,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 let W, H, laneW, dogX, dogLane = 2, active = false;
-let items = [], spiders = [], particles = [], clouds = [], birds = [];
+let items = [], spiders = [], floaters = [], clouds = [], birds = [];
 let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
 let lastTime = 0, spawnTimer = 0, audioCtx, bgMusic, targetX = 0;
 
@@ -136,10 +134,14 @@ function playEffect(freq, type, dur, vol = 0.4) {
     o.start(); o.stop(audioCtx.currentTime + dur);
 }
 
+function addFloater(x, y, txt, col) {
+    floaters.push({ x: x, y: y, txt: txt, col: col, life: 1.0 });
+}
+
 function initGame() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; 
-    bgMusic.volume = 0.05; // ETWAS LAUTER
+    bgMusic.volume = 0.05; 
     bgMusic.play().catch(()=>{});
     document.getElementById("start-screen").style.display = "none";
     document.body.style.overflow = "hidden";
@@ -178,22 +180,41 @@ function loop(now) {
         playEffect(880, 'sine', 0.5, 0.4);
         let banner = document.getElementById("lvl-banner");
         banner.classList.add("pop-active");
-        setTimeout(()=> banner.classList.remove("pop-active"), 1200); // KÜRZER
+        setTimeout(()=> banner.classList.remove("pop-active"), 1200);
     }
 
-    // Clouds & Birds
-    ctx.font = "45px Arial";
+    // Wolken & Vögel
+    ctx.font = "45px Arial"; ctx.textAlign = "center";
     clouds.forEach(c => { c.x += c.s; if(c.x > W + 60) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
     
     if(Math.random() < 0.006) birds.push({ x: W + 20, y: 100 + Math.random()*300, vx: -(1.5 + Math.random()), vy: (Math.random()-0.5)*0.5 });
     ctx.font = "28px Arial";
     birds.forEach((b, i) => { b.x += b.vx; b.y += b.vy; ctx.fillText("🐦", b.x, b.y); if(b.x < -40) birds.splice(i, 1); });
 
-    // Particles
-    particles.forEach((p, i) => {
-        p.x += p.vx; p.y += p.vy; p.l -= dt; ctx.globalAlpha = p.l; ctx.fillStyle = p.c;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-        ctx.globalAlpha = 1; if(p.l <= 0) particles.splice(i, 1);
+    // SPINNEN (Wieder da!)
+    if(spiders.length < 2 && Math.random() < 0.012) {
+        let l = Math.floor(Math.random()*5);
+        if(!spiders.some(s => s.lane === l)) spiders.push({lane: l, y: 0, dir: 1});
+    }
+    spiders.forEach((s, i) => {
+        s.y += (240 + level * 5) * dt * s.dir;
+        if(s.y > H - 150) s.dir = -1;
+        if(s.y < 0) spiders.splice(i, 1);
+        let sx = s.lane * laneW + laneW/2;
+        ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+        ctx.font = "35px Arial"; ctx.fillText("🕷️", sx, s.y + 25);
+        if(s.lane === dogLane && s.y > H-180 && s.y < H-90) { 
+            energy -= 20 * dt * 60; playEffect(100, 'square', 0.1, 0.2); 
+        }
+    });
+
+    // AUFSTEIGENDE PUNKTE
+    floaters.forEach((f, i) => {
+        f.y -= 2; f.life -= dt;
+        ctx.globalAlpha = f.life; ctx.fillStyle = f.col; ctx.font = "bold 20px Orbitron";
+        ctx.fillText(f.txt, f.x, f.y);
+        ctx.globalAlpha = 1;
+        if(f.life <= 0) floaters.splice(i, 1);
     });
 
     // Items spawning
@@ -202,20 +223,25 @@ function loop(now) {
     if(spawnTimer <= 0) {
         let r = Math.random() * 64, type = '🦴';
         if(r < 1) type = '❤️'; else if(r < 4) type = '👮'; else if(r < 14) type = '🍗'; else if(r < 34) type = '🍪';
-        items.push({lane: Math.floor(Math.random()*5), y: -60, type: type});
+        let lane = Math.floor(Math.random()*5);
+        if(!items.some(it => it.lane === lane && it.y < 100)) {
+            items.push({lane: lane, y: -60, type: type});
+        }
         spawnTimer = interval;
     }
     
     items.forEach((it, i) => {
         it.y += (320 + (level * 10)) * dt;
         let ix = it.lane * laneW + laneW/2;
-        ctx.font = "42px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
+        ctx.font = "42px Arial"; ctx.fillText(it.type, ix, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
-            if(it.type === '👮') { hearts--; energy -= 15; playEffect(150, 'square', 0.2, 0.5); }
-            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); playEffect(600, 'sine', 0.4, 0.5); }
+            if(it.type === '👮') { hearts--; energy -= 15; playEffect(150, 'square', 0.2, 0.5); addFloater(ix, it.y-20, "-1❤️", "red"); }
+            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); playEffect(600, 'sine', 0.4, 0.5); addFloater(ix, it.y-20, "+1❤️", "lime"); }
             else { 
-                score += (it.type==='🍗'?30:it.type==='🍪'?20:10); energy = Math.min(100, energy + 6); 
+                let p = (it.type==='🍗'?30:it.type==='🍪'?20:10);
+                score += p; energy = Math.min(100, energy + 6); 
                 playEffect(400 + score/10, 'sine', 0.2, 0.6);
+                addFloater(ix, it.y-20, "+"+p, "white");
             }
             items.splice(i, 1);
         }
