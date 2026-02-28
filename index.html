@@ -3,67 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doggyco V62 - Modern Crystal</title>
+    <title>Doggyco V63 - Ultimate Control</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background: #111; font-family: 'Orbitron', sans-serif; 
+            background: #000; font-family: 'Orbitron', sans-serif; 
             overflow: hidden; display: flex; flex-direction: column; align-items: center; 
-            height: 100vh; color: #fff;
+            height: 100vh; width: 100vw; color: #fff;
         }
         
         #game-wrap { 
-            position:relative; width: 100vw; height: 100vh; max-width: 500px; 
-            background: #000; overflow: hidden; display: flex; flex-direction: column;
+            position:relative; width: 100%; height: 98vh; max-width: 500px; 
+            background: #111; border: 2px solid #333; overflow: hidden;
         }
 
         #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.6); z-index: 1; }
         
-        /* HUD - Fixiert oben */
+        /* HUD - Ganz oben fixiert */
         #ui-header {
-            position: absolute; top: 0; width: 100%; padding: 10px; z-index: 150;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            position: absolute; top: 10px; width: 100%; z-index: 150;
         }
         #progress-container { 
-            width: 90%; height: 22px; margin: 0 auto;
-            background: rgba(255,255,255,0.2); border: 2px solid #fff; border-radius: 15px; overflow: hidden;
+            width: 90%; height: 25px; margin: 0 auto;
+            background: rgba(0,0,0,0.7); border: 2px solid #fff; border-radius: 15px; overflow: hidden;
         }
         #bar { height: 100%; width: 100%; background: var(--green); transition: width 0.3s; }
 
-        #hud { display: flex; justify-content: space-between; width: 90%; margin: 8px auto 0; }
-        .badge { background: rgba(255,255,255,0.9); color: #000; padding: 4px 12px; border-radius: 20px; font-weight: 900; font-size: 13px; }
+        #hud { display: flex; justify-content: space-between; width: 90%; margin: 10px auto 0; }
+        .badge { background: #fff; color: #000; padding: 5px 12px; border-radius: 15px; font-weight: 900; font-size: 14px; box-shadow: 0 0 10px var(--neon); }
 
         canvas { position: absolute; inset: 0; z-index: 20; background: transparent; }
 
         /* Milchiger Boden */
         #floor-glass { 
-            position: absolute; bottom: 0; width: 100%; height: 15%; 
+            position: absolute; bottom: 0; width: 100%; height: 16%; 
             background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(15px); 
             border-top: 2px solid rgba(255,255,255,0.4); z-index: 10; 
         }
 
-        /* Pfeiltasten */
-        #controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-around; z-index: 300; pointer-events: none; }
-        .btn-arrow { 
-            width: 70px; height: 70px; background: rgba(255,255,255,0.3); 
-            border: 2px solid #fff; border-radius: 50%; color: #fff; font-size: 30px; 
-            display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; pointer-events: auto;
+        /* Pfeiltasten GANZ AM RAND */
+        #controls { 
+            position: absolute; bottom: 30px; width: 100%; 
+            display: flex; justify-content: space-between; 
+            padding: 0 10px; z-index: 300; pointer-events: none; 
         }
+        .btn-arrow { 
+            width: 85px; height: 85px; background: rgba(0, 242, 255, 0.2); 
+            border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px);
+            box-shadow: 0 0 15px var(--neon);
+        }
+        .btn-arrow:active { background: var(--neon); color: #000; }
 
-        /* Moderne Overlays (Rund & Bockig) */
+        /* Moderne Overlays */
         .overlay { 
-            position:absolute; inset:0; background: rgba(0,0,0,0.8); 
-            backdrop-filter: blur(10px); display:flex; flex-direction:column; 
+            position:absolute; inset:0; background: rgba(0,0,0,0.85); 
+            backdrop-filter: blur(15px); display:flex; flex-direction:column; 
             justify-content:center; align-items:center; z-index:500; text-align: center;
         }
 
         .modern-banner { 
-            background: var(--gold); color: #000; padding: 30px 50px; 
-            border-radius: 50px; font-weight: 900; font-size: 35px; 
+            background: var(--gold); color: #000; padding: 30px 40px; 
+            border-radius: 40px; font-weight: 900; font-size: 28px; 
             box-shadow: 0 0 30px var(--gold); transform: scale(0); 
             transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 600; 
         }
@@ -72,12 +77,7 @@
             padding: 20px 60px; background: var(--green); color: #000; 
             border: none; border-radius: 50px; font-weight: 900; 
             font-size: 24px; cursor: pointer; box-shadow: 0 0 20px var(--green);
-        }
-
-        #info-box { 
-            display:none; width: 100vw; max-width: 500px; padding: 25px; 
-            background: #fff; color: #000; border-radius: 30px 30px 0 0; 
-            margin-top: -30px; z-index: 1000; position: relative;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -105,20 +105,15 @@
 
     <div class="overlay" id="start-screen">
         <h1 style="font-size: 45px; margin-bottom: 20px; text-shadow: 0 0 20px var(--neon);">DOGGYCO</h1>
-        <input type="text" id="pName" placeholder="NAME" style="padding:15px; border-radius:30px; border:2px solid var(--neon); background:none; color:#fff; text-align:center; font-family:'Orbitron'; width:70%; margin-bottom:30px;">
-        <button class="neon-btn" onclick="initGame()">START</button>
+        <input type="text" id="pName" placeholder="ENTER NAME" style="padding:15px; border-radius:30px; border:2px solid var(--neon); background:none; color:#fff; text-align:center; font-family:'Orbitron'; width:70%; margin-bottom:30px;">
+        <button class="neon-btn" onclick="initGame()">MISSION START</button>
     </div>
 
     <div class="overlay" id="end-screen" style="display:none;">
-        <div class="modern-banner" style="transform:scale(1); background:var(--red); color:#fff; box-shadow: 0 0 30px var(--red); margin-bottom:30px;">GAME OVER</div>
-        <h1 id="f-score" style="font-size: 60px; color: var(--gold); margin-bottom:30px;">0</h1>
+        <div class="modern-banner" style="transform:scale(1); background:var(--red); color:#fff; box-shadow: 0 0 30px var(--red);">GAME OVER</div>
+        <h1 id="f-score" style="font-size: 60px; color: var(--gold); margin: 20px 0;">0</h1>
         <button class="neon-btn" onclick="location.reload()">RETRY</button>
     </div>
-</div>
-
-<div id="info-box">
-    <h2 style="border-bottom: 3px solid #000; margin-bottom: 15px;">🏆 RANKING</h2>
-    <div id="leaderboard"></div>
 </div>
 
 <script>
@@ -127,7 +122,7 @@ const ctx = canvas.getContext("2d");
 
 let W, H, laneW, dogX, dogLane = 2, active = false;
 let items = [], spiders = [], floaters = [], score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
-let lastTime = 0, spawnTimer = 0, audioCtx;
+let lastTime = 0, spawnTimer = 0, audioCtx, bgMusic;
 
 function resize() {
     W = canvas.width = document.getElementById("game-wrap").offsetWidth;
@@ -149,26 +144,34 @@ function playSound(freq, type, dur) {
 
 function initGame() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Musik mit Fehlerbehandlung starten
+    bgMusic = new Audio('musik.mp3');
+    bgMusic.loop = true;
+    bgMusic.volume = 0.1;
+    let playPromise = bgMusic.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(() => { console.log("Musik-Autoplay blockiert oder Datei fehlt."); });
+    }
+
     document.getElementById("start-screen").style.display = "none";
     active = true;
     lastTime = performance.now();
     requestAnimationFrame(loop);
 }
 
-// STEUERUNG FIX
+// STEUERUNG
 function mLeft() { if(dogLane > 0) dogLane--; playSound(400, 'sine', 0.05); }
 function mRight() { if(dogLane < 4) dogLane++; playSound(400, 'sine', 0.05); }
 
-const handleTap = (e) => {
-    if(!active) return;
+const handleMouse = (e) => {
+    if(!active || e.touches) return; // Nur Maus für PC
     const rect = canvas.getBoundingClientRect();
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    // Exakte Bahn-Zuweisung
+    const x = e.clientX - rect.left;
     dogLane = Math.floor(x / (rect.width / 5));
     dogLane = Math.max(0, Math.min(4, dogLane));
 };
-canvas.addEventListener('mousedown', handleTap);
-canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleTap(e); }, {passive:false});
+canvas.addEventListener('mousedown', handleMouse);
 
 window.addEventListener('keydown', (e) => {
     if(e.key === "ArrowLeft") mLeft();
@@ -195,18 +198,19 @@ function loop(now) {
         level++; timeLeft = 30; energy = 100;
         document.getElementById("lvl-num").innerText = level;
         playSound(880, 'sine', 0.5);
-        let b = document.getElementById("lvl-banner"); b.style.transform = "scale(1)";
-        setTimeout(()=> b.style.transform = "scale(0)", 1500);
+        let b = document.getElementById("lvl-banner");
+        b.innerText = "LEVEL " + level + " REACHED!";
+        b.style.transform = "scale(1)";
+        setTimeout(()=> b.style.transform = "scale(0)", 1800);
     }
 
-    // Spawn-Mathematik: Exakt 1 Herz pro Level
+    // Mathe Spawn: 64 Items, +10% pro Level
     let itemsPerLevel = 64 * Math.pow(1.1, level - 1);
     let interval = 30 / itemsPerLevel;
     spawnTimer -= dt;
 
     if(spawnTimer <= 0) {
         let r = Math.random() * 64, type = '🦴';
-        // Herz nur spawnen, wenn noch keins im Level war (simuliert)
         if(r < 1 && !items.some(i => i.type === '❤️')) type = '❤️'; 
         else if(r < 4) type = '👮'; 
         else if(r < 14) type = '🍗'; 
@@ -266,26 +270,9 @@ function loop(now) {
 }
 
 function end() {
-    active = false;
+    active = false; if(bgMusic) bgMusic.pause();
     document.getElementById("end-screen").style.display = "flex";
     document.getElementById("f-score").innerText = score;
-    document.getElementById("info-box").style.display = "block";
-    document.body.style.overflowY = "auto"; // Scrollen erlauben
-
-    let n = document.getElementById("pName").value || "ANON";
-    let s = JSON.parse(localStorage.getItem('doggyV62') || '[]');
-    s.push({n: n, s: score}); s.sort((a,b)=>b.s-a.s);
-    localStorage.setItem('doggyV62', JSON.stringify(s.slice(0,5)));
-    updateRanks();
-}
-
-function updateRanks() {
-    let s = JSON.parse(localStorage.getItem('doggyV62') || '[]');
-    const medals = ["🪙", "🥈", "🥉", "🐾", "🐾"];
-    document.getElementById("leaderboard").innerHTML = s.map((x,i)=>`
-        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee; font-weight:700;">
-            <span>${medals[i]} ${x.n}</span><span>${x.s}</span>
-        </div>`).join('');
 }
 </script>
 </body>
