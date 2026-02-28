@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doggyco V65 - Online Edition</title>
+    <title>Doggyco V66 - Online Fix</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -40,14 +40,14 @@
     <canvas id="game-canvas"></canvas>
 
     <div id="controls">
-        <div class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft(event)">◀</div>
-        <div class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight(event)">▶</div>
+        <div class="btn-arrow" onclick="mLeft()">◀</div>
+        <div class="btn-arrow" onclick="mRight()">▶</div>
     </div>
 
     <div class="overlay" id="start-screen">
         <h1 style="font-size: 42px; color:#fff; text-shadow: 0 0 20px var(--neon);">DOGGYCO</h1>
         <input type="text" id="pName" placeholder="ENTER NAME" style="padding:15px; border-radius:30px; border:2px solid var(--neon); background:rgba(0,0,0,0.5); color:#fff; text-align:center; font-family:'Orbitron'; width:80%; margin:30px 0; outline: none;">
-        <button class="neon-btn" onclick="start()">START MISSION</button>
+        <button class="neon-btn" onclick="initGame()">START MISSION</button>
     </div>
 
     <div class="overlay" id="end-screen" style="display:none;">
@@ -60,14 +60,23 @@
 
 <div id="info-box">
     <h2 style="border-bottom: 3px solid #000; margin-bottom: 15px;">🏆 ONLINE RANKING</h2>
-    <div id="leaderboard">Loading...</div>
+    <div id="leaderboard">Loading ranking...</div>
 </div>
 
 <script>
-// Supabase Initialisierung mit deinen Daten aus dem Screenshot
+// Supabase Konfiguration
 const SUPABASE_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_RPqmxS3pjwTJGeLsdhuN3w_5BEprYDK';
-const supabase = typeof supabase !== 'undefined' ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+let supabaseClient = null;
+
+// Versuch der Initialisierung, ohne das Spiel zu blockieren
+try {
+    if (typeof supabase !== 'undefined') {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+} catch (e) {
+    console.error("Supabase failed to load", e);
+}
 
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
@@ -84,18 +93,24 @@ function resize() {
 window.onload = () => { resize(); updateOnlineRanks(); };
 window.onresize = resize;
 
-function start() {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.05;
-    bgMusic.play().catch(()=>{});
+// Spielstart-Funktion (Jetzt unabhängig von der DB)
+function initGame() {
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        bgMusic = new Audio('musik.mp3'); 
+        bgMusic.loop = true; 
+        bgMusic.volume = 0.05;
+        bgMusic.play().catch(e => console.log("Audio play blocked"));
+    } catch(e) {}
+
     document.getElementById("start-screen").style.display = "none";
     active = true;
     lastTime = performance.now();
     requestAnimationFrame(loop);
 }
 
-function mLeft(e) { if(e) e.preventDefault(); if(dogLane > 0) dogLane--; dogX = (dogLane * laneW) + (laneW / 2); }
-function mRight(e) { if(e) e.preventDefault(); if(dogLane < 4) dogLane++; dogX = (dogLane * laneW) + (laneW / 2); }
+function mLeft() { if(dogLane > 0) dogLane--; dogX = (dogLane * laneW) + (laneW / 2); }
+function mRight() { if(dogLane < 4) dogLane++; dogX = (dogLane * laneW) + (laneW / 2); }
 
 function loop(now) {
     if(!active) return;
@@ -118,7 +133,8 @@ function loop(now) {
     let interval = (30 / (64 * Math.pow(1.1, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
-        let r = Math.random() * 64, type = '🦴';
+        let r = Math.random() * 64;
+        let type = '🦴';
         if(r < 1) type = '❤️'; else if(r < 4) type = '👮'; else if(r < 14) type = '🍗'; else if(r < 34) type = '🍪';
         items.push({lane: Math.floor(Math.random()*5), y: -60, type: type});
         spawnTimer = interval;
@@ -153,25 +169,34 @@ function loop(now) {
 }
 
 async function end() {
-    active = false; if(bgMusic) bgMusic.pause();
+    active = false; 
+    if(bgMusic) bgMusic.pause();
     document.getElementById("end-screen").style.display = "flex";
     document.getElementById("f-score").innerText = score;
     let n = document.getElementById("pName").value || "ANON";
     
-    // Online speichern
-    if(supabase) {
-        await supabase.from('leaderboard').insert([{ n: n, s: score }]);
-        updateOnlineRanks();
+    if(supabaseClient) {
+        try {
+            await supabaseClient.from('leaderboard').insert([{ n: n, s: score }]);
+            updateOnlineRanks();
+        } catch(e) { console.log("Save error"); }
     }
 }
 
 async function updateOnlineRanks() {
-    if(!supabase) return;
-    let { data: scores, error } = await supabase.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
-    if(!error) {
-        const medals = ["🪙", "🥈", "🥉", "🐾", "🐾"];
-        document.getElementById("leaderboard").innerHTML = scores.map((x, i) => `
-            <div class="rank-item"><span>${medals[i] || '🐾'} ${x.n}</span><span>${x.s}</span></div>`).join('');
+    if(!supabaseClient) {
+        document.getElementById("leaderboard").innerHTML = "Offline Mode active.";
+        return;
+    }
+    try {
+        let { data: scores, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
+        if(!error && scores) {
+            const medals = ["🪙", "🥈", "🥉", "🐾", "🐾"];
+            document.getElementById("leaderboard").innerHTML = scores.map((x, i) => `
+                <div class="rank-item"><span>${medals[i] || '🐾'} ${x.n}</span><span>${x.s}</span></div>`).join('');
+        }
+    } catch(e) {
+        document.getElementById("leaderboard").innerHTML = "Could not load ranking.";
     }
 }
 </script>
