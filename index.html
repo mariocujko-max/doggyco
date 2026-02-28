@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doggyco V80 - Blue Neon Master</title>
+    <title>Doggyco V81 - Milestone Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -17,16 +17,20 @@
         }
 
         #game-wrap { 
-            position:relative; width: 100vw; height: 90vh; max-width: 500px; 
-            background: #000; border: 4px solid var(--neon); border-radius: 40px; 
+            position:relative; width: 100vw; height: 92vh; max-width: 500px; 
+            background: #000; border: 3px solid var(--neon); border-radius: 40px; 
             overflow: hidden; box-shadow: 0 0 40px var(--neon); touch-action: none;
-            z-index: 10; margin-top: 1vh;
+            z-index: 10; margin-top: 5px;
         }
 
         #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.4); z-index: 1; }
         canvas { position: absolute; inset: 0; z-index: 20; background: transparent; }
 
-        /* HUD & SCORE */
+        /* TITEL DESIGN */
+        .game-title { font-size: 50px; text-shadow: 0 0 20px var(--neon); margin-bottom: 5px; animation: flicker 3s infinite; }
+        @keyframes flicker { 0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; } 20%, 22%, 24%, 55% { opacity: 0.5; } }
+
+        /* HUD */
         #neon-score-display { position: absolute; top: 10px; width: 100%; text-align: center; font-size: 26px; color: #fff; text-shadow: 0 0 15px var(--neon); z-index: 160; }
         #ui-header { position: absolute; top: 50px; width: 100%; z-index: 150; pointer-events: none; }
         #progress-container { width: 85%; height: 24px; margin: 0 auto; background: rgba(0,0,0,0.6); border: 2px solid #fff; border-radius: 12px; overflow: hidden; }
@@ -34,44 +38,32 @@
         
         #hud { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 10px auto 0; }
         #hearts-display { font-size: 28px; filter: drop-shadow(0 0 5px #f00); }
-        
-        /* TIMER IN GELB */
         #timer { color: var(--gold); font-weight: 900; font-size: 22px; text-shadow: 0 0 8px var(--gold); }
-        
         .lvl-badge { background: #fff; color: #000; padding: 4px 12px; border-radius: 15px; font-weight: 900; animation: levelBlink 1s infinite alternate; }
         @keyframes levelBlink { from { box-shadow: 0 0 5px var(--gold); } to { box-shadow: 0 0 20px var(--gold); background: var(--gold); } }
 
-        /* DEZENTERES POP-UP BANNER */
+        /* LEVEL POP-UP */
         #lvl-banner { 
             position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            width: 75%; background: rgba(255, 215, 0, 0.85); backdrop-filter: blur(5px);
-            color: #000; padding: 20px; border-radius: 30px;
-            font-weight: 900; text-align: center; z-index: 1000; box-shadow: 0 0 30px var(--gold);
-            border: 3px solid #000; pointer-events: none;
+            width: 75%; background: rgba(255, 215, 0, 0.4); backdrop-filter: blur(10px);
+            color: #fff; padding: 25px; border-radius: 30px; border: 2px solid var(--gold);
+            font-weight: 900; text-align: center; z-index: 1000; pointer-events: none;
         }
-        .pop-active { animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .pop-active { animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes bounceIn { 0% { transform: translate(-50%, -50%) scale(0); } 100% { transform: translate(-50%, -50%) scale(1); } }
 
         /* OVERLAYS */
-        .overlay { position:absolute; inset:0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:500; text-align: center; }
-        .name-input { padding:18px; border-radius:30px; border:2px solid var(--neon); background: rgba(0,0,0,0.5); color:#fff; text-align:center; width:80%; margin:20px 0; font-family:'Orbitron'; font-size: 18px; box-shadow: 0 0 15px var(--neon); }
+        .overlay { position:absolute; inset:0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:500; text-align: center; }
+        .name-input { padding:18px; border-radius:30px; border:2px solid var(--neon); background: rgba(0,0,0,0.6); color:#fff; text-align:center; width:80%; margin:20px 0; font-family:'Orbitron'; font-size: 18px; box-shadow: 0 0 15px var(--neon); }
         .neon-btn { padding: 20px 60px; background: var(--green); color: #000; border-radius: 50px; font-weight: 900; font-size: 24px; cursor: pointer; border: none; margin-top: 10px; box-shadow: 0 0 20px var(--green); }
 
-        /* RANG-INFO */
-        #scroll-info { 
-            width: 95vw; max-width: 500px; padding: 25px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
-            border: 3px solid var(--neon); border-radius: 30px; margin: 25px 0; color: #fff; display: none; box-shadow: 0 0 20px var(--neon);
-        }
+        #scroll-info { width: 95vw; max-width: 500px; padding: 25px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 3px solid var(--neon); border-radius: 30px; margin: 25px 0; color: #fff; display: none; }
         .rank-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         
-        /* TIEFERE BLAUE PFEILTASTEN */
-        #controls { position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; pointer-events: none; }
-        .btn-arrow { 
-            width: 80px; height: 80px; background: rgba(0,0,0,0.6); border: 3px solid var(--neon); 
-            border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; 
-            justify-content: center; cursor: pointer; pointer-events: auto; transition: all 0.1s;
-        }
-        .btn-arrow:active { background: var(--neon); color: #000; box-shadow: 0 0 30px var(--neon); }
+        /* BLAUE PFEILE GANZ UNTEN */
+        #controls { position: absolute; bottom: 5px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; pointer-events: none; }
+        .btn-arrow { width: 85px; height: 85px; background: rgba(0,0,0,0.7); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
+        .btn-arrow:active { background: var(--neon); color: #000; box-shadow: 0 0 40px var(--neon); }
     </style>
 </head>
 <body>
@@ -89,24 +81,25 @@
     </div>
     
     <div id="lvl-banner">
-        <h2 style="font-size: 24px;">LEVEL UP!</h2>
-        <p style="font-size: 14px; margin-top: 5px;">NEXT LEVEL - FASTER! ⚡</p>
+        <h2 style="font-size: 26px;">LEVEL UP!</h2>
+        <p id="lvl-msg" style="font-size: 14px; margin-top: 5px;">NEXT LEVEL - FASTER! ⚡</p>
     </div>
     
     <canvas id="game-canvas"></canvas>
+    
     <div id="controls">
         <div class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft(event)">◀</div>
         <div class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight(event)">▶</div>
     </div>
 
     <div class="overlay" id="start-screen">
-        <h1 style="font-size: 50px; text-shadow: 0 0 20px var(--neon); margin-bottom: 10px;">DOGGYCO</h1>
+        <h1 class="game-title">DOGGYCO</h1>
         <input type="text" id="pName" placeholder="ENTER YOUR NAME" class="name-input">
         <button class="neon-btn" onclick="initGame()">START MISSION</button>
     </div>
 
     <div class="overlay" id="end-screen" style="display:none;">
-        <h1 style="font-size: 40px; text-shadow: 0 0 15px var(--neon); margin-bottom: 5px;">DOGGYCO</h1>
+        <h1 class="game-title" style="font-size: 40px;">DOGGYCO</h1>
         <h2 style="color:var(--red); font-size: 28px;">MISSION OVER</h2>
         <h1 id="f-score" style="font-size: 70px; color: var(--gold); margin: 15px 0;">0</h1>
         <button class="neon-btn" onclick="location.reload()">RETRY</button>
@@ -119,7 +112,7 @@
 </div>
 
 <script>
-// Supabase Konfiguration bleibt wie eingestellt
+// Supabase Zugangsdaten
 const SUPABASE_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -127,7 +120,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 let W, H, laneW, dogX, dogLane = 2, active = false;
-let items = [], spiders = [], floaters = [], clouds = [], birds = [];
+let items = [], spiders = [], floaters = [], particles = [], clouds = [], birds = [];
 let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
 let lastTime = 0, spawnTimer = 0, audioCtx, bgMusic, targetX = 0;
 
@@ -139,7 +132,6 @@ function resize() {
 }
 window.onload = resize; window.onresize = resize;
 
-// SOUND EFFEKTE VERSTÄRKEN
 function playEffect(freq, type, dur, vol = 0.3) {
     if(!audioCtx) return;
     let o = audioCtx.createOscillator(), g = audioCtx.createGain();
@@ -150,10 +142,20 @@ function playEffect(freq, type, dur, vol = 0.3) {
     o.start(); o.stop(audioCtx.currentTime + dur);
 }
 
+function createFirework() {
+    for(let i=0; i<50; i++) {
+        particles.push({
+            x: W/2, y: H/2,
+            vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15,
+            c: `hsl(${Math.random()*360}, 100%, 50%)`,
+            r: 3 + Math.random()*4, l: 1.0
+        });
+    }
+}
+
 function initGame() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; 
-    bgMusic.volume = 0.02; // LEISER GEMACHT
+    bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.02;
     bgMusic.play().catch(()=>{});
     document.getElementById("start-screen").style.display = "none";
     document.body.style.overflow = "hidden";
@@ -162,8 +164,9 @@ function initGame() {
     requestAnimationFrame(loop);
 }
 
-function mLeft(e) { if(e) e.preventDefault(); if(dogLane > 0) dogLane--; targetX = (dogLane * laneW) + (laneW / 2); playEffect(300, 'sine', 0.05, 0.1); }
-function mRight(e) { if(e) e.preventDefault(); if(dogLane < 4) dogLane++; targetX = (dogLane * laneW) + (laneW / 2); playEffect(300, 'sine', 0.05, 0.1); }
+function mLeft(e) { if(e) e.preventDefault(); if(dogLane > 0) dogLane--; updateTarget(); }
+function mRight(e) { if(e) e.preventDefault(); if(dogLane < 4) dogLane++; updateTarget(); }
+function updateTarget() { targetX = (dogLane * laneW) + (laneW / 2); playEffect(250, 'sine', 0.04, 0.1); }
 
 window.addEventListener('keydown', (e) => {
     if(!active) return;
@@ -185,23 +188,58 @@ function loop(now) {
     document.getElementById("timer").innerText = Math.ceil(timeLeft) + "s";
     document.getElementById("neon-score-display").innerText = "SCORE: " + score;
 
+    // LEVEL UP & MILESTONES
     if(timeLeft <= 0) {
         level++; timeLeft = 30; energy = 100;
         document.getElementById("lvl-num").innerText = level;
-        playEffect(880, 'sine', 0.5, 0.4); // LEVEL UP SOUND
-        let b = document.getElementById("lvl-banner");
-        b.classList.add("pop-active");
-        setTimeout(()=> b.classList.remove("pop-active"), 1800); // KÜRZER ANGEZEIGT
+        playEffect(880, 'sine', 0.5, 0.4);
+        
+        let banner = document.getElementById("lvl-banner");
+        let msg = document.getElementById("lvl-msg");
+        
+        if(level === 5 || level === 10) {
+            msg.innerHTML = "🌟 MILESTONE REACHED! FIREWORKS! 🌟";
+            createFirework();
+            playEffect(200, 'square', 0.8, 0.5);
+        } else {
+            msg.innerHTML = "NEXT LEVEL - FASTER! ⚡";
+        }
+        
+        banner.classList.add("pop-active");
+        setTimeout(()=> banner.classList.remove("pop-active"), 2000);
     }
 
-    // Wetter
+    // Clouds
     ctx.font = "45px Arial";
     clouds.forEach(c => { c.x += c.s; if(c.x > W + 60) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
-    if(Math.random() < 0.005) birds.push({ x: W + 20, y: 150 + Math.random()*200, vx: -(1.5 + Math.random()), vy: (Math.random()-0.5)*0.5 });
-    ctx.font = "25px Arial";
-    birds.forEach((b, i) => { b.x += b.vx; b.y += b.vy; ctx.fillText("🐦", b.x, b.y); if(b.x < -40) birds.splice(i, 1); });
 
-    // Spawning & Items
+    // Feuerwerk-Partikel
+    particles.forEach((p, i) => {
+        p.x += p.vx; p.y += p.vy; p.l -= dt;
+        ctx.globalAlpha = p.l; ctx.fillStyle = p.c;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = 1;
+        if(p.l <= 0) particles.splice(i, 1);
+    });
+
+    // Spiders
+    if(spiders.length < 2 && Math.random() < 0.012) {
+        let l = Math.floor(Math.random()*5);
+        if(!spiders.some(s => s.lane === l)) spiders.push({lane: l, y: 0, dir: 1});
+    }
+    spiders.forEach((s, i) => {
+        s.y += (240 + level * 5) * dt * s.dir;
+        if(s.y > H - 150) s.dir = -1;
+        if(s.y < 0) spiders.splice(i, 1);
+        let sx = s.lane * laneW + laneW/2;
+        ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+        ctx.font = "35px Arial"; ctx.fillText("🕷️", sx, s.y + 25);
+        if(s.lane === dogLane && s.y > H-180 && s.y < H-90) { 
+            energy -= 20; playEffect(100, 'square', 0.3, 0.5); spiders.splice(i, 1); 
+        }
+    });
+
+    // Items
     let interval = (30 / (64 * Math.pow(1.1, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
@@ -215,11 +253,11 @@ function loop(now) {
         let ix = it.lane * laneW + laneW/2;
         ctx.font = "42px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
-            if(it.type === '👮') { hearts--; energy -= 15; playEffect(150, 'square', 0.3, 0.5); }
-            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); playEffect(600, 'sine', 0.4, 0.5); }
+            if(it.type === '👮') { hearts--; energy -= 15; playEffect(150, 'square', 0.2, 0.4); }
+            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); playEffect(600, 'sine', 0.4, 0.4); }
             else { 
-                let p = it.type==='🍗'?30:it.type==='🍪'?20:10; score += p; energy = Math.min(100, energy + 6); 
-                playEffect(400 + score/10, 'sine', 0.2, 0.4); // SAMMEL SOUND VERSTÄRKT
+                score += (it.type==='🍗'?30:it.type==='🍪'?20:10); energy = Math.min(100, energy + 6); 
+                playEffect(400 + score/10, 'sine', 0.2, 0.4);
             }
             items.splice(i, 1);
         }
@@ -246,7 +284,7 @@ async function end() {
 async function updateOnlineRanks() {
     try {
         let { data: scores } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
-        if(scores && scores.length > 0) {
+        if(scores) {
             const medals = ["🪙", "🥈", "🥉", "🐾", "🐾"];
             document.getElementById("leaderboard").innerHTML = scores.map((x, i) => `
                 <div class="rank-item"><span>${medals[i] || '🐾'} ${x.n}</span><span>${x.s}</span></div>`).join('');
