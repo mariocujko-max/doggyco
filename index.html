@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doggyco V79 - Final Master</title>
+    <title>Doggyco V80 - Blue Neon Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -17,49 +17,61 @@
         }
 
         #game-wrap { 
-            position:relative; width: 100vw; height: 88vh; max-width: 500px; 
+            position:relative; width: 100vw; height: 90vh; max-width: 500px; 
             background: #000; border: 4px solid var(--neon); border-radius: 40px; 
             overflow: hidden; box-shadow: 0 0 40px var(--neon); touch-action: none;
-            z-index: 10; margin-top: 1vh; transition: height 0.5s ease;
+            z-index: 10; margin-top: 1vh;
         }
 
         #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.4); z-index: 1; }
         canvas { position: absolute; inset: 0; z-index: 20; background: transparent; }
 
-        /* HUD & UI */
+        /* HUD & SCORE */
         #neon-score-display { position: absolute; top: 10px; width: 100%; text-align: center; font-size: 26px; color: #fff; text-shadow: 0 0 15px var(--neon); z-index: 160; }
         #ui-header { position: absolute; top: 50px; width: 100%; z-index: 150; pointer-events: none; }
         #progress-container { width: 85%; height: 24px; margin: 0 auto; background: rgba(0,0,0,0.6); border: 2px solid #fff; border-radius: 12px; overflow: hidden; }
         #bar { height: 100%; width: 100%; background: var(--green); transition: width 0.3s ease; }
+        
         #hud { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 10px auto 0; }
         #hearts-display { font-size: 28px; filter: drop-shadow(0 0 5px #f00); }
-        #timer { color: var(--red); font-weight: 900; font-size: 22px; text-shadow: 0 0 8px var(--red); }
+        
+        /* TIMER IN GELB */
+        #timer { color: var(--gold); font-weight: 900; font-size: 22px; text-shadow: 0 0 8px var(--gold); }
+        
         .lvl-badge { background: #fff; color: #000; padding: 4px 12px; border-radius: 15px; font-weight: 900; animation: levelBlink 1s infinite alternate; }
         @keyframes levelBlink { from { box-shadow: 0 0 5px var(--gold); } to { box-shadow: 0 0 20px var(--gold); background: var(--gold); } }
 
-        /* POP-UP BANNER */
+        /* DEZENTERES POP-UP BANNER */
         #lvl-banner { 
             position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            width: 80%; background: var(--gold); color: #000; padding: 30px; border-radius: 30px;
-            font-weight: 900; text-align: center; z-index: 1000; box-shadow: 0 0 50px var(--gold);
-            border: 5px solid #000; pointer-events: none;
+            width: 75%; background: rgba(255, 215, 0, 0.85); backdrop-filter: blur(5px);
+            color: #000; padding: 20px; border-radius: 30px;
+            font-weight: 900; text-align: center; z-index: 1000; box-shadow: 0 0 30px var(--gold);
+            border: 3px solid #000; pointer-events: none;
         }
-        .pop-active { animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .pop-active { animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes bounceIn { 0% { transform: translate(-50%, -50%) scale(0); } 100% { transform: translate(-50%, -50%) scale(1); } }
 
-        /* DESIGN HARMONIE */
-        .overlay { position:absolute; inset:0; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:500; text-align: center; }
+        /* OVERLAYS */
+        .overlay { position:absolute; inset:0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:500; text-align: center; }
         .name-input { padding:18px; border-radius:30px; border:2px solid var(--neon); background: rgba(0,0,0,0.5); color:#fff; text-align:center; width:80%; margin:20px 0; font-family:'Orbitron'; font-size: 18px; box-shadow: 0 0 15px var(--neon); }
-        .neon-btn { padding: 20px 60px; background: var(--green); color: #000; border-radius: 50px; font-weight: 900; font-size: 24px; cursor: pointer; border: none; margin-top: 20px; box-shadow: 0 0 20px var(--green); }
+        .neon-btn { padding: 20px 60px; background: var(--green); color: #000; border-radius: 50px; font-weight: 900; font-size: 24px; cursor: pointer; border: none; margin-top: 10px; box-shadow: 0 0 20px var(--green); }
 
+        /* RANG-INFO */
         #scroll-info { 
-            width: 95vw; max-width: 500px; padding: 25px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px);
+            width: 95vw; max-width: 500px; padding: 25px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
             border: 3px solid var(--neon); border-radius: 30px; margin: 25px 0; color: #fff; display: none; box-shadow: 0 0 20px var(--neon);
         }
-        .rank-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .rank-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         
-        #controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; pointer-events: none; }
-        .btn-arrow { width: 75px; height: 75px; background: rgba(0,0,0,0.5); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px); }
+        /* TIEFERE BLAUE PFEILTASTEN */
+        #controls { position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; pointer-events: none; }
+        .btn-arrow { 
+            width: 80px; height: 80px; background: rgba(0,0,0,0.6); border: 3px solid var(--neon); 
+            border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; 
+            justify-content: center; cursor: pointer; pointer-events: auto; transition: all 0.1s;
+        }
+        .btn-arrow:active { background: var(--neon); color: #000; box-shadow: 0 0 30px var(--neon); }
     </style>
 </head>
 <body>
@@ -77,8 +89,8 @@
     </div>
     
     <div id="lvl-banner">
-        <h2 style="font-size: 28px;">LEVEL UP!</h2>
-        <p style="font-size: 16px; margin-top: 10px;">NEXT LEVEL - FASTER! ⚡</p>
+        <h2 style="font-size: 24px;">LEVEL UP!</h2>
+        <p style="font-size: 14px; margin-top: 5px;">NEXT LEVEL - FASTER! ⚡</p>
     </div>
     
     <canvas id="game-canvas"></canvas>
@@ -88,14 +100,15 @@
     </div>
 
     <div class="overlay" id="start-screen">
-        <h1 style="font-size: 45px; text-shadow: 0 0 20px var(--neon);">DOGGYCO</h1>
+        <h1 style="font-size: 50px; text-shadow: 0 0 20px var(--neon); margin-bottom: 10px;">DOGGYCO</h1>
         <input type="text" id="pName" placeholder="ENTER YOUR NAME" class="name-input">
         <button class="neon-btn" onclick="initGame()">START MISSION</button>
     </div>
 
     <div class="overlay" id="end-screen" style="display:none;">
-        <h2 style="color:var(--red); font-size: 32px;">MISSION OVER</h2>
-        <h1 id="f-score" style="font-size: 70px; color: var(--gold); margin: 20px 0;">0</h1>
+        <h1 style="font-size: 40px; text-shadow: 0 0 15px var(--neon); margin-bottom: 5px;">DOGGYCO</h1>
+        <h2 style="color:var(--red); font-size: 28px;">MISSION OVER</h2>
+        <h1 id="f-score" style="font-size: 70px; color: var(--gold); margin: 15px 0;">0</h1>
         <button class="neon-btn" onclick="location.reload()">RETRY</button>
     </div>
 </div>
@@ -103,14 +116,10 @@
 <div id="scroll-info">
     <h2 style="color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px;">🏆 GLOBAL RANKING</h2>
     <div id="leaderboard">Loading ranking...</div>
-    <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
-        <h3 style="color: var(--neon);">📖 MANUAL</h3>
-        <p style="font-size: 14px; color: #ddd; margin-top: 8px;">Catch 🍗, 🍪, 🦴 for energy. Survive 30s levels. Watch out for 🕷️ and 👮!</p>
-    </div>
 </div>
 
 <script>
-// DEINE DATEN SIND HIER EINGEBAUT:
+// Supabase Konfiguration bleibt wie eingestellt
 const SUPABASE_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -130,9 +139,21 @@ function resize() {
 }
 window.onload = resize; window.onresize = resize;
 
+// SOUND EFFEKTE VERSTÄRKEN
+function playEffect(freq, type, dur, vol = 0.3) {
+    if(!audioCtx) return;
+    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    g.gain.setValueAtTime(vol, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+}
+
 function initGame() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.04;
+    bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; 
+    bgMusic.volume = 0.02; // LEISER GEMACHT
     bgMusic.play().catch(()=>{});
     document.getElementById("start-screen").style.display = "none";
     document.body.style.overflow = "hidden";
@@ -141,18 +162,14 @@ function initGame() {
     requestAnimationFrame(loop);
 }
 
-function mLeft(e) { if(e) e.preventDefault(); if(dogLane > 0) dogLane--; targetX = (dogLane * laneW) + (laneW / 2); }
-function mRight(e) { if(e) e.preventDefault(); if(dogLane < 4) dogLane++; targetX = (dogLane * laneW) + (laneW / 2); }
+function mLeft(e) { if(e) e.preventDefault(); if(dogLane > 0) dogLane--; targetX = (dogLane * laneW) + (laneW / 2); playEffect(300, 'sine', 0.05, 0.1); }
+function mRight(e) { if(e) e.preventDefault(); if(dogLane < 4) dogLane++; targetX = (dogLane * laneW) + (laneW / 2); playEffect(300, 'sine', 0.05, 0.1); }
 
 window.addEventListener('keydown', (e) => {
     if(!active) return;
     if(e.key === "ArrowLeft") mLeft();
     if(e.key === "ArrowRight") mRight();
 });
-
-function addFloater(x, y, txt, col) { 
-    floaters.push({ x: x, y: y, txt: txt, col: col, life: 1.0, vx: (Math.random() - 0.5) * 4 }); 
-}
 
 function loop(now) {
     if(!active) return;
@@ -171,36 +188,20 @@ function loop(now) {
     if(timeLeft <= 0) {
         level++; timeLeft = 30; energy = 100;
         document.getElementById("lvl-num").innerText = level;
+        playEffect(880, 'sine', 0.5, 0.4); // LEVEL UP SOUND
         let b = document.getElementById("lvl-banner");
         b.classList.add("pop-active");
-        setTimeout(()=> b.classList.remove("pop-active"), 2500);
+        setTimeout(()=> b.classList.remove("pop-active"), 1800); // KÜRZER ANGEZEIGT
     }
 
-    // Weather
+    // Wetter
     ctx.font = "45px Arial";
     clouds.forEach(c => { c.x += c.s; if(c.x > W + 60) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
     if(Math.random() < 0.005) birds.push({ x: W + 20, y: 150 + Math.random()*200, vx: -(1.5 + Math.random()), vy: (Math.random()-0.5)*0.5 });
     ctx.font = "25px Arial";
     birds.forEach((b, i) => { b.x += b.vx; b.y += b.vy; ctx.fillText("🐦", b.x, b.y); if(b.x < -40) birds.splice(i, 1); });
 
-    // Spiders
-    if(spiders.length < 2 && Math.random() < 0.012) {
-        let l = Math.floor(Math.random()*5);
-        if(!spiders.some(s => s.lane === l)) spiders.push({lane: l, y: 0, dir: 1});
-    }
-    spiders.forEach((s, i) => {
-        s.y += (240 + level * 5) * dt * s.dir;
-        if(s.y > H - 150) s.dir = -1;
-        if(s.y < 0) spiders.splice(i, 1);
-        let sx = s.lane * laneW + laneW/2;
-        ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
-        ctx.font = "35px Arial"; ctx.fillText("🕷️", sx, s.y + 25);
-        if(s.lane === dogLane && s.y > H-180 && s.y < H-90) { 
-            energy -= 20; addFloater(sx, s.y, "-20%", "red"); spiders.splice(i, 1); 
-        }
-    });
-
-    // Items
+    // Spawning & Items
     let interval = (30 / (64 * Math.pow(1.1, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
@@ -214,21 +215,14 @@ function loop(now) {
         let ix = it.lane * laneW + laneW/2;
         ctx.font = "42px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
-            if(it.type === '👮') { hearts--; energy -= 15; addFloater(ix, it.y, "-1 ❤️", "red"); }
-            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); addFloater(ix, it.y, "RECOVERY", "lime"); }
+            if(it.type === '👮') { hearts--; energy -= 15; playEffect(150, 'square', 0.3, 0.5); }
+            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); playEffect(600, 'sine', 0.4, 0.5); }
             else { 
                 let p = it.type==='🍗'?30:it.type==='🍪'?20:10; score += p; energy = Math.min(100, energy + 6); 
-                addFloater(ix, it.y, "+"+p, "white");
+                playEffect(400 + score/10, 'sine', 0.2, 0.4); // SAMMEL SOUND VERSTÄRKT
             }
             items.splice(i, 1);
         }
-    });
-
-    floaters.forEach((f, i) => {
-        f.y -= 80 * dt; f.x += f.vx; f.life -= dt;
-        ctx.globalAlpha = Math.max(0, f.life); ctx.fillStyle = f.col; ctx.font = "bold 24px Orbitron";
-        ctx.fillText(f.txt, f.x, f.y); ctx.globalAlpha = 1;
-        if(f.life <= 0) floaters.splice(i, 1);
     });
 
     dogX += (targetX - dogX) * 0.2;
@@ -245,8 +239,6 @@ async function end() {
     document.getElementById("game-wrap").style.height = "60vh";
     document.body.style.overflow = "auto";
     let name = document.getElementById("pName").value || "ANON";
-    
-    // Daten an DEIN Supabase senden
     await supabaseClient.from('leaderboard').insert([{ n: name, s: score }]);
     updateOnlineRanks();
 }
@@ -258,15 +250,9 @@ async function updateOnlineRanks() {
             const medals = ["🪙", "🥈", "🥉", "🐾", "🐾"];
             document.getElementById("leaderboard").innerHTML = scores.map((x, i) => `
                 <div class="rank-item"><span>${medals[i] || '🐾'} ${x.n}</span><span>${x.s}</span></div>`).join('');
-        } else {
-            document.getElementById("leaderboard").innerHTML = "No ranking found yet.";
         }
-    } catch(e) {
-        document.getElementById("leaderboard").innerHTML = "Connection Error.";
-    }
+    } catch(e) {}
 }
-
-// Initialer Ranglisten-Abruf
 updateOnlineRanks();
 </script>
 </body>
