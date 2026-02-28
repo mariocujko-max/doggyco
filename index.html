@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doggyco V78 - Final Pop-Up & Rank Fix</title>
+    <title>Doggyco V79 - Final Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
-        body { background: #000; font-family: 'Orbitron', sans-serif; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; min-height: 100vh; color: #fff; }
+        body { 
+            background: #000; font-family: 'Orbitron', sans-serif; 
+            overflow-x: hidden; display: flex; flex-direction: column; align-items: center; 
+            min-height: 100vh; color: #fff;
+        }
 
         #game-wrap { 
             position:relative; width: 100vw; height: 88vh; max-width: 500px; 
@@ -22,18 +26,18 @@
         #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.4); z-index: 1; }
         canvas { position: absolute; inset: 0; z-index: 20; background: transparent; }
 
-        /* HUD & SCORE */
+        /* HUD & UI */
         #neon-score-display { position: absolute; top: 10px; width: 100%; text-align: center; font-size: 26px; color: #fff; text-shadow: 0 0 15px var(--neon); z-index: 160; }
         #ui-header { position: absolute; top: 50px; width: 100%; z-index: 150; pointer-events: none; }
         #progress-container { width: 85%; height: 24px; margin: 0 auto; background: rgba(0,0,0,0.6); border: 2px solid #fff; border-radius: 12px; overflow: hidden; }
         #bar { height: 100%; width: 100%; background: var(--green); transition: width 0.3s ease; }
         #hud { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 10px auto 0; }
         #hearts-display { font-size: 28px; filter: drop-shadow(0 0 5px #f00); }
-        #timer { color: var(--red); font-weight: 900; font-size: 20px; text-shadow: 0 0 8px var(--red); }
+        #timer { color: var(--red); font-weight: 900; font-size: 22px; text-shadow: 0 0 8px var(--red); }
         .lvl-badge { background: #fff; color: #000; padding: 4px 12px; border-radius: 15px; font-weight: 900; animation: levelBlink 1s infinite alternate; }
         @keyframes levelBlink { from { box-shadow: 0 0 5px var(--gold); } to { box-shadow: 0 0 20px var(--gold); background: var(--gold); } }
 
-        /* FETTES POP-UP BANNER */
+        /* POP-UP BANNER */
         #lvl-banner { 
             position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%) scale(0);
             width: 80%; background: var(--gold); color: #000; padding: 30px; border-radius: 30px;
@@ -73,8 +77,8 @@
     </div>
     
     <div id="lvl-banner">
-        <h2 style="font-size: 32px;">LEVEL UP!</h2>
-        <p style="font-size: 18px; margin-top: 10px;">NEXT LEVEL - FASTER! ⚡</p>
+        <h2 style="font-size: 28px;">LEVEL UP!</h2>
+        <p style="font-size: 16px; margin-top: 10px;">NEXT LEVEL - FASTER! ⚡</p>
     </div>
     
     <canvas id="game-canvas"></canvas>
@@ -98,16 +102,17 @@
 
 <div id="scroll-info">
     <h2 style="color: var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px;">🏆 GLOBAL RANKING</h2>
-    <div id="leaderboard">Connecting to database...</div>
-    <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; font-size: 14px; color: #ddd;">
-        <h3>📖 MANUAL</h3>
-        <p>Catch food to fill energy. Survive 30s to level up. Avoid spiders and cops!</p>
+    <div id="leaderboard">Loading ranking...</div>
+    <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px;">
+        <h3 style="color: var(--neon);">📖 MANUAL</h3>
+        <p style="font-size: 14px; color: #ddd; margin-top: 8px;">Catch 🍗, 🍪, 🦴 for energy. Survive 30s levels. Watch out for 🕷️ and 👮!</p>
     </div>
 </div>
 
 <script>
+// DEINE DATEN SIND HIER EINGEBAUT:
 const SUPABASE_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_RPqmxS3pjwTJGeLsdhuN3w_5BEprYDK';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const canvas = document.getElementById("game-canvas");
@@ -145,6 +150,10 @@ window.addEventListener('keydown', (e) => {
     if(e.key === "ArrowRight") mRight();
 });
 
+function addFloater(x, y, txt, col) { 
+    floaters.push({ x: x, y: y, txt: txt, col: col, life: 1.0, vx: (Math.random() - 0.5) * 4 }); 
+}
+
 function loop(now) {
     if(!active) return;
     let dt = (now - lastTime) / 1000;
@@ -159,7 +168,6 @@ function loop(now) {
     document.getElementById("timer").innerText = Math.ceil(timeLeft) + "s";
     document.getElementById("neon-score-display").innerText = "SCORE: " + score;
 
-    // POP-UP LEVEL UP LOGIK
     if(timeLeft <= 0) {
         level++; timeLeft = 30; energy = 100;
         document.getElementById("lvl-num").innerText = level;
@@ -171,8 +179,28 @@ function loop(now) {
     // Weather
     ctx.font = "45px Arial";
     clouds.forEach(c => { c.x += c.s; if(c.x > W + 60) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
+    if(Math.random() < 0.005) birds.push({ x: W + 20, y: 150 + Math.random()*200, vx: -(1.5 + Math.random()), vy: (Math.random()-0.5)*0.5 });
+    ctx.font = "25px Arial";
+    birds.forEach((b, i) => { b.x += b.vx; b.y += b.vy; ctx.fillText("🐦", b.x, b.y); if(b.x < -40) birds.splice(i, 1); });
 
-    // Items spawning
+    // Spiders
+    if(spiders.length < 2 && Math.random() < 0.012) {
+        let l = Math.floor(Math.random()*5);
+        if(!spiders.some(s => s.lane === l)) spiders.push({lane: l, y: 0, dir: 1});
+    }
+    spiders.forEach((s, i) => {
+        s.y += (240 + level * 5) * dt * s.dir;
+        if(s.y > H - 150) s.dir = -1;
+        if(s.y < 0) spiders.splice(i, 1);
+        let sx = s.lane * laneW + laneW/2;
+        ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+        ctx.font = "35px Arial"; ctx.fillText("🕷️", sx, s.y + 25);
+        if(s.lane === dogLane && s.y > H-180 && s.y < H-90) { 
+            energy -= 20; addFloater(sx, s.y, "-20%", "red"); spiders.splice(i, 1); 
+        }
+    });
+
+    // Items
     let interval = (30 / (64 * Math.pow(1.1, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
@@ -181,17 +209,26 @@ function loop(now) {
         items.push({lane: Math.floor(Math.random()*5), y: -60, type: type});
         spawnTimer = interval;
     }
-    
     items.forEach((it, i) => {
         it.y += (320 + (level * 10)) * dt;
         let ix = it.lane * laneW + laneW/2;
         ctx.font = "42px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
-            if(it.type === '👮') { hearts--; energy -= 15; }
-            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); }
-            else { score += (it.type==='🍗'?30:it.type==='🍪'?20:10); energy = Math.min(100, energy + 6); }
+            if(it.type === '👮') { hearts--; energy -= 15; addFloater(ix, it.y, "-1 ❤️", "red"); }
+            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); addFloater(ix, it.y, "RECOVERY", "lime"); }
+            else { 
+                let p = it.type==='🍗'?30:it.type==='🍪'?20:10; score += p; energy = Math.min(100, energy + 6); 
+                addFloater(ix, it.y, "+"+p, "white");
+            }
             items.splice(i, 1);
         }
+    });
+
+    floaters.forEach((f, i) => {
+        f.y -= 80 * dt; f.x += f.vx; f.life -= dt;
+        ctx.globalAlpha = Math.max(0, f.life); ctx.fillStyle = f.col; ctx.font = "bold 24px Orbitron";
+        ctx.fillText(f.txt, f.x, f.y); ctx.globalAlpha = 1;
+        if(f.life <= 0) floaters.splice(i, 1);
     });
 
     dogX += (targetX - dogX) * 0.2;
@@ -208,23 +245,29 @@ async function end() {
     document.getElementById("game-wrap").style.height = "60vh";
     document.body.style.overflow = "auto";
     let name = document.getElementById("pName").value || "ANON";
+    
+    // Daten an DEIN Supabase senden
     await supabaseClient.from('leaderboard').insert([{ n: name, s: score }]);
     updateOnlineRanks();
 }
 
 async function updateOnlineRanks() {
     try {
-        let { data: scores, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
-        if(error) throw error;
-        if(scores) {
+        let { data: scores } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
+        if(scores && scores.length > 0) {
             const medals = ["🪙", "🥈", "🥉", "🐾", "🐾"];
             document.getElementById("leaderboard").innerHTML = scores.map((x, i) => `
                 <div class="rank-item"><span>${medals[i] || '🐾'} ${x.n}</span><span>${x.s}</span></div>`).join('');
+        } else {
+            document.getElementById("leaderboard").innerHTML = "No ranking found yet.";
         }
     } catch(e) {
-        document.getElementById("leaderboard").innerHTML = "No ranking found yet.";
+        document.getElementById("leaderboard").innerHTML = "Connection Error.";
     }
 }
+
+// Initialer Ranglisten-Abruf
+updateOnlineRanks();
 </script>
 </body>
 </html>
