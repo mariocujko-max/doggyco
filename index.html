@@ -3,82 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doggyco V63 - Ultimate Control</title>
+    <title>Doggyco V64 - Final Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background: #000; font-family: 'Orbitron', sans-serif; 
-            overflow: hidden; display: flex; flex-direction: column; align-items: center; 
+            background: #0a0a0a; font-family: 'Orbitron', sans-serif; 
+            overflow: hidden; display: flex; justify-content: center; align-items: center; 
             height: 100vh; width: 100vw; color: #fff;
         }
         
         #game-wrap { 
-            position:relative; width: 100%; height: 98vh; max-width: 500px; 
-            background: #111; border: 2px solid #333; overflow: hidden;
+            position:relative; width: 98vw; height: 96vh; max-width: 500px; 
+            background: #000; border: 4px solid var(--neon); border-radius: 25px; 
+            overflow: hidden; box-shadow: 0 0 20px var(--neon), inset 0 0 10px var(--neon);
+            display: flex; flex-direction: column;
         }
 
-        #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.6); z-index: 1; }
+        #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.5); z-index: 1; }
         
-        /* HUD - Ganz oben fixiert */
-        #ui-header {
-            position: absolute; top: 10px; width: 100%; z-index: 150;
-        }
+        /* HUD - Top Position */
+        #ui-header { position: absolute; top: 15px; width: 100%; z-index: 150; }
         #progress-container { 
-            width: 90%; height: 25px; margin: 0 auto;
-            background: rgba(0,0,0,0.7); border: 2px solid #fff; border-radius: 15px; overflow: hidden;
+            width: 85%; height: 22px; margin: 0 auto;
+            background: rgba(0,0,0,0.7); border: 2px solid #fff; border-radius: 11px; overflow: hidden;
         }
         #bar { height: 100%; width: 100%; background: var(--green); transition: width 0.3s; }
 
-        #hud { display: flex; justify-content: space-between; width: 90%; margin: 10px auto 0; }
-        .badge { background: #fff; color: #000; padding: 5px 12px; border-radius: 15px; font-weight: 900; font-size: 14px; box-shadow: 0 0 10px var(--neon); }
+        #hud { display: flex; justify-content: space-between; width: 85%; margin: 10px auto 0; }
+        .badge { background: #fff; color: #000; padding: 4px 12px; border-radius: 12px; font-weight: 900; font-size: 13px; box-shadow: 0 0 10px #fff; }
 
         canvas { position: absolute; inset: 0; z-index: 20; background: transparent; }
+        #floor-glass { position: absolute; bottom: 0; width: 100%; height: 15%; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); border-top: 1px solid rgba(255,255,255,0.3); z-index: 10; }
 
-        /* Milchiger Boden */
-        #floor-glass { 
-            position: absolute; bottom: 0; width: 100%; height: 16%; 
-            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(15px); 
-            border-top: 2px solid rgba(255,255,255,0.4); z-index: 10; 
-        }
-
-        /* Pfeiltasten GANZ AM RAND */
-        #controls { 
-            position: absolute; bottom: 30px; width: 100%; 
-            display: flex; justify-content: space-between; 
-            padding: 0 10px; z-index: 300; pointer-events: none; 
-        }
+        /* Navigation Buttons - FIXED SIDES */
+        #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; z-index: 300; pointer-events: none; }
         .btn-arrow { 
-            width: 85px; height: 85px; background: rgba(0, 242, 255, 0.2); 
-            border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; 
+            width: 80px; height: 80px; background: rgba(0, 242, 255, 0.15); 
+            border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 35px; 
             display: flex; align-items: center; justify-content: center; 
             cursor: pointer; pointer-events: auto; backdrop-filter: blur(5px);
             box-shadow: 0 0 15px var(--neon);
         }
-        .btn-arrow:active { background: var(--neon); color: #000; }
 
-        /* Moderne Overlays */
-        .overlay { 
-            position:absolute; inset:0; background: rgba(0,0,0,0.85); 
-            backdrop-filter: blur(15px); display:flex; flex-direction:column; 
-            justify-content:center; align-items:center; z-index:500; text-align: center;
-        }
-
+        /* Modern Banners */
+        .overlay { position:absolute; inset:0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:500; text-align: center; padding: 20px; }
         .modern-banner { 
-            background: var(--gold); color: #000; padding: 30px 40px; 
-            border-radius: 40px; font-weight: 900; font-size: 28px; 
-            box-shadow: 0 0 30px var(--gold); transform: scale(0); 
-            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 600; 
+            background: var(--gold); color: #000; padding: 25px 35px; border-radius: 40px; 
+            font-weight: 900; font-size: 26px; box-shadow: 0 0 30px var(--gold); 
+            transform: scale(0); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 600; 
         }
-
-        .neon-btn { 
-            padding: 20px 60px; background: var(--green); color: #000; 
-            border: none; border-radius: 50px; font-weight: 900; 
-            font-size: 24px; cursor: pointer; box-shadow: 0 0 20px var(--green);
-            margin-top: 20px;
-        }
+        .neon-btn { padding: 18px 50px; background: var(--green); color: #000; border: none; border-radius: 40px; font-weight: 900; font-family: 'Orbitron'; font-size: 22px; cursor: pointer; box-shadow: 0 0 20px var(--green); margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -99,19 +76,19 @@
     <canvas id="game-canvas"></canvas>
 
     <div id="controls">
-        <div class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft()">◀</div>
-        <div class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight()">▶</div>
+        <div class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft(event)">◀</div>
+        <div class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight(event)">▶</div>
     </div>
 
     <div class="overlay" id="start-screen">
-        <h1 style="font-size: 45px; margin-bottom: 20px; text-shadow: 0 0 20px var(--neon);">DOGGYCO</h1>
-        <input type="text" id="pName" placeholder="ENTER NAME" style="padding:15px; border-radius:30px; border:2px solid var(--neon); background:none; color:#fff; text-align:center; font-family:'Orbitron'; width:70%; margin-bottom:30px;">
+        <h1 style="font-size: 42px; margin-bottom: 20px; text-shadow: 0 0 20px var(--neon);">DOGGYCO</h1>
+        <input type="text" id="pName" placeholder="ENTER NAME" style="padding:15px; border-radius:30px; border:2px solid var(--neon); background:none; color:#fff; text-align:center; font-family:'Orbitron'; width:80%; margin-bottom:30px; outline: none;">
         <button class="neon-btn" onclick="initGame()">MISSION START</button>
     </div>
 
     <div class="overlay" id="end-screen" style="display:none;">
         <div class="modern-banner" style="transform:scale(1); background:var(--red); color:#fff; box-shadow: 0 0 30px var(--red);">GAME OVER</div>
-        <h1 id="f-score" style="font-size: 60px; color: var(--gold); margin: 20px 0;">0</h1>
+        <h1 id="f-score" style="font-size: 55px; color: var(--gold); margin: 20px 0;">0</h1>
         <button class="neon-btn" onclick="location.reload()">RETRY</button>
     </div>
 </div>
@@ -128,9 +105,11 @@ function resize() {
     W = canvas.width = document.getElementById("game-wrap").offsetWidth;
     H = canvas.height = document.getElementById("game-wrap").offsetHeight;
     laneW = W / 5;
-    dogX = laneW * dogLane + laneW/2;
+    updateDogPos();
 }
 window.onload = resize; window.onresize = resize;
+
+function updateDogPos() { dogX = (dogLane * laneW) + (laneW / 2); }
 
 function playSound(freq, type, dur) {
     if(!audioCtx) return;
@@ -144,38 +123,36 @@ function playSound(freq, type, dur) {
 
 function initGame() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Musik mit Fehlerbehandlung starten
-    bgMusic = new Audio('musik.mp3');
-    bgMusic.loop = true;
-    bgMusic.volume = 0.1;
-    let playPromise = bgMusic.play();
-    if (playPromise !== undefined) {
-        playPromise.catch(() => { console.log("Musik-Autoplay blockiert oder Datei fehlt."); });
-    }
-
+    bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.1;
+    bgMusic.play().catch(() => console.log("Audio blockiert"));
     document.getElementById("start-screen").style.display = "none";
     active = true;
     lastTime = performance.now();
     requestAnimationFrame(loop);
 }
 
-// STEUERUNG
-function mLeft() { if(dogLane > 0) dogLane--; playSound(400, 'sine', 0.05); }
-function mRight() { if(dogLane < 4) dogLane++; playSound(400, 'sine', 0.05); }
-
-const handleMouse = (e) => {
-    if(!active || e.touches) return; // Nur Maus für PC
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    dogLane = Math.floor(x / (rect.width / 5));
-    dogLane = Math.max(0, Math.min(4, dogLane));
-};
-canvas.addEventListener('mousedown', handleMouse);
+// CONTROL LOGIC - STEP BY STEP 1-2-3-4-5
+function mLeft(e) { 
+    if(e) e.preventDefault();
+    if(dogLane > 0) { dogLane--; updateDogPos(); playSound(400, 'sine', 0.05); } 
+}
+function mRight(e) { 
+    if(e) e.preventDefault();
+    if(dogLane < 4) { dogLane++; updateDogPos(); playSound(400, 'sine', 0.05); } 
+}
 
 window.addEventListener('keydown', (e) => {
     if(e.key === "ArrowLeft") mLeft();
     if(e.key === "ArrowRight") mRight();
+});
+
+// PC Mouse Lane Selection
+canvas.addEventListener('mousedown', (e) => {
+    if(!active) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    dogLane = Math.floor(x / (rect.width / 5));
+    updateDogPos();
 });
 
 function addFloater(x, y, txt, col) { 
@@ -204,18 +181,12 @@ function loop(now) {
         setTimeout(()=> b.style.transform = "scale(0)", 1800);
     }
 
-    // Mathe Spawn: 64 Items, +10% pro Level
-    let itemsPerLevel = 64 * Math.pow(1.1, level - 1);
-    let interval = 30 / itemsPerLevel;
+    let interval = (30 / (64 * Math.pow(1.1, level - 1)));
     spawnTimer -= dt;
-
     if(spawnTimer <= 0) {
         let r = Math.random() * 64, type = '🦴';
         if(r < 1 && !items.some(i => i.type === '❤️')) type = '❤️'; 
-        else if(r < 4) type = '👮'; 
-        else if(r < 14) type = '🍗'; 
-        else if(r < 34) type = '🍪';
-        
+        else if(r < 4) type = '👮'; else if(r < 14) type = '🍗'; else if(r < 34) type = '🍪';
         items.push({lane: Math.floor(Math.random()*5), y: -60, type: type});
         spawnTimer = interval;
     }
@@ -225,7 +196,6 @@ function loop(now) {
         let ix = it.lane * laneW + laneW/2;
         ctx.font = "42px Arial"; ctx.textAlign = "center";
         ctx.fillText(it.type, ix, it.y);
-
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
             if(it.type === '👮') { hearts--; energy -= 15; addFloater(ix, it.y, "-1❤️", "red"); playSound(150, 'square', 0.3); }
             else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); addFloater(ix, it.y, "HEAL", "lime"); playSound(600, 'sine', 0.4); }
@@ -261,8 +231,6 @@ function loop(now) {
         if(f.life <= 0) floaters.splice(i, 1);
     });
 
-    let targetX = dogLane * laneW + laneW/2;
-    dogX += (targetX - dogX) * 0.25;
     ctx.font = "75px Arial"; ctx.fillText("🐶", dogX, H - 100);
     document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
@@ -277,4 +245,3 @@ function end() {
 </script>
 </body>
 </html>
-
