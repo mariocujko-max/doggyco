@@ -3,91 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doggyco V59 - Official Master</title>
+    <title>Doggyco V61 - Crystal Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #d1d8e0; font-family: 'Orbitron', sans-serif; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; height: 100vh; }
         
-        #game-wrap { 
-            position:relative; width: 100vw; height: 100vh; max-width: 480px; 
-            background: #000; border: 4px solid #222; overflow: hidden; 
-            box-shadow: 0 25px 60px rgba(0,0,0,0.4); touch-action: none;
+        body { 
+            background: #eef2f3; font-family: 'Orbitron', sans-serif; 
+            overflow-y: auto; display: flex; flex-direction: column; align-items: center; 
+            color: #222; min-height: 100vh;
+        }
+        
+        #game-container { 
+            position:relative; width: 100vw; height: 85vh; max-width: 480px; 
+            background: #000; border: 6px solid #222; border-radius: 0 0 30px 30px; 
+            overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
         }
 
-        #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.6); z-index: 1; }
-        #weather-layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
-        #floor-transparency { position: absolute; bottom: 0; width: 100%; height: 15%; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.3); z-index: 10; }
+        #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.8); z-index: 1; }
         
-        #progress-container { position: absolute; top: 12px; left: 5%; width: 90%; height: 24px; background: rgba(0,0,0,0.6); border: 2px solid #fff; border-radius: 12px; z-index: 110; overflow: hidden; }
+        #progress-container { 
+            position: absolute; top: 12px; left: 5%; width: 90%; height: 22px; 
+            background: rgba(255,255,255,0.3); border: 2px solid #fff; border-radius: 11px; z-index: 110; overflow: hidden;
+        }
         #bar { height: 100%; width: 100%; background: var(--green); transition: width 0.3s ease; }
 
-        #hud { position: absolute; top: 45px; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; z-index: 100; }
-        .badge { background: #fff; color: #000; padding: 4px 10px; border-radius: 8px; font-weight: 900; font-size: 13px; border: 2px solid #000; }
-        
+        #hud { position: absolute; top: 42px; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; z-index: 100; }
+        .badge { background: rgba(255,255,255,0.8); color: #000; padding: 4px 10px; border-radius: 8px; font-weight: 900; font-size: 13px; border: 1px solid #000; }
+
         canvas { position: absolute; inset: 0; z-index: 20; background: transparent; }
 
-        .overlay { position:absolute; inset:0; background:rgba(0,0,0,0.9); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:500; text-align: center; }
-        .lvl-banner { position: absolute; top: 40%; width: 100%; background: var(--gold); color: #000; padding: 20px; font-weight: 900; font-size: 28px; transform: scale(0); transition: 0.4s; z-index: 600; }
+        #controls { position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: space-around; z-index: 300; pointer-events: none; }
+        .btn-arrow { 
+            width: 65px; height: 65px; background: rgba(255,255,255,0.3); 
+            border: 2px solid #fff; border-radius: 50%; color: #fff; font-size: 28px; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; pointer-events: auto; backdrop-filter: blur(8px);
+        }
 
-        /* Neon Start Screen */
-        .neon-title { font-size: 42px; color: #fff; text-shadow: 0 0 15px var(--neon), 0 0 30px var(--neon); margin-bottom: 20px; letter-spacing: 3px; }
-        .neon-input { padding: 15px; border-radius: 12px; border: 2px solid var(--neon); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; width: 80%; margin-bottom: 25px; font-size: 18px; outline: none; }
-        .start-btn { padding: 18px 50px; background: transparent; color: var(--green); border: 4px solid var(--green); border-radius: 40px; font-weight: 900; font-family: 'Orbitron'; font-size: 22px; cursor: pointer; text-shadow: 0 0 10px var(--green); box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        /* Milchige Overlays */
+        .overlay { 
+            position:absolute; inset:0; 
+            background: rgba(255, 255, 255, 0.25); 
+            backdrop-filter: blur(15px); 
+            display:flex; flex-direction:column; justify-content:center; 
+            align-items:center; z-index:500; text-align: center; padding: 20px;
+        }
 
-        #leaderboard-wrap { width: 95vw; max-width: 480px; padding: 20px; background: white; border-radius: 20px; margin-top: 20px; color: #000; }
+        .lvl-banner { 
+            position: absolute; top: 40%; width: 100%; background: var(--gold); 
+            color: #000; padding: 25px; font-weight: 900; font-size: 32px; 
+            transform: scale(0); transition: 0.4s; z-index: 600; 
+        }
+
+        .neon-title { font-size: 42px; color: #000; text-shadow: 0 0 10px #fff; margin-bottom: 5px; }
+        .btn-start { 
+            padding: 18px 50px; background: #000; color: #fff; 
+            border: none; border-radius: 40px; font-weight: 900; font-family: 'Orbitron'; 
+            font-size: 22px; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Info Section below game */
+        #info-section { width: 95vw; max-width: 480px; padding: 25px; background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 50px; }
+        .section-title { border-bottom: 3px solid #000; margin-bottom: 15px; padding-bottom: 5px; font-size: 20px; text-transform: uppercase; }
+        .rank-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; font-weight: 700; }
+        .manual-text { font-size: 14px; line-height: 1.6; color: #444; }
     </style>
 </head>
 <body>
 
-<div id="game-wrap">
+<div id="game-container">
     <div id="bg-layer"></div>
-    <canvas id="weather-layer"></canvas>
-    <div id="floor-transparency"></div>
     <div id="progress-container"><div id="bar"></div></div>
     <div id="hud">
         <div id="hearts-display">❤️❤️❤️</div>
         <div class="badge" id="timer">30s</div>
         <div class="badge">LVL <span id="lvl-num">1</span></div>
     </div>
+    
     <div id="lvl-banner" class="lvl-banner">LEVEL UP! 🚀</div>
+
     <canvas id="game-canvas"></canvas>
+
+    <div id="controls">
+        <div class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft()">◀</div>
+        <div class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight()">▶</div>
+    </div>
 
     <div class="overlay" id="start-screen">
         <h1 class="neon-title">DOGGYCO</h1>
-        <input type="text" id="pName" placeholder="ENTER NAME" maxlength="10" class="neon-input">
-        <button class="start-btn" onclick="initGame()">START MISSION</button>
+        <p style="color: #333; margin-bottom: 20px; font-weight: 700;">CRYSTAL EDITION</p>
+        <input type="text" id="pName" placeholder="YOUR NAME" maxlength="10" style="padding:15px; border-radius:15px; border:2px solid #000; background:rgba(255,255,255,0.6); color:#000; text-align:center; font-family:'Orbitron'; width:80%; margin-bottom:25px; font-size: 18px;">
+        <button class="btn-start" onclick="initGame()">START MISSION</button>
     </div>
 
-    <div class="overlay" id="end-screen" style="display:none; background: rgba(0,0,0,0.95);">
-        <h2 style="color:var(--red); font-size: 32px;">MISSION OVER</h2>
-        <div id="medal-display" style="font-size: 70px; margin: 10px 0;">🐾</div>
-        <h1 id="f-score" style="font-size: 55px; color: var(--gold);">0</h1>
-        <button class="start-btn" onclick="location.reload()">TRY AGAIN</button>
+    <div class="overlay" id="end-screen" style="display:none;">
+        <h2 style="color:var(--red); font-size: 30px;">MISSION OVER</h2>
+        <div id="medal-display" style="font-size: 80px; margin: 10px 0;">🐾</div>
+        <h1 id="f-score" style="font-size: 60px; color: #000;">0</h1>
+        <button class="btn-start" onclick="location.reload()">RETRY</button>
     </div>
 </div>
 
-<div id="leaderboard-wrap">
-    <h2 style="border-bottom: 2px solid #000; margin-bottom: 10px;">🏆 RANKING</h2>
+<div id="info-section">
+    <h2 class="section-title">🏆 RANKING</h2>
     <div id="leaderboard"></div>
+
+    <h2 class="section-title" style="margin-top: 30px;">📖 HOW TO PLAY</h2>
+    <div class="manual-text">
+        <p><b>Move:</b> Tap lanes or use arrows to control 🐶.</p>
+        <p><b>Items per Level:</b> 1 ❤️, 3 👮, 30 🦴, 20 🍪, 10 🍗.</p>
+        <p><b>Points:</b> Meat +30, Cookie +20, Bone +10.</p>
+        <p><b>Danger:</b> Spiders drop to dog level and steal <b>20% energy!</b> Polizists take 1 ❤️.</p>
+        <p><b>Goal:</b> Survive 30s per level. Difficulty increases by 10% each stage!</p>
+    </div>
 </div>
 
 <script>
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
-const wCanvas = document.getElementById("weather-layer");
-const wctx = wCanvas.getContext("2d");
 
 let W, H, laneW, dogX, dogLane = 2, active = false;
-let items = [], spiders = [], floaters = [], clouds = [], birds = [];
-let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
+let items = [], spiders = [], floaters = [], score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
 let lastTime = 0, spawnTimer = 0, audioCtx, bgMusic;
 
 function resize() {
-    W = canvas.width = wCanvas.width = document.getElementById("game-wrap").offsetWidth;
-    H = canvas.height = wCanvas.height = document.getElementById("game-wrap").offsetHeight;
+    W = canvas.width = document.getElementById("game-container").offsetWidth;
+    H = canvas.height = document.getElementById("game-container").offsetHeight;
     laneW = W / 5;
     dogX = laneW * dogLane + laneW/2;
 }
@@ -110,33 +154,31 @@ function initGame() {
     bgMusic.play().catch(()=>{});
     document.getElementById("start-screen").style.display = "none";
     active = true;
-    // Lower clouds as requested
-    for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: 150 + Math.random()*100, s: 0.3 + Math.random()*0.4});
     lastTime = performance.now();
     requestAnimationFrame(loop);
 }
 
-// TAP LOGIC - Accurate lane movement
-const handleInput = (e) => {
+function mLeft() { if(dogLane > 0) dogLane--; playSound(400, 'sine', 0.05); }
+function mRight() { if(dogLane < 4) dogLane++; playSound(400, 'sine', 0.05); }
+
+const handleTap = (e) => {
     if(!active) return;
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const x = clientX - rect.left;
-    const clickedLane = Math.floor(x / (rect.width / 5));
-    dogLane = Math.max(0, Math.min(4, clickedLane));
-    playSound(400, 'sine', 0.05, 0.05);
+    const tappedLane = Math.floor(x / (rect.width / 5));
+    dogLane = Math.max(0, Math.min(4, tappedLane));
 };
-canvas.addEventListener('mousedown', handleInput);
-canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(e); }, {passive:false});
+canvas.addEventListener('mousedown', handleTap);
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleTap(e); }, {passive:false});
 
 window.addEventListener('keydown', (e) => {
-    if(e.key === "ArrowLeft" && dogLane > 0) dogLane--;
-    if(e.key === "ArrowRight" && dogLane < 4) dogLane++;
+    if(e.key === "ArrowLeft") mLeft();
+    if(e.key === "ArrowRight") mRight();
 });
 
-// Sideways floating text logic
 function addFloater(x, y, txt, col) { 
-    floaters.push({ x: x, y: y, txt: txt, col: col, life: 1.0, vx: (Math.random() - 0.5) * 2 }); 
+    floaters.push({ x: x, y: y, txt: txt, col: col, life: 1.0, vx: (Math.random() - 0.5) * 3 }); 
 }
 
 function loop(now) {
@@ -145,25 +187,11 @@ function loop(now) {
     lastTime = now;
     if(dt > 0.1) dt = 0.016;
 
-    // Weather
-    wctx.clearRect(0,0,W,H);
-    clouds.forEach(c => {
-        c.x += c.s; if(c.x > W + 50) c.x = -60;
-        wctx.font = "40px Arial"; wctx.fillText("☁️", c.x, c.y);
-    });
-    if(Math.random() < 0.003) birds.push({x: W + 20, y: 250 + Math.random()*100, s: 2.5});
-    birds.forEach((b, i) => {
-        b.x -= b.s; wctx.font = "30px Arial"; wctx.fillText("🐦", b.x, b.y);
-        if(b.x < -40) birds.splice(i, 1);
-    });
-
     ctx.clearRect(0,0,W,H);
     timeLeft -= dt;
     energy -= (4.5 + level) * dt;
     document.getElementById("timer").innerText = Math.ceil(timeLeft) + "s";
-    let bar = document.getElementById("bar");
-    bar.style.width = Math.max(0, energy) + "%";
-    bar.style.background = energy > 50 ? "var(--green)" : (energy > 25 ? "var(--gold)" : "var(--red)");
+    document.getElementById("bar").style.width = Math.max(0, energy) + "%";
 
     if(timeLeft <= 0) {
         level++; timeLeft = 30; energy = 100;
@@ -173,7 +201,6 @@ function loop(now) {
         setTimeout(()=> b.style.transform = "scale(0)", 1500);
     }
 
-    // Math Spawning (+10% increase)
     let interval = (30 / (64 * Math.pow(1.1, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
@@ -191,17 +218,16 @@ function loop(now) {
 
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
             if(it.type === '👮') { hearts--; energy -= 15; addFloater(ix, it.y, "-1❤️", "red"); playSound(150, 'square', 0.3); }
-            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); addFloater(ix, it.y, "HEAL", "lime"); playSound(600, 'sine', 0.4); }
+            else if(it.type === '❤️') { hearts = Math.min(3, hearts+1); addFloater(ix, it.y, "+1❤️", "lime"); playSound(600, 'sine', 0.4); }
             else {
                 let p = it.type === '🍗' ? 30 : (it.type === '🍪' ? 20 : 10);
                 score += p; energy = Math.min(100, energy + 8);
-                addFloater(ix, it.y, "+"+p, "white"); playSound(400 + p*5, 'sine', 0.1);
+                addFloater(ix, it.y, "+"+p, "black"); playSound(400 + p*5, 'sine', 0.1);
             }
             items.splice(i, 1);
         }
     });
 
-    // Spiders (Stay same size, drop to dog level, -20% energy)
     if(spiders.length < 2 && Math.random() < 0.012) {
         let l = Math.floor(Math.random()*5);
         if(!spiders.some(s => s.lane === l)) spiders.push({lane: l, y: 0, dir: 1});
@@ -211,14 +237,13 @@ function loop(now) {
         if(s.y > H - 150) s.dir = -1;
         if(s.y < 0) spiders.splice(i, 1);
         let sx = s.lane * laneW + laneW/2;
-        ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+        ctx.strokeStyle = "rgba(0,0,0,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.fillText("🕷️", sx, s.y + 25);
         if(s.lane === dogLane && s.y > H-180 && s.y < H-90) {
             energy -= 20; addFloater(sx, s.y, "-20%", "red"); playSound(100, 'sawtooth', 0.4); spiders.splice(i, 1);
         }
     });
 
-    // Floaters sideways drift
     floaters.forEach((f, i) => {
         f.y -= 80 * dt; f.x += f.vx; f.life -= dt;
         ctx.globalAlpha = f.life; ctx.fillStyle = f.col; ctx.font = "bold 25px Orbitron";
@@ -226,7 +251,6 @@ function loop(now) {
         if(f.life <= 0) floaters.splice(i, 1);
     });
 
-    // Dog Position (Above glass floor)
     let targetX = dogLane * laneW + laneW/2;
     dogX += (targetX - dogX) * 0.25;
     ctx.font = "75px Arial"; ctx.fillText("🐶", dogX, H - 110);
@@ -238,9 +262,10 @@ function loop(now) {
 function end() {
     active = false; if(bgMusic) bgMusic.pause();
     let n = document.getElementById("pName").value || "ANON";
-    let s = JSON.parse(localStorage.getItem('doggyV59') || '[]');
+    let s = JSON.parse(localStorage.getItem('doggyFinalV61') || '[]');
     s.push({n: n, s: score}); s.sort((a,b)=>b.s-a.s);
-    localStorage.setItem('doggyV59', JSON.stringify(s.slice(0,5)));
+    localStorage.setItem('doggyFinalV61', JSON.stringify(s.slice(0,5)));
+    
     document.getElementById("end-screen").style.display = "flex";
     document.getElementById("f-score").innerText = score;
     let medals = ["🪙", "🥈", "🥉", "🐾", "🐾"], rank = s.findIndex(x => x.s === score && x.n === n);
@@ -249,12 +274,10 @@ function end() {
 }
 
 function updateRanks() {
-    let s = JSON.parse(localStorage.getItem('doggyV59') || '[]');
+    let s = JSON.parse(localStorage.getItem('doggyFinalV61') || '[]');
     const medals = ["🪙", "🥈", "🥉", "🐾", "🐾"];
     document.getElementById("leaderboard").innerHTML = s.map((x,i)=>`
-        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee; font-weight:700;">
-            <span>${medals[i]} ${x.n}</span><span>${x.s}</span>
-        </div>`).join('');
+        <div class="rank-item"><span>${medals[i]} ${x.n}</span><span>${x.s}</span></div>`).join('');
 }
 </script>
 </body>
