@@ -160,7 +160,7 @@ function playSfx(f, type, d, v=0.3) {
 function startGame() {
     document.getElementById("main-header").classList.add("ingame");
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.05;
+    bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.15;
     bgMusic.play().catch(()=>{});
     document.getElementById("start-screen").style.display = "none";
     active = true;
@@ -267,4 +267,5 @@ window.addEventListener('keydown', e => { if(e.key === "ArrowLeft") mLeft(); if(
 </script>
 </body>
 </html>
+
 
