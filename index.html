@@ -3,17 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doggyco V105 - Iron-Clad Edition</title>
+    <title>Doggyco V110 - FINAL FIX</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; --blue: #0077ff; }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
-        body { background: #000; font-family: 'Orbitron', sans-serif; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { 
+            background: #000; font-family: 'Orbitron', sans-serif; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; 
+            min-height: 100vh; overflow-x: hidden;
+        }
 
         /* Spielfeld Design */
         #game-container { width: 100vw; display: flex; justify-content: center; padding: 10px 0; }
+        
         #game-wrap { 
             position:relative; width: 95vw; height: 80vh; max-width: 450px; 
             background: #000; border: 4px solid var(--neon); border-radius: 40px; 
@@ -25,22 +30,36 @@
 
         /* HUD & ENERGY */
         #ui-header { position: absolute; top: 30px; width: 100%; z-index: 150; pointer-events: none; }
-        #energy-bar-wrap { width: 80%; height: 26px; margin: 0 auto; background: rgba(0,0,0,0.8); border: 2px solid #fff; border-radius: 13px; overflow: hidden; position: relative; }
+        #energy-bar-wrap { 
+            width: 80%; height: 26px; margin: 0 auto; 
+            background: rgba(0,0,0,0.8); border: 2px solid #fff; border-radius: 13px; 
+            overflow: hidden; position: relative;
+        }
         #energy-fill { height: 100%; width: 100%; background: var(--green); transition: width 0.2s ease; }
-        #energy-text { position: absolute; width: 100%; text-align: center; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 900; color: #fff; text-shadow: 1px 1px 2px #000; }
+        #energy-text {
+            position: absolute; width: 100%; text-align: center; top: 50%; transform: translateY(-50%);
+            font-size: 11px; font-weight: 900; color: #fff; text-shadow: 1px 1px 2px #000;
+        }
 
         #hud-bottom { display: flex; justify-content: space-between; align-items: center; width: 80%; margin: 10px auto 0; }
-        #hearts-display { font-size: 26px; filter: drop-shadow(0 0 5px red); }
         #timer { color: var(--gold); font-size: 18px; text-shadow: 0 0 5px gold; }
 
         /* STEUERUNG */
         #controls { position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 25px; z-index: 300; pointer-events: none; }
-        .btn-arrow { width: 70px; height: 70px; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
+        .btn-arrow { 
+            width: 70px; height: 70px; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); 
+            border-radius: 50%; color: #fff; font-size: 30px; display: flex; align-items: center; 
+            justify-content: center; cursor: pointer; pointer-events: auto;
+        }
         .btn-arrow:active { background: var(--blue); box-shadow: 0 0 20px var(--blue); border-color: #fff; }
 
         /* OVERLAYS */
         .overlay { position:absolute; inset:0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:500; text-align: center; }
-        #lvl-banner { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 70%; background: var(--gold); color: #000; padding: 15px; border-radius: 20px; text-align: center; z-index: 1000; font-weight: 900; transition: 0.3s; }
+        #lvl-banner { 
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); 
+            width: 70%; background: var(--gold); color: #000; padding: 15px; 
+            border-radius: 20px; text-align: center; z-index: 1000; font-weight: 900; transition: 0.3s;
+        }
 
         /* INFO BOXEN */
         .info-content { width: 95vw; max-width: 450px; margin-top: 10px; padding-bottom: 40px; }
@@ -68,8 +87,8 @@
         <canvas id="game-canvas"></canvas>
         
         <div id="controls">
-            <div id="btn-L" class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft(event)">◀</div>
-            <div id="btn-R" class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight(event)">▶</div>
+            <div id="btn-L" class="btn-arrow" onmousedown="mLeft(event)" ontouchstart="mLeft(event)">◀</div>
+            <div id="btn-R" class="btn-arrow" onmousedown="mRight(event)" ontouchstart="mRight(event)">▶</div>
         </div>
 
         <div class="overlay" id="start-screen">
@@ -98,7 +117,7 @@
 </div>
 
 <script>
-// Supabase Dauerhaft
+// Supabase Anbindung
 const SUPABASE_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -125,33 +144,41 @@ function updateX() { targetX = (dogLane * laneW) + (laneW / 2); }
 function addFloater(x, y, txt, col) { floaters.push({ x, y, txt, col, life: 1.0 }); }
 function createFeuerwerk() { for(let i=0; i<30; i++) particles.push({ x: W/2, y: H/2, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, c: `hsl(${Math.random()*360},100%,50%)`, l: 1.0 }); }
 
-// DIREKTER START BEFEHL
 function startGame() {
     try {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.05;
         bgMusic.play().catch(()=>{});
         document.getElementById("start-screen").style.display = "none";
-        active = true;
-        resize();
-        lastTime = performance.now();
+        
+        // SICHERHEITS-RESIZE
+        resize(); 
+        
+        active = true; 
+        lastTime = performance.now(); 
         requestAnimationFrame(loop);
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        alert("Fehler beim Starten: " + e.message);
+    }
 }
 
 function loop(now) {
     if(!active) return;
     let dt = (now - lastTime) / 1000; lastTime = now;
-    if(dt > 0.1) dt = 0.016;
+    if(dt > 0.1) dt = 0.016; // Fix für Background-Tabs
+    
     ctx.clearRect(0,0,W,H);
 
     timeLeft -= dt; energy -= (4.5 + level * 0.5) * dt;
     
+    // ENERGY BAR FARBE
     const bar = document.getElementById("energy-fill");
-    bar.style.width = Math.max(0, energy) + "%";
-    const r = energy > 50 ? Math.floor(255 * (1 - (energy-50)/50)) : 255;
-    const g = energy > 50 ? 255 : Math.floor(255 * (energy/50));
-    bar.style.backgroundColor = `rgb(${r},${g},0)`;
+    if(bar) {
+        bar.style.width = Math.max(0, energy) + "%";
+        const r = energy > 50 ? Math.floor(255 * (1 - (energy-50)/50)) : 255;
+        const g = energy > 50 ? 255 : Math.floor(255 * (energy/50));
+        bar.style.backgroundColor = `rgb(${r},${g},0)`;
+    }
     
     document.getElementById("timer").innerText = Math.ceil(timeLeft) + "s";
     document.getElementById("lvl-num").innerText = level;
@@ -164,30 +191,30 @@ function loop(now) {
         setTimeout(() => b.style.transform = "translate(-50%, -50%) scale(0)", 1200);
     }
 
-    // Clouds & Birds
+    // Atmos
     ctx.font = "40px Arial"; ctx.textAlign = "center";
     if(clouds.length < 3) clouds.push({ x: -50, y: 100 + Math.random()*100, s: 0.2 + Math.random()*0.3 });
     clouds.forEach(c => { c.x += c.s; if(c.x > W + 50) c.x = -50; ctx.fillText("☁️", c.x, c.y); });
     if(Math.random() < 0.005) birds.push({ x: W + 20, y: 150 + Math.random()*200, vx: -1.5 });
     ctx.font = "20px Arial"; birds.forEach((b, i) => { b.x += b.vx; ctx.fillText("🐦", b.x, b.y); if(b.x < -30) birds.splice(i, 1); });
 
-    // VFX & Partikel
+    // VFX
     particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.l -= dt; ctx.globalAlpha = p.l; ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, 7); ctx.fill(); if(p.l <= 0) particles.splice(i,1); });
     ctx.globalAlpha = 1;
     floaters.forEach((f, i) => { f.y -= 2; f.life -= dt; ctx.globalAlpha = f.life; ctx.fillStyle = f.col; ctx.font = "bold 18px Orbitron"; ctx.fillText(f.txt, f.x, f.y); if(f.life <= 0) floaters.splice(i,1); });
     ctx.globalAlpha = 1;
 
-    // SPINNEN LOGIK
+    // Spinnen am Seil
     if(spiders.length < 2 && Math.random() < 0.01) spiders.push({lane: Math.floor(Math.random()*5), y: 0, dir: 1});
     spiders.forEach((s, i) => {
         s.y += (220 + level * 10) * dt * s.dir; if(s.y > H - 150) s.dir = -1; if(s.y < 0) spiders.splice(i, 1);
         let sx = s.lane * laneW + laneW/2;
-        ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+        ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "30px Arial"; ctx.fillText("🕷️", sx, s.y + 20);
         if(s.lane === dogLane && s.y > H-160 && s.y < H-90) { energy -= 20 * dt * 5; dogShake = 10; }
     });
 
-    // ITEMS LOGIK
+    // Items
     let interval = (30 / (60 * Math.pow(1.08, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
@@ -199,22 +226,22 @@ function loop(now) {
         it.y += (300 + level * 15) * dt; let ix = it.lane * laneW + laneW/2;
         ctx.font = "38px Arial"; ctx.fillText(it.type, ix, it.y);
         if(it.lane === dogLane && it.y > H-150 && it.y < H-80) {
-            let fact = 1 + (level * 0.1);
-            if(it.type === '👮') { hearts--; energy -= 15; dogShake = 15; addFloater(ix, it.y, "-1❤️", "red"); }
-            else if(it.type === '❤️') { if(hearts < 3) hearts++; else { energy = Math.min(100, energy+50); score += 50; addFloater(ix, it.y, "+50 ENERGY", "gold"); } }
+            let f = 1 + (level * 0.1);
+            if(it.type === '👮') { hearts--; energy -= 15; dogShake = 20; addFloater(ix, it.y, "-1❤️", "red"); }
+            else if(it.type === '❤️') { if(hearts < 3) hearts++; else { energy = Math.min(100, energy+50); score += 50; addFloater(ix, it.y, "+50 Energy", "gold"); } }
             else { 
-                let p = Math.floor((it.type==='🍗'?30:it.type==='🍪'?20:10)*fact); score += p; energy = Math.min(100, energy + 6);
+                let p = Math.floor((it.type==='🍗'?30:it.type==='🍪'?20:10)*f); score += p; energy = Math.min(100, energy + 7);
                 dogWobble = 15; addFloater(ix, it.y, "+"+p, "white");
             }
             items.splice(i, 1);
         }
     });
 
-    // Hund Zeichnen & Animation
+    // Dog Draw
     dogX += (targetX - dogX) * 0.2;
     let animX = dogX + (Math.random()-0.5)*dogShake;
     let animY = (H - 100) + Math.sin(Date.now() * 0.02) * dogWobble;
-    ctx.font = "70px Arial"; ctx.fillText("🐶", animX, animY);
+    ctx.font = "75px Arial"; ctx.fillText("🐶", animX, animY);
     if(dogWobble > 0) dogWobble *= 0.9; if(dogShake > 0) dogShake *= 0.9;
 
     document.getElementById("neon-score-display").innerText = "SCORE: " + Math.floor(score);
@@ -223,9 +250,9 @@ function loop(now) {
 }
 
 async function end() {
-    active = false; document.getElementById("f-score").innerText = Math.floor(score);
+    active = false; 
+    document.getElementById("f-score").innerText = Math.floor(score);
     let name = document.getElementById("pName").value || "ANON";
-    document.getElementById("end-msg").innerText = "MISSION OVER, " + name.toUpperCase() + "!";
     document.getElementById("end-screen").style.display = "flex";
     await supabaseClient.from('leaderboard').insert([{ n: name, s: Math.floor(score) }]);
     updateRanks();
@@ -236,6 +263,7 @@ async function updateRanks() {
     if(data) document.getElementById("leaderboard").innerHTML = data.map(x => `<div class="rank-item"><span style="color:var(--neon)">${x.n}</span><span style="color:var(--gold)">${x.s}</span></div>`).join('');
 }
 updateRanks();
+
 window.addEventListener('keydown', e => { if(e.key === "ArrowLeft") mLeft(); if(e.key === "ArrowRight") mRight(); });
 </script>
 </body>
