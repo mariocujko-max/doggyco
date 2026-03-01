@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO - Noble Forest Mission</title>
+    <title>DOGGYCO - Mystic Forest Balance</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -12,17 +12,19 @@
         
         body { 
             background: #000 url('forest_background.png') no-repeat center center fixed; 
-            background-size: 100% 100%; font-family: 'Orbitron', sans-serif; color: #fff; 
+            background-size: cover; font-family: 'Orbitron', sans-serif; color: #fff; 
             display: flex; flex-direction: column; align-items: center; 
-            min-height: 100vh; overflow: hidden; /* Fixiert bis Spielende */
+            min-height: 100vh; overflow-x: auto; /* Standardmäßig scrollbar */
         }
 
-        header { width: 100%; padding: 20px 0; text-align: center; z-index: 1000; transition: 0.5s; }
+        body.locked { overflow: hidden; } /* Während des Spiels gesperrt */
+
+        header { width: 100%; padding: 25px 0; text-align: center; z-index: 1000; transition: 0.5s; }
         header.ingame { opacity: 0; height: 0; padding: 0; overflow: hidden; }
         header h1 { font-size: 36px; color: var(--neon); text-shadow: 0 0 15px var(--neon); letter-spacing: 5px; }
 
-        /* Game Container */
-        #game-view { width: 100vw; height: 85vh; display: flex; justify-content: center; align-items: center; position: relative; z-index: 10; }
+        /* Game Area */
+        #game-view { width: 100vw; height: 85vh; display: flex; justify-content: center; align-items: center; position: relative; z-index: 10; margin-bottom: 20px; }
         #game-wrap { 
             position:relative; width: 95vw; height: 98%; max-width: 450px; 
             background: #000; border: 4px solid var(--neon); border-radius: 40px; 
@@ -46,32 +48,30 @@
         .btn-active { background: var(--blue) !important; box-shadow: 0 0 25px var(--blue); border-color: #fff; transform: scale(0.9); }
 
         /* Frosted Glass UI */
-        .frosted { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 2px solid var(--neon); border-radius: 35px; box-shadow: 0 0 25px var(--neon); }
+        .frosted { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(15px); border: 2px solid var(--neon); border-radius: 35px; box-shadow: 0 0 25px var(--neon); }
         .overlay { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:500; text-align: center; border-radius: 40px; }
         
-        #lvl-banner { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%) scale(0); width: 80%; background: var(--gold); color: #000; padding: 25px; border-radius: 35px; z-index: 1000; font-weight: 900; text-align: center; transition: 0.4s; }
-
-        /* Input & Buttons */
-        #pName { padding: 18px; border-radius: 25px; border: 2px solid var(--neon); background: rgba(0,0,0,0.8); color: #fff; text-align: center; width: 80%; margin-bottom: 25px; font-family: 'Orbitron'; font-size: 18px; box-shadow: 0 0 15px var(--neon); }
+        #pName { padding: 18px; border-radius: 25px; border: 2px solid var(--neon); background: rgba(0,0,0,0.8); color: #fff; text-align: center; width: 80%; margin-bottom: 25px; font-family: 'Orbitron'; font-size: 18px; }
         .neon-btn { padding: 18px 50px; background: var(--green); color: #000; border-radius: 40px; font-weight: 900; cursor: pointer; border: none; margin-top: 10px; box-shadow: 0 0 20px var(--green); font-family: 'Orbitron'; font-size: 20px; }
 
-        /* Information Sections below the game */
-        .info-content { width: 95vw; max-width: 450px; margin-top: 30px; padding-bottom: 80px; display: none; }
+        /* Information Blocks */
+        .info-content { width: 95vw; max-width: 450px; padding-bottom: 80px; }
         .neon-box { padding: 30px; margin-bottom: 30px; text-align: center; }
 
-        /* Donation Section Integration */
+        /* Donation Section */
         .gift-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .gift-btn { padding: 12px; border-radius: 15px; font-size: 11px; font-weight: 800; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); color: white; text-decoration: none; transition: 0.3s; }
+        .gift-btn { padding: 12px; border-radius: 15px; font-size: 11px; font-weight: 800; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); color: white; text-decoration: none; }
         .pp { background: rgba(0, 112, 186, 0.4); }
         .btc { background: rgba(247, 147, 26, 0.4); }
-        .qr { background: rgba(255,255,255,0.15); }
-        .tt { background: rgba(0,0,0,0.5); }
         
         .rank-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .guide-list { text-align: left; font-size: 13px; color: #ccc; line-height: 1.6; }
+        .guide-list b { color: var(--neon); }
+        
         footer { width: 100%; padding: 40px 20px; background: rgba(0,0,0,0.85); text-align: center; font-size: 11px; color: #555; border-top: 2px solid var(--neon); }
     </style>
 </head>
-<body>
+<body id="body-main">
 
 <header id="main-header"><h1>DOGGYCO</h1></header>
 
@@ -86,50 +86,51 @@
                 <div id="timer">30s</div>
             </div>
         </div>
-        <div class="frosted" id="lvl-banner">LEVEL UP! ⚡<br><span style="font-size:14px;">GETTING FASTER...</span></div>
         <canvas id="game-canvas"></canvas>
         <div id="controls">
             <div id="btn-L" class="btn-arrow" onmousedown="mLeft(event)" ontouchstart="mLeft(event)">◀</div>
             <div id="btn-R" class="btn-arrow" onmousedown="mRight(event)" ontouchstart="mRight(event)">▶</div>
         </div>
         <div class="overlay frosted" id="start-screen">
-            <input type="text" id="pName" placeholder="NAME ENTER">
-            <button class="neon-btn" onclick="startGame()">MISSION START</button>
+            <input type="text" id="pName" placeholder="ENTER AGENT NAME">
+            <button class="neon-btn" onclick="startGame()">START MISSION</button>
         </div>
         <div class="overlay frosted" id="end-screen" style="display:none;">
-            <h2 id="final-name" style="color:var(--neon); margin-bottom: 5px;">AGENT</h2>
+            <h2 id="final-name" style="color:var(--neon);">AGENT</h2>
             <h3>MISSION OVER</h3>
-            <h1 id="f-score" style="font-size: 60px; color: var(--gold); margin: 10px 0;">0</h1>
+            <h1 id="f-score" style="font-size: 60px; color: var(--gold);">0</h1>
             <button class="neon-btn" onclick="location.reload()">RETRY</button>
         </div>
     </div>
 </div>
 
-<div class="info-content" id="scroll-area">
+<div class="info-content">
     <div class="neon-box frosted">
         <h3 style="color:var(--gold); margin-bottom:20px;">🏆 TOP AGENTS</h3>
         <div id="leaderboard">Syncing...</div>
     </div>
 
     <div class="neon-box frosted">
-        <h3 style="color:var(--neon); margin-bottom:10px;">🎁 SUPPORT MISSION</h3>
-        <p style="font-size:12px; color:#ccc; margin-bottom:15px;">Your contribution keeps the dog running.</p>
+        <h3 style="color:var(--neon); margin-bottom:15px;">🎁 SUPPORT MISSION</h3>
         <div class="gift-grid">
             <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=give-me.org@gmx.net" target="_blank" class="gift-btn pp">PayPal</a>
-            <button class="gift-btn btc" onclick="copyBTC()">Copy BTC</button>
-            <button class="gift-btn qr" onclick="showQR()">QR Code</button>
-            <a href="https://www.tiktok.com/@giveme.org" target="_blank" class="gift-btn tt">TikTok</a>
+            <button class="gift-btn btc" onclick="navigator.clipboard.writeText('bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed'); alert('Wallet Copied!');">Copy BTC</button>
         </div>
     </div>
 
     <div class="neon-box frosted">
-        <h3 style="color:var(--neon); margin-bottom:15px;">📖 DESCRIPTION</h3>
-        <p style="font-size:13px; color:#ccc; line-height:1.7;">Forest survival. Collect food for energy. Spiders deal compounding damage per level. Cops cost one heart. Use arrows to dodge!</p>
+        <h3 style="color:var(--neon); margin-bottom:15px;">📖 HOW TO PLAY</h3>
+        <div class="guide-list">
+            <p>• <b>Food (Bones/Meat):</b> Eat to keep your ENERGY high. <b>Points</b> are buried automatically for every item collected!</p>
+            <p>• <b>Energy Bar:</b> If it reaches zero, you lose. Collect food to refill.</p>
+            <p>• <b>Spiders (🕷️):</b> They drop from the ceiling. <b>AVOID THEM!</b> They rob significant energy ($30\% +$ per level).</p>
+            <p>• <b>Police (👮):</b> Direct collision costs you <b>1 HEART</b>. Lose all 3 hearts and the mission fails.</p>
+            <p>• <b>Strategy:</b> Stay in the middle lanes to react faster. Don't chase every bone if a spider is near!</p>
+        </div>
     </div>
 </div>
 
 <footer>
-    <p><b>Legal Notice:</b> Private Initiative. Not a registered NPO.</p>
     <p>Contributions are personal gifts. © 2026 DOGGYCO | GIVE-ME.ORG</p>
 </footer>
 
@@ -141,7 +142,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 let W, H, laneW, dogX, targetX, dogLane = 2, active = false;
-let items = [], spiders = [], floaters = [], clouds = [];
+let items = [], spiders = [], clouds = [], birds = [];
 let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
 let lastTime = 0, spawnTimer = 0, audioCtx, bgMusic, dogShake = 0;
 
@@ -160,18 +161,9 @@ function updateX(d) {
     if(b) { b.classList.add('btn-active'); setTimeout(()=>b.classList.remove('btn-active'), 100); }
 }
 
-function playSfx(f, type, d, v=0.3) {
-    if(!audioCtx) return;
-    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-    g.gain.setValueAtTime(v, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + d);
-}
-
 function startGame() {
     document.getElementById("main-header").classList.add("ingame");
+    document.getElementById("body-main").classList.add("locked"); // Scroll Lock
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.15;
     bgMusic.play().catch(()=>{});
@@ -194,59 +186,40 @@ function loop(t) {
     document.getElementById("lvl-display").innerText = "LVL: " + level;
     document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
-    if(timeLeft <= 0) {
-        level++; timeLeft = 30; energy = Math.min(100, energy + 25);
-        playSfx(880, 'sine', 0.5, 0.4);
-        let b = document.getElementById("lvl-banner");
-        b.style.transform = "translate(-50%, -50%) scale(1)";
-        setTimeout(() => b.style.transform = "translate(-50%, -50%) scale(0)", 1500);
-    }
+    if(timeLeft <= 0) { level++; timeLeft = 30; energy = Math.min(100, energy + 25); }
 
-    // Atmos
-    if(clouds.length < 3) clouds.push({ x: -60, y: 70 + Math.random()*80, s: 0.2 + Math.random()*0.3 });
-    ctx.font = "40px Arial"; clouds.forEach(c => { c.x += c.s; if(c.x > W + 60) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
+    // Birds Logic
+    if(Math.random() < 0.005) birds.push({ x: W + 50, y: 100 + Math.random()*200, vx: -1.5 });
+    ctx.font = "24px Arial";
+    birds.forEach((b, i) => { b.x += b.vx; ctx.fillText("🐦", b.x, b.y); if(b.x < -60) birds.splice(i, 1); });
 
-    // Floating Text VFX
-    floaters.forEach((f, i) => { f.y -= 2; f.life -= dt; ctx.globalAlpha = f.life; ctx.fillStyle = f.col; ctx.font = "bold 18px Orbitron"; ctx.textAlign="center"; ctx.fillText(f.txt, f.x, f.y); if(f.life <= 0) floaters.splice(i,1); });
-    ctx.globalAlpha = 1;
-
-    // SPIDER LOGIC - NEW: UNIQUE LANES
+    // SPIDER LOGIC - Zentriert & Dünnes Seil
     if(spiders.length < 2 && Math.random() < 0.012) {
         let occupiedLanes = spiders.map(s => s.lane);
         let possibleLanes = [0,1,2,3,4].filter(l => !occupiedLanes.includes(l));
-        if(possibleLanes.length > 0) {
-            spiders.push({lane: possibleLanes[Math.floor(Math.random()*possibleLanes.length)], y: 0, dir: 1});
-        }
+        if(possibleLanes.length > 0) spiders.push({lane: possibleLanes[Math.floor(Math.random()*possibleLanes.length)], y: 0, dir: 1});
     }
     spiders.forEach((s, i) => {
         s.y += (220 + level * 15) * dt * s.dir; if(s.y > H - 150) s.dir = -1; if(s.y < 0) spiders.splice(i, 1);
         let sx = s.lane * laneW + laneW/2;
-        ctx.strokeStyle = "rgba(255,255,255,0.7)"; ctx.lineWidth = 4;
+        ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 1.5; // Dünneres Seil
         ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "38px Arial"; ctx.fillText("🕷️", sx-18, s.y + 25);
-        if(s.lane === dogLane && s.y > H-170 && s.y < H-90) { 
-            let dmg = (30 * Math.pow(1.1, level - 1));
-            energy -= dmg * dt * 5; dogShake = 15; playSfx(120, 'sawtooth', 0.1, 0.2);
-        }
+        if(s.lane === dogLane && s.y > H-170 && s.y < H-90) { energy -= (30 * Math.pow(1.1, level - 1)) * dt * 5; dogShake = 15; }
     });
 
     // Items
     let interval = (30 / (60 * Math.pow(1.1, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
-        let type = '🦴', r = Math.random() * 50;
-        if(r < 3) type = '👮'; else if(r < 15) type = '🍗'; else if(r < 30) type = '🍪';
-        items.push({lane: Math.floor(Math.random()*5), y: -60, type: type}); spawnTimer = interval;
+        items.push({lane: Math.floor(Math.random()*5), y: -60, type: Math.random() < 0.1 ? '👮' : '🦴'}); spawnTimer = interval;
     }
     items.forEach((it, i) => {
         it.y += (310 + level * 20) * dt; let ix = it.lane * laneW + laneW/2;
-        ctx.font = "42px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
+        ctx.font = "42px Arial"; ctx.fillText(it.type, ix, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
-            if(it.type === '👮') { hearts--; energy -= 15; dogShake = 25; floaters.push({x:ix, y:it.y, txt:"-1❤️", col:"red", life:1}); playSfx(150, 'square', 0.3, 0.4); }
-            else { 
-                let p = Math.floor(20 * (1 + level * 0.1)); score += p; energy = Math.min(100, energy + 8);
-                floaters.push({x:ix, y:it.y, txt:"+"+p, col:"white", life:1}); playSfx(400+score/10, 'sine', 0.15, 0.3);
-            }
+            if(it.type === '👮') { hearts--; dogShake = 25; }
+            else { score += 20 * (1 + level * 0.1); energy = Math.min(100, energy + 8); }
             items.splice(i, 1);
         }
     });
@@ -259,18 +232,13 @@ function loop(t) {
 
 async function end() {
     active = false; 
-    let name = document.getElementById("pName").value || "ANON";
-    document.getElementById("final-name").innerText = name.toUpperCase();
+    document.getElementById("body-main").classList.remove("locked"); // Unlock Scroll
     document.getElementById("f-score").innerText = Math.floor(score);
     document.getElementById("end-screen").style.display = "flex";
-    document.body.style.overflow = "auto"; 
-    document.getElementById("scroll-area").style.display = "block";
+    let name = document.getElementById("pName").value || "ANON";
     await supabaseClient.from('leaderboard').insert([{ n: name, s: Math.floor(score) }]);
     updateRanks();
 }
-
-function copyBTC() { navigator.clipboard.writeText("bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed"); alert("Wallet Copied!"); }
-function showQR() { window.open("https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=bitcoin:bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed", "_blank"); }
 
 async function updateRanks() {
     try {
@@ -283,5 +251,3 @@ window.addEventListener('keydown', e => { if(!active) return; if(e.key === "Arro
 </script>
 </body>
 </html>
-
-
