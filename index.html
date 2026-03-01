@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doggyco V120 - Ultimate Stability</title>
+    <title>Doggyco V125 - Back to Basics Stability</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -16,7 +16,7 @@
             min-height: 100vh; overflow-x: hidden;
         }
 
-        /* Spielfeld Design */
+        /* Spielfeld Design - Stabil & Zentriert */
         #game-container { width: 100vw; height: 85vh; display: flex; justify-content: center; padding: 10px 0; }
         
         #game-wrap { 
@@ -44,7 +44,7 @@
         #hud-bottom { display: flex; justify-content: space-between; align-items: center; width: 80%; margin: 8px auto 0; }
         #timer { color: var(--gold); font-size: 18px; text-shadow: 0 0 5px gold; }
 
-        /* STEUERUNG */
+        /* STEUERUNG - BLAU LEUCHTEND */
         #controls { position: absolute; bottom: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 25px; z-index: 300; pointer-events: none; }
         .btn-arrow { 
             width: 75px; height: 75px; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); 
@@ -63,7 +63,7 @@
         
         .neon-btn { padding: 16px 45px; background: var(--green); color: #000; border-radius: 35px; font-weight: 900; cursor: pointer; border: none; margin-top: 20px; box-shadow: 0 0 15px var(--green); }
 
-        /* INFO BEREICH */
+        /* INFO BEREICH UNTEN SCROLLBAR */
         .info-content { width: 95vw; max-width: 450px; margin-top: 20px; padding-bottom: 50px; }
         .neon-box { background: rgba(255,255,255,0.05); border: 2px solid var(--neon); border-radius: 20px; padding: 15px; margin-bottom: 15px; box-shadow: 0 0 10px var(--neon); }
         .rank-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #333; }
@@ -100,24 +100,25 @@
         <div class="overlay" id="end-screen" style="display:none;">
             <h2 id="end-msg">MISSION OVER</h2>
             <h1 id="f-score" style="font-size: 60px; color: var(--gold);">0</h1>
-            <button class="neon-btn" onclick="location.reload()">NEUSTART</button>
+            <button class="neon-btn" onclick="location.reload()">ERNEUT VERSUCHEN</button>
         </div>
     </div>
 </div>
 
 <div class="info-content">
     <div class="neon-box">
-        <h3 style="color:var(--gold); text-align:center; margin-bottom:10px;">🏆 RANKING</h3>
+        <h3 style="color:var(--gold); text-align:center; margin-bottom:10px;">🏆 GLOBAL RANKING</h3>
         <div id="leaderboard">Lade...</div>
     </div>
     <div class="neon-box">
         <h3 style="color:var(--neon); text-align:center;">📖 ANLEITUNG</h3>
         <p style="font-size:12px; color:#ccc; line-height:1.5;">Sammle Futter für <b>ENERGY</b>. Spinnen (🕷️) rauben Energie, Polizei (👮) kostet ein Herz. Jedes Level wird schneller!</p>
     </div>
+    <p style="text-align:center; font-size:10px; color:#444;">© 2026 Doggyco. Alle Rechte vorbehalten.</p>
 </div>
 
 <script>
-// Supabase Konfiguration
+// Supabase Anbindung
 const SUPABASE_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -153,13 +154,17 @@ function startGame() {
 function loop(t) {
     if(!active) return;
     let dt = (t - lastTime) / 1000; lastTime = t;
-    if(dt > 0.1) dt = 0.016; // Verhindert Sprünge
+    if(dt > 0.1) dt = 0.016;
     ctx.clearRect(0,0,W,H);
 
     timeLeft -= dt; energy -= (4.5 + level * 0.5) * dt;
+    
     const bar = document.getElementById("energy-fill");
     bar.style.width = Math.max(0, energy) + "%";
-    bar.style.backgroundColor = energy > 50 ? `rgb(${Math.floor(255*(1-(energy-50)/50))}, 255, 0)` : `rgb(255, ${Math.floor(255*(energy/50))}, 0)`;
+    const r = energy > 50 ? Math.floor(255 * (1 - (energy-50)/50)) : 255;
+    const g = energy > 50 ? 255 : Math.floor(255 * (energy/50));
+    bar.style.backgroundColor = `rgb(${r},${g},0)`;
+    
     document.getElementById("timer").innerText = Math.ceil(timeLeft) + "s";
     document.getElementById("lvl-num").innerText = level;
 
@@ -170,7 +175,7 @@ function loop(t) {
         setTimeout(() => b.style.transform = "translate(-50%, -50%) scale(0)", 1000);
     }
 
-    // Atmos (Wolken & Vögel)
+    // Atmos
     ctx.font = "40px Arial"; ctx.textAlign = "center";
     if(clouds.length < 3) clouds.push({ x: -50, y: 80 + Math.random()*80, s: 0.2 + Math.random()*0.3 });
     clouds.forEach(c => { c.x += c.s; if(c.x > W + 50) c.x = -50; ctx.fillText("☁️", c.x, c.y); });
@@ -191,7 +196,7 @@ function loop(t) {
         if(s.lane === dogLane && s.y > H-160 && s.y < H-90) { energy -= 20 * dt * 5; dogShake = 10; }
     });
 
-    // Items spawning
+    // Items
     let interval = (30 / (60 * Math.pow(1.08, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
@@ -214,7 +219,7 @@ function loop(t) {
         }
     });
 
-    // Hund Zeichnen & Animation
+    // Hund
     dogX += (targetX - dogX) * 0.2;
     let animX = dogX + (Math.random()-0.5)*dogShake;
     let animY = (H - 110) + Math.sin(t * 0.01) * dogWobble;
@@ -242,7 +247,6 @@ async function updateRanks() {
     } catch(e) {}
 }
 updateRanks();
-
 window.addEventListener('keydown', e => { if(e.key === "ArrowLeft") mLeft(); if(e.key === "ArrowRight") mRight(); });
 </script>
 </body>
