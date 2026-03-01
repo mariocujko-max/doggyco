@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO V290 - ULTIMATE FEEDBACK</title>
+    <title>DOGGYCO V300 - FINAL MASTER</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -17,7 +17,11 @@
         }
         body.locked { overflow: hidden; }
 
-        #game-view { width: 100vw; height: 88vh; display: flex; justify-content: center; align-items: center; position: relative; margin-top: 5px; }
+        header { padding: 15px; text-align: center; width: 100%; transition: 0.5s; }
+        header.ingame { height: 0; padding: 0; opacity: 0; overflow: hidden; }
+
+        /* Spielfeld */
+        #game-view { width: 100vw; height: 88vh; display: flex; justify-content: center; align-items: center; position: relative; }
         #game-wrap { 
             position:relative; width: 98vw; height: 100%; max-width: 480px; 
             background: #000; border: 4px solid var(--neon); border-radius: 40px; 
@@ -26,93 +30,114 @@
         #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.3); z-index: 1; }
         canvas { position: absolute; inset: 0; z-index: 20; background: transparent; }
 
-        /* HUD */
+        /* HUD DESIGN - EXAKTE REIHENFOLGE */
         #ui-header { position: absolute; top: 15px; width: 100%; z-index: 150; pointer-events: none; }
-        #energy-bar-wrap { width: 90%; height: 35px; margin: 0 auto; background: rgba(0,0,0,0.8); border: 2px solid #fff; border-radius: 20px; overflow: hidden; position: relative; }
-        #energy-fill { height: 100%; width: 100%; background: var(--green); transition: width 0.2s; }
-        #energy-text { position: absolute; width: 100%; text-align: center; top: 50%; transform: translateY(-50%); font-size: 12px; font-weight: 900; }
-        
-        #hud-bottom { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 10px auto 0; }
-        #hearts-display { font-size: 22px; filter: drop-shadow(0 0 5px red); }
-        #lvl-tag { color: var(--neon); font-size: 18px; font-weight: 900; text-shadow: 0 0 10px var(--neon); }
-        #score-display { color: var(--gold); font-size: 20px; font-weight: 900; }
-
-        /* Level Banner */
-        #lvl-banner { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            width: 80%; padding: 30px; background: rgba(255, 215, 0, 0.9); color: #000;
-            border-radius: 30px; z-index: 1000; font-weight: 900; font-size: 24px;
-            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center;
+        #energy-bar-wrap { 
+            width: 92%; height: 38px; margin: 0 auto; 
+            background: rgba(0,0,0,0.85); border: 2px solid #fff; border-radius: 19px; 
+            overflow: hidden; position: relative; box-shadow: 0 0 15px rgba(255,255,255,0.2);
         }
+        #energy-fill { height: 100%; width: 100%; background: var(--green); transition: width 0.2s; }
+        #energy-text { position: absolute; width: 100%; text-align: center; top: 50%; transform: translateY(-50%); font-size: 14px; font-weight: 900; letter-spacing: 2px; text-shadow: 2px 2px 4px #000; }
+        
+        #hud-data-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            width: 90%; margin: 12px auto 0; padding: 5px 10px;
+            background: rgba(0,0,0,0.5); border-radius: 10px;
+        }
+        .hud-item { font-weight: 900; font-size: 16px; display: flex; align-items: center; gap: 5px; }
+        #hearts-display { filter: drop-shadow(0 0 5px red); font-size: 18px; }
+        #lvl-display { color: var(--neon); }
+        #timer-display { color: var(--gold); }
+        #score-display { color: #fff; border-left: 2px solid #444; padding-left: 10px; }
 
-        /* Controls */
-        #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 30px; z-index: 300; pointer-events: none; }
+        /* Steuerung */
+        #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 35px; z-index: 300; pointer-events: none; }
         .btn-arrow { width: 75px; height: 75px; background: rgba(255,255,255,0.15); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
-        .btn-active { background: var(--blue) !important; transform: scale(0.9); box-shadow: 0 0 30px var(--blue); }
+        .btn-active { background: var(--blue) !important; box-shadow: 0 0 30px var(--blue); transform: scale(0.9); }
 
-        .frosted { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px); border: 2px solid var(--neon); border-radius: 35px; }
+        /* Overlays */
+        .frosted { background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(15px); border: 2px solid var(--neon); border-radius: 35px; }
         .overlay { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:500; text-align: center; }
         
         #pName { padding: 18px; border-radius: 25px; border: 2px solid var(--neon); background: rgba(0,0,0,0.7); color: #fff; text-align: center; width: 80%; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 18px; }
         .neon-btn { padding: 18px 50px; background: var(--green); color: #000; border-radius: 40px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; font-size: 20px; box-shadow: 0 0 20px var(--green); }
 
+        /* Gift Grid (give-me.org Stil) */
+        .gift-box { margin-top: 25px; width: 90%; text-align: center; }
+        .gift-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .gift-btn { 
+            padding: 12px; border-radius: 15px; font-size: 11px; font-weight: 800; cursor: pointer; 
+            border: 1px solid rgba(255,255,255,0.2); color: white; text-decoration: none; 
+            transition: 0.3s cubic-bezier(0.23, 1, 0.32, 1); background: rgba(255,255,255,0.05);
+        }
+        .gift-btn:hover { transform: translateY(-3px); border-color: #fff; box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
+
+        #lvl-banner { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            width: 80%; padding: 30px; background: var(--gold); color: #000;
+            border-radius: 30px; z-index: 1000; font-weight: 900; font-size: 24px;
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center;
+        }
+
         .info-content { width: 95vw; max-width: 450px; padding: 40px 0; }
         .neon-box { padding: 30px; margin-bottom: 30px; text-align: center; }
-        .gift-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .gift-btn { padding: 15px; border-radius: 15px; font-size: 12px; font-weight: 800; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); color: white; text-decoration: none; transition: 0.3s; }
-        .gift-btn:hover { transform: translateY(-5px); border-color: #fff; }
-        .pp { background: rgba(0, 112, 186, 0.5); }
-        .btc { background: rgba(247, 147, 26, 0.5); }
 
         footer { width: 100%; padding: 40px; background: rgba(0,0,0,0.9); text-align: center; font-size: 11px; color: #666; border-top: 2px solid var(--neon); }
     </style>
 </head>
 <body id="body-main">
 
+<header id="main-header"><h1 style="color:var(--neon)">DOGGYCO</h1></header>
+
 <div id="game-view">
     <div id="game-wrap">
         <div id="bg-layer"></div>
         <div id="ui-header">
             <div id="energy-bar-wrap"><div id="energy-fill"></div><div id="energy-text">ENERGY</div></div>
-            <div id="hud-bottom">
-                <div id="hearts-display">❤️❤️❤️</div>
-                <div id="lvl-tag">LVL 1</div>
-                <div id="score-display">0</div>
+            <div id="hud-data-row">
+                <div class="hud-item" id="hearts-display">❤️❤️❤️</div>
+                <div class="hud-item" id="lvl-display">LVL 1</div>
+                <div class="hud-item" id="timer-display">30s</div>
+                <div class="hud-item" id="score-display">0</div>
             </div>
         </div>
-        <div id="lvl-banner">LEVEL UP! ⚡<br><span style="font-size:16px">FASTER NOW!</span></div>
+        <div id="lvl-banner">LEVEL UP! ⚡<br><span style="font-size:16px">GETTING FASTER!</span></div>
         <canvas id="game-canvas"></canvas>
         <div id="controls">
             <div id="btn-L" class="btn-arrow" onmousedown="mLeft(event)" ontouchstart="mLeft(event)">◀</div>
             <div id="btn-R" class="btn-arrow" onmousedown="mRight(event)" ontouchstart="mRight(event)">▶</div>
         </div>
         <div class="overlay frosted" id="start-screen">
-            <h1 style="color:var(--neon); margin-bottom:20px; letter-spacing:5px;">DOGGYCO</h1>
-            <input type="text" id="pName" placeholder="DEIN NAME">
+            <input type="text" id="pName" placeholder="ENTER NAME">
             <button class="neon-btn" onclick="startGame()">START MISSION</button>
+            
+            <div class="gift-box">
+                <p style="font-size:10px; color:var(--gold); letter-spacing:2px;">SUPPORT MISSION</p>
+                <div class="gift-grid">
+                    <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=give-me.org@gmx.net" target="_blank" class="gift-btn" style="background:rgba(0,112,186,0.4)">PayPal</a>
+                    <button class="gift-btn" style="background:rgba(247,147,26,0.4)" onclick="navigator.clipboard.writeText('bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed'); alert('BTC Address Copied!');">Copy BTC</button>
+                    <button class="gift-btn" onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=bitcoin:bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed','_blank')">QR Code</button>
+                    <a href="https://www.tiktok.com/@giveme.org" target="_blank" class="gift-btn" style="background:#000">TikTok</a>
+                </div>
+            </div>
         </div>
         <div class="overlay frosted" id="end-screen" style="display:none;">
-            <h2 style="color:var(--red);">MISSION FEHLGESCHLAGEN</h2>
+            <h2 style="color:var(--red);">MISSION OVER</h2>
             <h1 id="f-score" style="font-size: 60px; color: var(--gold); margin: 20px 0;">0</h1>
-            <button class="neon-btn" onclick="location.reload()">ERNEUT VERSUCHEN</button>
+            <button class="neon-btn" onclick="location.reload()">RETRY</button>
         </div>
     </div>
 </div>
 
 <div class="info-content">
     <div class="neon-box frosted">
-        <h3 style="color:var(--neon); margin-bottom:15px;">🎁 SPENDENAKTION</h3>
-        <div class="gift-grid">
-            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=give-me.org@gmx.net" target="_blank" class="gift-btn pp">PayPal</a>
-            <button class="gift-btn btc" onclick="navigator.clipboard.writeText('bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed'); alert('BTC Adresse kopiert!');">Bitcoin</button>
-            <button class="gift-btn" style="background:rgba(255,255,255,0.1)" onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=bitcoin:bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed','_blank')">QR Code</button>
-            <a href="https://www.tiktok.com/@giveme.org" target="_blank" class="gift-btn" style="background:#000">TikTok</a>
-        </div>
+        <h3 style="color:var(--gold); margin-bottom:20px;">🏆 RANKING</h3>
+        <div id="leaderboard">Syncing...</div>
     </div>
-
     <div class="neon-box frosted">
-        <h3 style="color:var(--gold); margin-bottom:20px;">🏆 AGENTEN RANKING</h3>
-        <div id="leaderboard">Lade Daten...</div>
+        <h3 style="color:var(--neon); margin-bottom:15px;">📖 HOW TO PLAY</h3>
+        <p style="font-size:13px; color:#ccc; line-height:1.7;">Collect food for ENERGY. Spiders rob energy ($30\% +$ per level). Police cost 1 Life. Survive as long as possible!</p>
     </div>
 </div>
 
@@ -144,7 +169,7 @@ function mRight(e) { if(e) e.preventDefault(); if(dogLane < 4) dogLane++; update
 function updateX(d) { 
     targetX = (dogLane * laneW) + (laneW / 2); 
     const b = document.getElementById('btn-'+d);
-    if(b) { b.classList.add('btn-active'); setTimeout(()=>b.classList.remove('btn-active'), 100); }
+    if(b) { b.classList.add('btn-active'); setTimeout(()=>b.classList.remove('btn-active'), 120); }
 }
 
 function playSfx(f, type, d, v=0.5) {
@@ -158,6 +183,7 @@ function playSfx(f, type, d, v=0.5) {
 }
 
 function startGame() {
+    document.getElementById("main-header").classList.add("ingame");
     document.getElementById("body-main").classList.add("locked");
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.12;
@@ -175,30 +201,32 @@ function loop(t) {
 
     timeLeft -= dt; energy -= (4.5 + level * 0.7) * dt;
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
+    document.getElementById("timer-display").innerText = Math.ceil(timeLeft) + "s";
     document.getElementById("score-display").innerText = Math.floor(score);
-    document.getElementById("lvl-tag").innerText = "LVL " + level;
+    document.getElementById("lvl-display").innerText = "LVL " + level;
     document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
     if(timeLeft <= 0) {
-        level++; timeLeft = 30; energy = Math.min(100, energy + 20);
+        level++; timeLeft = 30; energy = Math.min(100, energy + 25);
         vibrate([100, 50, 100]); playSfx(880, 'sine', 0.6);
-        let banner = document.getElementById("lvl-banner");
-        banner.style.transform = "translate(-50%, -50%) scale(1)";
-        setTimeout(() => banner.style.transform = "translate(-50%, -50%) scale(0)", 2000);
+        let b = document.getElementById("lvl-banner");
+        b.style.transform = "translate(-50%, -50%) scale(1)";
+        setTimeout(() => b.style.transform = "translate(-50%, -50%) scale(0)", 2000);
     }
 
     // Atmos
-    if(clouds.length < 3) clouds.push({ x: -60, y: 40+Math.random()*60, s: 0.2+Math.random()*0.3 });
-    ctx.font = "40px Arial"; clouds.forEach(c => { c.x += c.s; if(c.x > W+60) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
+    if(clouds.length < 3) clouds.push({ x: -60, y: 50+Math.random()*60, s: 0.2+Math.random()*0.3 });
+    ctx.font = "40px Arial"; ctx.textAlign="center";
+    clouds.forEach(c => { c.x += c.s; if(c.x > W+60) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
     if(Math.random() < 0.005) birds.push({ x: W+50, y: 150+Math.random()*150, vx: -1.8 });
     ctx.font = "24px Arial"; birds.forEach((b, i) => { b.x += b.vx; ctx.fillText("🐦", b.x, b.y); if(b.x < -60) birds.splice(i, 1); });
 
-    // Floater Animation
-    floaters.forEach((f, i) => { f.y -= 2.5; f.life -= dt; ctx.globalAlpha = f.life; ctx.fillStyle = f.col; ctx.font = "bold 22px Orbitron"; ctx.textAlign="center"; ctx.fillText(f.txt, f.x, f.y); if(f.life <= 0) floaters.splice(i,1); });
+    // Floater
+    floaters.forEach((f, i) => { f.y -= 2.5; f.life -= dt; ctx.globalAlpha = f.life; ctx.fillStyle = f.col; ctx.font = "bold 22px Orbitron"; ctx.fillText(f.txt, f.x, f.y); if(f.life <= 0) floaters.splice(i,1); });
     ctx.globalAlpha = 1;
 
     // Spiders
-    if(spiders.length < 2 && Math.random() < 0.015) {
+    if(spiders.length < 2 && Math.random() < 0.012) {
         let occ = spiders.map(s => s.lane); let poss = [0,1,2,3,4].filter(l => !occ.includes(l));
         if(poss.length > 0) spiders.push({lane: poss[Math.floor(Math.random()*poss.length)], y: 0, dir: 1});
     }
@@ -208,9 +236,8 @@ function loop(t) {
         ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "38px Arial"; ctx.fillText("🕷️", sx, s.y + 25);
         if(s.lane === dogLane && s.y > H-180 && s.y < H-90) { 
-            let loss = Math.floor(25 * Math.pow(1.1, level-1));
-            energy -= loss * dt * 5; dogShake = 15; 
-            if(Math.random() < 0.1) { floaters.push({x:sx, y:H-150, txt:"-"+loss+"% ENERGY", col:"#ff00ff", life:1}); vibrate(50); }
+            let loss = Math.floor(30 * Math.pow(1.1, level-1)); energy -= loss * dt * 5; dogShake = 15; 
+            if(Math.random() < 0.1) { floaters.push({x:sx, y:H-150, txt:"-"+loss+"% ENERGY", col:"#ff00ff", life:1}); vibrate(40); }
         }
     });
 
@@ -227,7 +254,7 @@ function loop(t) {
                 floaters.push({x:ix, y:it.y, txt:"TOT -1 ❤️", col:"red", life:1.5});
             } else { 
                 let p = Math.floor(25 * (1 + level * 0.1)); score += p; energy = Math.min(100, energy + 10); 
-                vibrate(40); playSfx(500+score/5, 'sine', 0.2);
+                vibrate(40); playSfx(500, 'sine', 0.2);
                 floaters.push({x:ix, y:it.y, txt:"+"+p, col: "lime", life:0.8});
             }
             items.splice(i, 1);
