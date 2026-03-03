@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO V1600 - PERFECT ALIGNMENT</title>
+    <title>DOGGYCO V1700 - FINAL TRUTH</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --glass: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.12);
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
@@ -22,18 +22,20 @@
 
         header h1 { 
             font-size: 42px; color: var(--neon); letter-spacing: 5px; 
-            text-shadow: 0 0 15px var(--neon); padding: 25px; text-align: center;
+            text-shadow: 0 0 15px var(--neon), 0 0 30px var(--neon);
+            padding: 25px; text-align: center;
         }
 
-        /* STRENGES 400PX RASTER */
+        /* ABSOLUTE ZENTRIERUNG - FIXIERTER BLOCK */
         #game-view { width: 100vw; height: 80vh; display: flex; justify-content: center; align-items: center; position: relative; }
         #game-wrap { 
             position:relative; width: 400px; height: 100%; 
-            background: rgba(0,0,0,0.8); border: 4px solid var(--neon); border-radius: 40px; 
+            background: rgba(0,0,0,0.85); border: 4px solid var(--neon); border-radius: 40px; 
             overflow: hidden; box-shadow: 0 0 50px var(--neon); margin: 0 auto;
         }
         #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.3); z-index: 1; }
-        canvas { position: absolute; inset: 0; z-index: 50; background: transparent; }
+        canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
+        body.playing canvas { pointer-events: auto; }
 
         /* HUD */
         #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
@@ -41,23 +43,34 @@
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s; }
         #hud-row { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 12px auto 0; font-size: 14px; font-weight: 900; }
 
-        /* OVERLAYS */
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 1000; background: rgba(0,0,0,0.2); border-radius: 36px; }
-        #pName { padding: 18px; border-radius: 20px; border: 3px solid var(--neon); background: rgba(255,255,255,0.15); color: #fff; text-align: center; width: 80%; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 25px; outline: none; }
+        /* LEVEL BANNER */
+        #lvl-banner { 
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            width: 80%; padding: 25px; background: rgba(0, 242, 255, 0.9); color: #000;
+            border-radius: 30px; z-index: 1500; font-weight: 900; transition: 0.5s; text-align: center;
+            box-shadow: 0 0 30px var(--neon); backdrop-filter: blur(10px);
+        }
+
+        /* START SCREEN - HOHE TRANSPARENZ */
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 1000; background: rgba(0,0,0,0.25); border-radius: 36px; }
+        #pName { padding: 18px; border-radius: 20px; border: 3px solid var(--neon); background: rgba(255,255,255,0.1); color: #fff; text-align: center; width: 80%; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 25px; outline: none; }
         .neon-btn { padding: 18px 50px; background: var(--green); color: #000; border-radius: 35px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; box-shadow: 0 0 15px var(--green); }
 
-        /* INFO SECTIONS */
+        /* INFO TILES */
+        .info-section { width: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: 60px; }
         .frosted-tile { 
-            background: rgba(255,255,255,0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); 
+            background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); 
             border-radius: 35px; padding: 30px; margin: 20px 0; width: 92vw; max-width: 450px; text-align: center;
         }
 
+        /* SUPPORT HOVER */
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .btn-don { padding: 15px; border-radius: 15px; text-decoration: none; color: #fff; font-size: 11px; font-weight: 800; border: 1px solid rgba(255,255,255,0.2); text-align: center; transition: 0.3s; }
-        .btn-don:hover { transform: translateY(-5px); border-color: #fff; }
+        .btn-don:hover { transform: translateY(-5px); border-color: #fff; box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
         
         .qr-area { background: #fff; padding: 10px; border-radius: 20px; width: 160px; margin: 20px auto; transition: 0.3s; cursor: pointer; position: relative; }
         .qr-area:hover { transform: translateY(-5px) scale(1.05); }
+        .copy-toast { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 5px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; display: none; }
 
         #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; pointer-events: none; }
         .btn-arrow { width: 72px; height: 72px; background: rgba(255,255,255,0.15); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
@@ -83,6 +96,7 @@
             </div>
         </div>
         
+        <div id="lvl-banner">LEVEL UP! ⚡</div>
         <canvas id="game-canvas"></canvas>
 
         <div id="controls">
@@ -104,31 +118,34 @@
     </div>
 </div>
 
-<div class="frosted-tile">
-    <h3 style="color:var(--gold); margin-bottom:20px; letter-spacing: 2px;">🏆 TOP AGENTS</h3>
-    <div id="leaderboard">Syncing Ranking...</div>
-</div>
-
-<div class="frosted-tile">
-    <h3 style="color:var(--neon); margin-bottom:15px; letter-spacing: 2px;">🎁 SUPPORT MISSION</h3>
-    <div class="btn-grid">
-        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=give-me.org@gmx.net" target="_blank" class="btn-don" style="background:#0070ba;">PAYPAL</a>
-        <a href="https://www.tiktok.com/@giveme.org" target="_blank" class="btn-don" style="background:#000; border:1px solid #fff;">TIKTOK</a>
+<div class="info-section">
+    <div class="frosted-tile">
+        <h3 style="color:var(--gold); margin-bottom:20px; letter-spacing: 2px;">🏆 TOP AGENTS</h3>
+        <div id="leaderboard">Syncing Ranking...</div>
     </div>
-    <div class="qr-area" onclick="copyBTC()">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" alt="QR" style="width:100%">
-    </div>
-    <p style="font-size:10px; color:var(--gold); cursor:pointer; font-weight:800;" onclick="copyBTC()">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed (Copy)</p>
-</div>
 
-<div class="frosted-tile">
-    <h3 style="color:var(--gold); margin-bottom:15px;">📖 MISSION GUIDE</h3>
-    <div class="guide-text">
-        • 🦴: 10 | 🍪: 20 | 🍗: 30 Pts (+10% per Level)<br>
-        • 👮: Police - Instant 1 Heart ❤️ loss.<br>
-        • 🕷️: Spider -30% Energy Damage.<br>
-        • Speed increases every 30 seconds!<br><br>
-        <span style="font-size: 11px; color:#ccc;">Legal: Private initiative. Gifts only. © 2026 DOGGYCO</span>
+    <div class="frosted-tile">
+        <h3 style="color:var(--neon); margin-bottom:15px; letter-spacing: 2px;">🎁 SUPPORT MISSION</h3>
+        <div class="btn-grid">
+            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=give-me.org@gmx.net" target="_blank" class="btn-don" style="background:#0070ba;">PAYPAL</a>
+            <a href="https://www.tiktok.com/@giveme.org" target="_blank" class="btn-don" style="background:#000; border:1px solid #fff;">TIKTOK</a>
+        </div>
+        <div class="qr-area" onclick="copyBTC()">
+            <div id="copy-toast" class="copy-toast">COPIED!</div>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" alt="QR" style="width:100%">
+        </div>
+        <p style="font-size:10px; color:var(--gold); cursor:pointer; font-weight:800;" onclick="copyBTC()">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
+    </div>
+
+    <div class="frosted-tile">
+        <h3 style="color:var(--gold); margin-bottom:15px;">📖 MISSION GUIDE</h3>
+        <div class="guide-text">
+            • 🦴: 10 | 🍪: 20 | 🍗: 30 Pts (+10% per Level)<br>
+            • 👮: Police - Instant 1 Heart ❤️ loss.<br>
+            • 🕷️: Spider -30% Energy Damage.<br>
+            • Speed increases every 30 seconds!<br><br>
+            <span style="font-size: 11px; color:#ccc;">Legal: Private initiative. Gifts only. © 2026 DOGGYCO</span>
+        </div>
     </div>
 </div>
 
@@ -145,9 +162,9 @@ let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
 let lastTime = 0, spawnTimer = 0, audioCtx, dogShake = 0;
 
 function resize() {
-    W = canvas.width = 400; // FIXER SPIELBEREICH
+    W = canvas.width = 400; // FIXER BLOCK
     H = canvas.height = document.getElementById("game-wrap").offsetHeight;
-    laneW = 80; // 400 / 5
+    laneW = 80; 
     targetX = (dogLane * 80) + 40; 
     dogX = targetX;
 }
@@ -155,7 +172,8 @@ window.onload = () => { resize(); updateRanks(); };
 
 function copyBTC() {
     navigator.clipboard.writeText('bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed');
-    alert('BTC Address Copied!');
+    const t = document.getElementById("copy-toast");
+    t.style.display = "block"; setTimeout(() => t.style.display = "none", 2000);
 }
 
 window.addEventListener('keydown', e => {
@@ -202,7 +220,13 @@ function loop(t) {
     document.getElementById("lvl-display").innerText = "LVL " + level;
     document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
-    if(timeLeft <= 0) { level++; timeLeft = 30; energy = Math.min(100, energy + 25); playSfx(880, 'sine', 0.5); }
+    if(timeLeft <= 0) { 
+        level++; timeLeft = 30; energy = Math.min(100, energy + 25);
+        playSfx(880, 'sine', 0.5);
+        let b = document.getElementById("lvl-banner");
+        b.style.transform = "translate(-50%, -50%) scale(1)";
+        setTimeout(() => b.style.transform = "translate(-50%, -50%) scale(0)", 1500);
+    }
 
     // Atmos Behind
     if(clouds.length < 2) clouds.push({ x: -60, y: 150+Math.random()*80, s: 0.2 });
@@ -212,13 +236,13 @@ function loop(t) {
 
     // Floaters
     floaters.forEach((f, i) => { 
-        f.y -= 2.5; f.life -= dt; ctx.globalAlpha = f.life; 
+        f.y -= 2.2; f.life -= dt; ctx.globalAlpha = f.life; 
         ctx.fillStyle = f.col; ctx.font = "bold 24px Orbitron"; ctx.textAlign="center";
         ctx.fillText(f.txt, f.x, f.y); if(f.life <= 0) floaters.splice(i,1); 
     });
     ctx.globalAlpha = 1;
 
-    // Spiders - EXAKT MITTIG IN DER LANE
+    // Spiders - EXAKT MITTIG
     if(spiders.length < 2 && Math.random() < 0.012) spiders.push({lane: Math.floor(Math.random()*5), y: 0, dir: 1});
     spiders.forEach((s, i) => {
         s.y += (220 + level * 15) * dt * s.dir; if(s.y > H - 160) s.dir = -1; if(s.y < 0) spiders.splice(i, 1);
@@ -231,7 +255,7 @@ function loop(t) {
         }
     });
 
-    // Items
+    // Items Logic
     let interval = (28 / (60 * Math.pow(1.1, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
@@ -256,8 +280,7 @@ function loop(t) {
     });
 
     dogX += (targetX - dogX) * 0.25;
-    // ABSOLUTE PHYSIK: Der Hund ist in Lane 1 (40) zentriert, 40px Rand links, 40px Rand rechts.
-    dogX = Math.max(40, Math.min(360, dogX)); 
+    dogX = Math.max(40, Math.min(360, dogX)); // ABSOLUTE GRENZE
     ctx.font = "80px Arial"; ctx.fillText("🐶", dogX-40 + (Math.random()-0.5)*dogShake, H - 110);
     if(dogShake > 0) dogShake *= 0.85;
     if(energy <= 0 || hearts <= 0) end(); else requestAnimationFrame(loop);
@@ -283,5 +306,6 @@ async function updateRanks() {
 </script>
 </body>
 </html>
+
 
 
