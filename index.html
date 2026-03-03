@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO V550 - FINAL INTEGRITY</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@500;800&display=swap" rel="stylesheet">
+    <title>DOGGYCO V600 - FINAL PERFECTION</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --silver: #c0c0c0; --bronze: #cd7f32; --copper: #b87333; --wood: #8b4513;
-            --glass: rgba(255, 255, 255, 0.15);
+            --silver: #c0c0c0; --bronze: #cd7f32; --glass: rgba(255, 255, 255, 0.15);
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
@@ -21,70 +20,63 @@
             overflow-x: hidden;
         }
 
-        header { padding: 25px; text-align: center; z-index: 10; }
-        header h1 { font-size: 40px; color: var(--neon); letter-spacing: 5px; text-shadow: 0 0 15px var(--neon); }
+        /* NEON BLINKING HEADER */
+        header { padding: 25px; text-align: center; }
+        header h1 { 
+            font-size: 42px; color: var(--neon); letter-spacing: 6px;
+            text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon);
+            animation: neonPulse 1.5s infinite alternate;
+        }
+        @keyframes neonPulse { from { opacity: 1; } to { opacity: 0.7; } }
 
-        /* Game Core Container */
-        #game-view { width: 100vw; height: 82vh; display: flex; justify-content: center; align-items: center; position: relative; }
+        /* CENTERED GAME VIEW */
+        #game-view { width: 100vw; height: 80vh; display: flex; justify-content: center; align-items: center; position: relative; }
         #game-wrap { 
             position:relative; width: 95vw; height: 100%; max-width: 450px; 
-            background: rgba(0,0,0,0.7); border: 4px solid var(--neon); border-radius: 40px; 
-            overflow: hidden; box-shadow: 0 0 40px var(--neon);
+            background: rgba(0,0,0,0.8); border: 3px solid var(--neon); border-radius: 40px; 
+            overflow: hidden; box-shadow: 0 0 40px var(--neon); margin: auto;
         }
         #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.3); z-index: 1; }
-        
-        /* Play Layers */
         canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
         body.playing canvas { pointer-events: auto; }
 
-        /* HUD - Absolute Priority */
+        /* HUD DESIGN */
         #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
-        #energy-bar-wrap { width: 90%; height: 32px; margin: 0 auto; background: rgba(0,0,0,0.6); border: 2px solid #fff; border-radius: 16px; overflow: hidden; }
+        #energy-bar-wrap { width: 90%; height: 30px; margin: 0 auto; background: rgba(0,0,0,0.6); border: 2px solid #fff; border-radius: 15px; overflow: hidden; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s; }
-        #hud-row { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 12px auto 0; font-size: 15px; font-weight: 900; text-shadow: 2px 2px 5px #000; }
+        #hud-row { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 8px auto 0; font-size: 14px; font-weight: 900; text-shadow: 2px 2px 4px #000; }
 
-        /* Input & Screens */
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
-        #start-screen { z-index: 1000; background: rgba(0,0,0,0.8); }
-        #end-screen { z-index: 1100; display: none !important; background: rgba(0,0,0,0.95); } /* Hart deaktiviert beim Start */
+        /* OVERLAYS */
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 1000; background: rgba(0,0,0,0.75); border-radius: 40px; }
+        #pName { padding: 18px; border-radius: 20px; border: 2px solid var(--neon); background: rgba(255,255,255,0.2); color: #fff; text-align: center; width: 80%; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 20px; outline: none; }
+        .neon-btn { padding: 18px 45px; background: var(--green); color: #000; border-radius: 35px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; box-shadow: 0 0 15px var(--green); }
 
-        #pName { 
-            padding: 18px; border-radius: 20px; border: 3px solid var(--neon); 
-            background: rgba(255,255,255,0.25); color: #fff; text-align: center; 
-            width: 80%; font-family: 'Orbitron'; font-size: 20px; outline: none; margin-bottom: 25px;
-            pointer-events: auto;
-        }
-        .neon-btn { padding: 18px 50px; background: var(--green); color: #000; border-radius: 35px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; box-shadow: 0 0 15px var(--green); }
-
-        /* Styling for Info Tiles */
+        /* TILES */
         .frosted-tile { 
             background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.3); border-radius: 35px; padding: 25px; margin: 15px 0; 
-            width: 92vw; max-width: 450px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.25); border-radius: 35px; padding: 25px; margin: 20px 0; 
+            width: 92vw; max-width: 450px; text-align: center; color: #eee;
         }
 
-        /* Leaderboard Medals */
-        .rank-row { display: flex; justify-content: space-between; padding: 12px 15px; margin-bottom: 8px; border-radius: 15px; background: rgba(0,0,0,0.2); font-weight: 800; border: 1px solid transparent; }
-        .gold { color: var(--gold); border-color: var(--gold); }
-        .silver { color: var(--silver); border-color: var(--silver); }
-        .bronze { color: var(--bronze); border-color: var(--bronze); }
-        .copper { color: var(--copper); border-color: var(--copper); }
-        .wood { color: var(--wood); border-color: var(--wood); }
+        /* LEADERBOARD BEAUTIFIED */
+        .rank-row { display: flex; justify-content: space-between; padding: 12px 15px; margin-bottom: 8px; border-radius: 15px; background: rgba(0,0,0,0.4); font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; border-left: 5px solid transparent; }
+        .rank-row.gold { border-color: var(--gold); color: var(--gold); }
+        .rank-row.silver { border-color: var(--silver); color: var(--silver); }
+        .rank-row.bronze { border-color: var(--bronze); color: var(--bronze); }
 
-        /* Navigation Buttons */
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .btn-don { border-radius: 18px; padding: 16px; font-weight: 800; text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,0.2); transition: 0.3s; font-size: 11px; text-align: center; }
-        .btn-don:hover { transform: translateY(-3px); border-color: #fff; }
+        /* SUPPORT SECTION - QR DIRECT */
+        .qr-direct { width: 140px; height: 140px; background: #fff; padding: 10px; border-radius: 15px; margin: 15px auto; display: block; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .btn-don { padding: 14px; border-radius: 12px; font-weight: 800; text-decoration: none; color: #fff; font-size: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
 
-        /* Game Controls */
-        #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 35px; z-index: 300; pointer-events: none; }
-        .btn-arrow { width: 70px; height: 70px; background: rgba(255,255,255,0.1); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
+        /* CONTROLS CENTERED */
+        #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; pointer-events: none; }
+        .btn-arrow { width: 72px; height: 72px; background: rgba(255,255,255,0.1); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
         
-        /* Guide Text Styling */
-        .guide-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; text-align: left; line-height: 1.8; color: #eee; }
+        .readable-text { font-family: 'Plus Jakarta Sans', sans-serif; text-align: left; font-size: 14px; line-height: 1.7; text-shadow: 1px 1px 2px #000; }
     </style>
 </head>
-<body id="body-main">
+<body>
 
 <header><h1>DOGGYCO</h1></header>
 
@@ -96,8 +88,8 @@
             <div id="hud-row">
                 <span id="hearts-display">❤️❤️❤️</span>
                 <span id="lvl-display" style="color:var(--gold)">LVL 1</span>
-                <span id="timer-display" style="color:#fff">30S</span>
-                <span id="score-display" style="color:var(--neon)">0</span>
+                <span id="timer-display">30S</span>
+                <span id="score-display" style="color:var(--neon)">🏆 0</span>
             </div>
         </div>
         
@@ -109,42 +101,42 @@
         </div>
 
         <div id="start-screen" class="overlay">
-            <input type="text" id="pName" placeholder="ENTER AGENT NAME">
+            <input type="text" id="pName" placeholder="AGENT NAME" autofocus>
             <button class="neon-btn" onclick="startGame()">MISSION START</button>
         </div>
 
-        <div id="end-screen" class="overlay" style="display:none !important;">
-            <h2 style="color:var(--red); font-size: 32px;">MISSION ENDED</h2>
+        <div id="end-screen" class="overlay" style="display:none;">
+            <h2 style="color:var(--red); font-size: 32px;">GAME OVER</h2>
             <h1 id="f-score" style="font-size: 65px; color: var(--gold); margin: 20px 0;">0</h1>
-            <button class="neon-btn" onclick="location.reload()">RETRY</button>
+            <button class="neon-btn" onclick="location.reload()">TRY AGAIN</button>
         </div>
     </div>
 </div>
 
 <div class="frosted-tile">
     <h3 style="color:var(--gold); margin-bottom:15px; letter-spacing: 2px;">🏆 TOP AGENTS</h3>
-    <div id="leaderboard">Synchronizing Ranking...</div>
+    <div id="leaderboard">Syncing Ranking...</div>
 </div>
 
 <div class="frosted-tile">
     <h3 style="color:var(--neon); margin-bottom:15px; letter-spacing: 2px;">🎁 SUPPORT MISSION</h3>
     <div class="btn-grid">
-        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=give-me.org@gmx.net" target="_blank" class="btn-don" style="background:#0070ba99;">PAYPAL</a>
-        <button class="btn-don" style="background:#f7931a99;" onclick="navigator.clipboard.writeText('bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed'); alert('BTC Address Copied!');">COPY BTC</button>
-        <button class="btn-don" style="background:rgba(255,255,255,0.1);" onclick="window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=bitcoin:bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed','_blank')">QR CODE</button>
-        <a href="https://www.tiktok.com/@giveme.org" target="_blank" class="btn-don" style="background:#000;">TIKTOK</a>
+        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=give-me.org@gmx.net" target="_blank" class="btn-don" style="background:#0070ba;">PAYPAL</a>
+        <a href="https://www.tiktok.com/@giveme.org" target="_blank" class="btn-don" style="background:#000; border-color:#fff;">TIKTOK</a>
     </div>
+    <img class="qr-direct" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" alt="BTC QR">
+    <button onclick="navigator.clipboard.writeText('bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed'); alert('Copied!');" style="background:transparent; border:none; color:var(--gold); font-size:10px; cursor:pointer; text-decoration:underline;">Click to copy BTC Address</button>
 </div>
 
 <div class="frosted-tile">
-    <h3 style="color:var(--gold); margin-bottom:15px; letter-spacing: 2px;">📖 MISSION GUIDE</h3>
-    <div class="guide-text">
-        • 🦴 Bone: 10 | 🍪 Cookie: 20 | 🍗 Meat: 30 Pts (+10% per Level)<br>
-        • 👮 Police: Costs 1 Heart ❤️ Loss.<br>
-        • 🕷️ Spider: -30% Energy (compounding damage).<br>
-        • LEVEL UP: Every 30s speed and risks increase!<br><br>
-        <b>Legal Notice:</b> Private initiative. No NPO. Gifts are personal contributions. © 2026 DOGGYCO | GIVE-ME.ORG
+    <h3 style="color:var(--gold); margin-bottom:15px;">📖 MISSION GUIDE</h3>
+    <div class="readable-text">
+        • 🦴/🍪/🍗: Collect food for <b>Energy & Points</b>.<br>
+        • 👮 Police: Costs 1 Heart ❤️ loss.<br>
+        • 🕷️ Spider: Robs -30% Energy (compound damage).<br>
+        • LEVEL UP: Every 30s speed and risk increase!
     </div>
+    <p style="margin-top:20px; opacity:0.5; font-size:10px;">© 2026 DOGGYCO | GIVE-ME.ORG | Personal Gifts</p>
 </div>
 
 <script>
@@ -167,7 +159,7 @@ function resize() {
 window.onload = () => { resize(); updateRanks(); };
 window.onresize = resize;
 
-// PC STEERING FIX
+// PC CONTROL FIX
 window.addEventListener('keydown', e => {
     if(!active) return;
     if(e.key === "ArrowLeft" && dogLane > 0) { dogLane--; updateX(); }
@@ -179,16 +171,13 @@ function mRight() { if(dogLane < 4) { dogLane++; updateX(); } }
 function updateX() { targetX = (dogLane * laneW) + (laneW / 2); }
 
 function startGame() {
-    const name = document.getElementById("pName").value;
-    if(!name) return alert("Please enter a name!");
-    
+    const val = document.getElementById("pName").value;
+    if(!val) return alert("Enter Agent Name!");
     document.body.classList.add("playing");
     document.getElementById("start-screen").style.display = "none";
-    
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.05;
     bgMusic.play().catch(()=>{});
-    
     active = true; lastTime = performance.now();
     requestAnimationFrame(loop);
 }
@@ -202,14 +191,14 @@ function loop(t) {
     timeLeft -= dt; energy -= (4.4 + level * 0.6) * dt;
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
     document.getElementById("timer-display").innerText = Math.ceil(timeLeft) + "S";
-    document.getElementById("score-display").innerText = Math.floor(score);
+    document.getElementById("score-display").innerText = "🏆 " + Math.floor(score);
     document.getElementById("lvl-display").innerText = "LVL " + level;
     document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
     if(timeLeft <= 0) { level++; timeLeft = 30; energy = Math.min(100, energy + 25); }
 
-    // Atmosphere Behind UI
-    if(clouds.length < 2) clouds.push({ x: -60, y: 180+Math.random()*120, s: 0.2 });
+    // Layer: Clouds Behind symbols
+    if(clouds.length < 2) clouds.push({ x: -60, y: 150+Math.random()*80, s: 0.2 });
     ctx.font = "40px Arial"; clouds.forEach(c => { c.x += c.s; if(c.x > W+60) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
     if(Math.random() < 0.005) birds.push({ x: W+50, y: 80+Math.random()*100, vx: -1.5 });
     ctx.font = "24px Arial"; birds.forEach((b, i) => { b.x += b.vx; ctx.fillText("🐦", b.x, b.y); if(b.x < -60) birds.splice(i, 1); });
@@ -224,7 +213,7 @@ function loop(t) {
     });
     ctx.globalAlpha = 1;
 
-    // Spiders
+    // Spiders logic
     if(spiders.length < 2 && Math.random() < 0.012) spiders.push({lane: Math.floor(Math.random()*5), y: 0, dir: 1});
     spiders.forEach((s, i) => {
         s.y += (220 + level * 15) * dt * s.dir; if(s.y > H - 160) s.dir = -1; if(s.y < 0) spiders.splice(i, 1);
@@ -233,11 +222,11 @@ function loop(t) {
         ctx.font = "38px Arial"; ctx.fillText("🕷️", sx-18, s.y + 25);
         if(s.lane === dogLane && s.y > H-170 && s.y < H-90) { 
             let dmg = Math.floor(30 * Math.pow(1.1, level - 1)); energy -= dmg * dt * 5; dogShake = 15;
-            if(Math.random() < 0.05) floaters.push({x:sx, y:H-180, txt:"-"+dmg+"%", col:"#ff3131", life:1});
+            if(Math.random() < 0.05) floaters.push({x:sx, y:H-180, txt:"-"+dmg+"%", col:"var(--red)", life:1});
         }
     });
 
-    // Items
+    // Item Drops: 10, 20, 30 + 10% Lvl Scale
     let interval = (28 / (60 * Math.pow(1.1, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
@@ -250,10 +239,10 @@ function loop(t) {
         ctx.font = "42px Arial"; ctx.fillText(it.type, ix-20, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
             let mult = Math.pow(1.1, level - 1);
-            if(it.type === '👮') { hearts--; dogShake = 25; floaters.push({x:ix, y:it.y, txt:"-1 ❤️", col:"#ff3131", life:1.5}); }
+            if(it.type === '👮') { hearts--; dogShake = 25; floaters.push({x:ix, y:it.y, txt:"-1 ❤️", col:"var(--red)", life:1.5}); }
             else { 
-                let baseVal = it.type === '🍗' ? 30 : (it.type === '🍪' ? 20 : 10);
-                let p = Math.floor(baseVal * mult); score += p; energy = Math.min(100, energy + 8); 
+                let base = it.type === '🍗' ? 30 : (it.type === '🍪' ? 20 : 10);
+                let p = Math.floor(base * mult); score += p; energy = Math.min(100, energy + 8); 
                 floaters.push({x:ix, y:it.y, txt:"+"+p, col: "#00ff88", life:1});
             }
             items.splice(i, 1);
@@ -267,19 +256,17 @@ function loop(t) {
 }
 
 async function end() {
-    active = false;
-    document.getElementById("end-screen").style.setProperty("display", "flex", "important");
+    active = false; document.getElementById("end-screen").style.display = "flex";
     document.getElementById("f-score").innerText = Math.floor(score);
-    await supabaseClient.from('leaderboard').insert([{ n: document.getElementById("pName").value || "AGENT", s: Math.floor(score) }]);
+    await supabaseClient.from('leaderboard').insert([{ n: document.getElementById("pName").value, s: Math.floor(score) }]);
     updateRanks();
 }
 
 async function updateRanks() {
-    const classes = ["gold", "silver", "bronze", "copper", "wood"];
+    const cls = ["gold", "silver", "bronze", "", ""];
     try {
         let { data } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
-        if(data) document.getElementById("leaderboard").innerHTML = data.map((x, i) => `
-            <div class="rank-row ${classes[i]}"><span>${i+1}. ${x.n}</span><span>${x.s}</span></div>`).join('');
+        if(data) document.getElementById("leaderboard").innerHTML = data.map((x, i) => `<div class="rank-row ${cls[i]}"><span>${i+1}. ${x.n}</span><span>${x.s}</span></div>`).join('');
     } catch(e) {}
 }
 </script>
