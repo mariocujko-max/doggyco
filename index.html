@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO V950 - PRECISION FOCUS</title>
+    <title>DOGGYCO V1100 - IRON GATE</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -17,22 +17,20 @@
             background: #000 url('forest_background.png') no-repeat center center fixed; 
             background-size: cover; font-family: 'Orbitron', sans-serif; color: #fff; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            overflow: hidden;
         }
 
-        /* BLINKENDE NEON ÜBERSCHRIFT */
-        header { padding: 20px; text-align: center; }
+        /* NEON HEADER PULSING */
+        header { padding: 15px; text-align: center; }
         header h1 { 
-            font-size: 45px; color: var(--neon); letter-spacing: 7px;
+            font-size: clamp(30px, 8vw, 45px); color: var(--neon); letter-spacing: 6px;
             text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon), 0 0 40px var(--neon);
             animation: neonBlink 2s infinite alternate;
         }
-        @keyframes neonBlink { 
-            0% { opacity: 1; text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
-            100% { opacity: 0.6; text-shadow: 0 0 5px var(--neon), 0 0 10px var(--neon); }
-        }
+        @keyframes neonBlink { 0% { opacity: 1; } 100% { opacity: 0.7; } }
 
-        /* STRENG ZENTRIERTES SPIELFELD */
-        #game-view { width: 100vw; height: 75vh; display: flex; justify-content: center; align-items: center; position: relative; }
+        /* FIXED CENTERED GAME CORE */
+        #game-view { width: 100vw; height: 85vh; display: flex; justify-content: center; align-items: center; position: relative; }
         #game-wrap { 
             position:relative; width: 400px; height: 100%; 
             background: rgba(0,0,0,0.85); border: 4px solid var(--neon); border-radius: 40px; 
@@ -42,34 +40,58 @@
         canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
         body.playing canvas { pointer-events: auto; }
 
-        /* HUD DESIGN */
+        /* HUD - TOP LAYER */
         #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
         #energy-bar-wrap { width: 85%; height: 32px; margin: 0 auto; background: rgba(0,0,0,0.7); border: 2px solid #fff; border-radius: 16px; overflow: hidden; }
-        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); }
-        #hud-row { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 12px auto 0; font-size: 16px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px #000; }
+        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s; }
+        #hud-row { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 12px auto 0; font-size: 14px; font-weight: 900; text-shadow: 2px 2px 4px #000; }
 
-        /* OVERLAYS */
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 1000; background: rgba(0,0,0,0.5); border-radius: 36px; }
-        #pName { padding: 18px; border-radius: 20px; border: 3px solid var(--neon); background: var(--glass); color: #fff; text-align: center; width: 80%; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 25px; outline: none; }
-        .neon-btn { padding: 18px 50px; background: var(--green); color: #000; border-radius: 35px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; box-shadow: 0 0 15px var(--green); }
-
-        /* KACHELN */
-        .frosted-tile { 
-            background: var(--glass); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3); 
-            border-radius: 35px; padding: 25px; margin: 20px 0; width: 92vw; max-width: 450px; text-align: center;
+        /* LEVEL POPUP */
+        #lvl-banner { 
+            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            width: 85%; padding: 25px; background: rgba(0, 242, 255, 0.9); color: #000;
+            border-radius: 30px; z-index: 1500; font-weight: 900; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center;
+            box-shadow: 0 0 30px var(--neon); backdrop-filter: blur(10px);
         }
 
-        /* SUPPORT */
+        /* GLASS OVERLAYS */
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 1000; background: rgba(0,0,0,0.4); border-radius: 36px; }
+        #pName { 
+            padding: 18px; border-radius: 20px; border: 3px solid var(--neon); 
+            background: rgba(255, 255, 255, 0.2); color: #fff; text-align: center; 
+            width: 80%; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 25px; outline: none;
+        }
+        .neon-btn { padding: 18px 50px; background: var(--green); color: #000; border-radius: 35px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; box-shadow: 0 0 15px var(--green); transition: 0.3s; }
+        .neon-btn:hover { transform: scale(1.05); }
+
+        /* INFO TILES (SCROLLABLE BELOW GAME) */
+        .info-container { width: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: 50px; overflow-y: auto; }
+        .frosted-tile { 
+            background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 35px; padding: 25px; margin: 20px 0; 
+            width: 92vw; max-width: 450px; text-align: center;
+        }
+
+        /* SUPPORT BUTTONS give-me.org style */
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .btn-don { padding: 15px; border-radius: 15px; text-decoration: none; color: #fff; font-size: 11px; font-weight: 800; border: 1px solid rgba(255,255,255,0.2); text-align: center; transition: 0.3s; }
         .btn-don:hover { transform: translateY(-5px); border-color: #fff; }
+        
+        .qr-area { background: #fff; padding: 10px; border-radius: 20px; width: 160px; margin: 20px auto; transition: 0.3s; cursor: pointer; }
+        .qr-area:hover { transform: scale(1.05); }
 
-        /* STEUERUNG */
-        #controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; pointer-events: none; }
+        /* CONTROLS SYMMETRIC */
+        #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 35px; z-index: 300; pointer-events: none; }
         .btn-arrow { width: 75px; height: 75px; background: rgba(255,255,255,0.15); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
+        
+        /* RANKING */
+        .rank-row { display: flex; justify-content: space-between; padding: 12px; margin-bottom: 8px; border-radius: 15px; background: rgba(0,0,0,0.3); font-family: 'Plus Jakarta Sans'; font-weight: 800; }
+        .rank-gold { color: var(--gold); border: 1px solid var(--gold); }
+
+        .legal-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; text-align: left; line-height: 1.8; color: #ddd; }
     </style>
 </head>
-<body id="body-main">
+<body>
 
 <header><h1>DOGGYCO</h1></header>
 
@@ -86,6 +108,7 @@
             </div>
         </div>
         
+        <div id="lvl-banner">LEVEL UP! ⚡<br><span style="font-size: 14px;">FASTER & HARDER</span></div>
         <canvas id="game-canvas"></canvas>
 
         <div id="controls">
@@ -96,6 +119,7 @@
         <div id="start-screen" class="overlay">
             <input type="text" id="pName" placeholder="ENTER AGENT NAME" autofocus>
             <button class="neon-btn" onclick="startGame()">START MISSION</button>
+            <p style="margin-top: 15px; font-size: 10px; opacity: 0.5;">Press ENTER to Start</p>
         </div>
 
         <div id="end-screen" class="overlay" style="display:none;">
@@ -107,32 +131,34 @@
     </div>
 </div>
 
-<div class="frosted-tile">
-    <h3 style="color:var(--gold); margin-bottom:20px;">🏆 TOP AGENTS</h3>
-    <div id="leaderboard">Syncing Ranking...</div>
-</div>
-
-<div class="frosted-tile">
-    <h3 style="color:var(--neon); margin-bottom:15px;">🎁 SUPPORT MISSION</h3>
-    <div class="btn-grid">
-        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=give-me.org@gmx.net" target="_blank" class="btn-don" style="background:#0070ba;">PAYPAL</a>
-        <a href="https://www.tiktok.com/@giveme.org" target="_blank" class="btn-don" style="background:#000; border:1px solid #fff;">TIKTOK</a>
+<div class="info-container">
+    <div class="frosted-tile">
+        <h3 style="color:var(--gold); margin-bottom:20px; letter-spacing: 2px;">🏆 TOP AGENTS</h3>
+        <div id="leaderboard">Syncing Ranking...</div>
     </div>
-    <div style="background:#fff; padding:10px; border-radius:15px; width:150px; margin:20px auto; cursor:pointer;" onclick="copyBTC()">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=bitcoin:bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" alt="QR" style="width:100%">
-    </div>
-    <p style="font-size:10px; color:var(--gold); cursor:pointer;" onclick="copyBTC()">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed (COPY)</p>
-</div>
 
-<div class="frosted-tile">
-    <h3 style="color:var(--gold); margin-bottom:15px;">📖 MISSION GUIDE</h3>
-    <p style="text-align: left; font-size: 13px; line-height: 1.8; color: #ccc; font-family: 'Plus Jakarta Sans';">
-        • 🦴: 10 | 🍪: 20 | 🍗: 30 Pts (+10% per Lvl)<br>
-        • 👮: Police - Instant 1 Heart ❤️ loss.<br>
-        • 🕷️: Spider -30% Energy (Buzz Damage).<br>
-        • Speed increases every 30 seconds!
-    </p>
-    <p style="margin-top:20px; opacity:0.5; font-size:11px;">© 2026 DOGGYCO | GIVE-ME.ORG | Gifts only</p>
+    <div class="frosted-tile">
+        <h3 style="color:var(--neon); margin-bottom:15px; letter-spacing: 2px;">🎁 SUPPORT MISSION</h3>
+        <div class="btn-grid">
+            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=give-me.org@gmx.net" target="_blank" class="btn-don" style="background:#0070ba;">PAYPAL</a>
+            <a href="https://www.tiktok.com/@giveme.org" target="_blank" class="btn-don" style="background:#000; border:1px solid #fff;">TIKTOK</a>
+        </div>
+        <div class="qr-area" onclick="copyBTC()">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" alt="QR" style="width:100%">
+        </div>
+        <p style="font-size:10px; color:var(--gold); cursor:pointer;" onclick="copyBTC()">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed (Click to Copy)</p>
+    </div>
+
+    <div class="frosted-tile">
+        <h3 style="color:var(--gold); margin-bottom:15px;">📖 MISSION GUIDE</h3>
+        <div class="legal-text">
+            • 🦴: 10 | 🍪: 20 | 🍗: 30 Pts (+10% per Level)<br>
+            • 👮: Police - Instant 1 Heart ❤️ loss.<br>
+            • 🕷️: Spider -30% Energy + 3% per Level Damage.<br>
+            • Speed increases every 30 seconds!<br><br>
+            <b>Legal Notice:</b> Private initiative. No NPO. All gifts are personal contributions. © 2026 DOGGYCO | GIVE-ME.ORG
+        </div>
+    </div>
 </div>
 
 <script>
@@ -145,22 +171,22 @@ const ctx = canvas.getContext("2d");
 let W, H, laneW, dogX, targetX, dogLane = 2, active = false;
 let items = [], spiders = [], clouds = [], birds = [], floaters = [];
 let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
-let lastTime = 0, spawnTimer = 0, audioCtx, bgMusic, dogShake = 0;
+let lastTime = 0, spawnTimer = 0, audioCtx, dogShake = 0;
 
 function resize() {
-    W = canvas.width = 400; // FIX WIDTH
+    W = canvas.width = 400; // FIXED INTERNAL WIDTH
     H = canvas.height = document.getElementById("game-wrap").offsetHeight;
     laneW = W / 5; 
     targetX = (dogLane * laneW) + (laneW / 2); 
     dogX = targetX;
 }
 window.onload = () => { resize(); updateRanks(); };
-window.onresize = resize;
 
-function copyBTC() { navigator.clipboard.writeText('bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed'); alert('Copied!'); }
+function copyBTC() { navigator.clipboard.writeText('bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed'); alert('BTC Address Copied!'); }
 
-// KEYBOARD CONTROLS
+// MULTI-INPUT (ENTER & ARROWS)
 window.addEventListener('keydown', e => {
+    if(e.key === "Enter" && !active) startGame();
     if(!active) return;
     if(e.key === "ArrowLeft" && dogLane > 0) { dogLane--; updateX(); }
     if(e.key === "ArrowRight" && dogLane < 4) { dogLane++; updateX(); }
@@ -182,11 +208,11 @@ function playSfx(f, type, d, v=0.4) {
 
 function startGame() {
     if(!document.getElementById("pName").value) return alert("Enter Agent Name!");
-    document.body.classList.add("playing");
     document.getElementById("start-screen").style.display = "none";
-    
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.05;
+    
+    // START BG MUSIC ONCE
+    let bgMusic = new Audio('musik.mp3'); bgMusic.loop = true; bgMusic.volume = 0.05;
     bgMusic.play().catch(()=>{});
     
     active = true; lastTime = performance.now();
@@ -199,7 +225,7 @@ function loop(t) {
     if(dt > 0.1) dt = 0.016;
     ctx.clearRect(0,0,W,H);
 
-    timeLeft -= dt; energy -= (4.4 + level * 0.6) * dt;
+    timeLeft -= dt; energy -= (4.2 + level * 0.8) * dt;
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
     document.getElementById("timer-display").innerText = Math.ceil(timeLeft) + "S";
     document.getElementById("score-display").innerText = "🏆 " + Math.floor(score);
@@ -207,36 +233,42 @@ function loop(t) {
     document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
     if(timeLeft <= 0) { 
-        level++; timeLeft = 30; energy = Math.min(100, energy + 25); 
-        playSfx(880, 'sine', 0.5); 
+        level++; timeLeft = 30; energy = Math.min(100, energy + 25);
+        playSfx(880, 'sine', 0.5);
+        let b = document.getElementById("lvl-banner");
+        b.style.transform = "translate(-50%, -50%) scale(1)";
+        setTimeout(() => b.style.transform = "translate(-50%, -50%) scale(0)", 1500);
     }
 
     // Atmos Behind
-    if(clouds.length < 2) clouds.push({ x: -60, y: 150+Math.random()*80, s: 0.2 });
+    if(clouds.length < 2) clouds.push({ x: -60, y: 150+Math.random()*100, s: 0.2 });
     ctx.font = "40px Arial"; clouds.forEach(c => { c.x += c.s; if(c.x > W+60) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
 
-    // Floaters Damage Feedback
+    // Floaters Damage
     floaters.forEach((f, i) => { 
         f.y -= 2.5; f.life -= dt; ctx.globalAlpha = f.life; 
         ctx.fillStyle = f.col; ctx.font = "bold 24px Orbitron"; ctx.textAlign="center";
-        ctx.fillText(f.txt, f.x, f.y); if(f.life <= 0) floaters.splice(i,1); 
+        ctx.shadowBlur = 15; ctx.shadowColor = f.col;
+        ctx.fillText(f.txt, f.x, f.y); ctx.shadowBlur = 0;
+        if(f.life <= 0) floaters.splice(i,1); 
     });
     ctx.globalAlpha = 1;
 
-    // Spiders
+    // Spiders - PRECISE CENTERED LINE
     if(spiders.length < 2 && Math.random() < 0.012) spiders.push({lane: Math.floor(Math.random()*5), y: 0, dir: 1});
     spiders.forEach((s, i) => {
         s.y += (220 + level * 15) * dt * s.dir; if(s.y > H - 160) s.dir = -1; if(s.y < 0) spiders.splice(i, 1);
-        let sx = (s.lane * laneW) + (laneW / 2); // PERFECT CENTER
+        let sx = (s.lane * 80) + 40; // MATHEMATICAL CENTER OF LANE (400 / 5 = 80)
         ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "38px Arial"; ctx.fillText("🕷️", sx-18, s.y + 25);
         if(s.lane === dogLane && s.y > H-170 && s.y < H-90) { 
-            let dmg = Math.floor(30 * Math.pow(1.1, level - 1)); energy -= dmg * dt * 5; dogShake = 15;
-            if(Math.random() < 0.05) { floaters.push({x:sx, y:H-180, txt:"-"+dmg+"%", col:"var(--red)", life:1}); playSfx(150, 'sawtooth', 0.2); }
+            let dmgBase = 30 + (level * 3); // 30% + 3% per Level
+            energy -= dmgBase * dt * 5; dogShake = 15;
+            if(Math.random() < 0.05) { floaters.push({x:sx, y:H-180, txt:"-"+dmgBase+"%", col:"var(--red)", life:1}); playSfx(150, 'sawtooth', 0.2); }
         }
     });
 
-    // Items
+    // Items Logic
     let interval = (28 / (60 * Math.pow(1.1, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
@@ -245,7 +277,7 @@ function loop(t) {
         items.push({lane: Math.floor(Math.random()*5), y: -60, type: type}); spawnTimer = interval;
     }
     items.forEach((it, i) => {
-        it.y += (310 + level * 22) * dt; let ix = (it.lane * laneW) + (laneW / 2);
+        it.y += (310 + level * 22) * dt; let ix = (it.lane * 80) + 40;
         ctx.font = "42px Arial"; ctx.fillText(it.type, ix-20, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
             let mult = Math.pow(1.1, level - 1);
@@ -263,7 +295,9 @@ function loop(t) {
     });
 
     dogX += (targetX - dogX) * 0.25;
-    ctx.font = "80px Arial"; ctx.fillText("🐶", dogX-40 + (Math.random()-0.5)*dogShake, H - 110);
+    // CLAMP DOG TO GAME BORDERS
+    dogX = Math.max(40, Math.min(360, dogX)); 
+    ctx.font = "85px Arial"; ctx.fillText("🐶", dogX-42 + (Math.random()-0.5)*dogShake, H - 110);
     if(dogShake > 0) dogShake *= 0.85;
     if(energy <= 0 || hearts <= 0) end(); else requestAnimationFrame(loop);
 }
@@ -286,3 +320,4 @@ async function updateRanks() {
 </script>
 </body>
 </html>
+
