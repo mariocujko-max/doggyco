@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO V2100 - TOTAL CONTROL</title>
+    <title>DOGGYCO V2200 - ABSOLUTE ZERO</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --glass: rgba(255, 255, 255, 0.05);
+            --glass: rgba(255, 255, 255, 0.1);
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
@@ -17,37 +17,46 @@
             background: #000 url('forest_background.png') no-repeat center center fixed; 
             background-size: cover; font-family: 'Orbitron', sans-serif; color: #fff; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            overflow: hidden;
         }
 
         header h1 { 
-            font-size: 45px; color: var(--neon); letter-spacing: 5px; 
-            text-shadow: 0 0 20px var(--neon); padding: 20px; text-align: center;
-            animation: neonGlow 2s infinite alternate;
+            font-size: 42px; color: var(--neon); letter-spacing: 5px; 
+            text-shadow: 0 0 15px var(--neon), 0 0 30px var(--neon);
+            padding: 20px; text-align: center;
         }
-        @keyframes neonGlow { from { opacity: 1; } to { opacity: 0.6; } }
 
-        /* STARRE 400PX ZENTRIERUNG */
-        #game-view { width: 100vw; height: 80vh; display: flex; justify-content: center; align-items: center; }
+        /* DER SPIELBLOCK - STRENGSTENS AUF 400PX FIXIERT */
+        #game-view { width: 100vw; height: 80vh; display: flex; justify-content: center; align-items: center; position: relative; }
         #game-wrap { 
             position:relative; width: 400px; height: 100%; 
             background: rgba(0,0,0,0.85); border: 4px solid var(--neon); border-radius: 40px; 
-            overflow: hidden; box-shadow: 0 0 50px var(--neon);
+            overflow: hidden; box-shadow: 0 0 50px var(--neon); margin: 0 auto;
         }
         #bg-layer { position: absolute; inset: 0; background: url('hintergrund.png') center/cover; filter: brightness(0.3); z-index: 1; }
-        canvas { position: absolute; inset: 0; z-index: 50; background: transparent; }
+        canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
+        body.playing canvas { pointer-events: auto; }
 
         /* HUD */
         #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
         #energy-bar-wrap { width: 88%; height: 32px; margin: 0 auto; background: rgba(0,0,0,0.7); border: 2px solid #fff; border-radius: 16px; overflow: hidden; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s; }
-        #hud-row { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 12px auto 0; font-size: 15px; font-weight: 900; }
+        #hud-row { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 12px auto 0; font-size: 14px; font-weight: 900; }
 
-        /* OVERLAYS (GLASS EFFECT) */
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px); z-index: 1000; background: rgba(0,0,0,0.2); border-radius: 36px; }
+        /* LEVEL BANNER POPUP */
+        #lvl-banner { 
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0);
+            width: 80%; padding: 25px; background: rgba(0, 242, 255, 0.95); color: #000;
+            border-radius: 30px; z-index: 1500; font-weight: 900; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center;
+            box-shadow: 0 0 30px var(--neon); backdrop-filter: blur(10px);
+        }
+
+        /* OVERLAYS */
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); z-index: 1000; background: rgba(0,0,0,0.3); border-radius: 36px; }
         #pName { padding: 18px; border-radius: 20px; border: 3px solid var(--neon); background: rgba(255,255,255,0.1); color: #fff; text-align: center; width: 80%; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 25px; outline: none; }
         .neon-btn { padding: 18px 50px; background: var(--green); color: #000; border-radius: 35px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; box-shadow: 0 0 15px var(--green); }
 
-        /* SCROLLABLE INFO SECTION */
+        /* UNTERE SEKTIONEN */
         .info-scroll { width: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: 60px; overflow-y: auto; }
         .frosted-tile { background: rgba(255,255,255,0.08); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 35px; padding: 30px; margin: 20px 0; width: 92vw; max-width: 450px; text-align: center; }
 
@@ -55,15 +64,15 @@
         .btn-don { padding: 15px; border-radius: 15px; text-decoration: none; color: #fff; font-size: 11px; font-weight: 800; border: 1px solid rgba(255,255,255,0.2); text-align: center; transition: 0.3s; }
         .btn-don:hover { transform: translateY(-5px); border-color: #fff; }
         
-        .qr-area { background: #fff; padding: 10px; border-radius: 20px; width: 160px; margin: 20px auto; transition: 0.3s; cursor: pointer; }
-        .qr-area:hover { transform: translateY(-5px); box-shadow: 0 0 20px var(--gold); }
+        .qr-area { background: #fff; padding: 10px; border-radius: 20px; width: 160px; margin: 20px auto; transition: 0.3s; cursor: pointer; position: relative; }
+        .qr-area:hover { transform: translateY(-5px) scale(1.05); }
         .copy-toast { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 5px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; display: none; }
 
         #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; pointer-events: none; }
         .btn-arrow { width: 75px; height: 75px; background: rgba(255,255,255,0.15); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
         
         .rank-row { display: flex; justify-content: space-between; padding: 12px; margin-bottom: 8px; border-radius: 15px; background: rgba(0,0,0,0.3); font-family: 'Plus Jakarta Sans'; font-weight: 800; }
-        .guide-text { font-family: 'Plus Jakarta Sans', sans-serif; text-align: left; font-size: 14px; line-height: 1.8; color: #fff; font-weight: 700; text-shadow: 1px 1px 2px #000; }
+        .guide-text { font-family: 'Plus Jakarta Sans', sans-serif; text-align: left; font-size: 14px; line-height: 1.8; color: #fff; text-shadow: 1px 1px 3px #000; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -83,6 +92,7 @@
             </div>
         </div>
         
+        <div id="lvl-banner">LEVEL UP! ⚡<br><span style="font-size: 12px;">SPEED INCREASING</span></div>
         <canvas id="game-canvas"></canvas>
 
         <div id="controls">
@@ -92,7 +102,7 @@
 
         <div id="start-screen" class="overlay">
             <input type="text" id="pName" placeholder="ENTER AGENT NAME" autofocus>
-            <button class="neon-btn" onclick="startGame()">MISSION START</button>
+            <button class="neon-btn" onclick="startGame()">START MISSION</button>
         </div>
 
         <div id="end-screen" class="overlay" style="display:none;">
@@ -126,9 +136,9 @@
     <div class="frosted-tile">
         <h3 style="color:var(--gold); margin-bottom:15px;">📖 MISSION GUIDE</h3>
         <div class="guide-text">
-            • 🦴: 10 | 🍪: 20 | 🍗: 30 Pts (+10% per Level)<br>
+            • 🦴: 10 | 🍪: 20 | 🍗: 30 Pts (+10% per Lvl)<br>
             • 👮: Police - Instant 1 Heart ❤️ loss.<br>
-            • 🕷️: Spider -30% Energy Damage + 3% per Level.<br>
+            • 🕷️: Spider -30% Energy Damage + Level Bonus.<br>
             • Speed increases every 30 seconds!<br><br>
             <span style="font-size: 11px; color:#ccc;">Legal: Private initiative. Gifts only. © 2026 DOGGYCO</span>
         </div>
@@ -142,7 +152,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
-const FIXED_W = 400; // DER ANKER: SPIELFELD IMMER 400PX
+const FIXED_W = 400; // DER UNVERRÜCKBARE ANKER
 let H, dogX, targetX, dogLane = 2, active = false;
 let items = [], spiders = [], clouds = [], birds = [], floaters = [];
 let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
@@ -151,7 +161,7 @@ let lastTime = 0, spawnTimer = 0, audioCtx, dogShake = 0;
 function resize() {
     canvas.width = FIXED_W; 
     H = canvas.height = document.getElementById("game-wrap").offsetHeight;
-    targetX = (dogLane * 80) + 40; 
+    targetX = (dogLane * 80) + 40; // 40, 120, 200, 280, 360
     dogX = targetX;
 }
 window.onload = () => { resize(); updateRanks(); };
@@ -162,6 +172,7 @@ function copyBTC() {
     t.style.display = "block"; setTimeout(() => t.style.display = "none", 2000);
 }
 
+// PC KEYS & HANDY-LOGIK (FIXIERT)
 window.addEventListener('keydown', e => {
     if(e.key === "Enter" && !active) startGame();
     if(!active) return;
@@ -169,8 +180,10 @@ window.addEventListener('keydown', e => {
     if(e.key === "ArrowRight" && dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; }
 });
 
-function mLeft() { if(dogLane > 0) { dogLane--; targetX = (dogLane * 80) + 40; } }
-function mRight() { if(dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; } }
+function mLeft() { if(active && dogLane > 0) { dogLane--; targetX = (dogLane * 80) + 40; } }
+function mRight() { if(active && dogLane < 4) { dogLane--; dogLane += 2; if(dogLane > 4) dogLane = 4; targetX = (dogLane * 80) + 40; } }
+// Korrektur mRight für sauberen Lane-Wechsel
+function mRight() { if(active && dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; } }
 
 function playSfx(f, type, d, v=0.4) {
     if(!audioCtx) return;
@@ -205,36 +218,43 @@ function loop(t) {
     document.getElementById("lvl-display").innerText = "LVL " + level;
     document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
-    if(timeLeft <= 0) { level++; timeLeft = 30; energy = Math.min(100, energy + 25); playSfx(880, 'sine', 0.5); }
+    if(timeLeft <= 0) { 
+        level++; timeLeft = 30; energy = Math.min(100, energy + 25);
+        playSfx(880, 'sine', 0.5);
+        let b = document.getElementById("lvl-banner");
+        b.style.transform = "translate(-50%, -50%) scale(1)";
+        setTimeout(() => b.style.transform = "translate(-50%, -50%) scale(0)", 2000);
+    }
 
-    // Wolken & Vögel
+    // Atmos
     if(clouds.length < 2) clouds.push({ x: -60, y: 150+Math.random()*80, s: 0.2 });
     ctx.font = "40px Arial"; clouds.forEach(c => { c.x += c.s; if(c.x > FIXED_W+60) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
-    if(Math.random() < 0.005) birds.push({ x: 450, y: 80+Math.random()*100, vx: -1.5 });
-    ctx.font = "24px Arial"; birds.forEach((b, i) => { b.x += b.vx; ctx.fillText("🐦", b.x, b.y); if(b.x < -60) birds.splice(i, 1); });
 
-    // Floaters
+    // Floaters (RED DAMAGE!)
     floaters.forEach((f, i) => { 
         f.y -= 2.2; f.life -= dt; ctx.globalAlpha = f.life; 
-        ctx.fillStyle = f.col; ctx.font = "bold 24px Orbitron"; ctx.textAlign="center";
+        ctx.fillStyle = f.col; ctx.font = "bold 26px Orbitron"; ctx.textAlign="center";
         ctx.fillText(f.txt, f.x, f.y); if(f.life <= 0) floaters.splice(i,1); 
     });
     ctx.globalAlpha = 1;
 
-    // Spiders - ABSOLUT MITTIG & WACKELND
-    if(spiders.length < 2 && Math.random() < 0.012) spiders.push({lane: Math.floor(Math.random()*5), y: 0, dir: 1, offset: Math.random()*10});
+    // Spiders - PRECISE & STÖRGERÄUSCH
+    if(spiders.length < 2 && Math.random() < 0.012) spiders.push({lane: Math.floor(Math.random()*5), y: 0, dir: 1});
     spiders.forEach((s, i) => {
         s.y += (220 + level * 15) * dt * s.dir; if(s.y > H - 160) s.dir = -1; if(s.y < 0) spiders.splice(i, 1);
-        let sx = (s.lane * 80) + 40 + Math.sin(t/100 + s.offset)*3; // WACKEL-EFFEKT
+        let sx = (s.lane * 80) + 40; 
         ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "38px Arial"; ctx.fillText("🕷️", sx-18, s.y + 25);
         if(s.lane === dogLane && s.y > H-170 && s.y < H-90) { 
             let dmg = 30 + (level * 3); energy -= dmg * dt * 5; dogShake = 15;
-            if(Math.random() < 0.05) { floaters.push({x:sx, y:H-180, txt:"-"+dmg+"%", col:"var(--red)", life:1}); playSfx(150, 'sawtooth', 0.2); }
+            if(Math.random() < 0.05) { 
+                floaters.push({x:sx, y:H-180, txt:"-"+dmg+"%", col:"var(--red)", life:1}); 
+                playSfx(120, 'sawtooth', 0.2); // STÖRGERÄUSCH
+            }
         }
     });
 
-    // Items Logic - DER FEHLER IST HIER BEHOBEN (Kein relativer W Bezug mehr)
+    // Items Logic
     let interval = (28 / (60 * Math.pow(1.1, level - 1)));
     spawnTimer -= dt;
     if(spawnTimer <= 0) {
@@ -243,16 +263,15 @@ function loop(t) {
         items.push({lane: Math.floor(Math.random()*5), y: -60, type: type}); spawnTimer = interval;
     }
     items.forEach((it, i) => {
-        it.y += (310 + level * 22) * dt; 
-        let ix = (it.lane * 80) + 40; // FIXER WERT 80px PRO LANE
+        it.y += (310 + level * 22) * dt; let ix = (it.lane * 80) + 40;
         ctx.font = "42px Arial"; ctx.fillText(it.type, ix-20, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
             let mult = Math.pow(1.1, level - 1);
             if(it.type === '👮') { hearts--; dogShake = 25; playSfx(100, 'square', 0.4); floaters.push({x:ix, y:it.y, txt:"-1 ❤️", col:"var(--red)", life:1.5}); }
             else { 
                 let b = it.type === '🍗' ? 30 : (it.type === '🍪' ? 20 : 10);
-                let p = Math.floor(b * mult); score += p; energy = Math.min(100, energy + 8); 
-                floaters.push({x:ix, y:it.y, txt:"+"+p, col: "#00ff88", life:1.5});
+                score += b * mult; energy = Math.min(100, energy + 8); 
+                floaters.push({x:ix, y:it.y, txt:"+"+Math.floor(b * mult), col: "#00ff88", life:1.2});
                 playSfx(400, 'sine', 0.2);
             }
             items.splice(i, 1);
@@ -260,7 +279,7 @@ function loop(t) {
     });
 
     dogX += (targetX - dogX) * 0.25;
-    dogX = Math.max(40, Math.min(360, dogX)); 
+    dogX = Math.max(40, Math.min(360, dogX)); // ABSOLUTE GRENZE
     ctx.font = "80px Arial"; ctx.fillText("🐶", dogX-40 + (Math.random()-0.5)*dogShake, H - 110);
     if(dogShake > 0) dogShake *= 0.85;
     if(energy <= 0 || hearts <= 0) end(); else requestAnimationFrame(loop);
