@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOGGYCO V22000 - ULTIMATE MASTER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { 
+            --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: #050505; font-family: 'Orbitron', sans-serif; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header h1 { 
+            font-size: 45px; color: var(--neon); letter-spacing: 5px; 
+            text-shadow: 0 0 20px var(--neon); padding: 25px; text-align: center;
+        }
+
+        #game-view { width: 100vw; height: 80vh; display: flex; justify-content: center; align-items: center; position: relative; }
+        #game-wrap { 
+            position:relative; width: 400px; height: 100%; 
+            background: rgba(10, 10, 10, 0.95); border: 4px solid var(--neon); border-radius: 40px; 
+            overflow: hidden; box-shadow: 0 0 50px var(--neon); margin: 0 auto;
+        }
+
+        canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
+
+        /* HUD */
+        #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
+        #energy-bar-wrap { width: 88%; height: 32px; margin: 0 auto; background: rgba(0,0,0,0.7); border: 2px solid #fff; border-radius: 16px; overflow: hidden; }
+        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s; }
+        #hud-row { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 12px auto 0; font-size: 15px; font-weight: 900; text-shadow: 2px 2px 4px #000; }
+
+        /* OVERLAYS */
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); z-index: 1000; background: rgba(0,0,0,0.5); border-radius: 36px; }
+        #pName { padding: 18px; border-radius: 20px; border: 3px solid var(--neon); background: rgba(255,255,255,0.05); color: #fff; text-align: center; width: 80%; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 25px; outline: none; }
+        .neon-btn { padding: 18px 50px; background: var(--green); color: #000; border-radius: 35px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; box-shadow: 0 0 15px var(--green); transition: 0.3s; }
+
+        /* INFO TILES & NEON BUTTONS */
+        .info-scroll { width: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: 60px; overflow-y: auto; }
+        .frosted-tile { background: var(--glass); backdrop-filter: blur(20px); border: 2px solid var(--neon); border-radius: 35px; padding: 30px; margin: 20px 0; width: 92vw; max-width: 450px; text-align: center; box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .btn-don { padding: 15px; border-radius: 15px; text-decoration: none; color: #fff; font-size: 11px; font-weight: 800; border: 2px solid var(--neon); text-align: center; transition: 0.4s; background: rgba(0,0,0,0.5); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-don:hover { transform: translateY(-8px); box-shadow: 0 8px 20px var(--neon); border-color: #fff; }
+        
+        .qr-area { background: #fff; padding: 10px; border-radius: 20px; width: 160px; margin: 25px auto; transition: 0.4s; cursor: pointer; border: 4px solid var(--neon); position: relative; }
+        .qr-area:hover { transform: translateY(-8px) scale(1.05); box-shadow: 0 10px 20px var(--gold); }
+        .copy-toast { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 5px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; display: none; z-index: 2000; }
+
+        /* CONTROLS */
+        #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 45px; z-index: 300; pointer-events: none; }
+        .btn-arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
+    </style>
+</head>
+<body>
+
+<header><h1>DOGGYCO</h1></header>
+
+<div id="game-view">
+    <div id="game-wrap">
+        <div id="ui-header">
+            <div id="energy-bar-wrap"><div id="energy-fill"></div></div>
+            <div id="hud-row">
+                <span id="hearts-display">❤️❤️❤️</span>
+                <span id="lvl-display" style="color:var(--gold)">LVL 1</span>
+                <span id="score-display">🏆 0</span>
+            </div>
+        </div>
+        
+        <canvas id="game-canvas"></canvas>
+
+        <div id="controls">
+            <div class="btn-arrow" onclick="mLeft()">◀</div>
+            <div class="btn-arrow" onclick="mRight()">▶</div>
+        </div>
+
+        <div id="start-screen" class="overlay">
+            <input type="text" id="pName" placeholder="AGENT NAME" autofocus>
+            <button class="neon-btn" onclick="startGame()">START MISSION</button>
+        </div>
+
+        <div id="end-screen" class="overlay" style="display:none;">
+            <h2 style="color:var(--red); font-size: 32px;">OVER</h2>
+            <h1 id="f-score" style="font-size: 70px; color: var(--gold); margin: 20px 0;">0</h1>
+            <button class="neon-btn" onclick="location.reload()">RETRY</button>
+        </div>
+    </div>
+</div>
+
+<div class="info-scroll">
+    <div class="frosted-tile">
+        <h3 style="color:var(--neon); margin-bottom:15px;">🎁 SUPPORT</h3>
+        <div class="btn-grid">
+            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=give-me.org@gmx.net" target="_blank" class="btn-don">PAYPAL</a>
+            <a href="https://www.tiktok.com/@giveme.org" target="_blank" class="btn-don">TIKTOK</a>
+            <div class="btn-don" style="background:#f7931a;" onclick="copyBTC(event)">BITCOIN</div>
+            <div class="btn-don" style="background:#8247e5;" onclick="copyBTC(event)">WALLET</div>
+        </div>
+        <div class="qr-area" onclick="copyBTC(event)">
+            <div id="copy-toast" class="copy-toast">KOPPIERT!</div>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" alt="QR" style="width:100%">
+        </div>
+        <p style="font-size:10px; color:var(--gold); cursor:pointer;" onclick="copyBTC(event)">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
+    </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const canvas = document.getElementById("game-canvas");
+const ctx = canvas.getContext("2d");
+const W = 400; 
+let H, dogX, targetX, dogLane = 2, active = false;
+let items = [], spiders = [], floaters = [], lastTime = 0, spawnTimer = 0;
+let score = 0, hearts = 3, energy = 100, level = 1, audioCtx;
+
+function init() {
+    canvas.width = W; 
+    H = canvas.height = document.getElementById("game-wrap").offsetHeight;
+    targetX = (dogLane * 80) + 40; 
+    dogX = targetX;
+}
+window.onload = init;
+
+function copyBTC(e) { 
+    if(e) e.preventDefault(); 
+    navigator.clipboard.writeText('bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed'); 
+    const t = document.getElementById("copy-toast"); 
+    t.style.display = "block"; setTimeout(() => t.style.display = "none", 2000); 
+}
+
+function startGame() {
+    if(!document.getElementById("pName").value) return alert("Agent Name?");
+    document.getElementById("start-screen").style.display = "none";
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    active = true; lastTime = performance.now();
+    requestAnimationFrame(loop);
+}
+
+function mLeft() { if(active && dogLane > 0) { dogLane--; targetX = (dogLane * 80) + 40; } }
+function mRight() { if(active && dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; } }
+
+window.addEventListener('keydown', e => {
+    if(!active) return;
+    if(e.key === "ArrowLeft") mLeft();
+    if(e.key === "ArrowRight") mRight();
+});
+
+function loop(t) {
+    if(!active) return;
+    let dt = (t - lastTime) / 1000; lastTime = t;
+    if(dt > 0.1) dt = 0.016;
+    ctx.clearRect(0,0,W,H);
+
+    energy -= (4 + level) * dt;
+    document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
+    document.getElementById("score-display").innerText = "🏆 " + Math.floor(score);
+    document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
+
+    // Spinnen - STARR ZENTRIERT
+    if(Math.random() < 0.01) spiders.push({lane: Math.floor(Math.random()*5), y: 0});
+    spiders.forEach((s, i) => {
+        s.y += (180 + level * 20) * dt;
+        let sx = (s.lane * 80) + 40;
+        ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+        ctx.font = "38px Arial"; ctx.fillText("🕷️", sx-18, s.y + 25);
+        if(s.lane === dogLane && s.y > H-170 && s.y < H-90) {
+            energy -= 100 * dt;
+            if(Math.random() < 0.05) floaters.push({x:sx, y:H-180, txt:"-30%", col:"#ff3131", life:1});
+        }
+        if(s.y > H) spiders.splice(i,1);
+    });
+
+    // Items
+    spawnTimer -= dt;
+    if(spawnTimer <= 0) { items.push({lane: Math.floor(Math.random()*5), y: -60, type: Math.random() < 0.1 ? '👮' : '🦴'}); spawnTimer = 0.6; }
+    items.forEach((it, i) => {
+        it.y += (260 + level * 20) * dt; let ix = (it.lane * 80) + 40;
+        ctx.font = "42px Arial"; ctx.fillText(it.type, ix-20, it.y);
+        if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
+            if(it.type === '👮') { hearts--; floaters.push({x:ix, y:it.y, txt:"-1 ❤️", col:"#ff3131", life:1.5}); }
+            else { score += 10; energy = Math.min(100, energy + 7); floaters.push({x:ix, y:it.y, txt:"+10", col: "#00ff88", life:1.2}); }
+            items.splice(i, 1);
+        }
+        if(it.y > H) items.splice(i,1);
+    });
+
+    // Floaters (Sichtbarkeit!)
+    floaters.forEach((f, i) => { 
+        f.y -= 2.2; f.life -= dt; ctx.globalAlpha = f.life; 
+        ctx.fillStyle = f.col; ctx.font = "bold 26px Orbitron"; ctx.textAlign="center"; 
+        ctx.shadowColor = "black"; ctx.shadowBlur = 4;
+        ctx.fillText(f.txt, f.x, f.y); 
+        ctx.shadowBlur = 0;
+        if(f.life <= 0) floaters.splice(i,1); 
+    });
+    ctx.globalAlpha = 1;
+
+    // HUND (TARIERUNG: -45px für perfekte Symmetrie)
+    dogX += (targetX - dogX) * 0.25;
+    dogX = Math.max(40, Math.min(360, dogX)); 
+    ctx.font = "80px Arial"; 
+    ctx.fillText("🐶", dogX - 45, H - 110);
+
+    if(energy <= 0 || hearts <= 0) { active = false; document.getElementById("end-screen").style.display = "flex"; document.getElementById("f-score").innerText = Math.floor(score); }
+    else requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
