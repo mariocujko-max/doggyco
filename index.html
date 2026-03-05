@@ -3,24 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO V31000 - TITANIUM LEGACY</title>
+    <title>DOGGYCO V32000 - INFINITE MASTER</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --glass: rgba(255, 255, 255, 0.05);
+            --glass: rgba(255, 255, 255, 0.05); --blue-touch: #0070ff;
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background: #000 url('forest_background.png') no-repeat center center fixed; 
             background-size: cover; font-family: 'Orbitron', sans-serif; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            overflow-x: hidden;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden;
         }
 
-        header h1 { font-size: 45px; color: var(--neon); letter-spacing: 5px; text-shadow: 0 0 20px var(--neon); padding: 25px; text-align: center; }
+        header h1 { font-size: 40px; color: var(--neon); letter-spacing: 5px; text-shadow: 0 0 20px var(--neon); padding: 15px; text-align: center; }
 
         #game-view { width: 100vw; height: 75vh; display: flex; justify-content: center; align-items: center; position: relative; }
         #game-wrap { 
@@ -34,19 +33,21 @@
 
         /* HUD */
         #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
-        #energy-bar-wrap { width: 88%; height: 25px; margin: 0 auto; background: rgba(0,0,0,0.8); border: 2px solid #fff; border-radius: 12px; overflow: hidden; }
+        #agent-name-display { text-align: center; color: var(--neon); font-size: 12px; margin-bottom: 5px; font-weight: 900; }
+        #energy-bar-wrap { width: 88%; height: 20px; margin: 0 auto; background: rgba(0,0,0,0.8); border: 1px solid #fff; border-radius: 10px; overflow: hidden; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s; }
-        #hud-row { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 10px auto; font-size: 14px; font-weight: 900; text-shadow: 2px 2px 4px #000; }
+        #hud-row { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 8px auto; font-size: 13px; font-weight: 900; text-shadow: 2px 2px 4px #000; }
 
         /* OVERLAYS */
         .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(12px); z-index: 1000; background: rgba(0,0,0,0.4); border-radius: 36px; }
         #pName { padding: 18px; border-radius: 20px; border: 3px solid var(--neon); background: rgba(255,255,255,0.08); color: #fff; text-align: center; width: 80%; font-family: 'Orbitron'; margin-bottom: 25px; outline: none; }
         .neon-btn { padding: 18px 50px; background: var(--green); color: #000; border-radius: 35px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; box-shadow: 0 0 15px var(--green); transition: 0.3s; }
         
-        .level-popup { display: none; position: absolute; inset: 0; z-index: 2000; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); border-radius: 36px; }
-        .level-text { font-size: 40px; color: var(--gold); text-shadow: 0 0 20px var(--gold); text-align: center; }
+        /* CONTROLS - BLAU UNTERLEGT BEI TOUCH */
+        #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 45px; z-index: 300; pointer-events: none; }
+        .btn-arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; transition: 0.2s; }
+        .btn-arrow:active { background: var(--blue-touch); box-shadow: 0 0 30px var(--blue-touch); }
 
-        /* INFO & SUPPORT */
         .info-scroll { width: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: 60px; }
         .frosted-tile { background: var(--glass); backdrop-filter: blur(20px); border: 2px solid var(--neon); border-radius: 35px; padding: 30px; margin: 20px 0; width: 92vw; max-width: 450px; text-align: center; box-shadow: 0 0 15px var(--neon); }
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
@@ -56,11 +57,8 @@
         .qr-area { background: #fff; padding: 10px; border-radius: 20px; width: 150px; margin: 20px auto; border: 4px solid var(--neon); position: relative; }
         .copy-toast { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 5px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; display: none; }
 
-        /* CONTROLS */
-        #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 45px; z-index: 300; pointer-events: none; }
-        .btn-arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
-        
         .rank-row { display: flex; justify-content: space-between; padding: 12px; margin-bottom: 8px; border-radius: 15px; background: rgba(0,0,0,0.5); font-family: 'Plus Jakarta Sans'; font-weight: 800; border: 1px solid var(--neon); }
+        .legal { font-size: 10px; color: #666; padding: 20px; text-align: center; line-height: 1.5; width: 90%; }
     </style>
 </head>
 <body>
@@ -71,6 +69,7 @@
     <div id="game-wrap">
         <div id="bg-layer"></div>
         <div id="ui-header">
+            <div id="agent-name-display">AGENT: ---</div>
             <div id="energy-bar-wrap"><div id="energy-fill"></div></div>
             <div id="hud-row">
                 <span id="hearts-display">❤️❤️❤️</span>
@@ -87,19 +86,16 @@
             <div class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight()">▶</div>
         </div>
 
-        <div id="level-popup" class="level-popup">
-            <h2 class="level-text">MISSION SUCCESS</h2>
-            <p id="next-lvl-txt" style="color:#fff; margin-top:10px;">LEVEL 2 STARTS...</p>
-        </div>
-
         <div id="start-screen" class="overlay">
-            <input type="text" id="pName" placeholder="AGENT NAME" autofocus>
-            <button class="neon-btn" onclick="startGame()">START MISSION</button>
+            <input type="text" id="pName" placeholder="DEIN NAME" autofocus>
+            <button class="neon-btn" onclick="startGame()">MISSION START</button>
         </div>
 
         <div id="end-screen" class="overlay" style="display:none;">
-            <h2 style="color:var(--red); font-size: 32px;">GAME OVER</h2>
-            <h1 id="f-score" style="font-size: 70px; color: var(--gold); margin: 20px 0;">0</h1>
+            <h3 id="end-agent" style="color:var(--neon); margin-bottom:10px;">AGENT: ---</h3>
+            <h2 style="color:var(--red); font-size: 28px;">MISSION OVER</h2>
+            <h1 id="f-score" style="font-size: 60px; color: var(--gold); margin: 15px 0;">0</h1>
+            <div id="firework-msg" style="display:none; color:var(--gold); font-weight:900; margin-bottom:10px; text-align:center;">🎆 GOLD RANK! EXPLOSION! 🎆<br>NEXT: CATS WORLD</div>
             <button class="neon-btn" onclick="location.reload()">RETRY</button>
         </div>
     </div>
@@ -120,10 +116,13 @@
             <div class="btn-don" style="background:#8247e5" onclick="copyBTC()">WALLET</div>
         </div>
         <div class="qr-area" onclick="copyBTC()">
-            <div id="copy-toast" class="copy-toast">KOPPIERT!</div>
+            <div id="copy-toast" class="copy-toast">COPIED!</div>
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" alt="QR" style="width:100%">
         </div>
-        <p style="font-size:10px; color:var(--gold); cursor:pointer;" onclick="copyBTC()">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
+    </div>
+
+    <div class="legal">
+        HINWEIS: Private Initiative. Freiwillige Geschenke. EU-Recht: Digitale Inhalte ohne Datenträger. © 2026 DOGGYCO.
     </div>
 </div>
 
@@ -135,19 +134,19 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 const W = 400; 
-let H, dogX, targetX, dogLane = 2, active = false, isLeveling = false;
-let items = [], spiders = [], floaters = [], clouds = [], lastTime = 0;
+let H, dogX, targetX, dogLane = 2, active = false;
+let items = [], spiders = [], floaters = [], clouds = [], birds = [], fireworks = [];
 let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
-let audioCtx, dogShake = 0;
+let audioCtx, dogShake = 0, dogScale = 1;
 
-// Wolken-Initialisierung
-for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: Math.random()*H*0.5, s: 10 + Math.random()*20});
+// Wolken & Vögel
+for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: 50 + Math.random()*100, s: 15 + Math.random()*15});
+for(let i=0; i<2; i++) birds.push({x: W + Math.random()*W, y: 80 + Math.random()*80, s: 40 + Math.random()*30});
 
 function init() {
     canvas.width = W; 
     H = canvas.height = document.getElementById("game-wrap").offsetHeight;
-    targetX = (dogLane * 80) + 40; 
-    dogX = targetX;
+    targetX = (dogLane * 80) + 40; dogX = targetX;
 }
 window.onload = () => { init(); updateRanks(); };
 
@@ -157,7 +156,7 @@ function copyBTC() {
     t.style.display = "block"; setTimeout(() => t.style.display = "none", 2000);
 }
 
-function playSfx(f, type, d, v=0.3) {
+function playSfx(f, type, d, v=0.2) {
     if(!audioCtx) return;
     let o = audioCtx.createOscillator(), g = audioCtx.createGain();
     o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
@@ -168,15 +167,29 @@ function playSfx(f, type, d, v=0.3) {
 }
 
 function startGame() {
-    if(!document.getElementById("pName").value) return;
+    const name = document.getElementById("pName").value;
+    if(!name) return;
+    document.getElementById("agent-name-display").innerText = "AGENT: " + name;
     document.getElementById("start-screen").style.display = "none";
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Hintergrundmusik
+    let music = new Audio('musik.mp3'); music.loop = true; music.volume = 0.1;
+    music.play().catch(()=>{});
+
     active = true; lastTime = performance.now();
     requestAnimationFrame(loop);
 }
 
-function mLeft() { if(active && !isLeveling && dogLane > 0) { dogLane--; targetX = (dogLane * 80) + 40; } }
-function mRight() { if(active && !isLeveling && dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; } }
+window.addEventListener('keydown', e => {
+    if(e.key === "Enter" && !active) startGame();
+    if(!active) return;
+    if(e.key === "ArrowLeft") mLeft();
+    if(e.key === "ArrowRight") mRight();
+});
+
+function mLeft() { if(active && dogLane > 0) { dogLane--; targetX = (dogLane * 80) + 40; } }
+function mRight() { if(active && dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; } }
 
 function loop(t) {
     if(!active) return;
@@ -184,30 +197,31 @@ function loop(t) {
     if(dt > 0.1) dt = 0.016;
     ctx.clearRect(0,0,W,H);
 
-    // Wolken
+    // Himmel-Animation
     clouds.forEach(c => {
-        c.x += c.s * dt; if(c.x > W) c.x = -50;
-        ctx.font = "40px Arial"; ctx.globalAlpha = 0.3; ctx.fillText("☁️", c.x, c.y); ctx.globalAlpha = 1;
+        c.x += c.s * dt; if(c.x > W) c.x = -60;
+        ctx.globalAlpha = 0.3; ctx.font = "40px Arial"; ctx.fillText("☁️", c.x, c.y); ctx.globalAlpha = 1;
+    });
+    birds.forEach(b => {
+        b.x -= b.s * dt; if(b.x < -60) b.x = W + 60;
+        ctx.globalAlpha = 0.4; ctx.font = "30px Arial"; ctx.fillText("🦅", b.x, b.y); ctx.globalAlpha = 1;
     });
 
-    if(!isLeveling) {
-        timeLeft -= dt; energy -= (4 + level) * dt;
-        document.getElementById("timer-display").innerText = "⏳ " + Math.ceil(timeLeft) + "s";
-    }
-
-    if(timeLeft <= 0 && !isLeveling) triggerLevelUp();
+    timeLeft -= dt; energy -= (4 + level) * dt;
+    document.getElementById("timer-display").innerText = "⏳ " + Math.ceil(timeLeft) + "s";
+    if(timeLeft <= 0) { level++; timeLeft = 30; energy = 100; playSfx(800, 'sine', 0.5); }
 
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
     document.getElementById("score-display").innerText = "🏆 " + Math.floor(score);
     document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
-    // Spinnen (Max 2)
-    if(!isLeveling && spiders.length < 2 && Math.random() < 0.015) spiders.push({lane: Math.floor(Math.random()*5), y: 0, d: 1});
+    // Spinnen
+    if(spiders.length < 2 && Math.random() < 0.012) spiders.push({lane: Math.floor(Math.random()*5), y: 0, d: 1});
     spiders.forEach((s, i) => {
-        s.y += (180 + level * 15) * dt * s.d;
-        if(s.y > H - 150) s.d = -1; if(s.y < 0) spiders.splice(i, 1);
+        s.y += (180 + level * 20) * dt * s.d;
+        if(s.y > H - 160) s.d = -1; if(s.y < 0) spiders.splice(i, 1);
         let sx = (s.lane * 80) + 40;
-        ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+        ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "38px Arial"; ctx.textAlign = "center"; ctx.fillText("🕷️", sx, s.y + 25);
         if(s.lane === dogLane && s.y > H-170 && s.y < H-90) { 
             energy -= 100 * dt; dogShake = 10;
@@ -215,21 +229,20 @@ function loop(t) {
         }
     });
 
-    // Items (Bürger, Keulen etc.)
-    if(!isLeveling && Math.random() < 0.02) {
+    // Items (Keine Bürger!)
+    if(Math.random() < 0.02) {
         let r = Math.random(), type = '🦴';
-        if(r < 0.08) type = '👮'; else if(r < 0.2) type = '🍗'; else if(r < 0.35) type = '🍪'; else if(r < 0.45) type = '🍔';
+        if(r < 0.08) type = '👮'; else if(r < 0.22) type = '🍗'; else if(r < 0.4) type = '🍪';
         items.push({lane: Math.floor(Math.random()*5), y: -60, type});
     }
     items.forEach((it, i) => {
-        it.y += (250 + level * 18) * dt; let ix = (it.lane * 80) + 40;
+        it.y += (250 + level * 15) * dt; let ix = (it.lane * 80) + 40;
         ctx.font = "42px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
-            let mult = 1 + (level-1)*0.1;
-            if(it.type === '👮') { hearts--; playSfx(100, 'square', 0.4); floaters.push({x:ix, y:it.y, txt:"-1 ❤️", col:"#ff3131", life:1.5}); }
+            if(it.type === '👮') { hearts--; dogShake = 20; playSfx(100, 'square', 0.4); floaters.push({x:ix, y:it.y, txt:"-1 ❤️", col:"#ff3131", life:1.5}); }
             else { 
-                let b = (it.type === '🍔' || it.type === '🍗') ? 30 : 15;
-                let p = Math.floor(b * mult); score += p; energy = Math.min(100, energy + 7);
+                let p = it.type==='🦴' ? 10 : (it.type==='🍪' ? 20 : 30);
+                score += p; energy = Math.min(100, energy + 8); dogScale = 1.3;
                 floaters.push({x:ix, y:it.y, txt:"+"+p, col: "#00ff88", life:1.2}); playSfx(600, 'sine', 0.1);
             }
             items.splice(i, 1);
@@ -237,42 +250,49 @@ function loop(t) {
         if(it.y > H) items.splice(i,1);
     });
 
+    // Floaters
     floaters.forEach((f, i) => { f.y -= 2; f.life -= dt; ctx.globalAlpha = f.life; ctx.fillStyle = f.col; ctx.font = "bold 26px Orbitron"; ctx.textAlign="center"; ctx.fillText(f.txt, f.x, f.y); if(f.life <= 0) floaters.splice(i,1); });
     ctx.globalAlpha = 1;
 
+    // HUND (SYMMETRIE & FEEDBACK)
     dogX += (targetX - dogX) * 0.2;
-    ctx.font = "80px Arial"; ctx.textAlign = "center"; ctx.fillText("🐶", dogX + (Math.random()-0.5)*dogShake, H - 110);
+    ctx.save();
+    ctx.translate(dogX + (Math.random()-0.5)*dogShake, H - 110);
+    ctx.scale(dogScale, dogScale);
+    ctx.font = "80px Arial"; ctx.textAlign = "center"; ctx.fillText("🐶", 0, 0);
+    ctx.restore();
     if(dogShake > 0) dogShake *= 0.85;
+    if(dogScale > 1) dogScale -= 0.05;
 
     if(energy <= 0 || hearts <= 0) gameOver();
     else requestAnimationFrame(loop);
 }
 
-function triggerLevelUp() {
-    isLeveling = true; playSfx(880, 'sine', 0.5);
-    document.getElementById("level-popup").style.display = "flex";
-    document.getElementById("next-lvl-txt").innerText = "LEVEL " + (level + 1) + " BEGINS...";
-    setTimeout(() => {
-        level++; timeLeft = 30; energy = 100; items = []; spiders = [];
-        document.getElementById("lvl-display").innerText = "LVL " + level;
-        document.getElementById("level-popup").style.display = "none";
-        isLeveling = false;
-    }, 3000);
-}
-
 function gameOver() {
-    active = false; document.getElementById("end-screen").style.display = "flex";
+    active = false;
+    const name = document.getElementById("pName").value;
+    document.getElementById("end-agent").innerText = "AGENT: " + name;
+    document.getElementById("end-screen").style.display = "flex";
     document.getElementById("f-score").innerText = Math.floor(score);
-    saveScore(document.getElementById("pName").value, Math.floor(score));
+    saveScore(name, Math.floor(score));
 }
 
-async function saveScore(n, s) { try { await supabaseClient.from('leaderboard').insert([{ n, s }]); updateRanks(); } catch(e){} }
+async function saveScore(n, s) {
+    const { data } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(1);
+    if(data && data.length > 0 && s > data[0].s) {
+        document.getElementById("firework-msg").style.display = "block";
+        playSfx(400, 'square', 1, 0.5); // Explosion Sound
+    }
+    await supabaseClient.from('leaderboard').insert([{ n, s }]);
+    updateRanks();
+}
+
 async function updateRanks() {
     try {
         let { data } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
         if(data) document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
-            let medal = i===0 ? '🥇' : (i===1 ? '🥈' : (i===2 ? '🥉' : ''));
-            return `<div class="rank-row"><span>${medal} ${x.n}</span><span>${x.s}</span></div>`;
+            let label = i===0 ? '🥇 Gold' : (i===1 ? '🥈 Silber' : (i===2 ? '🥉 Bronze' : (i===3 ? 'Kupfer' : 'Holz')));
+            return `<div class="rank-row"><span>${label}: ${x.n}</span><span>${x.s}</span></div>`;
         }).join('');
     } catch(e) {}
 }
