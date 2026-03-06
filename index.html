@@ -3,69 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO & CATS WORLD V47000 - ULTIMATE CENTER</title>
+    <title>DOGGYCO & CATS WORLD - ULTIMATIVES ZENTRUM</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
-            --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --glass: rgba(255, 255, 255, 0.08); --blue-active: #0070ff; --cat-purple: #bc13fe;
+            --neon: #00f2ff; 
+            --green: #00ff88; 
+            --red: #ff3131; 
+            --gold: #ffd700; 
+            --glass: rgba(255, 255, 255, 0.08); 
+            --blue-active: #0070ff; 
+            --cat-purple: #bc13fe;
+            --cat-pink: #ff1493;
         }
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+        }
         
         body { 
-            background: #000 url('forest_background.png') no-repeat center center fixed; 
-            background-size: cover; font-family: 'Orbitron', sans-serif; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden;
-            transition: 1s;
+            background: #0a0a0a url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23001a1a" width="100" height="100"/><circle cx="50" cy="50" r="40" fill="%23003333" opacity="0.3"/></svg>') repeat;
+            font-family: 'Orbitron', sans-serif; 
+            color: #fff; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow-x: hidden;
+            transition: 1s ease;
         }
-        /* NEUER CATS WORLD HINTERGRUND */
-        body.cats-mode { background-color: #120025; background-image: radial-gradient(circle, #1a0033 0%, #000 100%); }
+        
+        body.cats-mode { 
+            background: linear-gradient(135deg, #1a0033 0%, #330066 50%, #2d0052 100%);
+            background-attachment: fixed;
+        }
 
-        @keyframes neonPulse { 0%, 100% { opacity: 1; text-shadow: 0 0 15px var(--neon); } 50% { opacity: 0.7; text-shadow: 0 0 5px var(--neon); } }
-        header h1 { font-size: 38px; color: var(--neon); animation: neonPulse 2s infinite; padding: 15px; text-align: center; }
+        @keyframes neonPulse { 
+            0%, 100% { opacity: 1; text-shadow: 0 0 20px var(--neon), 0 0 40px var(--neon); } 
+            50% { opacity: 0.8; text-shadow: 0 0 10px var(--neon); } 
+        }
+        
+        @keyframes catPulse { 
+            0%, 100% { opacity: 1; text-shadow: 0 0 20px var(--cat-purple), 0 0 40px var(--cat-pink); } 
+            50% { opacity: 0.8; text-shadow: 0 0 10px var(--cat-purple); } 
+        }
 
-        #game-view { width: 100vw; height: 80vh; display: flex; justify-content: center; align-items: center; position: relative; }
+        header h1 { 
+            font-size: 42px; 
+            color: var(--neon); 
+            animation: neonPulse 2s infinite; 
+            padding: 20px 15px; 
+            text-align: center; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        body.cats-mode header h1 {
+            color: var(--cat-purple);
+            animation: catPulse 2s infinite;
+        }
+
+        #game-view { 
+            width: 100vw; 
+            height: 85vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            position: relative; 
+        }
+
         #game-wrap { 
-            position:relative; width: 400px; height: 95%; 
-            background: rgba(0,0,0,0.9); border: 4px solid var(--neon); border-radius: 40px; 
-            overflow: hidden; box-shadow: 0 0 40px var(--neon); transition: 1s;
+            position: relative; 
+            width: 400px; 
+            height: 95%; 
+            background: rgba(0, 0, 0, 0.95); 
+            border: 4px solid var(--neon); 
+            border-radius: 40px; 
+            overflow: hidden; 
+            box-shadow: 0 0 50px var(--neon), inset 0 0 20px rgba(0, 242, 255, 0.1); 
+            transition: 1s ease;
         }
-        #game-wrap.cat-active { border-color: var(--cat-purple); box-shadow: 0 0 40px var(--cat-purple); }
+        
+        #game-wrap.cat-active { 
+            border-color: var(--cat-purple); 
+            box-shadow: 0 0 50px var(--cat-purple), inset 0 0 20px rgba(188, 19, 254, 0.1); 
+        }
 
         /* HUD */
-        #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
-        #energy-bar-wrap { width: 85%; height: 20px; margin: 0 auto; background: rgba(0,0,0,0.8); border: 1.5px solid #fff; border-radius: 10px; overflow: hidden; }
-        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s; }
-        #hud-row { display: flex; justify-content: space-between; width: 85%; margin: 8px auto; font-size: 13px; font-weight: 900; }
+        #ui-header { 
+            position: absolute; 
+            top: 15px; 
+            width: 100%; 
+            z-index: 200; 
+            pointer-events: none; 
+        }
 
-        canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
+        #energy-bar-wrap { 
+            width: 85%; 
+            height: 22px; 
+            margin: 0 auto; 
+            background: rgba(0, 0, 0, 0.9); 
+            border: 2px solid #fff; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+        }
 
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(15px); z-index: 1000; background: rgba(0,0,0,0.6); border-radius: 36px; }
-        .neon-btn { padding: 16px 45px; background: var(--green); color: #000; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; box-shadow: 0 0 15px var(--green); margin: 5px; }
-        .cat-btn { background: var(--cat-purple); color: #fff; box-shadow: 0 0 15px var(--cat-purple); }
+        #energy-fill { 
+            height: 100%; 
+            width: 100%; 
+            background: linear-gradient(90deg, var(--red) 0%, var(--gold) 50%, var(--green) 100%); 
+            transition: width 0.15s ease; 
+            box-shadow: 0 0 15px var(--green);
+        }
 
-        #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; pointer-events: none; }
-        .btn-arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; transition: 0.1s; }
-        .btn-arrow:active { background: var(--blue-active); border-color: #fff; box-shadow: 0 0 30px var(--blue-active); }
+        #hud-row { 
+            display: flex; 
+            justify-content: space-between; 
+            width: 85%; 
+            margin: 10px auto 0; 
+            font-size: 14px; 
+            font-weight: 900; 
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+        }
 
-        .info-scroll { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px 0 80px; }
-        .frosted-tile { background: var(--glass); backdrop-filter: blur(25px); border: 2px solid var(--neon); border-radius: 30px; padding: 25px; margin: 15px 0; width: 90vw; max-width: 450px; text-align: center; }
-        .rank-row { display: flex; justify-content: space-between; padding: 10px 15px; margin-bottom: 8px; border-radius: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--neon); }
-        .legal { font-size: 10px; color: #777; line-height: 1.4; padding: 10px; }
+        canvas { 
+            position: absolute; 
+            inset: 0; 
+            z-index: 50; 
+            background: transparent; 
+            pointer-events: none; 
+        }
+
+        .overlay { 
+            position: absolute; 
+            inset: 0; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            backdrop-filter: blur(15px); 
+            z-index: 1000; 
+            background: rgba(0, 0, 0, 0.7); 
+            border-radius: 36px; 
+        }
+
+        .neon-btn { 
+            padding: 18px 50px; 
+            background: var(--green); 
+            color: #000; 
+            border-radius: 30px; 
+            font-weight: 900; 
+            cursor: pointer; 
+            border: 2px solid #fff; 
+            font-family: 'Orbitron'; 
+            box-shadow: 0 0 20px var(--green); 
+            margin: 8px; 
+            transition: 0.2s;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+        
+        .neon-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--green);
+        }
+
+        .cat-btn { 
+            background: var(--cat-purple); 
+            color: #fff; 
+            box-shadow: 0 0 20px var(--cat-purple);
+            border-color: var(--cat-pink);
+        }
+        
+        .cat-btn:hover {
+            box-shadow: 0 0 30px var(--cat-purple), 0 0 15px var(--cat-pink);
+        }
+
+        #pName {
+            padding: 16px 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-family: 'Orbitron';
+            border: 2px solid var(--neon);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            font-size: 14px;
+            width: 80%;
+            max-width: 250px;
+        }
+
+        #controls { 
+            position: absolute; 
+            bottom: 25px; 
+            width: 100%; 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 0 35px; 
+            z-index: 300; 
+            pointer-events: none; 
+        }
+
+        .btn-arrow { 
+            width: 80px; 
+            height: 80px; 
+            background: rgba(255, 255, 255, 0.12); 
+            border: 3px solid var(--neon); 
+            border-radius: 50%; 
+            color: #fff; 
+            font-size: 42px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            pointer-events: auto; 
+            transition: 0.1s; 
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        .btn-arrow:active { 
+            background: var(--blue-active); 
+            border-color: #fff; 
+            box-shadow: 0 0 40px var(--blue-active); 
+            transform: scale(0.95);
+        }
+
+        .info-scroll { 
+            width: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 30px 0 100px; 
+        }
+
+        .frosted-tile { 
+            background: var(--glass); 
+            backdrop-filter: blur(25px); 
+            border: 2px solid var(--neon); 
+            border-radius: 30px; 
+            padding: 30px; 
+            margin: 18px 0; 
+            width: 90vw; 
+            max-width: 500px; 
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
+        }
+
+        .rank-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 14px 18px; 
+            margin-bottom: 10px; 
+            border-radius: 15px; 
+            background: rgba(0, 242, 255, 0.05); 
+            border: 1.5px solid var(--neon); 
+        }
+
+        .legal { 
+            font-size: 11px; 
+            color: #888; 
+            line-height: 1.6; 
+            padding: 15px; 
+        }
+
+        #end-screen h2 {
+            color: var(--gold);
+            margin: 20px 0;
+            font-size: 28px;
+        }
     </style>
 </head>
 <body>
 
-<header id="game-title"><h1>DOGGYCO</h1></header>
+<header id="game-title">
+    <h1>🐶 DOGGYCO</h1>
+</header>
 
 <div id="game-view">
     <div id="game-wrap">
         <div id="ui-header">
-            <div id="energy-bar-wrap"><div id="energy-fill"></div></div>
+            <div id="energy-bar-wrap">
+                <div id="energy-fill"></div>
+            </div>
             <div id="hud-row">
                 <span id="hearts-display">❤️❤️❤️</span>
-                <span id="lvl-display" style="color:var(--gold)">LVL: 1</span>
+                <span id="lvl-display" style="color:var(--gold)">🎯 LVL: 1</span>
                 <span id="timer-display" style="color:var(--neon)">⏳ 30s</span>
                 <span id="score-display">🏆 0</span>
             </div>
@@ -74,44 +302,60 @@
         <canvas id="game-canvas"></canvas>
 
         <div id="controls">
-            <div class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft()">◀</div>
-            <div class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight()">▶</div>
+            <div class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft()" ontouchend="stopMove()" onmouseup="stopMove()">◀</div>
+            <div class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight()" ontouchend="stopMove()" onmouseup="stopMove()">▶</div>
         </div>
 
         <div id="start-screen" class="overlay">
-            <input type="text" id="pName" placeholder="AGENT NAME" style="padding:15px; border-radius:15px; margin-bottom:20px; text-align:center; font-family:'Orbitron';">
-            <button class="neon-btn" onclick="startGame(false)">START DOGGYCO</button>
-            <button class="neon-btn cat-btn" onclick="startGame(true)">START CATS WORLD</button>
+            <h2 style="color: var(--neon); margin-bottom: 20px; font-size: 24px;">AGENT WILLKOMMEN!</h2>
+            <input type="text" id="pName" placeholder="AGENT NAME EINGEBEN" maxlength="15">
+            <button class="neon-btn" onclick="startGame(false)">▶ DOGGYCO STARTEN</button>
+            <button class="neon-btn cat-btn" onclick="startGame(true)">▶ CATS WORLD STARTEN</button>
         </div>
 
         <div id="end-screen" class="overlay" style="display:none;">
-            <h1 id="f-score" style="font-size: 60px; color: var(--gold); margin: 15px 0;">0</h1>
-            <button class="neon-btn" onclick="location.reload()">NEUSTART</button>
+            <h2>SPIEL VORBEI!</h2>
+            <h1 id="f-score" style="font-size: 70px; color: var(--gold); margin: 20px 0;">0</h1>
+            <p id="final-agent" style="font-size: 16px; margin-bottom: 20px; color: var(--neon);">AGENT: ---</p>
+            <button class="neon-btn" onclick="location.reload()">🔄 NEUSTART</button>
         </div>
     </div>
 </div>
 
 <div class="info-scroll">
     <div class="frosted-tile">
-        <h3 style="color:var(--gold); margin-bottom:15px;">📖 ANLEITUNG</h3>
-        <p style="font-size:13px; line-height:1.6; text-align:left;">
-            • 🦴/🥛 = Kleine Punkte<br>
-            • 🍪 = Bonus Punkte<br>
-            • 🍗/🐟 = Große Punkte + Energie<br>
-            • 🕷️/🐍 = Gefahr (-30% Energie)<br>
-            • 👮 = Risiko (-1 Herz ❤️)<br>
-            • Alle 30 Sekunden: Level Up!
+        <h3 style="color:var(--neon); margin-bottom:18px; font-size: 18px;">📖 SPIELANLEITUNG</h3>
+        <p style="font-size:13px; line-height:1.8; text-align:left;">
+            <strong>🎮 STEUERUNG:</strong><br>
+            ◀ ▶ Pfeile zum Links/Rechts Bewegen<br><br>
+            <strong>🍔 PUNKTE-SYSTEM:</strong><br>
+            🦴 / 🥛 = <span style="color: var(--green);">+10 Punkte</span><br>
+            🍪 = <span style="color: var(--gold);">+20 Bonus Punkte</span><br>
+            🍗 / 🐟 = <span style="color: var(--green);">+35 Punkte + Energie</span><br><br>
+            <strong>⚠️ GEFAHREN:</strong><br>
+            🕷️ / 🐍 = <span style="color: var(--red);">-30% Energie</span><br>
+            👮 = <span style="color: var(--red);">-1 Herz ❤️</span><br><br>
+            <strong>⚡ LEVEL-UP:</strong><br>
+            Alle 30 Sekunden: Level Up + 20 Energie Bonus!
         </p>
     </div>
 
     <div class="frosted-tile">
-        <h3 style="color:var(--gold); margin-bottom:15px;">🏆 BESTENLISTE</h3>
-        <div id="leaderboard">Ranking lädt...</div>
+        <h3 style="color:var(--neon); margin-bottom:15px; font-size: 18px;">🏆 BESTENLISTE</h3>
+        <div id="leaderboard" style="min-height: 100px; display: flex; flex-direction: column; justify-content: center;">
+            <p style="color: #888;">Bestenliste wird geladen...</p>
+        </div>
     </div>
 
     <div class="frosted-tile">
-        <h3 style="color:var(--neon); margin-bottom:10px;">⚖️ RECHTLICHES</h3>
-        <p class="legal">Private Initiative. Freiwillige Geschenke. EU-Recht: Digitale Inhalte ohne Datenträger. Kein gewerblicher Zweck. © 2026 DOGGYCO & CATS WORLD.</p>
+        <h3 style="color:var(--neon); margin-bottom:12px; font-size: 16px;">⚖️ RECHTLICHE HINWEISE</h3>
+        <p class="legal">
+            🎮 <strong>DOGGYCO & CATS WORLD</strong> - Privates Projekt<br>
+            Freiwillige Teilnahme. Kostenlos zu spielen.<br>
+            EU-Richtlinie: Digitale Inhalte ohne physischen Datenträger.<br>
+            Kein gewerblicher Hintergrund.<br>
+            © 2026 DOGGYCO & CATS WORLD STUDIOS. Alle Rechte vorbehalten.
+        </p>
     </div>
 </div>
 
@@ -124,114 +368,405 @@ const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 const W = 400; 
 let H, dogX, targetX, dogLane = 2, active = false, isCat = false;
-let items = [], spiders = [], floaters = [], clouds = [], birds = [];
+let items = [], spiders = [], floaters = [], clouds = [], stars = [], particles = [];
 let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30, lastTime = 0;
-let audioCtx, dogShake = 0;
+let audioCtx, dogShake = 0, moveActive = false;
+
+// 🎵 MUSIK UND SOUND MANAGER
+class SoundManager {
+    constructor() {
+        this.audioCtx = null;
+    }
+
+    init() {
+        if (!this.audioCtx) {
+            this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    playSfx(frequency, type, duration, volume = 0.1) {
+        if (!this.audioCtx) return;
+        
+        try {
+            const osc = this.audioCtx.createOscillator();
+            const gain = this.audioCtx.createGain();
+            const filter = this.audioCtx.createBiquadFilter();
+            
+            osc.type = type;
+            osc.frequency.setValueAtTime(frequency, this.audioCtx.currentTime);
+            
+            gain.gain.setValueAtTime(volume, this.audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + duration);
+            
+            filter.frequency.value = 2000;
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.audioCtx.destination);
+            
+            osc.start();
+            osc.stop(this.audioCtx.currentTime + duration);
+        } catch(e) {
+            console.error("Sound error:", e);
+        }
+    }
+
+    // ✓ PUNKT SAMMELN
+    collectSound() {
+        this.playSfx(800, 'sine', 0.1, 0.15);
+        this.playSfx(1000, 'sine', 0.08, 0.1);
+    }
+
+    // ✓ BONUS SAMMELN
+    bonusSound() {
+        this.playSfx(1200, 'sine', 0.15, 0.2);
+        this.playSfx(1400, 'sine', 0.12, 0.15);
+    }
+
+    // ✓ SCHADEN
+    damageSound() {
+        this.playSfx(200, 'sawtooth', 0.3, 0.2);
+        this.playSfx(150, 'sine', 0.25, 0.15);
+    }
+
+    // ✓ LEVEL UP
+    levelUpSound() {
+        this.playSfx(1000, 'sine', 0.1, 0.15);
+        this.playSfx(1200, 'sine', 0.1, 0.15);
+        this.playSfx(1400, 'sine', 0.12, 0.15);
+    }
+
+    // ✓ SPIEL VORBEI
+    gameOverSound() {
+        this.playSfx(400, 'sine', 0.3, 0.2);
+        this.playSfx(300, 'sine', 0.3, 0.2);
+        this.playSfx(200, 'sine', 0.4, 0.25);
+    }
+}
+
+const soundManager = new SoundManager();
 
 function init() {
     canvas.width = W; 
     H = canvas.height = document.getElementById("game-wrap").offsetHeight;
-    targetX = (dogLane * 80) + 40; dogX = targetX;
-    // Himmel tiefer gesetzt
-    for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: 150 + Math.random()*50, s: 12});
-    for(let i=0; i<2; i++) birds.push({x: W + 50, y: 180 + Math.random()*40, s: 55});
+    
+    // STARTPOSITION: GENAU MITTE (Lane 2)
+    dogLane = 2;
+    targetX = calculateLaneX(2);
+    dogX = targetX;
+    
+    // Hintergrund-Effekte
+    for(let i = 0; i < 8; i++) {
+        clouds.push({
+            x: Math.random() * W,
+            y: 100 + Math.random() * 100,
+            s: 8 + Math.random() * 4,
+            opacity: 0.2 + Math.random() * 0.2
+        });
+    }
+    
+    for(let i = 0; i < 15; i++) {
+        stars.push({
+            x: Math.random() * W,
+            y: Math.random() * 200,
+            size: Math.random() * 1.5,
+            opacity: Math.random() * 0.8
+        });
+    }
 }
+
+function calculateLaneX(lane) {
+    // 5 Bahnen: 0, 1, 2, 3, 4
+    // Genau in der Mitte (Breite 400)
+    const laneWidth = W / 5; // 80px pro Bahn
+    return (lane * laneWidth) + (laneWidth / 2); // Mitte jeder Bahn
+}
+
 window.onload = () => { init(); updateRanks(); };
 
-function playSfx(f, type, d, v=0.1) {
-    if(!audioCtx) return;
-    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-    g.gain.setValueAtTime(v, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + d);
-}
-
 function startGame(catMode) {
-    if(!document.getElementById("pName").value) return;
+    const playerName = document.getElementById("pName").value.trim();
+    if(!playerName) {
+        alert("Bitte gib einen Agenten-Namen ein!");
+        return;
+    }
+    
     isCat = catMode;
     if(isCat) {
         document.body.classList.add("cats-mode");
         document.getElementById("game-wrap").classList.add("cat-active");
-        document.getElementById("game-title").innerHTML = "<h1 style='color:var(--cat-purple)'>CATS WORLD</h1>";
+        document.getElementById("game-title").innerHTML = "<h1 style='color:var(--cat-purple)'>🐱 CATS WORLD</h1>";
     }
+    
     document.getElementById("start-screen").style.display = "none";
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    active = true; lastTime = performance.now();
+    soundManager.init();
+    active = true;
+    lastTime = performance.now();
     requestAnimationFrame(loop);
 }
 
-// ANTI-SKIP LANE LOCK (KORRIGIERT AUF +40 FÜR MITTE)
-function mLeft() { if(active && dogLane > 0 && Math.abs(dogX - targetX) < 5) { dogLane--; targetX = (dogLane * 80) + 40; } }
-function mRight() { if(active && dogLane < 4 && Math.abs(dogX - targetX) < 5) { dogLane++; targetX = (dogLane * 80) + 40; } }
+// ✓ BAHNEN-KONTROLLE (OPTIMIERT)
+function mLeft() { 
+    if(active && dogLane > 0 && !moveActive && Math.abs(dogX - calculateLaneX(dogLane)) < 8) { 
+        dogLane--;
+        targetX = calculateLaneX(dogLane);
+        moveActive = true;
+    } 
+}
+
+function mRight() { 
+    if(active && dogLane < 4 && !moveActive && Math.abs(dogX - calculateLaneX(dogLane)) < 8) { 
+        dogLane++;
+        targetX = calculateLaneX(dogLane);
+        moveActive = true;
+    } 
+}
+
+function stopMove() {
+    moveActive = false;
+}
 
 function loop(t) {
     if(!active) return;
-    let dt = (t - lastTime) / 1000; lastTime = t;
-    ctx.clearRect(0,0,W,H);
-
-    clouds.forEach(c => { c.x += c.s * dt; if(c.x > W + 60) c.x = -60; ctx.globalAlpha = 0.3; ctx.font = "40px Arial"; ctx.fillText(isCat?"✨":"☁️", c.x, c.y); ctx.globalAlpha = 1; });
-    birds.forEach(b => { b.x -= b.s * dt; if(b.x < -60) b.x = W + 60; ctx.globalAlpha = 0.4; ctx.font = "30px Arial"; ctx.fillText("🦅", b.x, b.y); ctx.globalAlpha = 1; });
-
-    timeLeft -= dt; energy -= (4 + level * 0.4) * dt;
-    if(timeLeft <= 0) { 
-        level++; timeLeft = 30; energy = Math.min(100, energy + 20); 
-        playSfx(800, 'sine', 0.5);
+    let dt = (t - lastTime) / 1000;
+    lastTime = t;
+    
+    // CANVAS LÖSCHEN
+    ctx.clearRect(0, 0, W, H);
+    
+    // CATS WORLD: Schöner Hintergrund
+    if(isCat) {
+        const gradient = ctx.createLinearGradient(0, 0, 0, H);
+        gradient.addColorStop(0, 'rgba(100, 30, 150, 0.3)');
+        gradient.addColorStop(0.5, 'rgba(50, 10, 80, 0.2)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, W, H);
+        
+        // Magische Sterne
+        stars.forEach(star => {
+            ctx.globalAlpha = star.opacity * (0.5 + 0.5 * Math.sin(t / 500 + star.x));
+            ctx.fillStyle = "rgba(255, 200, 255, 1)";
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
     }
     
+    // WOLKEN & VÖGEL
+    clouds.forEach(c => {
+        c.x += c.s * dt;
+        if(c.x > W + 60) c.x = -60;
+        ctx.globalAlpha = c.opacity;
+        ctx.font = "48px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(isCat ? "✨" : "☁️", c.x, c.y);
+    });
+    
+    ctx.globalAlpha = 1;
+
+    // TIMER & LEVEL-UP
+    timeLeft -= dt;
+    energy -= (4 + level * 0.4) * dt;
+    
+    if(timeLeft <= 0) { 
+        level++;
+        timeLeft = 30;
+        energy = Math.min(100, energy + 20);
+        soundManager.levelUpSound();
+    }
+    
+    // HUD UPDATE
     document.getElementById("timer-display").innerText = "⏳ " + Math.ceil(timeLeft) + "s";
-    document.getElementById("lvl-display").innerText = "LVL: " + level;
-    document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
+    document.getElementById("lvl-display").innerText = "🎯 LVL: " + level;
+    document.getElementById("energy-fill").style.width = Math.max(0, Math.min(100, energy)) + "%";
     document.getElementById("score-display").innerText = "🏆 " + Math.floor(score);
     document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
-    if(energy <= 0 || hearts <= 0) { endGame(); return; }
+    // GAME OVER CHECK
+    if(energy <= 0 || hearts <= 0) { 
+        soundManager.gameOverSound();
+        endGame(); 
+        return; 
+    }
 
-    // Gegner (Anti-Overlap)
-    if(spiders.length < 2 && Math.random() < 0.012) spiders.push({lane: Math.floor(Math.random()*5), y: 0, d: 1});
+    // 🕷️ / 🐍 GEGNER-SPAWN
+    if(spiders.length < Math.min(2 + Math.floor(level / 5), 4) && Math.random() < 0.015) {
+        spiders.push({
+            lane: Math.floor(Math.random() * 5),
+            y: -80,
+            d: 1,
+            wobble: Math.random() * Math.PI * 2
+        });
+    }
+    
+    // 🕷️ / 🐍 GEGNER-ZEICHNUNG
     spiders.forEach((s, i) => {
-        s.y += (180 + level * 12) * dt * s.d; if(s.y > H - 180) s.d = -1; if(s.y < 0) spiders.splice(i, 1);
-        let sx = (s.lane * 80) + 40;
-        ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
-        ctx.font = "38px Arial"; ctx.textAlign = "center"; 
-        // SCHÖNERE SCHLANGEN & ABWESCHLUNG
-        ctx.fillText(isCat?"🐍":"🕷️", sx, s.y + 25);
-        if(s.lane === dogLane && s.y > H-180 && s.y < H-80) { energy -= 30; dogShake = 15; playSfx(100, 'sawtooth', 0.3); spiders.splice(i,1); }
+        s.y += (200 + level * 15) * dt * s.d;
+        s.wobble += 0.05;
+        
+        if(s.y > H - 150) s.d = -1;
+        if(s.y < -80) {
+            spiders.splice(i, 1);
+            return;
+        }
+        
+        let sx = calculateLaneX(s.lane);
+        
+        // Netzfaden mit Animation
+        ctx.strokeStyle = `rgba(150, 100, 200, ${0.4 + 0.3 * Math.sin(s.wobble)})`;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(sx, 0);
+        ctx.lineTo(sx + Math.sin(s.wobble) * 20, s.y);
+        ctx.stroke();
+        
+        // SCHÖNE SCHLANGE/SPINNE
+        ctx.globalAlpha = 0.95;
+        ctx.font = "45px Arial";
+        ctx.textAlign = "center";
+        ctx.shadowColor = isCat ? "rgba(188, 19, 254, 0.6)" : "rgba(200, 0, 200, 0.6)";
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetX = Math.sin(s.wobble) * 5;
+        ctx.shadowOffsetY = 0;
+        
+        ctx.fillText(isCat ? "🐍" : "🕷️", sx, s.y + 25);
+        
+        ctx.shadowColor = "transparent";
+        ctx.globalAlpha = 1;
+        
+        // KOLLISIONS-CHECK
+        if(s.lane === dogLane && s.y > H - 180 && s.y < H - 60) {
+            energy -= 30;
+            dogShake = 15;
+            soundManager.damageSound();
+            spiders.splice(i, 1);
+        }
     });
 
-    // Items Logic
-    if(Math.random() < 0.02) {
-        let r = Math.random(), type = isCat ? '🥛' : '🦴';
-        if(r < 0.1) type = '👮'; 
-        else if(r < 0.25) type = isCat ? '🐟' : '🍗'; 
-        else if(r < 0.45) type = '🍪';
-        items.push({lane: Math.floor(Math.random()*5), y: -60, type});
+    // 🍔 ITEMS SPAWN
+    if(Math.random() < 0.025) {
+        let r = Math.random();
+        let type = isCat ? '🥛' : '🦴';
+        
+        if(r < 0.12) type = '👮';
+        else if(r < 0.3) type = isCat ? '🐟' : '🍗';
+        else if(r < 0.5) type = '🍪';
+        
+        items.push({
+            lane: Math.floor(Math.random() * 5),
+            y: -80,
+            type,
+            rotation: Math.random() * Math.PI * 2,
+            collected: false
+        });
     }
+    
+    // 🍔 ITEMS ZEICHNUNG & LOGIK
     items.forEach((it, i) => {
-        it.y += (250 + level * 10) * dt; let ix = (it.lane * 80) + 40;
-        ctx.font = "42px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
-        if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
-            if(it.type === '👮') { hearts--; dogShake = 10; playSfx(80, 'square', 0.4); }
-            else { 
-                score += 25; energy = Math.min(100, energy + 10); 
-                // AUFSTEIGENDE PUNKTE ANIMATION
-                floaters.push({x:ix, y:it.y, txt:"+25", life:1});
-                playSfx(600, 'sine', 0.1);
+        if(it.collected) return;
+        
+        it.y += (280 + level * 12) * dt;
+        it.rotation += 0.05;
+        
+        let ix = calculateLaneX(it.lane);
+        
+        // SCHÖNE MILCH / WASSER
+        if(isCat && it.type === '🥛') {
+            ctx.globalAlpha = 0.8;
+            ctx.font = "50px Arial";
+            ctx.textAlign = "center";
+            ctx.shadowColor = "rgba(173, 216, 230, 0.8)";
+            ctx.shadowBlur = 20;
+            ctx.fillText(it.type, ix, it.y);
+            ctx.shadowColor = "transparent";
+            ctx.globalAlpha = 1;
+        } else {
+            ctx.save();
+            ctx.translate(ix, it.y);
+            ctx.rotate(it.rotation);
+            ctx.font = "48px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(it.type, 0, 0);
+            ctx.restore();
+        }
+        
+        // KOLLISIONS-CHECK
+        if(it.lane === dogLane && it.y > H - 180 && it.y < H - 60) {
+            it.collected = true;
+            
+            if(it.type === '👮') {
+                hearts--;
+                dogShake = 10;
+                soundManager.damageSound();
+            } else {
+                let points = 10;
+                let emoji = "+10";
+                
+                if(it.type === '🍪') {
+                    points = 20;
+                    emoji = "+20 BONUS";
+                    soundManager.bonusSound();
+                } else if(it.type === '🍗' || it.type === '🐟') {
+                    points = 35;
+                    emoji = "+35";
+                    energy = Math.min(100, energy + 15);
+                    soundManager.collectSound();
+                } else {
+                    soundManager.collectSound();
+                }
+                
+                score += points;
+                floaters.push({
+                    x: ix,
+                    y: it.y,
+                    txt: emoji,
+                    life: 1.2,
+                    baseY: it.y
+                });
             }
+            
+            items.splice(i, 1);
+        } else if(it.y > H) {
             items.splice(i, 1);
         }
     });
 
-    // Character Symmetrisch + Gleitbewegung
-    dogX += (targetX - dogX) * 0.22;
-    ctx.font = "80px Arial"; ctx.textAlign = "center"; 
-    // KOPF GENAU MITTE-MITTE (Berechnung korrigiert)
-    ctx.fillText(isCat ? "🐱" : "🐶", dogX + (Math.random()-0.5)*dogShake, H - 110);
-    if(dogShake > 0) dogShake *= 0.9;
+    // 🐶 / 🐱 CHARACTER - GENAU MITTE MITTE
+    dogX += (targetX - dogX) * 0.25;
     
-    // Floaters (Punkte-Animation)
-    floaters.forEach((f, i) => { f.y -= 2; f.life -= dt; ctx.globalAlpha = f.life; ctx.fillStyle = "var(--green)"; ctx.font = "bold 22px Orbitron"; ctx.fillText(f.txt, f.x, f.y); ctx.globalAlpha = 1; if(f.life <= 0) floaters.splice(i,1); });
+    ctx.globalAlpha = 1;
+    ctx.font = "90px Arial";
+    ctx.textAlign = "center";
+    ctx.shadowColor = isCat ? "rgba(188, 19, 254, 0.8)" : "rgba(0, 242, 255, 0.6)";
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    
+    // CHARACTER POSITION - MITTIG (Y: H - 100)
+    ctx.fillText(isCat ? "🐱" : "🐶", dogX + (Math.random() - 0.5) * dogShake * 1.5, H - 100);
+    
+    ctx.shadowColor = "transparent";
+    
+    if(dogShake > 0) dogShake *= 0.88;
+    
+    // 📈 AUFSTEIGENDE PUNKTE ANIMATION
+    floaters.forEach((f, i) => {
+        f.y -= 3;
+        f.life -= dt * 0.8;
+        
+        ctx.globalAlpha = Math.max(0, f.life);
+        ctx.fillStyle = f.txt.includes("BONUS") ? var(--gold) : "#00ff88";
+        ctx.font = `bold ${18 + f.life * 8}px Orbitron`;
+        ctx.textAlign = "center";
+        ctx.shadowColor = "rgba(0, 255, 136, 0.8)";
+        ctx.shadowBlur = 10;
+        ctx.fillText(f.txt, f.x, f.y);
+        ctx.shadowColor = "transparent";
+        ctx.globalAlpha = 1;
+        
+        if(f.life <= 0) floaters.splice(i, 1);
+    });
 
     requestAnimationFrame(loop);
 }
@@ -245,20 +780,54 @@ function endGame() {
 }
 
 async function saveToDb() {
-    const n = document.getElementById("pName").value;
-    await supabaseClient.from('leaderboard').insert([{ n, s: Math.floor(score) }]);
-    updateRanks();
+    const agentName = document.getElementById("pName").value;
+    try {
+        await supabaseClient.from('leaderboard').insert([{
+            n: agentName,
+            s: Math.floor(score),
+            mode: isCat ? 'CATS' : 'DOGS',
+            timestamp: new Date().toISOString()
+        }]);
+        updateRanks();
+    } catch(e) {
+        console.error("Datenbank-Fehler:", e);
+    }
 }
 
 async function updateRanks() {
     try {
-        let { data } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
-        if(data) document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
-            let m = i===0?'🥇 Gold':(i===1?'🥈 Silber':(i===2?'🥉 Bronze':(i===3?'Copper':'Wood')));
-            return `<div class="rank-row"><span>${m}: ${x.n}</span><span>${x.s}</span></div>`;
-        }).join('');
-    } catch(e) {}
+        const { data } = await supabaseClient
+            .from('leaderboard')
+            .select('*')
+            .order('s', { ascending: false })
+            .limit(5);
+        
+        if(data && data.length > 0) {
+            const medals = ['🥇 GOLD', '🥈 SILBER', '🥉 BRONZE', '4️⃣ KUPFER', '5️⃣ HOLZ'];
+            document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
+                return `<div class="rank-row">
+                    <span style="font-weight: 900;">${medals[i]}</span>
+                    <span>${x.n}</span>
+                    <span style="color: var(--gold); font-weight: 900;">${x.s}</span>
+                </div>`;
+            }).join('');
+        } else {
+            document.getElementById("leaderboard").innerHTML = '<p style="color: #888;">Keine Einträge vorhanden</p>';
+        }
+    } catch(e) {
+        console.error("Leaderboard-Fehler:", e);
+        document.getElementById("leaderboard").innerHTML = '<p style="color: #888;">Fehler beim Laden</p>';
+    }
 }
+
+// Mobile-Optimierung
+document.addEventListener('touchstart', (e) => {
+    if(e.target.classList.contains('btn-arrow')) {
+        e.preventDefault();
+    }
+}, { passive: false });
 </script>
+
 </body>
 </html>
+
