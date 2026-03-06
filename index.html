@@ -3,71 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO & CATS WORLD V54000 - OMEGA FUSION</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <title>DOGGYCO & CATS WORLD V55000</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --glass: rgba(255, 255, 255, 0.1); --blue-active: #0070ff; --cat-purple: #bc13fe;
+            --cat-purple: #bc13fe;
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
+        /* SCROLLEN ERLAUBT */
         body { 
             background: #000; font-family: 'Orbitron', sans-serif; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden;
         }
 
-        /* DYNAMISCHE HINTERGRÜNDE */
         #game-view { 
-            width: 100vw; height: 80vh; display: flex; justify-content: center; align-items: center; position: relative; 
-            background-size: cover; background-position: center; transition: background 2s ease;
+            width: 100vw; height: 85vh; display: flex; justify-content: center; align-items: center; position: relative; 
+            background-image: url('forest_background.png'); /* Start-Hintergrund immer da */
+            background-size: cover; background-position: center; transition: 1.5s;
         }
-        .bg-dog { background-image: url('forest_background.png'); }
-        .bg-cat { background-image: url('https://googleusercontent.com/image_generation_content/1'); }
+        #game-view.cats-bg { background-image: url('https://googleusercontent.com/image_generation_content/1'); }
 
-        @keyframes neonPulse { 0%, 100% { opacity: 1; text-shadow: 0 0 15px var(--neon); } 50% { opacity: 0.7; text-shadow: 0 0 5px var(--neon); } }
-        header h1 { font-size: 35px; color: var(--neon); animation: neonPulse 2s infinite; padding: 15px; text-align: center; z-index: 10; transition: 0.5s; }
+        header h1 { font-size: 35px; color: var(--neon); text-shadow: 0 0 15px var(--neon); padding: 15px; text-align: center; }
 
         #game-wrap { 
             position:relative; width: 400px; height: 95%; 
-            background: rgba(0,0,0,0.85); border: 4px solid var(--neon); border-radius: 40px; 
-            overflow: hidden; box-shadow: 0 0 40px var(--neon); transition: 1s;
+            background: rgba(0,0,0,0.8); border: 4px solid var(--neon); border-radius: 40px; 
+            overflow: hidden; box-shadow: 0 0 40px var(--neon);
         }
-        #game-wrap.cat-theme { border-color: var(--cat-purple); box-shadow: 0 0 40px var(--cat-purple); }
+        #game-wrap.cat-active { border-color: var(--cat-purple); box-shadow: 0 0 40px var(--cat-purple); }
 
         /* HUD */
         #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
         #energy-bar-wrap { width: 85%; height: 20px; margin: 0 auto; background: rgba(0,0,0,0.8); border: 1px solid #fff; border-radius: 10px; overflow: hidden; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s; }
-        #hud-row { display: flex; justify-content: space-between; width: 85%; margin: 8px auto; font-size: 13px; font-weight: 900; text-shadow: 1px 1px 3px #000; }
+        #hud-row { display: flex; justify-content: space-between; width: 85%; margin: 8px auto; font-size: 13px; font-weight: 900; }
 
         canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
 
-        /* OVERLAYS & NEON ANLEITUNG */
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(15px); z-index: 1000; background: rgba(0,0,0,0.75); border-radius: 36px; }
-        .neon-btn { padding: 16px 45px; background: var(--green); color: #000; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; box-shadow: 0 0 15px var(--green); margin: 5px; transition: 0.2s; }
+        /* POPUPS */
+        #level-popup { position: absolute; top: 40%; width: 100%; text-align: center; color: var(--gold); font-size: 24px; font-weight: 900; z-index: 600; display: none; text-shadow: 0 0 15px #000; }
+
+        /* OVERLAYS */
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(15px); z-index: 1000; background: rgba(0,0,0,0.7); border-radius: 36px; }
+        .neon-btn { padding: 16px 40px; background: var(--green); color: #000; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; margin: 10px; box-shadow: 0 0 15px var(--green); }
         .cat-btn { background: var(--cat-purple); color: #fff; box-shadow: 0 0 15px var(--cat-purple); }
-        .neon-btn:active { transform: scale(0.95); }
 
-        .instr-text { color: var(--green); text-shadow: 0 0 5px var(--green); font-size: 12px; margin: 3px 0; font-weight: 900; text-align: center; }
-
-        /* CONTROLS */
+        /* STEUERUNG */
         #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; pointer-events: none; }
         .btn-arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
-        .btn-arrow:active { background: var(--blue-active); border-color: #fff; box-shadow: 0 0 30px var(--blue-active); }
+        .btn-arrow:active { background: #0070ff; box-shadow: 0 0 30px #0070ff; }
 
-        /* RANKING */
-        .info-scroll { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px 0 80px; overflow-y: auto; flex-grow: 1; }
-        .frosted-tile { background: var(--glass); backdrop-filter: blur(25px); border: 2px solid var(--neon); border-radius: 30px; padding: 25px; margin: 15px 0; width: 90vw; max-width: 450px; text-align: center; }
-        .rank-row { display: flex; justify-content: space-between; padding: 12px 15px; margin-bottom: 8px; border-radius: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--neon); font-size: 14px; align-items: center; }
+        /* INFO & RANKING (Scrollbar) */
+        .info-scroll { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 30px 0 100px; }
+        .frosted-tile { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 2px solid var(--neon); border-radius: 30px; padding: 25px; margin: 15px 0; width: 90vw; max-width: 450px; text-align: center; }
+        .rank-row { display: flex; justify-content: space-between; padding: 12px; margin-bottom: 8px; border-radius: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--neon); }
     </style>
 </head>
 <body>
 
 <header><h1 id="main-title">DOGGYCO</h1></header>
 
-<div id="game-view" class="bg-dog">
+<div id="game-view">
     <div id="game-wrap">
         <div id="ui-header">
             <div id="energy-bar-wrap"><div id="energy-fill"></div></div>
@@ -79,6 +78,7 @@
             </div>
         </div>
         
+        <div id="level-popup">NEXT LEVEL!<br>+10% SPEED</div>
         <canvas id="game-canvas"></canvas>
 
         <div id="controls">
@@ -88,17 +88,14 @@
 
         <div id="start-screen" class="overlay">
             <h2 style="color:var(--gold); margin-bottom:10px;">ANLEITUNG</h2>
-            <p class="instr-text">🦴/🥣 = +25 PKT | 👮 = -1 HERZ</p>
-            <p class="instr-text">🐍/🕷️ = -30% ENERGIE</p>
-            <input type="text" id="pName" placeholder="DEIN NAME" style="padding:15px; border-radius:15px; margin:20px 0; text-align:center; font-family:'Orbitron'; outline:none;">
+            <p style="color:var(--green); font-size:12px; margin-bottom:15px;">🦴/🥣 = PKT | 👮 = -1 HERZ | 🐍 = GEFAHR</p>
+            <input type="text" id="pName" placeholder="DEIN NAME" style="padding:15px; border-radius:15px; margin-bottom:20px; text-align:center; font-family:'Orbitron';">
             <button class="neon-btn" onclick="startGame(false)">START DOGGYCO</button>
             <button class="neon-btn cat-btn" onclick="startGame(true)">START CATS WORLD</button>
-            <p style="font-size:10px; color:#aaa; margin-top:10px;">DRÜCKE ENTER ZUM STARTEN</p>
         </div>
 
         <div id="end-screen" class="overlay" style="display:none;">
-            <h1 id="f-score" style="font-size: 60px; color: var(--gold); margin: 15px 0;">0</h1>
-            <div id="gold-msg" style="display:none; color:var(--gold); font-size:14px; margin-bottom:10px; text-align:center;">🎆 GOLD RANK! EXPLOSION! 🎆</div>
+            <h1 id="f-score" style="font-size: 60px; color: var(--gold);">0</h1>
             <button class="neon-btn" onclick="location.reload()">NEUSTART</button>
         </div>
     </div>
@@ -109,9 +106,7 @@
         <h3 id="leader-title" style="color:var(--gold); margin-bottom:15px;">🏆 BESTENLISTE</h3>
         <div id="leaderboard">Ranking lädt...</div>
     </div>
-    <div class="frosted-tile" style="font-size: 10px; color: #777;">
-        Private Initiative. EU-Recht: Digitale Inhalte ohne Datenträger. © 2026 DOGGYCO & CATS WORLD.
-    </div>
+    <p style="font-size:10px; color:#777;">© 2026 DOGGYCO & CATS WORLD. Private Initiative.</p>
 </div>
 
 <script>
@@ -125,11 +120,7 @@ const W = 400;
 let H, dogX, targetX, dogLane = 2, active = false, isCat = false;
 let items = [], spiders = [], floaters = [], clouds = [], birds = [];
 let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30, lastTime = 0;
-let audioCtx, dogShake = 0, jumpY = 0, jumpV = 0;
-
-// Hier kannst du deine MP3-Datei verlinken:
-let catMusic = new Audio('cats_world_theme.mp3'); 
-catMusic.loop = true;
+let audioCtx, dogShake = 0, jumpY = 0;
 
 function init() {
     canvas.width = W; 
@@ -138,7 +129,7 @@ function init() {
 }
 window.onload = () => { init(); updateRanks(); };
 
-function playSfx(f, t, d, v=0.1) {
+function playSfx(f, t, d, v=0.08) {
     if(!audioCtx) return;
     let o = audioCtx.createOscillator(), g = audioCtx.createGain();
     o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
@@ -151,28 +142,18 @@ function playSfx(f, t, d, v=0.1) {
 function startGame(catMode) {
     if(!document.getElementById("pName").value) return;
     isCat = catMode;
-    const title = document.getElementById("main-title");
-    const wrap = document.getElementById("game-wrap");
     const view = document.getElementById("game-view");
+    const wrap = document.getElementById("game-wrap");
+    const title = document.getElementById("main-title");
 
     if(isCat) {
+        view.classList.add("cats-bg");
+        wrap.classList.add("cat-active");
         title.innerText = "CATS WORLD"; title.style.color = "var(--cat-purple)";
-        wrap.classList.add("cat-theme"); view.className = "bg-cat";
-        document.getElementById("leader-title").innerText = "🏆 CATS RANKING";
-        // Musik abspielen, falls vorhanden
-        catMusic.play().catch(() => console.log("Musik braucht Interaktion"));
-    } else {
-        title.innerText = "DOGGYCO"; title.style.color = "var(--neon)";
-        wrap.classList.remove("cat-theme"); view.className = "bg-dog";
     }
-
+    
     document.getElementById("start-screen").style.display = "none";
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    clouds = []; birds = [];
-    for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: 150 + Math.random()*50, s: 12 + Math.random()*10});
-    for(let i=0; i<2; i++) birds.push({x: W + 50, y: 180 + Math.random()*40, s: 45 + Math.random()*20});
-
     active = true; lastTime = performance.now();
     requestAnimationFrame(loop);
 }
@@ -184,7 +165,6 @@ window.addEventListener('keydown', e => {
     if(e.key === "ArrowRight") mRight();
 });
 
-// HARD LANE LOCK: Mitte-Mitte Symmetrie (40, 120, 200, 280, 360)
 function mLeft() { if(active && dogLane > 0 && Math.abs(dogX - targetX) < 5) { dogLane--; targetX = (dogLane * 80) + 40; } }
 function mRight() { if(active && dogLane < 4 && Math.abs(dogX - targetX) < 5) { dogLane++; targetX = (dogLane * 80) + 40; } }
 
@@ -194,11 +174,13 @@ function loop(t) {
     if(dt > 0.1) dt = 0.016;
     ctx.clearRect(0,0,W,H);
 
-    clouds.forEach(c => { c.x += c.s * dt; if(c.x > W + 60) c.x = -60; ctx.globalAlpha = 0.3; ctx.font = "40px Arial"; ctx.fillText(isCat?"✨":"☁️", c.x, c.y); ctx.globalAlpha = 1; });
-    birds.forEach(b => { b.x -= b.s * dt; if(b.x < -60) b.x = W + 60; ctx.globalAlpha = 0.4; ctx.font = "30px Arial"; ctx.fillText(isCat?"🦇":"🦅", b.x, b.y); ctx.globalAlpha = 1; });
-
-    timeLeft -= dt; energy -= (4.5 + level * 0.4) * dt;
-    if(timeLeft <= 0) { level++; timeLeft = 30; energy = Math.min(100, energy + 20); playSfx(isCat ? 1100 : 700, 'sine', 0.5); }
+    timeLeft -= dt; energy -= (4 + level * 0.5) * dt;
+    if(timeLeft <= 0) { 
+        level++; timeLeft = 30; energy = Math.min(100, energy + 15); 
+        playSfx(800, 'sine', 0.5);
+        document.getElementById("level-popup").style.display = "block";
+        setTimeout(() => document.getElementById("level-popup").style.display = "none", 2000);
+    }
     
     document.getElementById("timer-display").innerText = "⏳ " + Math.ceil(timeLeft) + "s";
     document.getElementById("lvl-display").innerText = "LVL: " + level;
@@ -206,70 +188,48 @@ function loop(t) {
     document.getElementById("score-display").innerText = "🏆 " + Math.floor(score);
     document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
-    if(energy <= 0 || hearts <= 0) { endGame(); return; }
+    if(energy <= 0 || hearts <= 0) { active = false; document.getElementById("end-screen").style.display = "flex"; return; }
 
-    // GEGNER (Schlangen am Seil für Cats World)
+    // Gegner
     if(spiders.length < 2 && Math.random() < 0.012) spiders.push({lane: Math.floor(Math.random()*5), y: 0, d: 1});
     spiders.forEach((s, i) => {
-        s.y += (180 + level * 10) * dt * s.d; if(s.y > H - 180) s.d = -1; if(s.y < 0) spiders.splice(i, 1);
+        s.y += (180 + level * 15) * dt * s.d; if(s.y > H - 180) s.d = -1; if(s.y < 0) spiders.splice(i, 1);
         let sx = (s.lane * 80) + 40;
         ctx.strokeStyle = isCat?"var(--cat-purple)":"rgba(255,255,255,0.3)"; 
-        ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "38px Arial"; ctx.textAlign = "center"; ctx.fillText(isCat?"🐍":"🕷️", sx, s.y + 25);
         if(s.lane === dogLane && s.y > H-180 && s.y < H-80) { energy -= 30; dogShake = 15; playSfx(100, 'sawtooth', 0.3); spiders.splice(i,1); }
     });
 
-    // ITEMS (Milchschale für Katze)
-    if(Math.random() < 0.022) items.push({lane: Math.floor(Math.random()*5), y: -60, type: Math.random()<0.1?'👮':(isCat?'🥣':'🦴')});
+    // Items
+    if(Math.random() < 0.02) items.push({lane: Math.floor(Math.random()*5), y: -60, type: Math.random()<0.1?'👮':(isCat?'🥣':'🦴')});
     items.forEach((it, i) => {
         it.y += (250 + level * 10) * dt; let ix = (it.lane * 80) + 40;
         ctx.font = "42px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
             if(it.type === '👮') { hearts--; dogShake = 10; playSfx(80, 'square', 0.4); }
-            else { 
-                score += 25; energy = Math.min(100, energy + 10); jumpV = -10; 
-                floaters.push({x:ix, y:it.y, txt:"+25", life:1});
-                playSfx(isCat ? 1200 : 600, 'sine', 0.1); 
-            }
+            else { score += 25; energy = Math.min(100, energy + 10); jumpY = -15; floaters.push({x:ix, y:it.y, txt:"+25", life:1}); playSfx(600, 'sine', 0.1); }
             items.splice(i, 1);
         }
-        if(it.y > H) items.splice(i,1);
     });
 
-    // SPRUNG & SHAKE
-    jumpY += jumpV; if(jumpY < 0) jumpV += 0.8; else { jumpY = 0; jumpV = 0; }
+    // Charakter zentriert
     dogX += (targetX - dogX) * 0.22;
     ctx.font = "80px Arial"; ctx.textAlign = "center"; 
     ctx.fillText(isCat ? "🐱" : "🐶", dogX + (Math.random()-0.5)*dogShake, H - 110 + jumpY);
-    if(dogShake > 0) dogShake *= 0.9;
+    if(dogShake > 0) dogShake *= 0.85; if(jumpY < 0) jumpY += 1.5; else jumpY = 0;
 
-    // AUFSTEIGENDE PUNKTE
-    floaters.forEach((f, i) => { f.y -= 2; f.life -= dt; ctx.globalAlpha = f.life; ctx.fillStyle = "var(--green)"; ctx.font = "bold 22px Orbitron"; ctx.fillText(f.txt, f.x, f.y); ctx.globalAlpha = 1; if(f.life <= 0) floaters.splice(i,1); });
+    floaters.forEach((f, i) => { f.y -= 2; f.life -= dt; ctx.globalAlpha = f.life; ctx.fillStyle = "var(--green)"; ctx.font = "bold 20px Orbitron"; ctx.fillText(f.txt, f.x, f.y); if(f.life <= 0) floaters.splice(i,1); });
 
     requestAnimationFrame(loop);
-}
-
-function endGame() {
-    active = false; catMusic.pause();
-    document.getElementById("end-screen").style.display = "flex";
-    document.getElementById("f-score").innerText = Math.floor(score);
-    saveToDb();
-}
-
-async function saveToDb() {
-    const n = document.getElementById("pName").value;
-    const { data } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(1);
-    if(data && data.length > 0 && score > data[0].s) document.getElementById("gold-msg").style.display = "block";
-    await supabaseClient.from('leaderboard').insert([{ n, s: Math.floor(score) }]);
-    updateRanks();
 }
 
 async function updateRanks() {
     try {
         let { data } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
         if(data) document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
-            let medal = i===0?'🥇 Gold':(i===1?'🥈 Silber':(i===2?'🥉 Bronze':(i===3?'🧱 Kupfer-Barren':'🪵 Holzklotz')));
-            return `<div class="rank-row"><span>${medal}: ${x.n}</span><span>${x.s}</span></div>`;
+            let m = i===0?'🥇':(i===1?'🥈':(i===2?'🥉':(i===3?'🧱':'🪵')));
+            return `<div class="rank-row"><span>${m} ${x.n}</span><span>${x.s}</span></div>`;
         }).join('');
     } catch(e) {}
 }
