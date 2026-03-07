@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO & CATS WORLD V64000</title>
+    <title>DOGGYCO & CATS WORLD V65000</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -25,7 +25,6 @@
             z-index: -1; transition: 1.5s;
         }
 
-        /* NEON BLINKEN */
         @keyframes neonBlink {
             0%, 100% { text-shadow: 0 0 20px var(--neon), 0 0 40px var(--neon); opacity: 1; }
             50% { text-shadow: 0 0 5px var(--neon); opacity: 0.8; }
@@ -35,11 +34,10 @@
         #game-view { width: 100vw; height: 85vh; display: flex; justify-content: center; align-items: center; position: relative; }
         #game-wrap { 
             position:relative; width: 400px; height: 98%; 
-            background: rgba(0,0,0,0.8); border: 4px solid var(--neon); border-radius: 40px; 
+            background: rgba(0,0,0,0.7); border: 4px solid var(--neon); border-radius: 40px; 
             overflow: hidden; box-shadow: 0 0 50px var(--neon);
         }
 
-        /* HUD */
         #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
         #energy-bar-wrap { width: 85%; height: 25px; margin: 0 auto; background: rgba(0,0,0,0.9); border: 2px solid #fff; border-radius: 12px; overflow: hidden; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s; }
@@ -47,37 +45,41 @@
 
         canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
 
-        /* GLASSMORPHISM POPUP */
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(20px); z-index: 1000; background: rgba(0,0,0,0.85); border-radius: 36px; padding: 20px; text-align: center; }
+        /* MILCHSCHICHT / GLASSMORPHISM */
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(25px); z-index: 1000; background: rgba(0,0,0,0.75); border-radius: 36px; padding: 20px; }
         
-        .milchschicht {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
             border: 2px solid rgba(255, 255, 255, 0.2);
-            padding: 20px; border-radius: 20px; width: 90%; margin-bottom: 20px;
+            padding: 25px; border-radius: 25px; width: 90%; margin-bottom: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            text-align: center;
         }
 
         #pName { 
             padding: 15px; border-radius: 15px; border: 2px solid var(--neon); 
-            background: rgba(255,255,255,0.05); color: #fff; text-align: center; 
-            width: 100%; font-family: 'Orbitron'; outline: none;
+            background: rgba(255, 255, 255, 0.1); color: #fff; text-align: center; 
+            width: 100%; font-family: 'Orbitron'; outline: none; margin-top: 10px;
         }
 
-        .neon-btn { padding: 15px 30px; background: var(--green); color: #000; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; margin: 10px; box-shadow: 0 0 15px var(--green); transition: 0.3s; width: 100%; }
-        .neon-btn:hover { transform: translateY(-5px); box-shadow: 0 10px 25px var(--green); }
+        .neon-btn { padding: 15px 30px; background: var(--green); color: #000; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; margin: 8px; box-shadow: 0 0 15px var(--green); transition: 0.3s; width: 100%; }
+        .neon-btn:active { transform: translateY(-5px); box-shadow: 0 5px 20px var(--green); }
         .cat-btn { background: var(--cat-purple); color: #fff; box-shadow: 0 0 15px var(--cat-purple); }
 
-        /* SUPPORT BUTTONS */
-        .support-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .s-btn { padding: 12px; border-radius: 15px; border: none; color: #fff; font-weight: 900; cursor: pointer; transition: 0.3s; }
-        .s-btn:active { transform: translateY(-8px); }
+        /* SUPPORT UI */
+        .support-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; margin-top: 15px; }
+        .s-btn { padding: 14px; border-radius: 18px; border: none; color: #fff; font-weight: 900; cursor: pointer; transition: 0.3s; font-family: 'Orbitron'; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .s-btn:active { transform: scale(1.1); }
 
         #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; }
         .btn-arrow { width: 85px; height: 85px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.1s; }
-        .btn-arrow:active { transform: scale(0.9); background: var(--blue-active); }
+        .btn-arrow:active { background: var(--blue-active); border-color: #fff; }
 
         .content-area { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 40px 0 150px; gap: 30px; }
         .tile { background: var(--glass); backdrop-filter: blur(30px); border: 2px solid var(--neon); border-radius: 35px; padding: 30px; width: 92vw; max-width: 500px; text-align: center; }
+        
+        #level-popup { position: absolute; top: 40%; width: 100%; text-align: center; color: var(--gold); font-size: 32px; font-weight: 900; z-index: 600; display: none; text-shadow: 0 0 20px #000; }
     </style>
 </head>
 <body>
@@ -98,6 +100,7 @@
             </div>
         </div>
         
+        <div id="level-popup">LEVEL UP!</div>
         <canvas id="game-canvas"></canvas>
 
         <div id="controls">
@@ -106,26 +109,37 @@
         </div>
 
         <div id="start-screen" class="overlay">
-            <div class="milchschicht">
-                <h3 style="color:var(--gold);">MISSION START</h3>
+            <div class="glass-panel">
+                <h3 style="color:var(--gold);">WILLKOMMEN AGENT</h3>
                 <input type="text" id="pName" placeholder="DEIN NAME">
             </div>
-            <button class="neon-btn" onclick="showInstr()">SPIELANLEITUNG</button>
+            <button class="neon-btn" onclick="openWindow('instr-screen')">SPIELANLEITUNG</button>
+            <button class="neon-btn" onclick="openWindow('legal-screen')">RECHTLICHES</button>
             <button class="neon-btn" onclick="startGame(false)">DOGGYCO START</button>
             <button class="neon-btn cat-btn" onclick="startGame(true)">CATS WORLD START</button>
         </div>
 
         <div id="instr-screen" class="overlay" style="display:none;">
-            <div class="milchschicht">
+            <div class="glass-panel">
                 <h2 style="color:var(--gold); margin-bottom:10px;">ANLEITUNG</h2>
-                <p style="font-size:12px; line-height:1.6;">
-                    🟢 GRÜN: Knochen/Flaschen sammeln (+25 PKT)<br>
-                    🔴 ROT: Weiche Gefahren aus (-1 Herz)<br>
-                    ⚡ ENERGIE: Fleisch/Fisch füllen Energie auf.<br>
-                    Keine Sprünge! Nur Gleiten.
+                <p style="font-size:12px; line-height:1.6; text-align: left;">
+                    🟢 <b>GRÜN:</b> Sammle Futter (+25 PKT)<br>
+                    🔴 <b>ROT:</b> Meide Gefahren (-1 Herz)<br>
+                    ⚡ <b>ENERGIE:</b> Fleisch/Fisch füllt Energie auf.<br>
+                    🚫 <b>LANE LOCK:</b> Nur Gleiten erlaubt!
                 </p>
             </div>
-            <button class="neon-btn" onclick="hideInstr()">VERSTANDEN</button>
+            <button class="neon-btn" onclick="closeWindow('instr-screen')">ZURÜCK</button>
+        </div>
+
+        <div id="legal-screen" class="overlay" style="display:none;">
+            <div class="glass-panel">
+                <h2 style="color:var(--red); margin-bottom:10px;">RECHTLICHES</h2>
+                <p style="font-size:11px; line-height:1.4;">
+                    Privatprojekt. Spenden sind freiwillige Geschenke. EU-Recht: Digitale Inhalte ohne Datenträger. © 2026 DOGGYCO & CATS WORLD.
+                </p>
+            </div>
+            <button class="neon-btn" onclick="closeWindow('legal-screen')">ZURÜCK</button>
         </div>
 
         <div id="end-screen" class="overlay" style="display:none;">
@@ -141,18 +155,19 @@
         <div id="leaderboard">Lädt...</div>
     </div>
 
-    <div class="tile">
-        <h3 style="color:var(--gold); margin-bottom:20px;">💖 SUPPORT</h3>
+    <div class="tile" style="border-color: var(--gold);">
+        <h3 style="color:var(--gold); margin-bottom:20px;">💖 SUPPORT UNS</h3>
         <div class="support-grid">
-            <button class="s-btn" style="background:#ff0050;" onclick="window.open('https://tiktok.com/@TIKTOK')">TIKTOK 📱</button>
-            <button class="s-btn" style="background:#0070ba;" onclick="window.open('https://paypal.me/PAYPAL')">PAYPAL 💳</button>
-            <button class="s-btn" style="background:#f7931a;" onclick="window.location.href='bitcoin:BTC_ADRESSE'">BITCOIN ₿</button>
-            <button class="s-btn" style="background:#333;" onclick="window.location.href='ethereum:WALLET_ADRESSE'">WALLET 👛</button>
+            <button class="s-btn" style="background:#ff0050;" onclick="window.open('https://tiktok.com/@TIKTOK')">🎵 TikTok</button>
+            <button class="s-btn" style="background:#0070ba;" onclick="window.open('https://paypal.me/PAYPAL')">🅿️ PayPal</button>
+            <button class="s-btn" style="background:#f7931a;" onclick="window.location.href='bitcoin:BTC_ADRESSE'">₿ Bitcoin</button>
+            <button class="s-btn" style="background:#333;" onclick="window.location.href='ethereum:WALLET_ADRESSE'">👛 Wallet</button>
         </div>
-        <div style="background:#fff; padding:15px; border-radius:20px; display:inline-block; margin-top:20px; border:3px solid var(--gold);">
+        <div class="glass-panel" style="background:#fff; padding:15px; margin-top:20px;">
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BITCOIN_ADRESSE" width="150">
-            <p style="color:#000; font-size:10px; font-weight:bold; margin-top:5px;">BTC SCAN</p>
+            <p style="color:#000; font-size:10px; font-weight:bold; margin-top:5px;">BTC ADRESSE SCAN</p>
         </div>
+        <p style="font-size:9px; color:var(--gold); margin-top:10px; word-break:break-all;">BTC: BITCOIN_ADRESSE_TEXT</p>
     </div>
 </div>
 
@@ -173,13 +188,25 @@ let catMusic = new Audio('cats_world_theme.mp3');
 dogMusic.loop = catMusic.loop = true;
 dogMusic.volume = catMusic.volume = 0.2;
 
-function showInstr() { document.getElementById("instr-screen").style.display = "flex"; }
-function hideInstr() { document.getElementById("instr-screen").style.display = "none"; }
+function openWindow(id) { document.getElementById(id).style.display = "flex"; }
+function closeWindow(id) { document.getElementById(id).style.display = "none"; }
 
 function init() {
     canvas.width = W; 
     H = canvas.height = document.getElementById("game-wrap").offsetHeight;
     targetX = (dogLane * 80) + 40; dogX = targetX;
+}
+
+function playSfx(f, t, d, v=0.6) {
+    try {
+        let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
+    } catch(e){}
 }
 
 function startGame(catMode) {
@@ -207,9 +234,13 @@ function loop(t) {
     if(dt > 0.1) dt = 0.016;
     ctx.clearRect(0,0,W,H);
 
-    // Level-Timer & Speed
     timeLeft -= dt; energy -= (4 + level * 0.4) * dt;
-    if(timeLeft <= 0) { level++; timeLeft = 30; energy = Math.min(100, energy + 20); }
+    if(timeLeft <= 0) { 
+        level++; timeLeft = 30; energy = Math.min(100, energy + 20); 
+        document.getElementById("level-popup").style.display = "block";
+        setTimeout(()=>document.getElementById("level-popup").style.display="none", 2000);
+        playSfx(800, 'sine', 0.5);
+    }
 
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
     document.getElementById("score-display").innerText = "🏆 " + Math.floor(score);
@@ -219,35 +250,36 @@ function loop(t) {
 
     if(energy <= 0 || hearts <= 0) { active = false; document.getElementById("end-screen").style.display = "flex"; return; }
 
-    // SPAWN SYSTEM (Keine Überschneidungen)
+    // SPAWN LOGIK (Verhindert Überschneidungen)
     if(items.length + spiders.length < 3 && Math.random() < 0.02) {
         let lane = Math.floor(Math.random()*5);
-        let overlap = items.some(it => it.lane === lane && it.y < 100) || spiders.some(s => s.lane === lane && s.y < 100);
-        if(!overlap) {
-            if(Math.random() < 0.7) items.push({lane, y: -60, type: Math.random() < 0.1 ? '👮' : (isCat?'🍼':'🦴')});
+        let clear = items.every(i => i.lane !== lane || i.y > 150) && spiders.every(s => s.lane !== lane || s.y > 150);
+        if(clear) {
+            if(Math.random() < 0.7) items.push({lane, y: -60, type: Math.random()<0.1?'👮':(isCat?'🍼':'🦴')});
             else spiders.push({lane, y: 0, d: 1});
         }
     }
 
     // Gegner
     spiders.forEach((s, i) => {
-        s.y += (180 + level * 12) * dt * s.d;
+        s.y += (180 + level * 15) * dt * s.d;
         if(s.y > H - 180) s.d = -1; if(s.y < 0) spiders.splice(i, 1);
         let sx = (s.lane * 80) + 40;
-        ctx.strokeStyle = "#fff"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+        ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "40px Arial"; ctx.fillText(isCat?"🐍":"🕷️", sx, s.y + 25);
         if(s.lane === dogLane && s.y > H-180 && s.y < H-80) { 
-            energy -= 30; dogShake = 20; floaters.push({x: sx, y: s.y, txt: "-30%", color: "red", life: 1}); spiders.splice(i,1); 
+            energy -= 30; dogShake = 20; floaters.push({x: sx, y: s.y, txt: "-30%", color: "red", life: 1}); playSfx(150, 'sawtooth', 0.3); spiders.splice(i,1); 
         }
     });
 
     // Items
     items.forEach((it, i) => {
-        it.y += (250 + level * 10) * dt; let ix = (it.lane * 80) + 40;
+        it.y += (250 + level * 12) * dt; let ix = (it.lane * 80) + 40;
         ctx.font = "42px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
-            if(it.type === '👮') { hearts--; dogShake = 20; floaters.push({x: ix, y: it.y, txt: "-❤️", color: "red", life: 1}); }
-            else { score += 25; energy = Math.min(100, energy + 10); floaters.push({x: ix, y: it.y, txt: "+25", color: "var(--green)", life: 1}); }
+            if(it.type === '👮') { hearts--; dogShake = 20; floaters.push({x: ix, y: it.y, txt: "-❤️", color: "red", life: 1}); playSfx(100, 'square', 0.4); }
+            else { score += 25; energy = Math.min(100, energy + 12); jumpY = -15; floaters.push({x: ix, y: it.y, txt: "+25", color: "var(--green)", life: 1}); playSfx(isCat?1200:600, 'sine', 0.1); }
             items.splice(i, 1);
         }
         if(it.y > H) items.splice(i,1);
@@ -255,10 +287,9 @@ function loop(t) {
 
     dogX += (targetX - dogX) * 0.22;
     ctx.font = "80px Arial";
-    ctx.fillText(isCat ? "🐱" : "🐶", dogX + (Math.random()-0.5)*dogShake, H - 110);
-    if(dogShake > 0) dogShake *= 0.9;
+    ctx.fillText(isCat ? "🐱" : "🐶", dogX + (Math.random()-0.5)*dogShake, H - 110 + jumpY);
+    if(dogShake > 0) dogShake *= 0.9; if(jumpY < 0) jumpY += 1.5; else jumpY = 0;
 
-    // Aufsteigende Punkte
     floaters.forEach((f, i) => { 
         f.y -= 2; f.life -= dt; ctx.globalAlpha = f.life; ctx.fillStyle = f.color;
         ctx.font = "bold 24px Orbitron"; ctx.fillText(f.txt, f.x, f.y); 
