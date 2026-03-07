@@ -1,238 +1,236 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO & CATS WORLD V55000</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doggyco - Catch World</title>
     <style>
-        :root { 
-            --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --cat-purple: #bc13fe;
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+        #game-container {
+            position: relative;
+            width: 450px;
+            height: 700px;
+            /* Nutzt deine Datei hintergrund.png */
+            background: url('hintergrund.png') no-repeat center center;
+            background-size: cover;
+            border: 5px solid #222;
+            overflow: hidden;
+        }
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px #000;
+            z-index: 10;
+        }
+        .menu-screen {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 22px;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px #2e7d32;
+        }
+        button:active { transform: translateY(4px); box-shadow: 0 0 #2e7d32; }
         
-        /* SCROLLEN ERLAUBT */
-        body { 
-            background: #000; font-family: 'Orbitron', sans-serif; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden;
+        #player {
+            position: absolute;
+            bottom: 30px;
+            width: 80px;
+            height: 80px;
+            /* Nutzt deine Datei logo.png */
+            background: url('logo.png') no-repeat center center;
+            background-size: contain;
         }
-
-        #game-view { 
-            width: 100vw; height: 85vh; display: flex; justify-content: center; align-items: center; position: relative; 
-            background-image: url('forest_background.png'); /* Start-Hintergrund immer da */
-            background-size: cover; background-position: center; transition: 1.5s;
+        .falling-item {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            /* Nutzt deine Datei image_2.png */
+            background: url('image_2.png') no-repeat center center;
+            background-size: contain;
         }
-        #game-view.cats-bg { background-image: url('https://googleusercontent.com/image_generation_content/1'); }
-
-        header h1 { font-size: 35px; color: var(--neon); text-shadow: 0 0 15px var(--neon); padding: 15px; text-align: center; }
-
-        #game-wrap { 
-            position:relative; width: 400px; height: 95%; 
-            background: rgba(0,0,0,0.8); border: 4px solid var(--neon); border-radius: 40px; 
-            overflow: hidden; box-shadow: 0 0 40px var(--neon);
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
         }
-        #game-wrap.cat-active { border-color: var(--cat-purple); box-shadow: 0 0 40px var(--cat-purple); }
-
-        /* HUD */
-        #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
-        #energy-bar-wrap { width: 85%; height: 20px; margin: 0 auto; background: rgba(0,0,0,0.8); border: 1px solid #fff; border-radius: 10px; overflow: hidden; }
-        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s; }
-        #hud-row { display: flex; justify-content: space-between; width: 85%; margin: 8px auto; font-size: 13px; font-weight: 900; }
-
-        canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
-
-        /* POPUPS */
-        #level-popup { position: absolute; top: 40%; width: 100%; text-align: center; color: var(--gold); font-size: 24px; font-weight: 900; z-index: 600; display: none; text-shadow: 0 0 15px #000; }
-
-        /* OVERLAYS */
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(15px); z-index: 1000; background: rgba(0,0,0,0.7); border-radius: 36px; }
-        .neon-btn { padding: 16px 40px; background: var(--green); color: #000; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; margin: 10px; box-shadow: 0 0 15px var(--green); }
-        .cat-btn { background: var(--cat-purple); color: #fff; box-shadow: 0 0 15px var(--cat-purple); }
-
-        /* STEUERUNG */
-        #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; pointer-events: none; }
-        .btn-arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; }
-        .btn-arrow:active { background: #0070ff; box-shadow: 0 0 30px #0070ff; }
-
-        /* INFO & RANKING (Scrollbar) */
-        .info-scroll { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 30px 0 100px; }
-        .frosted-tile { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 2px solid var(--neon); border-radius: 30px; padding: 25px; margin: 15px 0; width: 90vw; max-width: 450px; text-align: center; }
-        .rank-row { display: flex; justify-content: space-between; padding: 12px; margin-bottom: 8px; border-radius: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--neon); }
+        .btn {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            border: 2px solid white;
+            color: white;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
 
-<header><h1 id="main-title">DOGGYCO</h1></header>
-
-<div id="game-view">
-    <div id="game-wrap">
-        <div id="ui-header">
-            <div id="energy-bar-wrap"><div id="energy-fill"></div></div>
-            <div id="hud-row">
-                <span id="hearts-display">❤️❤️❤️</span>
-                <span id="lvl-display" style="color:var(--gold)">LVL: 1</span>
-                <span id="timer-display" style="color:var(--neon)">⏳ 30s</span>
-                <span id="score-display">🏆 0</span>
+    <div id="game-container">
+        <div id="start-menu" class="menu-screen">
+            <h1 style="color: #ffcc00;">DOGGYCO CATCH</h1>
+            <p>Catch the falling items!<br>Use Arrows or Buttons to move.</p>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                <h3>Leaderboard</h3>
+                <div id="best-score">Best: 0</div>
             </div>
+            <button onclick="startGame()">START GAME</button>
+            <p style="font-size: 11px; margin-top: 30px; opacity: 0.6;">
+                © 2026 Doggyco. All rights reserved. <br>
+                Unauthorized reproduction is prohibited.
+            </p>
         </div>
-        
-        <div id="level-popup">NEXT LEVEL!<br>+10% SPEED</div>
-        <canvas id="game-canvas"></canvas>
+
+        <div id="ui-layer">
+            <div>Score: <span id="score">0</span></div>
+            <div>Level: <span id="level">1</span></div>
+        </div>
+
+        <div id="player"></div>
 
         <div id="controls">
-            <div class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft()">◀</div>
-            <div class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight()">▶</div>
-        </div>
-
-        <div id="start-screen" class="overlay">
-            <h2 style="color:var(--gold); margin-bottom:10px;">ANLEITUNG</h2>
-            <p style="color:var(--green); font-size:12px; margin-bottom:15px;">🦴/🥣 = PKT | 👮 = -1 HERZ | 🐍 = GEFAHR</p>
-            <input type="text" id="pName" placeholder="DEIN NAME" style="padding:15px; border-radius:15px; margin-bottom:20px; text-align:center; font-family:'Orbitron';">
-            <button class="neon-btn" onclick="startGame(false)">START DOGGYCO</button>
-            <button class="neon-btn cat-btn" onclick="startGame(true)">START CATS WORLD</button>
-        </div>
-
-        <div id="end-screen" class="overlay" style="display:none;">
-            <h1 id="f-score" style="font-size: 60px; color: var(--gold);">0</h1>
-            <button class="neon-btn" onclick="location.reload()">NEUSTART</button>
+            <div class="btn" onmousedown="moveLeft()" ontouchstart="moveLeft()">LEFT</div>
+            <div class="btn" onmousedown="moveRight()" ontouchstart="moveRight()">RIGHT</div>
         </div>
     </div>
-</div>
 
-<div class="info-scroll">
-    <div class="frosted-tile">
-        <h3 id="leader-title" style="color:var(--gold); margin-bottom:15px;">🏆 BESTENLISTE</h3>
-        <div id="leaderboard">Ranking lädt...</div>
-    </div>
-    <p style="font-size:10px; color:#777;">© 2026 DOGGYCO & CATS WORLD. Private Initiative.</p>
-</div>
+    <audio id="game-audio" loop src="musik.mp3"></audio>
 
-<script>
-const SUPABASE_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <script>
+        const container = document.getElementById('game-container');
+        const player = document.getElementById('player');
+        const scoreDisp = document.getElementById('score');
+        const levelDisp = document.getElementById('level');
+        const startMenu = document.getElementById('start-menu');
+        const audio = document.getElementById('game-audio');
 
-const canvas = document.getElementById("game-canvas");
-const ctx = canvas.getContext("2d");
-const W = 400; 
-let H, dogX, targetX, dogLane = 2, active = false, isCat = false;
-let items = [], spiders = [], floaters = [], clouds = [], birds = [];
-let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30, lastTime = 0;
-let audioCtx, dogShake = 0, jumpY = 0;
+        let score = 0;
+        let level = 1;
+        let speed = 4;
+        let spawnRate = 1200;
+        let playerX = 185;
+        let gameActive = false;
 
-function init() {
-    canvas.width = W; 
-    H = canvas.height = document.getElementById("game-wrap").offsetHeight;
-    targetX = (dogLane * 80) + 40; dogX = targetX;
-}
-window.onload = () => { init(); updateRanks(); };
-
-function playSfx(f, t, d, v=0.08) {
-    if(!audioCtx) return;
-    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-    g.gain.setValueAtTime(v, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + d);
-}
-
-function startGame(catMode) {
-    if(!document.getElementById("pName").value) return;
-    isCat = catMode;
-    const view = document.getElementById("game-view");
-    const wrap = document.getElementById("game-wrap");
-    const title = document.getElementById("main-title");
-
-    if(isCat) {
-        view.classList.add("cats-bg");
-        wrap.classList.add("cat-active");
-        title.innerText = "CATS WORLD"; title.style.color = "var(--cat-purple)";
-    }
-    
-    document.getElementById("start-screen").style.display = "none";
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    active = true; lastTime = performance.now();
-    requestAnimationFrame(loop);
-}
-
-window.addEventListener('keydown', e => {
-    if(e.key === "Enter" && !active) startGame(false);
-    if(!active) return;
-    if(e.key === "ArrowLeft") mLeft();
-    if(e.key === "ArrowRight") mRight();
-});
-
-function mLeft() { if(active && dogLane > 0 && Math.abs(dogX - targetX) < 5) { dogLane--; targetX = (dogLane * 80) + 40; } }
-function mRight() { if(active && dogLane < 4 && Math.abs(dogX - targetX) < 5) { dogLane++; targetX = (dogLane * 80) + 40; } }
-
-function loop(t) {
-    if(!active) return;
-    let dt = (t - lastTime) / 1000; lastTime = t;
-    if(dt > 0.1) dt = 0.016;
-    ctx.clearRect(0,0,W,H);
-
-    timeLeft -= dt; energy -= (4 + level * 0.5) * dt;
-    if(timeLeft <= 0) { 
-        level++; timeLeft = 30; energy = Math.min(100, energy + 15); 
-        playSfx(800, 'sine', 0.5);
-        document.getElementById("level-popup").style.display = "block";
-        setTimeout(() => document.getElementById("level-popup").style.display = "none", 2000);
-    }
-    
-    document.getElementById("timer-display").innerText = "⏳ " + Math.ceil(timeLeft) + "s";
-    document.getElementById("lvl-display").innerText = "LVL: " + level;
-    document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
-    document.getElementById("score-display").innerText = "🏆 " + Math.floor(score);
-    document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
-
-    if(energy <= 0 || hearts <= 0) { active = false; document.getElementById("end-screen").style.display = "flex"; return; }
-
-    // Gegner
-    if(spiders.length < 2 && Math.random() < 0.012) spiders.push({lane: Math.floor(Math.random()*5), y: 0, d: 1});
-    spiders.forEach((s, i) => {
-        s.y += (180 + level * 15) * dt * s.d; if(s.y > H - 180) s.d = -1; if(s.y < 0) spiders.splice(i, 1);
-        let sx = (s.lane * 80) + 40;
-        ctx.strokeStyle = isCat?"var(--cat-purple)":"rgba(255,255,255,0.3)"; 
-        ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
-        ctx.font = "38px Arial"; ctx.textAlign = "center"; ctx.fillText(isCat?"🐍":"🕷️", sx, s.y + 25);
-        if(s.lane === dogLane && s.y > H-180 && s.y < H-80) { energy -= 30; dogShake = 15; playSfx(100, 'sawtooth', 0.3); spiders.splice(i,1); }
-    });
-
-    // Items
-    if(Math.random() < 0.02) items.push({lane: Math.floor(Math.random()*5), y: -60, type: Math.random()<0.1?'👮':(isCat?'🥣':'🦴')});
-    items.forEach((it, i) => {
-        it.y += (250 + level * 10) * dt; let ix = (it.lane * 80) + 40;
-        ctx.font = "42px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
-        if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
-            if(it.type === '👮') { hearts--; dogShake = 10; playSfx(80, 'square', 0.4); }
-            else { score += 25; energy = Math.min(100, energy + 10); jumpY = -15; floaters.push({x:ix, y:it.y, txt:"+25", life:1}); playSfx(600, 'sine', 0.1); }
-            items.splice(i, 1);
+        function startGame() {
+            startMenu.style.display = 'none';
+            score = 0;
+            level = 1;
+            speed = 4;
+            spawnRate = 1200;
+            scoreDisp.innerText = score;
+            levelDisp.innerText = level;
+            gameActive = true;
+            audio.play();
+            updatePlayer();
+            spawnLoop();
         }
-    });
 
-    // Charakter zentriert
-    dogX += (targetX - dogX) * 0.22;
-    ctx.font = "80px Arial"; ctx.textAlign = "center"; 
-    ctx.fillText(isCat ? "🐱" : "🐶", dogX + (Math.random()-0.5)*dogShake, H - 110 + jumpY);
-    if(dogShake > 0) dogShake *= 0.85; if(jumpY < 0) jumpY += 1.5; else jumpY = 0;
+        function updatePlayer() {
+            player.style.left = playerX + 'px';
+        }
 
-    floaters.forEach((f, i) => { f.y -= 2; f.life -= dt; ctx.globalAlpha = f.life; ctx.fillStyle = "var(--green)"; ctx.font = "bold 20px Orbitron"; ctx.fillText(f.txt, f.x, f.y); if(f.life <= 0) floaters.splice(i,1); });
+        function moveLeft() { if(playerX > 10) playerX -= 35; updatePlayer(); }
+        function moveRight() { if(playerX < 360) playerX += 35; updatePlayer(); }
 
-    requestAnimationFrame(loop);
-}
+        window.addEventListener('keydown', (e) => {
+            if(e.key === "ArrowLeft") moveLeft();
+            if(e.key === "ArrowRight") moveRight();
+        });
 
-async function updateRanks() {
-    try {
-        let { data } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
-        if(data) document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
-            let m = i===0?'🥇':(i===1?'🥈':(i===2?'🥉':(i===3?'🧱':'🪵')));
-            return `<div class="rank-row"><span>${m} ${x.n}</span><span>${x.s}</span></div>`;
-        }).join('');
-    } catch(e) {}
-}
-</script>
+        function createItem() {
+            if(!gameActive) return;
+            const item = document.createElement('div');
+            item.className = 'falling-item';
+            item.style.left = Math.random() * (400) + 'px';
+            item.style.top = '-50px';
+            container.appendChild(item);
+
+            let y = -50;
+            let fall = setInterval(() => {
+                if(!gameActive) { clearInterval(fall); item.remove(); return; }
+                
+                y += speed;
+                item.style.top = y + 'px';
+
+                // Collision
+                if(y > 590 && y < 650) {
+                    let itemX = parseInt(item.style.left);
+                    if(itemX > playerX - 40 && itemX < playerX + 70) {
+                        score += 10;
+                        scoreDisp.innerText = score;
+                        checkLevel();
+                        clearInterval(fall);
+                        item.remove();
+                    }
+                }
+
+                if(y > 700) {
+                    clearInterval(fall);
+                    item.remove();
+                }
+            }, 20);
+        }
+
+        function checkLevel() {
+            // Level steigen alle 100 Punkte
+            if(score % 100 === 0) {
+                level++;
+                levelDisp.innerText = level;
+                speed *= 1.10; // Geschwindigkeit +10%
+                spawnRate *= 0.90; // Erscheinen wird schneller
+            }
+        }
+
+        function spawnLoop() {
+            if(!gameActive) return;
+            createItem();
+            setTimeout(spawnLoop, spawnRate);
+        }
+
+        // Lokales Bestenliste-System
+        if(localStorage.getItem('doggyBest')) {
+            document.getElementById('best-score').innerText = "Best: " + localStorage.getItem('doggyBest');
+        }
+    </script>
 </body>
 </html>
