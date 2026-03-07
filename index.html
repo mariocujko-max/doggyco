@@ -3,36 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cats World - DoggyCo Ultimate</title>
+    <title>DoggyCo Professional - Version 4600</title>
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.15);
             --glass-border: rgba(255, 255, 255, 0.3);
             --blur: blur(15px);
-            --accent-blue: #00d4ff;
+            --accent: #00d4ff;
+            --font: 'Segoe UI', Arial, sans-serif;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; font-family: 'Segoe UI', sans-serif;
-            background: #050505; color: white;
-        }
-
-        /* Dynamischer Hintergrund (Himmel) */
-        #game-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            z-index: 1;
+            overflow: hidden; font-family: var(--font);
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+            color: white;
         }
 
         /* --- UI / STARTSEITE --- */
-        #ui-wrapper {
-            position: relative; z-index: 100;
+        #start-screen {
+            position: absolute; inset: 0; z-index: 100;
             display: flex; flex-direction: column; align-items: center;
-            justify-content: center; height: 100vh;
+            justify-content: center; background: rgba(0,0,0,0.5);
         }
 
-        .container { width: 400px; display: flex; flex-direction: column; gap: 15px; }
+        .container { width: 420px; display: flex; flex-direction: column; gap: 15px; }
 
         .glass-box {
             background: var(--glass-bg);
@@ -40,176 +35,176 @@
             -webkit-backdrop-filter: var(--blur);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
-            padding: 20px;
+            padding: 25px;
             text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
         }
 
-        h1 { margin: 0; font-size: 2.5rem; text-shadow: 0 0 20px var(--accent-blue); }
+        h1 { margin: 0; font-size: 2.8rem; letter-spacing: 2px; color: var(--accent); text-shadow: 0 0 15px var(--accent); }
+        h3 { margin: 5px 0 15px 0; opacity: 0.8; font-weight: 300; }
+
+        input#player-name {
+            width: 85%; background: rgba(0,0,0,0.3); border: 1px solid var(--accent);
+            border-radius: 12px; padding: 15px; color: white; font-size: 1.2rem;
+            text-align: center; outline: none; box-shadow: inset 0 0 10px rgba(0,212,255,0.2);
+        }
+
+        .btn-start {
+            background: linear-gradient(45deg, rgba(0,212,255,0.4), rgba(46,204,113,0.4));
+            border: 2px solid var(--accent); color: white; padding: 18px;
+            border-radius: 15px; font-weight: bold; font-size: 1.5rem;
+            cursor: pointer; transition: 0.3s;
+        }
+        .btn-start:hover { transform: scale(1.03); background: rgba(0,212,255,0.6); }
+
+        .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .small-btn { padding: 12px; font-size: 0.9rem; cursor: pointer; }
+
+        /* --- GAMEPLAY & EFFEKTE --- */
+        #game-layer { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
         
-        input#player-input {
-            width: 85%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
-            border-radius: 10px; padding: 12px; color: white; font-size: 1.1rem;
-            text-align: center; outline: none; margin-top: 10px;
+        .falling-item {
+            position: absolute; width: 45px; height: 45px; border-radius: 50%;
+            cursor: pointer; pointer-events: auto; z-index: 20;
         }
 
-        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-        .btn-main {
-            background: rgba(0, 212, 255, 0.4); border: 2px solid var(--accent-blue);
-            color: white; padding: 15px; border-radius: 15px; font-weight: bold;
-            font-size: 1.4rem; cursor: pointer; transition: 0.3s;
-        }
-        .btn-main:hover { background: rgba(0, 212, 255, 0.6); transform: scale(1.05); }
-
-        /* --- GAMEPLAY ELEMENTE --- */
-        .item {
-            position: absolute; width: 40px; height: 40px; border-radius: 50%;
-            cursor: pointer; z-index: 50; transition: transform 0.1s;
-        }
-
-        /* Blaue Bewegungspfeile */
-        .trail-arrow {
+        /* Harmonischer Blauer Pfeil */
+        .blue-arrow-trail {
             position: absolute; width: 0; height: 0;
             border-left: 8px solid transparent; border-right: 8px solid transparent;
-            border-bottom: 16px solid var(--accent-blue);
-            pointer-events: none; z-index: 10; opacity: 0.8;
-            animation: arrowFade 0.6s forwards;
+            border-bottom: 18px solid var(--accent);
+            pointer-events: none; opacity: 0.8; z-index: 15;
+            animation: arrowAnim 0.7s ease-out forwards;
         }
 
-        @keyframes arrowFade {
-            to { opacity: 0; transform: translateY(-30px) scale(0.2); }
+        @keyframes arrowAnim {
+            to { opacity: 0; transform: translateY(-40px) scale(0.2) rotate(45deg); }
         }
 
         /* Aufsteigende Punkte */
-        .floating-point {
-            position: absolute; font-weight: bold; font-size: 1.8rem;
-            pointer-events: none; z-index: 200;
-            animation: riseFade 1.2s ease-out forwards;
+        .point-popup {
+            position: absolute; font-weight: 900; font-size: 2rem;
+            pointer-events: none; z-index: 150;
+            animation: pointRise 1.2s ease-out forwards;
         }
 
-        @keyframes riseFade {
+        @keyframes pointRise {
             0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100px); opacity: 0; }
+            100% { transform: translateY(-120px); opacity: 0; }
         }
 
-        #score-board {
-            position: absolute; top: 20px; left: 20px; font-size: 28px;
-            font-weight: bold; z-index: 300; display: none;
+        #hud {
+            position: absolute; top: 25px; left: 25px; font-size: 32px;
+            font-weight: bold; color: var(--accent); z-index: 200; display: none;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body>
 
-    <div id="game-bg"></div>
-    <div id="score-board">PUNKTE: 0</div>
+    <div id="hud">PUNKTE: 0</div>
 
-    <div id="ui-wrapper">
+    <div id="start-screen">
         <div class="container">
             <div class="glass-box">
-                <h1>Cats World</h1>
-                <p>DoggyCo Edition</p>
-                <input type="text" id="player-input" placeholder="Name hier eingeben...">
+                <h1>DOGGYCO</h1>
+                <h3>Cats World Edition</h3>
+                <input type="text" id="player-name" placeholder="Spielername...">
             </div>
 
-            <button class="btn-main" onclick="launchGame()">SPIEL STARTEN</button>
+            <button class="btn-start" onclick="startGame()">MISSION STARTEN</button>
 
-            <div class="row">
-                <div class="glass-box" style="padding: 10px;">🏆 Rank</div>
-                <div class="glass-box" style="padding: 10px;">🛠️ Support</div>
+            <div class="info-row">
+                <div class="glass-box small-btn">🏆 Global Rank</div>
+                <div class="glass-box small-btn">🛠️ Support</div>
             </div>
 
             <div class="glass-box">
-                <h4 style="margin: 0;">Institution</h4>
-                <p style="font-size: 0.8rem;">Offizieller Partner-Bereich</p>
-                <hr style="border: 0.5px solid var(--glass-border); margin: 10px 0;">
-                <p style="font-size: 0.7rem; opacity: 0.7; cursor: pointer;">Rechtliche Linien & Impressum</p>
+                <h4 style="margin: 0;">INSTITUTION</h4>
+                <p style="font-size: 0.85rem; margin: 8px 0;">Offizielles Partner-Portal</p>
+                <hr style="border: 0.5px solid var(--glass-border); margin: 12px 0;">
+                <p style="font-size: 0.75rem; opacity: 0.6; cursor: pointer;">Rechtliche Linien | Datenschutz | Impressum</p>
             </div>
         </div>
     </div>
 
-    <script>
-        let currentScore = 0;
-        let gameRunning = false;
+    <div id="game-layer"></div>
 
-        function launchGame() {
-            document.getElementById('ui-wrapper').style.display = 'none';
-            document.getElementById('score-board').style.display = 'block';
-            gameRunning = true;
-            startSpawning();
-            // Hier könnte Musik starten: playMusic();
+    <script>
+        let score = 0;
+        let active = false;
+        const gameLayer = document.getElementById('game-layer');
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('hud').style.display = 'block';
+            active = true;
+            loop();
         }
 
-        // Steuerung: Blaue Pfeile
+        // 1. Harmonische Steuerung (Blaue Pfeile)
         document.addEventListener('mousemove', (e) => {
-            if(!gameRunning) return;
+            if(!active) return;
             const arrow = document.createElement('div');
-            arrow.className = 'trail-arrow';
-            arrow.style.left = e.pageX + 'px';
-            arrow.style.top = e.pageY + 'px';
+            arrow.className = 'blue-arrow-trail';
+            arrow.style.left = (e.pageX - 8) + 'px';
+            arrow.style.top = (e.pageY - 9) + 'px';
             arrow.style.transform = `rotate(${Math.random() * 360}deg)`;
             document.body.appendChild(arrow);
-            setTimeout(() => arrow.remove(), 600);
+            setTimeout(() => arrow.remove(), 700);
         });
 
-        // Spielregeln: Items fallen vom Himmel
-        function startSpawning() {
-            if(!gameRunning) return;
-            spawnObject();
-            setTimeout(startSpawning, 850);
+        // 2. Spielregeln (Falling Objects)
+        function loop() {
+            if(!active) return;
+            createObject();
+            setTimeout(loop, 900);
         }
 
-        function spawnObject() {
+        function createObject() {
             const obj = document.createElement('div');
-            const isGood = Math.random() > 0.3; // 70% Gut, 30% Schlecht
-            obj.className = 'item';
-            obj.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-            obj.style.top = '-50px';
-            obj.style.background = isGood ? '#2ecc71' : '#e74c3c';
-            obj.style.boxShadow = `0 0 20px ${isGood ? '#2ecc71' : '#e74c3c'}`;
+            const good = Math.random() > 0.3; 
+            obj.className = 'falling-item';
+            obj.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+            obj.style.top = '-60px';
+            obj.style.background = good ? 'radial-gradient(circle, #2ecc71, #27ae60)' : 'radial-gradient(circle, #e74c3c, #c0392b)';
+            obj.style.boxShadow = `0 0 20px ${good ? '#2ecc71' : '#e74c3c'}`;
             
             document.body.appendChild(obj);
 
-            let yPos = -50;
-            const fallSpeed = 3 + Math.random() * 4;
-            const fallInterval = setInterval(() => {
-                yPos += fallSpeed;
-                obj.style.top = yPos + 'px';
-                if(yPos > window.innerHeight) {
-                    clearInterval(fallInterval);
+            let y = -60;
+            const speed = 3 + Math.random() * 5;
+            const fall = setInterval(() => {
+                y += speed;
+                obj.style.top = y + 'px';
+                if(y > window.innerHeight) {
+                    clearInterval(fall);
                     obj.remove();
                 }
             }, 20);
 
             obj.onclick = (e) => {
-                clearInterval(fallInterval);
-                const points = isGood ? 10 : -5;
-                currentScore += points;
-                document.getElementById('score-board').innerText = "PUNKTE: " + currentScore;
+                clearInterval(fall);
+                const p = good ? 10 : -5;
+                score += p;
+                document.getElementById('hud').innerText = "PUNKTE: " + score;
                 
-                // Aufsteigende Punkte Effekt
-                createFloatingText(e.pageX, e.pageY, (points > 0 ? "+" : "") + points, isGood ? "#2ecc71" : "#ff4d4d");
+                // 3. Aufsteigende Punkte-Animation
+                showPop(e.pageX, e.pageY, (p > 0 ? "+" : "") + p, good ? "#2ecc71" : "#ff4d4d");
                 obj.remove();
             };
         }
 
-        function createFloatingText(x, y, text, color) {
-            const el = document.createElement('div');
-            el.className = 'floating-point';
-            el.innerText = text;
-            el.style.left = x + 'px';
-            el.style.top = y + 'px';
-            el.style.color = color;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 1200);
-        }
-
-        // Musik-Funktion vorbereitet
-        function playMusic() {
-            // Hier Audio-Objekt einfügen
-            console.log("Musik läuft...");
+        function showPop(x, y, txt, col) {
+            const pop = document.createElement('div');
+            pop.className = 'point-popup';
+            pop.innerText = txt;
+            pop.style.left = x + 'px';
+            pop.style.top = y + 'px';
+            pop.style.color = col;
+            document.body.appendChild(pop);
+            setTimeout(() => pop.remove(), 1200);
         }
     </script>
 </body>
 </html>
-
