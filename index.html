@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO & CATS WORLD - ULTIMATE MASTER V4600</title>
+    <title>DOGGYCO & CATS WORLD - REPAIRED FINAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --glass: rgba(255, 255, 255, 0.15); --cat-purple: #bc13fe; --blur: blur(25px);
+            --glass: rgba(255, 255, 255, 0.15); --cat-purple: #bc13fe; --blur: blur(20px);
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
@@ -18,249 +17,194 @@
             font-family: 'Orbitron', sans-serif; color: #fff;
         }
 
-        /* Hintergrund füllt die ganze Seite */
-        #bg-container {
+        #bg-image {
             position: fixed; inset: 0; background-image: url('hintergrund.png'); 
-            background-size: cover; background-position: center; z-index: 1; transition: background 1.5s ease;
+            background-size: cover; background-position: center; z-index: 1;
         }
 
-        /* --- UI LAYER (MILCHGLAS OPTIK) --- */
+        /* --- UI STARTSEITE --- */
         #ui-layer {
             position: relative; z-index: 100; height: 100vh; display: flex; 
             flex-direction: column; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.5); backdrop-filter: var(--blur);
         }
 
-        .neon-text {
-            font-size: 3.5rem; color: var(--neon); text-shadow: 0 0 25px var(--neon);
-            animation: glow 1.5s infinite alternate; margin-bottom: 30px;
+        .neon-title {
+            font-size: 3rem; color: var(--neon); text-shadow: 0 0 20px var(--neon);
+            margin-bottom: 20px; text-align: center;
         }
-        @keyframes glow { from { opacity: 0.7; } to { opacity: 1; text-shadow: 0 0 40px var(--neon); } }
 
         .glass-box {
-            background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
-            border: 1px solid rgba(255,255,255,0.3); border-radius: 25px;
-            padding: 20px; margin: 12px; width: 90%; max-width: 450px; text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            background: var(--glass); border: 1px solid rgba(255,255,255,0.3); 
+            border-radius: 20px; padding: 20px; margin: 10px; width: 350px; text-align: center;
+            pointer-events: auto; /* WICHTIG: Klickbar machen! */
         }
 
         input#pName {
-            width: 85%; padding: 15px; border-radius: 12px; border: 2px solid var(--neon);
-            background: rgba(0,0,0,0.5); color: white; text-align: center; font-family: 'Orbitron';
-            font-size: 1.2rem; outline: none; margin-bottom: 20px;
+            width: 100%; padding: 12px; border-radius: 10px; border: 2px solid var(--neon);
+            background: rgba(0,0,0,0.6); color: white; text-align: center; font-family: 'Orbitron';
+            margin-bottom: 15px; outline: none;
         }
 
-        .btn-main-row { display: flex; gap: 15px; width: 100%; justify-content: center; }
-        .start-btn { flex: 1; padding: 18px; border-radius: 15px; border: none; font-weight: 900; cursor: pointer; font-family: 'Orbitron'; font-size: 1rem; }
-        .dog-btn { background: var(--green); color: #000; box-shadow: 0 0 15px var(--green); }
-        .cat-btn { background: var(--cat-purple); color: #fff; box-shadow: 0 0 15px var(--cat-purple); }
+        .btn-row { display: flex; gap: 10px; width: 100%; }
+        .btn { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; font-family: 'Orbitron'; }
+        .dog-btn { background: var(--green); color: #000; }
+        .cat-btn { background: var(--cat-purple); color: #fff; }
 
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 90%; max-width: 450px; margin-top: 10px; }
-        .tile { padding: 15px; font-size: 0.8rem; cursor: pointer; transition: 0.3s; }
-        .tile:hover { background: rgba(255,255,255,0.2); }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 350px; }
+        .tile { padding: 12px; font-size: 0.8rem; cursor: pointer; }
 
-        /* --- GAME-AREA --- */
+        /* --- GAMEPLAY --- */
         #game-wrap { 
             position: relative; width: 400px; height: 85vh; margin: auto; top: 5vh;
-            border: 5px solid var(--neon); border-radius: 40px; overflow: hidden; display: none;
-            background: rgba(0,0,0,0.7); box-shadow: 0 0 60px var(--neon); z-index: 50;
+            border: 4px solid var(--neon); border-radius: 40px; overflow: hidden; display: none;
+            background: rgba(0,0,0,0.8); z-index: 200;
         }
+        canvas { display: block; }
 
         #hud {
             position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-around;
-            font-size: 14px; font-weight: bold; text-shadow: 2px 2px #000; z-index: 200;
+            font-size: 14px; font-weight: bold; text-shadow: 2px 2px #000; pointer-events: none;
         }
 
-        /* Steuerungstasten */
-        #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; }
-        .arrow-btn { 
-            width: 85px; height: 85px; background: rgba(255,255,255,0.1); border: 4px solid var(--neon); 
-            border-radius: 50%; color: white; font-size: 40px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.1s;
+        #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; }
+        .arrow { 
+            width: 80px; height: 80px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); 
+            border-radius: 50%; color: white; font-size: 35px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
         }
-        .arrow-btn.blink { background: var(--neon); box-shadow: 0 0 30px var(--neon); transform: scale(1.1); }
+        .arrow:active { background: var(--neon); }
 
-        /* Effekte */
-        .shake-screen { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-4px, 0, 0); } 20%, 80% { transform: translate3d(6px, 0, 0); } }
-
-        #leader-box { position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        /* SHAKE EFFEKT */
+        .shake { animation: shakeAnim 0.3s linear; }
+        @keyframes shakeAnim { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
     </style>
 </head>
 <body>
 
-<div id="bg-container"></div>
+<div id="bg-image"></div>
 
 <div id="ui-layer">
-    <h1 class="neon-text" id="main-title">DOGGYCO</h1>
+    <h1 class="neon-title" id="t-logo">DOGGYCO</h1>
     
     <div class="glass-box">
-        <input type="text" id="pName" placeholder="SPIELERNAME">
-        <div class="btn-main-row">
-            <button class="start-btn dog-btn" onclick="launch(false)">DOGGY START</button>
-            <button class="start-btn cat-btn" onclick="launch(true)">CATS START</button>
+        <input type="text" id="pName" placeholder="DEIN NAME...">
+        <div class="btn-row">
+            <button class="btn dog-btn" onclick="start(false)">DOGGY START</button>
+            <button class="btn cat-btn" onclick="start(true)">CATS START</button>
         </div>
     </div>
 
     <div class="info-grid">
-        <div class="glass-box tile" onclick="toggleRank(true)">🏆 GLOBAL RANK</div>
-        <div class="glass-box tile">🛠️ SUPPORT</div>
-    </div>
-
-    <div class="info-grid">
-        <div class="glass-box tile">📖 ANLEITUNG</div>
-        <div class="glass-box tile" style="font-size: 0.65rem;">⚖️ RECHTLICHE LINIEN & IMPRESSUM</div>
+        <div class="glass-box tile" onclick="alert('Ranking folgt!')">🏆 RANK</div>
+        <div class="glass-box tile" onclick="alert('Support: help@doggy.co')">🛠️ SUPPORT</div>
+        <div class="glass-box tile" onclick="alert('Anleitung: Fange Items, meide Polizei!')">📖 INFO</div>
+        <div class="glass-box tile" style="font-size: 0.6rem;">⚖️ LEGAL</div>
     </div>
 </div>
 
 <div id="game-wrap">
     <div id="hud">
-        <span id="h-score">🏆 0</span>
-        <span id="h-lvl" style="color:var(--gold)">LVL 1</span>
-        <span id="h-heart">❤️❤️❤️</span>
+        <span id="s-score">🏆 0</span>
+        <span id="s-lvl" style="color:var(--gold)">LVL 1</span>
+        <span id="s-heart">❤️❤️❤️</span>
     </div>
-    <canvas id="gameCanvas"></canvas>
-    
+    <canvas id="canvas"></canvas>
     <div id="controls">
-        <div id="ctrl-L" class="arrow-btn" onmousedown="m('L')" ontouchstart="m('L')">◀</div>
-        <div id="ctrl-R" class="arrow-btn" onmousedown="m('R')" ontouchstart="m('R')">▶</div>
+        <div class="arrow" onmousedown="mv('L')" ontouchstart="mv('L')">◀</div>
+        <div class="arrow" onmousedown="mv('R')" ontouchstart="mv('R')">▶</div>
     </div>
-</div>
-
-<div id="leader-box">
-    <h2 style="color:var(--gold); margin-bottom: 20px;">🏆 GLOBAL RANKING</h2>
-    <div id="rank-list" style="width: 100%; margin-bottom: 20px;">Lade Daten...</div>
-    <button class="start-btn dog-btn" onclick="toggleRank(false)">SCHLIESSEN</button>
 </div>
 
 <script>
-    // Supabase Setup
-    const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
-    const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Dein Key hier
-    const supabase = supabase.createClient(SURL, SKEY);
-
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+    const cvs = document.getElementById("canvas");
+    const ctx = cvs.getContext("2d");
     let score = 0, level = 1, hearts = 3, active = false, isCat = false;
-    let items = [], floaters = [], dogX = 200, dogLane = 2, lastLvl = Date.now();
-    let speed = 4;
+    let items = [], floaters = [], dogX = 200, dogLane = 2, speed = 4, lastLvl = Date.now();
 
-    function launch(catMode) {
-        if(!document.getElementById("pName").value) { alert("Bitte Namen eingeben!"); return; }
-        isCat = catMode;
+    function start(cat) {
+        if(!document.getElementById("pName").value) { alert("Name?"); return; }
+        isCat = cat;
         document.getElementById("ui-layer").style.display = "none";
         document.getElementById("game-wrap").style.display = "block";
         
         if(isCat) {
-            document.getElementById("bg-container").style.backgroundImage = "url('forest_background.png')";
-            document.getElementById("main-title").style.color = "var(--cat-purple)";
+            document.getElementById("bg-image").style.backgroundImage = "url('forest_background.png')";
+            document.getElementById("t-logo").style.color = "var(--cat-purple)";
             document.getElementById("game-wrap").style.borderColor = "var(--cat-purple)";
         }
         
-        canvas.width = 400; canvas.height = 600;
+        cvs.width = 400; cvs.height = 600;
         active = true;
-        new Audio('musik.mp3').play().catch(()=>{});
-        setInterval(spawner, 1000); 
-        requestAnimationFrame(run);
+        // Audio Versuch
+        let m = new Audio('musik.mp3'); m.loop = true; m.play().catch(()=>{});
+        
+        setInterval(spawn, 1000);
+        requestAnimationFrame(draw);
     }
 
-    function m(dir) {
-        const btn = document.getElementById("ctrl-" + dir);
-        btn.classList.add("blink");
-        setTimeout(() => btn.classList.remove("blink"), 150);
-        
-        if(dir === 'L' && dogLane > 0) dogLane--;
-        if(dir === 'R' && dogLane < 4) dogLane++;
+    function mv(d) {
+        if(d === 'L' && dogLane > 0) dogLane--;
+        if(d === 'R' && dogLane < 4) dogLane++;
         dogX = (dogLane * 80) + 40;
-        
-        // Bewegungs-Pfeil blau
-        addF(dogX, 520, "▲", "var(--neon)");
+        // Blauer Pfeil Effekt
+        addF(dogX, 500, "▲", "var(--neon)");
     }
 
-    function spawner() {
+    function spawn() {
         if(!active) return;
-        let lane = Math.floor(Math.random() * 5);
+        let l = Math.floor(Math.random() * 5);
         let r = Math.random();
-        // Regelmäßige Verteilung: 70% Schätze, 20% Polizei, 10% Tiere
-        let type = r > 0.3 ? (isCat ? '🥣' : '🦴') : (r > 0.1 ? '👮' : (isCat ? '🐍' : '🕷️'));
-        items.push({ x: lane * 80 + 40, y: -50, type: type });
+        let t = r > 0.3 ? (isCat ? '🥣' : '🦴') : (r > 0.1 ? '👮' : (isCat ? '🐍' : '🕷️'));
+        items.push({ x: l * 80 + 40, y: -50, t: t });
     }
 
-    function run() {
+    function draw() {
         if(!active) return;
-        ctx.clearRect(0, 0, 400, 600);
+        ctx.clearRect(0,0,400,600);
 
-        // Level Up +10% Speed alle 30s
-        if(Date.now() - lastLvl > 30000) {
-            level++; speed *= 1.1; lastLvl = Date.now();
-        }
+        // Level Up (alle 30 Sek)
+        if(Date.now() - lastLvl > 30000) { level++; speed *= 1.1; lastLvl = Date.now(); }
 
         items.forEach((it, i) => {
             it.y += speed;
-            ctx.font = "42px Arial"; ctx.textAlign = "center";
-            ctx.fillText(it.type, it.x, it.y);
+            ctx.font = "40px Arial"; ctx.textAlign = "center";
+            ctx.fillText(it.t, it.x, it.y);
 
-            // Collision Detection
             if(it.y > 500 && it.y < 560 && Math.abs(it.x - dogX) < 40) {
-                if(it.type === '👮' || it.type === '🐍' || it.type === '🕷️') {
+                if(it.t === '👮' || it.t === '🐍' || it.t === '🕷️') {
                     hearts--;
-                    document.getElementById("game-wrap").classList.add("shake-screen");
-                    setTimeout(()=>document.getElementById("game-wrap").classList.remove("shake-screen"), 300);
+                    document.getElementById("game-wrap").classList.add("shake");
+                    setTimeout(()=>document.getElementById("game-wrap").classList.remove("shake"), 200);
                     addF(it.x, it.y, "-1 ❤️", "var(--red)");
                 } else {
-                    let p = 10 * level; score += p;
-                    addF(it.x, it.y, "+" + p, "var(--green)");
+                    score += (10 * level);
+                    addF(it.x, it.y, "+" + (10*level), "var(--green)");
                 }
                 items.splice(i, 1);
             }
-            if(it.y > 600) items.splice(i, 1);
+            if(it.y > 600) items.splice(i,1);
         });
 
-        // Player Rendering
-        ctx.font = "75px Arial";
-        ctx.fillText(isCat ? "🐱" : "🐶", dogX, 550);
+        ctx.font = "70px Arial"; ctx.fillText(isCat ? "🐱" : "🐶", dogX, 550);
 
-        // Animationen (Punkte/Pfeile)
         floaters.forEach((f, i) => {
-            f.y -= 2.5; f.life -= 0.02;
-            ctx.globalAlpha = f.life; ctx.fillStyle = f.col; ctx.font = "bold 24px Orbitron";
-            ctx.fillText(f.txt, f.x, f.y);
-            if(f.life <= 0) floaters.splice(i, 1);
+            f.y -= 2; f.l -= 0.02;
+            ctx.globalAlpha = f.l; ctx.fillStyle = f.c; ctx.font = "bold 20px Orbitron";
+            ctx.fillText(f.t, f.x, f.y);
+            if(f.l <= 0) floaters.splice(i, 1);
         });
         ctx.globalAlpha = 1;
 
-        // HUD Update
-        document.getElementById("h-score").innerText = "🏆 " + score;
-        document.getElementById("h-heart").innerText = "❤️".repeat(Math.max(0, hearts));
-        document.getElementById("h-lvl").innerText = "LVL " + level;
+        document.getElementById("s-score").innerText = "🏆 " + score;
+        document.getElementById("s-heart").innerText = "❤️".repeat(Math.max(0, hearts));
+        document.getElementById("s-lvl").innerText = "LVL " + level;
 
-        if(hearts <= 0) {
-            active = false;
-            saveScore();
-            alert("ENDE! Dein Score: " + score);
-            location.reload();
-        }
-        requestAnimationFrame(run);
+        if(hearts <= 0) { alert("Aus! Score: " + score); location.reload(); }
+        requestAnimationFrame(draw);
     }
 
-    function addF(x, y, txt, col) { floaters.push({ x, y, txt, col, life: 1.0 }); }
-
-    function toggleRank(show) {
-        document.getElementById("leader-box").style.display = show ? "flex" : "none";
-        if(show) updateRankList();
-    }
-
-    async function saveScore() {
-        const name = document.getElementById("pName").value;
-        await supabase.from('leaderboard').insert([{ n: name, s: score }]);
-    }
-
-    async function updateRankList() {
-        let { data } = await supabase.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
-        if(data) {
-            document.getElementById("rank-list").innerHTML = data.map(x => `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333;"><span>${x.n}</span><span>${x.s}</span></div>`).join('');
-        }
-    }
+    function addF(x, y, t, c) { floaters.push({ x, y, t, c, l: 1.0 }); }
 </script>
 </body>
 </html>
