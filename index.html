@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO V-MAX 9000 - COMPLETE</title>
+    <title>DOGGYCO V-MAX 10000</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --glass: rgba(255, 255, 255, 0.12); --cat-purple: #bc13fe; --rabbit-orange: #ff9f43; --blur: blur(25px);
+            --glass: rgba(255, 255, 255, 0.15); --cat-purple: #bc13fe; --blur: blur(25px);
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
@@ -20,59 +20,57 @@
         }
 
         #main-bg {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-image: url('hintergrund.png'); background-size: cover; background-position: center;
-            z-index: -1; transition: 1s;
+            position: fixed; inset: 0; background-image: url('hintergrund.png'); 
+            background-size: cover; background-position: center; z-index: -1;
         }
 
-        /* NEON TITEL */
         @keyframes neonBlink {
             0%, 100% { text-shadow: 0 0 30px var(--neon); color: var(--neon); }
             50% { text-shadow: 0 0 10px var(--neon); color: #fff; }
         }
-        .main-header { font-size: clamp(40px, 10vw, 70px); font-weight: 900; animation: neonBlink 1.5s infinite; padding: 30px; text-align: center; }
+        .main-header { font-size: 60px; font-weight: 900; animation: neonBlink 1.5s infinite; padding: 30px; text-align: center; }
 
         /* KACHELN DESIGN */
         .glass-panel {
             background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
             border: 3px solid var(--neon); border-radius: 25px;
-            padding: 30px; margin: 15px 0; width: 92vw; max-width: 500px; text-align: center;
-            box-shadow: 0 0 15px var(--neon); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 25px; margin: 15px 0; width: 400px; text-align: center;
+            box-shadow: 0 0 15px var(--neon); transition: 0.3s;
             cursor: pointer; position: relative;
         }
+        /* Einzelnes Erheben beim Drücken */
+        .glass-panel:active, .neon-btn:active { transform: translateY(-10px); box-shadow: 0 15px 30px var(--neon); }
 
-        /* HOVER & ACTIVE EFFEKT (ERHEBEN) */
-        .glass-panel:hover { transform: translateY(-10px); box-shadow: 0 15px 40px var(--neon); }
-        .glass-panel:active { transform: translateY(-5px) scale(1.02); }
-
-        /* NAMENSFELD GESTRECKT */
+        /* NAME GESTRECKT */
         #pName {
             background: transparent; border: none; border-bottom: 3px solid var(--neon);
             color: white; font-family: 'Orbitron'; font-size: 1.8rem;
-            text-align: center; width: 100%; outline: none; padding: 20px; margin-bottom: 10px;
+            text-align: center; width: 100%; outline: none; padding: 25px 0;
         }
 
-        /* SPIEL-BUTTONS FARBLICH */
-        .btn-game { padding: 20px; border-radius: 15px; font-weight: 900; width: 100%; border: none; font-family: 'Orbitron'; margin: 10px 0; font-size: 1.1rem; cursor: pointer; }
-        .dog-btn { background: var(--green); color: #000; box-shadow: 0 0 15px var(--green); }
-        .cat-btn { background: var(--cat-purple); color: #fff; box-shadow: 0 0 15px var(--cat-purple); }
-        .rabbit-btn { background: var(--rabbit-orange); color: #000; box-shadow: 0 0 15px var(--rabbit-orange); opacity: 0.6; cursor: not-allowed; }
+        .neon-btn { 
+            padding: 18px; border-radius: 15px; border: none; font-weight: 900; 
+            width: 100%; font-family: 'Orbitron'; margin: 10px 0; cursor: pointer; transition: 0.3s;
+        }
+        .dog-btn { background: var(--green); color: #000; }
+        .cat-btn { background: var(--cat-purple); color: #fff; opacity: 0.6; cursor: not-allowed; }
+        .rabbit-btn { background: #444; color: #888; cursor: not-allowed; }
 
-        /* SUPPORT ELEMENTE */
-        .support-row { display: flex; justify-content: space-around; gap: 10px; margin: 15px 0; }
-        .sup-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-family: 'Orbitron'; }
-        .qr-wrap { background: #fff; padding: 10px; border-radius: 15px; display: inline-block; margin: 15px 0; }
+        /* SUPPORT BUTTONS */
+        .sup-row { display: flex; gap: 10px; margin-top: 15px; }
+        .small-btn { flex: 1; padding: 12px; border-radius: 10px; border: 2px solid var(--neon); background: var(--glass); color: white; font-size: 0.7rem; cursor: pointer; transition: 0.3s; }
+        .small-btn:active { transform: translateY(-5px); background: var(--neon); color: black; }
 
-        /* GAME LAYOUT */
-        #game-wrap { position: relative; width: 400px; height: 85vh; border: 5px solid var(--neon); border-radius: 40px; overflow: hidden; display: none; background: rgba(0,0,0,0.85); box-shadow: 0 0 60px var(--neon); }
-        #hud { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-around; z-index: 200; font-weight: 900; text-shadow: 2px 2px #000; }
-        #energy-bar { width: 80%; height: 15px; background: #222; border-radius: 10px; margin: 5px auto; overflow: hidden; border: 1px solid #fff; }
-        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--green)); transition: 0.3s; }
-        
+        /* GAME AREA */
+        #game-wrap { 
+            position: relative; width: 400px; height: 85vh; border: 5px solid var(--neon); 
+            border-radius: 40px; overflow: hidden; display: none; background: rgba(0,0,0,0.8);
+        }
+        canvas { position: absolute; inset: 0; }
+        #hud { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-around; z-index: 200; font-weight: 900; }
+
         #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; }
-        .arrow { width: 85px; height: 85px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        
-        .rank-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(0,242,255,0.3); font-size: 0.9rem; }
+        .arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -80,57 +78,49 @@
 <div id="main-bg"></div>
 <header><h1 class="main-header">DOGGYCO</h1></header>
 
-<div id="ui-layer" style="width: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: 60px;">
+<div id="ui-layer" style="display: flex; flex-direction: column; align-items: center; padding-bottom: 50px;">
     
     <div class="glass-panel" style="cursor: default;">
-        <input type="text" id="pName" placeholder="PLAYER NAME">
-        <button class="btn-game dog-btn" onclick="launch(false)">FREE DOGGYCO</button>
-        <button class="btn-game cat-btn" style="opacity: 0.7;">LEVEL 10 CATS WORLD 🔒</button>
-        <button class="btn-game rabbit-btn">MASTER RABBIT LAND 🔒</button>
+        <input type="text" id="pName" placeholder="ENTER NAME" onkeydown="if(event.key==='Enter')launch(false)">
+        <button class="neon-btn dog-btn" onclick="launch(false)">FREE DOGGYCO START</button>
+        <button class="neon-btn cat-btn">LEVEL 10 CATS WORLD 🔒</button>
+        <button class="neon-btn rabbit-btn">MASTER RABBIT LAND 🔒</button>
     </div>
 
-    <div class="glass-panel">
-        <h3 style="color:var(--gold); margin-bottom: 10px; border-bottom: 1px solid var(--neon);">🏆 GLOBAL RANKING</h3>
-        <div id="leaderboard">Loading ranking...</div>
+    <div class="glass-panel" id="ranking-tile">
+        <h3 style="color:var(--gold); border-bottom: 1px solid var(--neon); padding-bottom: 10px; margin-bottom: 10px;">🏆 GLOBAL RANKING</h3>
+        <div id="leaderboard" style="text-align: left;">Loading...</div>
     </div>
 
-    <div class="glass-panel">
-        <h3 style="color:var(--green); margin-bottom: 10px; border-bottom: 1px solid var(--neon);">💎 SUPPORT</h3>
-        <div class="support-row">
-            <button class="sup-btn" style="background:#ff0050; color:#fff;" onclick="window.open('https://tiktok.com')">TIKTOK</button>
-            <button class="sup-btn" style="background:#0070ba; color:#fff;" onclick="window.open('https://paypal.me')">PAYPAL</button>
+    <div class="glass-panel" style="cursor: default;">
+        <h3 style="color:var(--green); border-bottom: 1px solid var(--neon); padding-bottom: 10px;">💎 SUPPORT</h3>
+        <div class="sup-row">
+            <button class="small-btn" onclick="window.open('https://tiktok.com')">TIKTOK</button>
+            <button class="small-btn" onclick="window.open('https://paypal.me')">PAYPAL</button>
         </div>
-        <div class="qr-wrap">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BITCOIN_ADDRESS" width="120" alt="QR">
+        <div style="background: white; padding: 10px; border-radius: 15px; margin: 15px auto; width: 120px;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=BITCOIN_ADDRESS" width="100" alt="QR">
         </div>
-        <p style="font-size:10px; color:var(--gold); word-break:break-all;">Wallet: BITCOIN_ADDRESS_12345</p>
+        <p style="font-size: 10px; word-break: break-all;">Wallet: 1A2B3C4D5E6F7G8H9I0J</p>
+        <div class="sup-row">
+            <button class="small-btn" onclick="navigator.clipboard.writeText('1A2B3C4D5E6F7G8H9I0J');alert('Copied!')">COPY WALLET</button>
+        </div>
     </div>
 
-    <div class="glass-panel" style="text-align: left;">
-        <h3 style="color:var(--neon); text-align: center; margin-bottom: 10px; border-bottom: 1px solid var(--neon);">📖 INSTRUCTIONS</h3>
-        <p style="font-size: 0.85rem; line-height: 1.5;">
-            - Catch 🦴/🥣 for +25 Pts.<br>
-            - Avoid 👮, 🐍 and 🕷️!<br>
-            - Speed increases 10% every Level.<br>
-            - Watch your Energy bar!
-        </p>
-    </div>
-
-    <div class="glass-panel" style="border-color: rgba(255,255,255,0.4); box-shadow: none;">
-        <h3 style="color:#fff; margin-bottom: 5px;">⚖️ LEGAL NOTICE</h3>
-        <p style="font-size: 11px; line-height: 1.4;">
-            This is a private project. All donations are voluntary gifts to support development. © 2026 DOGGYCO GLOBAL ACADEMY.
+    <div class="glass-panel" style="cursor: default;">
+        <h3 style="margin-bottom: 10px;">⚖️ LEGAL NOTICE</h3>
+        <p style="font-size: 11px; color: white; line-height: 1.4;">
+            This project is private. All donations are gifts to support development. No commercial liability. <br>
+            © 2026 DOGGYCO GLOBAL ACADEMY.
         </p>
     </div>
 </div>
 
-<div id="game-wrap" id="gWrap">
+<div id="game-wrap">
     <div id="hud">
         <span id="hScore">🏆 0</span>
-        <span id="hLvl" style="color:var(--gold)">LVL 1</span>
         <span id="hHeart">❤️❤️❤️</span>
     </div>
-    <div style="position:absolute; top:45px; width:100%;"><div id="energy-bar"><div id="energy-fill"></div></div></div>
     <canvas id="c"></canvas>
     <div id="controls">
         <div class="arrow" onmousedown="mv('L')" ontouchstart="mv('L')">◀</div>
@@ -139,28 +129,22 @@
 </div>
 
 <script>
-// Supabase Integration
-const SUPABASE_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
+const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; 
+const supabase = supabase.createClient(SURL, SKEY);
 
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
-let score = 0, level = 1, hearts = 3, energy = 100, active = false, isCat = false;
-let items = [], floaters = [], dogX = 200, dogLane = 2, lastTime = 0, speed = 4;
+let score = 0, hearts = 3, active = false, dogLane = 2, dogX = 200, items = [], floaters = [], lastTime = 0;
 
 function launch(cat) {
     if(!document.getElementById("pName").value) return;
-    isCat = cat;
     document.getElementById("ui-layer").style.display = "none";
     document.getElementById("game-wrap").style.display = "block";
     canvas.width = 400; canvas.height = 600;
     active = true; lastTime = performance.now();
-    
-    // MUSIK START
-    let m = new Audio('musik.mp3'); m.loop = true; m.play().catch(()=>{});
-    
-    setInterval(spawn, 900);
+    new Audio('musik.mp3').play().catch(()=>{});
+    setInterval(spawn, 1000);
     requestAnimationFrame(loop);
 }
 
@@ -168,59 +152,41 @@ function mv(dir) {
     if(dir === 'L' && dogLane > 0) dogLane--;
     if(dir === 'R' && dogLane < 4) dogLane++;
     dogX = (dogLane * 80) + 40;
-    // BLAUER PFEIL FEEDBACK
-    addF(dogX, 500, "▲", "var(--neon)");
+    floaters.push({x: dogX, y: 500, t: "▲", c: "var(--neon)", l: 1});
 }
 
 function spawn() {
     if(!active) return;
-    let lane = Math.floor(Math.random() * 5);
-    let type = Math.random() > 0.3 ? '🦴' : '👮';
-    items.push({ x: lane * 80 + 40, y: -50, type: type });
+    items.push({ x: Math.floor(Math.random()*5)*80+40, y: -50, type: Math.random()>0.3?'🦴':'👮' });
 }
 
 function loop(t) {
     if(!active) return;
     let dt = (t - lastTime) / 1000; lastTime = t;
     ctx.clearRect(0,0,400,600);
-
-    energy -= (5 + level) * dt;
-    document.getElementById("energy-fill").style.width = energy + "%";
-
     items.forEach((it, i) => {
-        it.y += (250 + level * 10) * dt;
-        ctx.font = "40px Arial"; ctx.textAlign = "center";
-        ctx.fillText(it.type, it.x, it.y);
-
+        it.y += 300 * dt;
+        ctx.font = "40px Arial"; ctx.fillText(it.type, it.x, it.y);
         if(it.y > 500 && it.y < 560 && Math.abs(it.x - dogX) < 40) {
-            if(it.type === '👮') { hearts--; } 
-            else { score += 25; energy = Math.min(100, energy + 10); addF(it.x, it.y, "+25", "var(--green)"); }
-            items.splice(i, 1);
+            if(it.type === '👮') hearts--; else score += 25;
+            items.splice(i,1);
         }
-        if(it.y > 600) items.splice(i, 1);
     });
-
-    ctx.font = "70px Arial"; ctx.fillText(isCat ? "🐱" : "🐶", dogX, 550);
-
+    ctx.font = "70px Arial"; ctx.textAlign="center"; ctx.fillText("🐶", dogX, 550);
     floaters.forEach((f, i) => {
-        f.y -= 2; f.life -= 0.02;
-        ctx.globalAlpha = f.life; ctx.fillStyle = f.color; ctx.fillText(f.text, f.x, f.y);
-        if(f.life <= 0) floaters.splice(i, 1);
+        f.y -= 2; f.l -= 0.02; ctx.globalAlpha = f.l; ctx.fillStyle = f.c; ctx.fillText(f.t, f.x, f.y);
+        if(f.l <= 0) floaters.splice(i,1);
     });
     ctx.globalAlpha = 1;
-
-    document.getElementById("hScore").innerText = "🏆 " + Math.floor(score);
+    document.getElementById("hScore").innerText = "🏆 " + score;
     document.getElementById("hHeart").innerText = "❤️".repeat(hearts);
-
-    if(hearts <= 0 || energy <= 0) { active = false; alert("GameOver!"); location.reload(); }
+    if(hearts <= 0) location.reload();
     requestAnimationFrame(loop);
 }
 
-function addF(x, y, text, color) { floaters.push({ x, y, text, color, life: 1.0 }); }
-
 async function updateRanks() {
     let { data } = await supabase.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
-    if(data) document.getElementById("leaderboard").innerHTML = data.map(x => `<div class="rank-row"><span>${x.n}</span><span>${x.s}</span></div>`).join('');
+    if(data) document.getElementById("leaderboard").innerHTML = data.map(x => `<div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(0,242,255,0.2); padding:5px;"><span>${x.n}</span><span>${x.s}</span></div>`).join('');
 }
 window.onload = updateRanks;
 </script>
