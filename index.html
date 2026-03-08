@@ -3,521 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO - THE ULTIMATE VERSION</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@500;800&display=swap" rel="stylesheet">
-    
+    <title>DOGGYCO - ULTIMATE MASTER VERSION</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --neon-blue: #00f2ff;
             --neon-green: #00ff88;
-            --neon-pink: #ff00ea;
             --neon-red: #ff3131;
             --gold: #ffd700;
-            --bg-dark: #050505;
-            --glass: rgba(255, 255, 255, 0.07);
         }
 
-        /* RESET & BASE */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 50% 50%, #111 0%, #000 100%),
-                linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: #fff;
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { 
+            background: #000; 
+            color: #fff; 
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* HEADER */
-        header {
-            padding: 20px;
-            text-align: center;
-            z-index: 10;
-        }
-
-        .logo {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(30px, 8vw, 50px);
-            font-weight: 900;
-            letter-spacing: 6px;
-            color: var(--neon-blue);
-            text-shadow: 0 0 15px var(--neon-blue), 0 0 30px var(--neon-blue);
-            margin-bottom: 5px;
-        }
-
-        /* GAME CONTAINER */
-        #game-view {
+        /* Das Spielfeld */
+        #game-container {
             position: relative;
-            width: 100%;
-            max-width: 450px;
-            height: 75vh;
-            display: flex;
-            justify-content: center;
-            padding: 10px;
-        }
-
-        #game-wrap {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            border: 3px solid var(--neon-blue);
-            border-radius: 40px;
+            width: 100vw;
+            max-width: 400px; /* 5 Bahnen à 80px */
+            height: 85vh;
+            border: 4px solid var(--neon-blue);
+            background: linear-gradient(180deg, #050505 0%, #111 100%);
+            box-shadow: 0 0 50px rgba(0, 242, 255, 0.2);
             overflow: hidden;
-            box-shadow: 0 0 40px rgba(0, 242, 255, 0.3);
         }
 
-        /* CANVAS */
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
+        canvas { display: block; }
 
-        /* HUD & UI ELEMENTS */
-        #hud {
+        /* HUD & UI */
+        .hud {
             position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            padding: 0 25px;
+            top: 0; width: 100%;
+            padding: 20px;
             z-index: 100;
             pointer-events: none;
         }
 
-        .energy-container {
-            width: 100%;
-            height: 14px;
+        #energy-bar {
+            width: 100%; height: 15px;
             background: rgba(255,255,255,0.1);
+            border: 2px solid #fff;
             border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.3);
-            margin-bottom: 15px;
             overflow: hidden;
         }
 
         #energy-fill {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(90deg, var(--neon-red), var(--gold), var(--neon-green));
-            box-shadow: 0 0 10px var(--neon-green);
-            transition: width 0.3s ease;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, var(--neon-red), var(--neon-green));
+            transition: width 0.2s linear;
         }
 
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: 16px;
-            text-shadow: 2px 2px 4px #000;
+        .stats {
+            display: flex; justify-content: space-between;
+            margin-top: 10px; font-weight: 900; font-size: 18px;
         }
 
-        #score-val { color: var(--gold); font-size: 20px; }
-
-        /* OVERLAYS (START/END) */
+        /* Overlays */
         .overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
-            z-index: 500;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-            text-align: center;
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 1000; text-align: center;
         }
 
-        input#player-name {
-            width: 80%;
-            padding: 15px;
-            background: var(--glass);
-            border: 2px solid var(--neon-blue);
-            border-radius: 15px;
-            color: #fff;
-            font-family: 'Orbitron';
-            font-size: 18px;
-            text-align: center;
-            margin-bottom: 20px;
-            outline: none;
-        }
-
-        .btn-main {
-            padding: 18px 45px;
+        .btn-start {
+            padding: 20px 40px;
             background: var(--neon-green);
-            color: #000;
-            border: none;
-            border-radius: 50px;
-            font-family: 'Orbitron';
-            font-weight: 900;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: 0 0 20px var(--neon-green);
-            transition: transform 0.2s;
+            color: #000; font-weight: 900;
+            border: none; border-radius: 50px;
+            cursor: pointer; box-shadow: 0 0 20px var(--neon-green);
         }
 
-        .btn-main:active { transform: scale(0.95); }
-
-        /* CONTROLS */
-        #controls {
+        /* Floating Score Animation */
+        .floating-score {
             position: absolute;
-            bottom: 30px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 40px;
-            z-index: 200;
+            font-weight: 900;
+            color: var(--neon-green);
+            pointer-events: none;
+            animation: floatUp 1s forwards;
         }
 
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-100px); opacity: 0; }
+        }
+
+        /* Mobile Controls */
+        #controls {
+            display: flex; width: 100%; max-width: 400px;
+            justify-content: space-between; padding: 10px;
+        }
         .ctrl-btn {
-            width: 75px;
-            height: 75px;
+            width: 80px; height: 80px;
             background: rgba(255,255,255,0.1);
             border: 2px solid var(--neon-blue);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-size: 30px;
-            backdrop-filter: blur(5px);
-        }
-
-        /* BOTTOM TILES */
-        .info-section {
-            width: 90%;
-            max-width: 450px;
-            margin-top: 30px;
-            padding-bottom: 50px;
-        }
-
-        .tile {
-            background: var(--glass);
-            border: 2px solid var(--neon-blue);
-            border-radius: 30px;
-            padding: 25px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .wallet-box {
-            background: #000;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            color: var(--gold);
-            margin: 15px 0;
-            word-break: break-all;
-            border: 1px dashed var(--gold);
-            cursor: pointer;
-        }
-
-        .grid-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .sub-btn {
-            padding: 12px;
-            background: transparent;
-            border: 1px solid var(--neon-blue);
-            border-radius: 12px;
-            color: #fff;
-            font-size: 12px;
-            font-weight: 800;
-            text-decoration: none;
-        }
-
-        /* TOAST */
-        #toast {
-            position: fixed;
-            bottom: 20px;
-            background: var(--neon-green);
-            color: #000;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: 800;
-            display: none;
-            z-index: 2000;
         }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="logo">DOGGYCO</div>
-</header>
+<h1 style="color: var(--neon-blue); margin: 10px;">DOGGYCO</h1>
 
-<div id="game-view">
-    <div id="game-wrap">
-        <div id="hud">
-            <div class="energy-container">
-                <div id="energy-fill"></div>
-            </div>
-            <div class="stats-row">
-                <div id="hearts">❤️❤️❤️</div>
-                <div id="score-val">0</div>
-            </div>
+<div id="game-container">
+    <div class="hud">
+        <div id="energy-bar"><div id="energy-fill"></div></div>
+        <div class="stats">
+            <span id="hearts">❤️❤️❤️</span>
+            <span id="score">0</span>
         </div>
+    </div>
 
-        <canvas id="mainCanvas"></canvas>
+    <canvas id="gameCanvas"></canvas>
 
-        <div id="controls">
-            <div class="ctrl-btn" id="btn-l">◀</div>
-            <div class="ctrl-btn" id="btn-r">▶</div>
-        </div>
+    <div id="start-screen" class="overlay">
+        <h2 style="color:var(--neon-blue); margin-bottom:20px;">BEREIT FÜR DOGGYCO?</h2>
+        <button class="btn-start" onclick="startGame()">START MISSION</button>
+    </div>
 
-        <div id="start-overlay" class="overlay">
-            <h2 style="margin-bottom: 20px; color: var(--neon-blue);">READY?</h2>
-            <input type="text" id="player-name" placeholder="DEIN NAME" maxlength="12">
-            <button class="btn-main" onclick="Game.start()">PLAY NOW</button>
-        </div>
-
-        <div id="end-overlay" class="overlay" style="display: none;">
-            <h2 style="color: var(--neon-red); font-size: 30px;">GAME OVER</h2>
-            <div id="final-score" style="font-size: 60px; color: var(--gold); margin: 20px 0;">0</div>
-            <button class="btn-main" onclick="location.reload()">RETRY</button>
-        </div>
+    <div id="game-over" class="overlay" style="display:none;">
+        <h1 style="color:var(--neon-red);">MISSION FEHLGESCHLAGEN</h1>
+        <h2 id="final-score" style="color:var(--gold); font-size: 50px;">0</h2>
+        <button class="btn-start" onclick="location.reload()">NEUSTART</button>
     </div>
 </div>
 
-<div class="info-section">
-    <div class="tile">
-        <h3 style="color: var(--neon-blue); font-family: 'Orbitron';">DONATIONS</h3>
-        <p style="font-size: 12px; margin-top: 5px; opacity: 0.8;">Unterstütze die Entwicklung von Doggyco</p>
-        <div class="wallet-box" onclick="copyWallet()">
-            bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed
-        </div>
-        <div class="grid-buttons">
-            <a href="#" class="sub-btn">BITCOIN</a>
-            <a href="#" class="sub-btn">PAYPAL</a>
-            <a href="#" class="sub-btn">TIKTOK</a>
-            <a href="#" class="sub-btn">WALLET</a>
-        </div>
-    </div>
+<div id="controls">
+    <div class="ctrl-btn" ontouchstart="moveLeft()">◀</div>
+    <div class="ctrl-btn" ontouchstart="moveRight()">▶</div>
 </div>
 
-<div id="toast">KOPIERT!</div>
+<audio id="bgMusic" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+<audio id="collectSound" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
 
 <script>
 /**
- * DOGGYCO ENGINE V.FINAL
- * Alles integriert: 5-Bahnen, Energie, Spinnen-Limit, Symmetrie
+ * DOGGYCO ENGINE - ENDGÜLTIGE STRUKTUR
  */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const bgMusic = document.getElementById('bgMusic');
+const collectSound = document.getElementById('collectSound');
 
-const Game = {
-    canvas: document.getElementById('mainCanvas'),
-    ctx: null,
-    width: 400, // Logische Breite für 5 Bahnen à 80px
-    height: 0,
-    active: false,
-    laneWidth: 80,
-    
-    // Player State
-    player: {
-        lane: 2, // Start in der Mitte (0, 1, 2, 3, 4)
-        x: 200,
-        y: 0,
-        targetX: 200,
-        hearts: 3,
-        energy: 100,
-        score: 0
-    },
+// Spiel-Konfiguration
+let gameActive = false;
+let score = 0;
+let energy = 100;
+let hearts = 3;
+let currentLane = 2; // Start in der Mitte (0,1,2,3,4)
+const laneWidth = 80;
 
-    // Arrays für Objekte
-    items: [],
-    spiders: [], // Hindernisse an Fäden
-    particles: [],
+let items = [];
+let spiders = [];
+let particles = [];
 
-    init() {
-        this.ctx = this.canvas.getContext('2d');
-        this.resize();
-        window.addEventListener('resize', () => this.resize());
-        
-        // Touch Controls
-        document.getElementById('btn-l').addEventListener('touchstart', (e) => { e.preventDefault(); this.moveLeft(); });
-        document.getElementById('btn-r').addEventListener('touchstart', (e) => { e.preventDefault(); this.moveRight(); });
-        
-        // Keyboard Controls
-        window.addEventListener('keydown', (e) => {
-            if(e.key === "ArrowLeft") this.moveLeft();
-            if(e.key === "ArrowRight") this.moveRight();
-        });
-    },
-
-    resize() {
-        const wrap = document.getElementById('game-wrap');
-        this.canvas.width = this.width;
-        this.canvas.height = wrap.offsetHeight;
-        this.height = this.canvas.height;
-        this.player.y = this.height - 120;
-    },
-
-    moveLeft() { if(this.player.lane > 0) this.player.lane--; },
-    moveRight() { if(this.player.lane < 4) this.player.lane++; },
-
-    start() {
-        const name = document.getElementById('player-name').value;
-        if(!name) { alert("Bitte Namen eingeben!"); return; }
-        
-        document.getElementById('start-overlay').style.display = 'none';
-        this.active = true;
-        this.loop();
-    },
-
-    spawnItem() {
-        if(Math.random() < 0.04) {
-            const lane = Math.floor(Math.random() * 5);
-            const isBad = Math.random() < 0.25;
-            this.items.push({
-                lane: lane,
-                y: -50,
-                type: isBad ? '👮' : '🦴',
-                speed: 4 + (this.player.score / 500)
-            });
-        }
-    },
-
-    spawnSpider() {
-        // Limit: Max 2 Spinnen gleichzeitig (dein Wunsch!)
-        if(this.spiders.length < 2 && Math.random() < 0.01) {
-            this.spiders.push({
-                lane: Math.floor(Math.random() * 5),
-                y: -100,
-                speed: 3
-            });
-        }
-    },
-
-    update() {
-        if(!this.active) return;
-
-        // Energie-Abzug
-        this.player.energy -= 0.12;
-        if(this.player.energy <= 0) this.gameOver();
-
-        // Player Bewegung (Smooth)
-        this.player.targetX = (this.player.lane * this.laneWidth) + (this.laneWidth / 2);
-        this.player.x += (this.player.targetX - this.player.x) * 0.2;
-
-        // Items verarbeiten
-        this.items.forEach((it, index) => {
-            it.y += it.speed;
-            
-            // Kollision
-            if(it.lane === this.player.lane && it.y > this.player.y - 40 && it.y < this.player.y + 40) {
-                if(it.type === '🦴') {
-                    this.player.score += 10;
-                    this.player.energy = Math.min(100, this.player.energy + 6);
-                } else {
-                    this.player.hearts--;
-                    if(this.player.hearts <= 0) this.gameOver();
-                }
-                this.items.splice(index, 1);
-            }
-
-            if(it.y > this.height) this.items.splice(index, 1);
-        });
-
-        // Spinnen verarbeiten
-        this.spiders.forEach((s, index) => {
-            s.y += s.speed;
-            if(s.lane === this.player.lane && s.y > this.player.y - 40 && s.y < this.player.y + 40) {
-                this.player.energy -= 15; // Spinnen-Schaden
-                this.spiders.splice(index, 1);
-            }
-            if(s.y > this.height) this.spiders.splice(index, 1);
-        });
-
-        // UI Update
-        document.getElementById('energy-fill').style.width = this.player.energy + "%";
-        document.getElementById('score-val').innerText = Math.floor(this.player.score);
-        document.getElementById('hearts').innerText = "❤️".repeat(Math.max(0, this.player.hearts));
-    },
-
-    draw() {
-        this.ctx.clearRect(0, 0, this.width, this.height);
-
-        // Bahnen zeichnen (Symmetrisch)
-        this.ctx.strokeStyle = "rgba(0, 242, 255, 0.1)";
-        for(let i=1; i<5; i++) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(i * 80, 0);
-            this.ctx.lineTo(i * 80, this.height);
-            this.ctx.stroke();
-        }
-
-        // Spinnen-Fäden
-        this.spiders.forEach(s => {
-            const sx = (s.lane * 80) + 40;
-            this.ctx.strokeStyle = "#fff";
-            this.ctx.setLineDash([5, 5]);
-            this.ctx.beginPath();
-            this.ctx.moveTo(sx, 0);
-            this.ctx.lineTo(sx, s.y);
-            this.ctx.stroke();
-            this.ctx.setLineDash([]);
-            this.ctx.font = "30px Arial";
-            this.ctx.fillText("🕷️", sx - 15, s.y);
-        });
-
-        // Items
-        this.items.forEach(it => {
-            const ix = (it.lane * 80) + 40;
-            this.ctx.font = "35px Arial";
-            this.ctx.fillText(it.type, ix - 17, it.y);
-        });
-
-        // Hund (Symmetrie durch mathematische Zentrierung -40px vom Ankerpunkt)
-        this.ctx.font = "75px Arial";
-        this.ctx.fillText("🐶", this.player.x - 40, this.player.y + 25);
-    },
-
-    loop() {
-        if(!this.active) return;
-        this.update();
-        this.draw();
-        this.spawnItem();
-        this.spawnSpider();
-        requestAnimationFrame(() => this.loop());
-    },
-
-    gameOver() {
-        this.active = false;
-        document.getElementById('end-overlay').style.display = 'flex';
-        document.getElementById('final-score').innerText = Math.floor(this.player.score);
-    }
+// Hund-Objekt
+const dog = {
+    x: 200,
+    y: 0,
+    targetX: 200,
+    width: 60
 };
 
-// Wallet Helper
-function copyWallet() {
-    const addr = "bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed";
-    navigator.clipboard.writeText(addr).then(() => {
-        const t = document.getElementById('toast');
-        t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 2000);
-    });
+function init() {
+    canvas.width = 400;
+    canvas.height = document.getElementById('game-container').offsetHeight;
+    dog.y = canvas.height - 120;
 }
 
-// Start
-Game.init();
+function startGame() {
+    document.getElementById('start-screen').style.display = 'none';
+    gameActive = true;
+    bgMusic.play();
+    gameLoop();
+}
+
+function moveLeft() { if(currentLane > 0) currentLane--; }
+function moveRight() { if(currentLane < 4) currentLane++; }
+
+// Tastatur-Support
+window.addEventListener('keydown', (e) => {
+    if(e.key === "ArrowLeft") moveLeft();
+    if(e.key === "ArrowRight") moveRight();
+});
+
+function spawnEntity() {
+    if(!gameActive) return;
+    
+    // Items (Knochen oder Hindernisse)
+    if(Math.random() < 0.03) {
+        items.push({
+            x: (Math.floor(Math.random() * 5) * laneWidth) + 40,
+            y: -50,
+            type: Math.random() > 0.2 ? '🦴' : '👮',
+            speed: 5 + (score / 100)
+        });
+    }
+
+    // Spinnen-Logik (Max 2!)
+    if(spiders.length < 2 && Math.random() < 0.01) {
+        spiders.push({
+            x: (Math.floor(Math.random() * 5) * laneWidth) + 40,
+            y: -100,
+            speed: 3
+        });
+    }
+}
+
+function createFloatingScore(x, y, text) {
+    const el = document.createElement('div');
+    el.className = 'floating-score';
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.innerText = text;
+    document.getElementById('game-container').appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+}
+
+function update() {
+    if(!gameActive) return;
+
+    // Energie-Verbrauch
+    energy -= 0.1;
+    document.getElementById('energy-fill').style.width = energy + "%";
+    if(energy <= 0) gameOver();
+
+    // Hund-Symmetrie Bewegung
+    dog.targetX = (currentLane * laneWidth) + 40;
+    dog.x += (dog.targetX - dog.x) * 0.2;
+
+    // Items
+    items.forEach((it, i) => {
+        it.y += it.speed;
+        // Kollision
+        if(Math.abs(it.x - dog.x) < 40 && Math.abs(it.y - dog.y) < 40) {
+            if(it.type === '🦴') {
+                score += 10;
+                energy = Math.min(100, energy + 10);
+                collectSound.play();
+                createFloatingScore(it.x, it.y, "+10");
+            } else {
+                hearts--;
+                energy -= 20;
+            }
+            items.splice(i, 1);
+        }
+        if(it.y > canvas.height) items.splice(i, 1);
+    });
+
+    // Spinnen
+    spiders.forEach((s, i) => {
+        s.y += s.speed;
+        if(Math.abs(s.x - dog.x) < 40 && Math.abs(s.y - dog.y) < 40) {
+            energy -= 30;
+            spiders.splice(i, 1);
+        }
+        if(s.y > canvas.height) spiders.splice(i, 1);
+    });
+
+    if(hearts <= 0) gameOver();
+    
+    document.getElementById('score').innerText = score;
+    document.getElementById('hearts').innerText = "❤️".repeat(hearts);
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Bahnen zeichnen
+    ctx.strokeStyle = "rgba(0, 242, 255, 0.1)";
+    for(let i=1; i<5; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * laneWidth, 0);
+        ctx.lineTo(i * laneWidth, canvas.height);
+        ctx.stroke();
+    }
+
+    // Items zeichnen
+    ctx.font = "40px Arial";
+    items.forEach(it => ctx.fillText(it.type, it.x - 20, it.y));
+
+    // Spinnen zeichnen (mit Faden)
+    spiders.forEach(s => {
+        ctx.strokeStyle = "#fff";
+        ctx.beginPath();
+        ctx.moveTo(s.x, 0);
+        ctx.lineTo(s.x, s.y);
+        ctx.stroke();
+        ctx.fillText("🕷️", s.x - 20, s.y);
+    });
+
+    // Hund zeichnen
+    ctx.font = "70px Arial";
+    ctx.fillText("🐶", dog.x - 35, dog.y + 25);
+}
+
+function gameLoop() {
+    update();
+    draw();
+    spawnEntity();
+    if(gameActive) requestAnimationFrame(gameLoop);
+}
+
+function gameOver() {
+    gameActive = false;
+    bgMusic.pause();
+    document.getElementById('game-over').style.display = 'flex';
+    document.getElementById('final-score').innerText = score;
+}
+
+window.onload = init;
 </script>
 </body>
 </html>
