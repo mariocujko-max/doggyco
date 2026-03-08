@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO & CATS WORLD V70000 - MASTER REPAIRED</title>
+    <title>DOGGYCO & CATS WORLD - ULTIMATE MASTER</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --glass: rgba(255, 255, 255, 0.12); --cat-purple: #bc13fe; --blue-glow: #0070ff;
+            --glass: rgba(255, 255, 255, 0.15); --cat-purple: #bc13fe; --blue-glow: #0070ff;
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
@@ -25,62 +25,120 @@
             z-index: -1; transition: 1.5s;
         }
 
-        header h1 { font-size: 38px; color: var(--neon); text-shadow: 0 0 20px var(--neon); padding: 25px; text-align: center; }
+        /* RIESIGE BLINKENDE NEON ÜBERSCHRIFT */
+        @keyframes neonBlink {
+            0%, 100% { text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); color: var(--neon); opacity: 1; }
+            50% { text-shadow: 0 0 10px var(--neon); color: #fff; opacity: 0.7; }
+        }
+        .main-header { 
+            font-size: 60px; font-weight: 900; animation: neonBlink 1.5s infinite; 
+            padding: 40px; text-align: center; width: 100%;
+        }
 
-        /* EINHEITLICHES MILCHGLAS DESIGN */
-        .glass-box {
+        /* MASSIVE MILCHGLAS KACHELN */
+        .glass-panel {
             background: rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 20px; margin: 10px auto; width: 380px; text-align: center;
-            transition: all 0.3s ease; cursor: pointer; color: #fff;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            padding: 30px; margin: 15px 0;
+            width: 90vw; max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         /* ABHEBE EFFEKT */
-        .glass-box:active {
-            transform: translateY(-8px) scale(1.02);
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-            border-color: var(--neon);
+        .glass-panel:active {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+        }
+
+        /* NAMENSFELD IN DER KACHEL */
+        #pName {
+            background: transparent; border: none;
+            border-bottom: 3px solid var(--neon);
+            color: white; font-family: 'Orbitron'; font-size: 1.6rem;
+            text-align: center; width: 100%; outline: none; padding: 10px; margin-bottom: 20px;
         }
 
         /* GAME AREA */
-        #game-view { width: 100vw; height: 80vh; display: flex; justify-content: center; align-items: center; position: relative; }
+        #game-view { width: 100vw; height: 85vh; display: flex; justify-content: center; align-items: center; position: relative; }
         #game-wrap { 
             position:relative; width: 400px; height: 98%; 
-            background: rgba(0,0,0,0.75); border: 4px solid var(--neon); border-radius: 40px; 
-            overflow: hidden; box-shadow: 0 0 50px var(--neon);
+            background: rgba(0,0,0,0.8); border: 5px solid var(--neon); border-radius: 40px; 
+            overflow: hidden; display: none; box-shadow: 0 0 60px var(--neon);
         }
 
-        #start-screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.85); border-radius: 36px; }
-
-        #pName { 
-            background: transparent; border: none; border-bottom: 2px solid var(--neon);
-            color: white; font-family: 'Orbitron'; font-size: 1.2rem; text-align: center;
-            width: 90%; outline: none; padding: 5px;
-        }
-
-        /* HUD & KONTROLLEN */
+        /* HUD */
         #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
-        #energy-bar-wrap { width: 85%; height: 20px; margin: 0 auto; background: rgba(0,0,0,0.9); border: 1px solid #fff; border-radius: 10px; overflow: hidden; }
-        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: 0.2s; }
-        #hud-row { display: flex; justify-content: space-between; width: 85%; margin: 8px auto; font-size: 12px; font-weight: 900; }
-        
-        #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; }
-        .btn-arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.05); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .active-ring { background: rgba(0, 112, 255, 0.5) !important; box-shadow: 0 0 35px var(--blue-glow) !important; border-color: #fff !important; }
+        #energy-bar-wrap { width: 85%; height: 25px; margin: 0 auto; background: rgba(0,0,0,0.9); border: 1.5px solid #fff; border-radius: 12px; overflow: hidden; }
+        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s; }
+        #hud-row { display: flex; justify-content: space-between; width: 85%; margin: 10px auto; font-size: 14px; font-weight: 900; text-shadow: 2px 2px #000; }
 
         canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
 
-        .rank-row { display: grid; grid-template-columns: 1fr 100px; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        /* BUTTONS */
+        .neon-btn { padding: 20px; background: var(--green); color: #000; border-radius: 15px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; margin: 10px 0; width: 100%; font-size: 1.1rem; }
+        .cat-btn { background: var(--cat-purple); color: #fff; }
+
+        /* KONTROLLEN */
+        #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; }
+        .btn-arrow { width: 85px; height: 85px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        /* RANKING */
+        .rank-row { display: grid; grid-template-columns: 1fr 120px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        .shake { animation: shakeAnim 0.3s linear; }
+        @keyframes shakeAnim { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-6px);} 75% {transform: translateX(6px);} }
     </style>
 </head>
 <body>
 
 <div id="main-bg"></div>
-<header><h1>DOGGYCO</h1></header>
+<header><h1 class="main-header" id="dynamic-title">DOGGYCO</h1></header>
+
+<div id="ui-layer" style="z-index: 100; width: 100%; display: flex; flex-direction: column; align-items: center;">
+    
+    <div class="glass-panel" style="cursor: default;">
+        <input type="text" id="pName" placeholder="ENTER PLAYER NAME">
+        <button class="neon-btn" onclick="startApp(false)">FREE DOGGYCO START</button>
+        <button class="neon-btn cat-btn" onclick="startApp(true)">LEVEL 10 CATS WORLD START</button>
+        <button class="neon-btn" style="background:#444; color:#888; cursor:not-allowed; box-shadow:none;">MASTER RABBIT LAND 🔒</button>
+    </div>
+
+    <div class="glass-panel" style="cursor: default;">
+        <h2 style="color:var(--gold); margin-bottom:15px;">🏆 GLOBAL RANKING</h2>
+        <div id="leaderboard">Loading ranking data...</div>
+    </div>
+
+    <div class="glass-panel" onclick="window.location.href='https://give-me.org'">
+        <h2 style="color:var(--green); margin-bottom:10px;">💎 SUPPORT</h2>
+        <p>Official Platform: give-me.org</p>
+        <p style="font-size: 0.8rem; margin-top: 10px;">Click here to support our project</p>
+    </div>
+
+    <div class="glass-panel" style="text-align: left;">
+        <h2 style="color:var(--neon); text-align: center; margin-bottom: 10px;">📖 INSTRUCTIONS</h2>
+        <p style="font-size: 0.9rem; line-height: 1.6;">
+            - Use <b>Arrows</b> to move left and right.<br>
+            - Catch <b>Bones/Bowls</b> for +25 Points.<br>
+            - Collect <b>Meat/Milk</b> to refill Energy.<br>
+            - <b>Avoid Police, Snakes & Spiders!</b><br>
+            - Obstacles cost 1 Heart & -30% Energy.<br>
+            - Game Speed increases every Level!
+        </p>
+    </div>
+
+    <div class="glass-panel" style="border: none; background: none; box-shadow: none;">
+        <p style="font-size: 11px; color: rgba(255,255,255,0.7); line-height: 1.4;">
+            LEGAL NOTICE: Private initiative. Donations are voluntary gifts. <br>
+            All rights reserved © 2026 DOGGYCO & give-me.org
+        </p>
+    </div>
+</div>
 
 <div id="game-view">
     <div id="game-wrap">
@@ -92,123 +150,123 @@
                 <div id="score-display">🏆 0</div>
             </div>
         </div>
-
         <canvas id="game-canvas"></canvas>
-
         <div id="controls">
-            <div id="l-btn" class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft()">◀</div>
-            <div id="r-btn" class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight()">▶</div>
-        </div>
-
-        <div id="start-screen">
-            <div class="glass-box" style="cursor: default;">
-                <input type="text" id="pName" placeholder="ENTER PLAYER NAME...">
-            </div>
-            <div class="glass-box" onclick="startGame(false)">FREE DOGGYCO</div>
-            <div class="glass-box" onclick="startGame(true)" style="color:var(--cat-purple)">LEVEL 10 CATS WORLD</div>
-            <div class="glass-box" style="opacity: 0.6; cursor: not-allowed;">MASTER RABBIT LAND 🔒</div>
-        </div>
-        
-        <div id="end-screen" style="display:none;" class="start-screen">
-             <h1 id="f-score" style="font-size: 50px; color: var(--gold);">0</h1>
-             <button class="glass-box" onclick="location.reload()">RESTART</button>
+            <div class="btn-arrow" onmousedown="move('L')" ontouchstart="move('L')">◀</div>
+            <div class="btn-arrow" onmousedown="move('R')" ontouchstart="move('R')">▶</div>
         </div>
     </div>
 </div>
 
-<div class="glass-box" style="cursor: default; width: 400px;">
-    <h3 style="color:var(--gold); margin-bottom:10px;">🏆 GLOBAL RANKING</h3>
-    <div id="leaderboard">Loading...</div>
-</div>
-
-<div class="glass-box" onclick="window.location.href='https://give-me.org'">
-    <h3 style="color:var(--green);">💎 SUPPORT (GIVE-ME.ORG)</h3>
-    <p style="font-size: 10px;">Click here to visit our official page</p>
-</div>
-
-<div class="glass-box" onclick="alert('INSTRUCTIONS:\n- Move with Arrows\n- Catch Bones/Bowls for +25 Pts\n- Collect Meat for Energy\n- Avoid Police & Animals (-1 Heart)\n- Speed increases every 30 seconds!')">
-    📖 INSTRUCTIONS
-</div>
-
-<div style="margin: 20px 0; font-size: 11px; color: rgba(255,255,255,0.6); text-align: center; width: 380px;">
-    Legal Notice: Private Project. Donations are voluntary gifts. <br>
-    All rights reserved © 2026 DOGGYCO & give-me.org
-</div>
-
 <script>
-// SUPABASE & GAME LOGIC
 const SUPABASE_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // DEIN KEY
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
-const W = 400; 
-let H, dogX, targetX, dogLane = 2, active = false, isCat = false;
-let items = [], spiders = [], floaters = [], lastTime = 0, score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
-let dogShake = 0;
+let score = 0, level = 1, hearts = 3, active = false, isCat = false;
+let items = [], spiders = [], floaters = [], dogX = 200, dogLane = 2;
+let energy = 100, lastTime = 0, speed = 4, timeLeft = 30;
 
-function init() {
-    canvas.width = W; 
-    H = canvas.height = document.getElementById("game-wrap").offsetHeight;
-    targetX = (dogLane * 80) + 40; dogX = targetX;
-}
-
-function startGame(cat) {
-    if(!document.getElementById("pName").value) { alert("Please enter a name!"); return; }
-    isCat = cat;
-    document.getElementById("start-screen").style.display = "none";
-    if(isCat) document.getElementById("main-bg").style.filter = "hue-rotate(280deg)";
+function startApp(catMode) {
+    if(!document.getElementById("pName").value) return;
+    isCat = catMode;
+    document.getElementById("ui-layer").style.display = "none";
+    document.getElementById("game-wrap").style.display = "block";
+    if(isCat) {
+        document.getElementById("main-bg").style.backgroundImage = "url('forest_background.png')";
+        document.getElementById("dynamic-title").style.color = "var(--cat-purple)";
+        document.getElementById("game-wrap").style.borderColor = "var(--cat-purple)";
+    }
+    canvas.width = 400; canvas.height = 600;
     active = true; lastTime = performance.now();
-    requestAnimationFrame(loop);
+    new Audio('musik.mp3').play().catch(()=>{});
+    setInterval(spawnItem, 1000);
+    requestAnimationFrame(gameLoop);
 }
 
-function mLeft() { if(active && dogLane > 0) { dogLane--; targetX = (dogLane * 80) + 40; } }
-function mRight() { if(active && dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; } }
+function move(dir) {
+    if(!active) return;
+    if(dir === 'L' && dogLane > 0) dogLane--;
+    if(dir === 'R' && dogLane < 4) dogLane++;
+    dogX = (dogLane * 80) + 40;
+    addFloater(dogX, 500, "▲", "var(--neon)"); // Blauer Pfeil Effekt
+}
 
-function loop(t) {
+function spawnItem() {
+    if(!active) return;
+    let lane = Math.floor(Math.random() * 5);
+    let r = Math.random();
+    let type = r > 0.3 ? (isCat ? '🥣' : '🦴') : (r > 0.1 ? '👮' : (isCat ? '🐍' : '🕷️'));
+    items.push({ x: lane * 80 + 40, y: -50, type: type, d: 1 });
+}
+
+function gameLoop(t) {
     if(!active) return;
     let dt = (t - lastTime) / 1000; lastTime = t;
-    ctx.clearRect(0,0,W,H);
+    ctx.clearRect(0, 0, 400, 600);
 
-    energy -= (5 + level) * dt;
+    energy -= (4.5 + level * 0.5) * dt;
     timeLeft -= dt;
-    if(timeLeft <= 0) { level++; timeLeft = 30; energy = Math.min(100, energy+20); }
+    if(timeLeft <= 0) { level++; timeLeft = 30; energy = Math.min(100, energy + 20); }
 
-    // DRAWING
     items.forEach((it, i) => {
-        it.y += (250 + level*10) * dt;
-        ctx.font = "40px Arial"; ctx.fillText(it.type, (it.lane*80)+40, it.y);
-        if(it.lane === dogLane && it.y > H-150 && it.y < H-80) { score+=25; energy=Math.min(100, energy+10); items.splice(i,1); }
-        if(it.y > H) items.splice(i,1);
+        it.y += (250 + level * 15) * dt;
+        ctx.font = "40px Arial"; ctx.textAlign = "center";
+        ctx.fillText(it.type, it.x, it.y);
+
+        if(it.y > 500 && it.y < 560 && Math.abs(it.x - dogX) < 40) {
+            if(it.type === '👮' || it.type === '🐍' || it.type === '🕷️') {
+                hearts--; energy -= 20;
+                document.getElementById("game-wrap").classList.add("shake");
+                setTimeout(()=>document.getElementById("game-wrap").classList.remove("shake"), 300);
+                addFloater(it.x, it.y, "-1 ❤️", "var(--red)");
+            } else {
+                score += (25 * level); energy = Math.min(100, energy + 10);
+                addFloater(it.x, it.y, "+" + (25*level), "var(--green)");
+            }
+            items.splice(i, 1);
+        }
+        if(it.y > 600) items.splice(i, 1);
     });
 
-    if(Math.random() < 0.02) items.push({lane: Math.floor(Math.random()*5), y: -50, type: isCat?'🍼':'🦴'});
+    ctx.font = "80px Arial";
+    ctx.fillText(isCat ? "🐱" : "🐶", dogX, 550);
 
-    dogX += (targetX - dogX) * 0.2;
-    ctx.font = "70px Arial"; ctx.textAlign = "center";
-    ctx.fillText(isCat?"🐱":"🐶", dogX, H-100);
+    floaters.forEach((f, i) => {
+        f.y -= 2; f.life -= 0.02;
+        ctx.globalAlpha = Math.max(0, f.life); ctx.fillStyle = f.col; ctx.font = "bold 22px Orbitron";
+        ctx.fillText(f.t, f.x, f.y);
+        if(f.life <= 0) floaters.splice(i, 1);
+    });
+    ctx.globalAlpha = 1;
 
-    // HUD Update
     document.getElementById("energy-fill").style.width = energy + "%";
     document.getElementById("score-display").innerText = "🏆 " + Math.floor(score);
+    document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
     document.getElementById("lvl-display").innerText = "LVL: " + level;
-    document.getElementById("hearts-display").innerText = "❤️".repeat(hearts);
 
-    if(energy <= 0 || hearts <= 0) { active = false; alert("Game Over! Score: " + score); location.reload(); }
-    requestAnimationFrame(loop);
+    if(hearts <= 0 || energy <= 0) { active = false; saveScore(); location.reload(); }
+    requestAnimationFrame(gameLoop);
+}
+
+function addFloater(x, y, t, col) { floaters.push({ x, y, t, col, life: 1.0 }); }
+
+async function saveScore() {
+    const n = document.getElementById("pName").value;
+    await supabaseClient.from('leaderboard').insert([{ n, s: Math.floor(score) }]);
 }
 
 async function updateRanks() {
     let { data } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
     if(data) document.getElementById("leaderboard").innerHTML = data.map(x => `
         <div class="rank-row">
-            <span style="text-align:left">${x.n}</span>
-            <span style="text-align:right; color:var(--gold)">${x.s}</span>
+            <span style="text-align:left;">${x.n}</span>
+            <span style="text-align:right; color:var(--gold); font-weight:bold;">${x.s} PTS</span>
         </div>`).join('');
 }
-
-window.onload = () => { init(); updateRanks(); };
+window.onload = () => { updateRanks(); };
 </script>
 </body>
 </html>
