@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOGGYCO ULTIMATE - EMERGENCY FIX</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        :root { --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.1); }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body { 
+            background: #000; font-family: 'Orbitron', sans-serif; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        #main-bg { position: fixed; inset: 0; background: #050505; z-index: -2; }
+        
+        header h1 { font-size: 40px; color: var(--neon); text-align: center; padding: 25px; text-shadow: 0 0 15px var(--neon); }
+
+        #game-view { width: 100vw; height: 70vh; display: flex; justify-content: center; position: relative; margin-top: 10px; }
+        
+        /* THE TRANSPARENT BOX */
+        #game-wrap { 
+            position:relative; width: 400px; height: 100%; 
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
+            border: 3px solid var(--neon); border-radius: 40px; overflow: hidden; 
+        }
+
+        canvas { position: absolute; inset: 0; z-index: 50; background: transparent; }
+
+        /* HUD */
+        #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; padding: 0 20px; }
+        #energy-bar { width: 100%; height: 12px; background: rgba(0,0,0,0.5); border-radius: 6px; border: 1px solid #fff; overflow: hidden; }
+        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.3s; }
+
+        /* OVERLAYS */
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.8); border-radius: 36px; }
+        .main-btn { padding: 18px 40px; background: var(--neon); color: #000; border: none; border-radius: 35px; font-weight: 900; cursor: pointer; margin: 10px; width: 250px; font-family: 'Orbitron'; }
+        #pName { padding: 15px; border-radius: 12px; border: 2px solid var(--neon); background: rgba(0,0,0,0.5); color: #fff; text-align: center; width: 250px; margin-bottom: 20px; font-family: 'Orbitron'; }
+
+        /* TILES */
+        .content-area { width: 100%; max-width: 450px; padding: 20px; }
+        .tile { background: var(--glass); backdrop-filter: blur(15px); border-radius: 25px; padding: 20px; text-align: center; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .icon-btn { padding: 12px; border-radius: 12px; border: 1px solid var(--neon); color: #fff; text-decoration: none; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+        #controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; }
+        .arrow { width: 70px; height: 70px; background: rgba(255,255,255,0.2); border: 2px solid var(--neon); border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 25px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="main-bg"></div>
+<header><h1>DOGGYCO</h1></header>
+
+<div id="game-view">
+    <div id="game-wrap">
+        <div id="ui-header">
+            <div id="energy-bar"><div id="energy-fill"></div></div>
+            <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:900;">
+                <div id="h-disp">❤️❤️❤️</div>
+                <div id="s-disp">🏆 0</div>
+            </div>
+        </div>
+        
+        <canvas id="game-canvas"></canvas>
+
+        <div id="controls">
+            <div class="arrow" onmousedown="move(-1)" ontouchstart="move(-1)"><i class="fas fa-arrow-left"></i></div>
+            <div class="arrow" onmousedown="move(1)" ontouchstart="move(1)"><i class="fas fa-arrow-right"></i></div>
+        </div>
+
+        <div id="start-screen" class="overlay">
+            <input type="text" id="pName" placeholder="ENTER NAME">
+            <button class="main-btn" onclick="startGame(false)">PLAY DOGGY</button>
+            <button class="main-btn" style="background:#bc13fe" onclick="startGame(true)">PLAY CAT</button>
+        </div>
+
+        <div id="end-screen" class="overlay" style="display:none;">
+            <h1 id="f-score" style="color:var(--gold); font-size:40px;">0</h1>
+            <button class="main-btn" onclick="location.reload()">RETRY</button>
+        </div>
+    </div>
+</div>
+
+<div class="content-area">
+    <div class="tile">
+        <h3 style="color:var(--neon)">RANKING</h3>
+        <div id="leaderboard" style="margin-top:10px;">Offline Mode</div>
+    </div>
+    <div class="tile">
+        <h3 style="color:var(--gold)">LINKS</h3>
+        <div class="btn-grid">
+            <a href="https://tiktok.com" class="icon-btn"><i class="fab fa-tiktok"></i> TikTok</a>
+            <a href="https://paypal.me" class="icon-btn"><i class="fab fa-paypal"></i> PayPal</a>
+            <a href="#" class="icon-btn" onclick="navigator.clipboard.writeText('bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed'); alert('Copied!');"><i class="fas fa-wallet"></i> Wallet</a>
+            <a href="#" class="icon-btn" onclick="alert('Food: +10-50pts | Avoid Spiders!')"><i class="fas fa-info"></i> Rules</a>
+        </div>
+    </div>
+</div>
+
+<script>
+// PURE LOGIC - NO EXTERNAL BLOCKING
+const canvas = document.getElementById("game-canvas");
+const ctx = canvas.getContext("2d");
+const W = 400;
+let H, active = false, isCat = false, score = 0, energy = 100, hearts = 3, lane = 2, dogX = 200;
+let items = [], spiders = [], floaters = [], lastTime = 0;
+
+function init() {
+    canvas.width = W;
+    H = canvas.height = document.getElementById("game-wrap").offsetHeight;
+    console.log("Game initialized");
+}
+
+function startGame(cat) {
+    if(!document.getElementById("pName").value) return alert("Enter Name!");
+    isCat = cat;
+    document.getElementById("start-screen").style.display = "none";
+    active = true;
+    lastTime = performance.now();
+    requestAnimationFrame(gameLoop);
+}
+
+function move(dir) { if(active && lane+dir>=0 && lane+dir<=4) lane+=dir; }
+
+function gameLoop(t) {
+    if(!active) return;
+    let dt = (t - lastTime) / 1000;
+    if(dt > 0.1) dt = 0.016;
+    lastTime = t;
+    ctx.clearRect(0,0,W,H);
+
+    // ENERGY
+    energy -= 7 * dt;
+    document.getElementById("energy-fill").style.width = energy + "%";
+    document.getElementById("s-disp").innerText = "🏆 " + Math.floor(score);
+    document.getElementById("h-disp").innerText = "❤️".repeat(hearts);
+
+    if(energy <= 0 || hearts <= 0) { 
+        active = false; 
+        document.getElementById("end-screen").style.display = "flex"; 
+        document.getElementById("f-score").innerText = "SCORE: " + Math.floor(score);
+        return; 
+    }
+
+    // SPIDERS
+    if(spiders.length < 2 && Math.random() < 0.01) {
+        let nL = Math.floor(Math.random()*5);
+        if(!spiders.some(s => s.lane === nL)) spiders.push({lane: nL, y: -50, dir: 1, speed: 200});
+    }
+    spiders.forEach((s, i) => {
+        s.y += s.speed * dt * s.dir;
+        if(s.y > H * 0.7) s.dir = -1;
+        if(s.y < -60) spiders.splice(i, 1);
+        let sx = s.lane * 80 + 40;
+        ctx.strokeStyle = "#fff"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+        ctx.font = "30px Arial"; ctx.fillText("🕷️", sx-15, s.y+20);
+        if(s.lane === lane && s.y > H-150 && s.y < H-80) { energy -= 20; spiders.splice(i, 1); }
+    });
+
+    // ITEMS
+    if(Math.random() < 0.04) {
+        let r = Math.random();
+        let itm = r < 0.6 ? {e:'🦴', p:10} : (r < 0.85 ? {e:'🍪', p:25} : {e:'🥩', p:50});
+        items.push({lane: Math.floor(Math.random()*5), y: -50, ...itm});
+    }
+    items.forEach((it, i) => {
+        it.y += (220 + score/8) * dt;
+        let ix = it.lane * 80 + 40;
+        ctx.font = "35px Arial"; ctx.fillText(it.e, ix-17, it.y);
+        if(it.lane === lane && it.y > H-150 && it.y < H-80) {
+            score += it.p; energy = Math.min(100, energy + 10);
+            floaters.push({x: ix, y: it.y, txt: "+"+it.p, c: "#00ff88", vx: 1.5, vy: -2});
+            items.splice(i, 1);
+        }
+        if(it.y > H) items.splice(i, 1);
+    });
+
+    floaters.forEach((f, i) => { f.x += f.vx; f.y += f.vy; ctx.fillStyle = f.c; ctx.font = "bold 20px Orbitron"; ctx.fillText(f.txt, f.x, f.y); if(f.y < 0) floaters.splice(i, 1); });
+
+    // PLAYER
+    let targetX = lane * 80 + 40;
+    dogX += (targetX - dogX) * 0.2;
+    ctx.font = "75px Arial"; ctx.fillText(isCat ? "🐱" : "🐶", dogX-35, H-100);
+
+    requestAnimationFrame(gameLoop);
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
