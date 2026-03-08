@@ -3,327 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO - ULTIMATE MASTER VERSION</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
+    <title>DOGGYCO & CATS WORLD V60000 - ULTIMATE PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --neon-blue: #00f2ff;
-            --neon-green: #00ff88;
-            --neon-red: #ff3131;
-            --gold: #ffd700;
+        :root { 
+            --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
+            --glass: rgba(255, 255, 255, 0.12); --blue-active: #0070ff; --cat-purple: #bc13fe;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+        
         body { 
-            background: #000; 
-            color: #fff; 
-            font-family: 'Orbitron', sans-serif;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background: #000; font-family: 'Orbitron', sans-serif; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            overflow-y: auto; overflow-x: hidden;
         }
 
-        /* Das Spielfeld */
-        #game-container {
-            position: relative;
-            width: 100vw;
-            max-width: 400px; /* 5 Bahnen à 80px */
-            height: 85vh;
-            border: 4px solid var(--neon-blue);
-            background: linear-gradient(180deg, #050505 0%, #111 100%);
-            box-shadow: 0 0 50px rgba(0, 242, 255, 0.2);
-            overflow: hidden;
+        #main-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(180deg, #000 0%, #111 100%);
+            z-index: -1; transition: 1.5s;
         }
 
-        canvas { display: block; }
+        header h1 { font-size: 38px; color: var(--neon); text-shadow: 0 0 20px var(--neon); padding: 30px; text-align: center; }
 
-        /* HUD & UI */
-        .hud {
-            position: absolute;
-            top: 0; width: 100%;
-            padding: 20px;
-            z-index: 100;
-            pointer-events: none;
+        #game-view { width: 100vw; height: 85vh; display: flex; justify-content: center; align-items: center; position: relative; }
+        #game-wrap { 
+            position:relative; width: 400px; height: 98%; 
+            background: rgba(0,0,0,0.85); border: 4px solid var(--neon); border-radius: 40px; 
+            overflow: hidden; box-shadow: 0 0 50px var(--neon);
         }
+        #game-wrap.cat-theme { border-color: var(--cat-purple); box-shadow: 0 0 50px var(--cat-purple); }
 
-        #energy-bar {
-            width: 100%; height: 15px;
-            background: rgba(255,255,255,0.1);
-            border: 2px solid #fff;
-            border-radius: 10px;
-            overflow: hidden;
-        }
+        #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
+        #energy-bar-wrap { width: 85%; height: 25px; margin: 0 auto; background: rgba(0,0,0,0.9); border: 2px solid #fff; border-radius: 12px; overflow: hidden; }
+        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff4e50, #f9d423, #00ff88); transition: width 0.2s; }
+        #hud-row { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 10px auto; font-size: 14px; font-weight: 900; }
 
-        #energy-fill {
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, var(--neon-red), var(--neon-green));
-            transition: width 0.2s linear;
-        }
+        canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
 
-        .stats {
-            display: flex; justify-content: space-between;
-            margin-top: 10px; font-weight: 900; font-size: 18px;
-        }
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(20px); z-index: 1000; background: rgba(0,0,0,0.8); border-radius: 36px; }
+        .neon-btn { padding: 18px 45px; background: var(--green); color: #000; border-radius: 35px; font-weight: 900; cursor: pointer; border: none; margin: 10px; box-shadow: 0 0 15px var(--green); transition: 0.2s; font-family: 'Orbitron'; }
+        .cat-btn { background: var(--cat-purple); color: #fff; box-shadow: 0 0 15px var(--cat-purple); }
+        .neon-btn:active { transform: scale(0.95); }
 
-        /* Overlays */
-        .overlay {
-            position: absolute; inset: 0;
-            background: rgba(0,0,0,0.9);
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            z-index: 1000; text-align: center;
-        }
+        #controls { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; }
+        .btn-arrow { width: 85px; height: 85px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .btn-arrow:active { background: var(--blue-active); box-shadow: 0 0 30px var(--blue-active); }
 
-        .btn-start {
-            padding: 20px 40px;
-            background: var(--neon-green);
-            color: #000; font-weight: 900;
-            border: none; border-radius: 50px;
-            cursor: pointer; box-shadow: 0 0 20px var(--neon-green);
-        }
-
-        /* Floating Score Animation */
-        .floating-score {
-            position: absolute;
-            font-weight: 900;
-            color: var(--neon-green);
-            pointer-events: none;
-            animation: floatUp 1s forwards;
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100px); opacity: 0; }
-        }
-
-        /* Mobile Controls */
-        #controls {
-            display: flex; width: 100%; max-width: 400px;
-            justify-content: space-between; padding: 10px;
-        }
-        .ctrl-btn {
-            width: 80px; height: 80px;
-            background: rgba(255,255,255,0.1);
-            border: 2px solid var(--neon-blue);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 30px;
-        }
+        .content-area { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 50px 0 150px; gap: 50px; }
+        .tile { background: var(--glass); backdrop-filter: blur(30px); border: 2px solid var(--neon); border-radius: 35px; padding: 35px; width: 92vw; max-width: 500px; text-align: center; }
+        
+        .qr-box { background: #fff; padding: 20px; border-radius: 25px; display: inline-block; margin-top: 20px; border: 4px solid var(--gold); }
+        .rank-row { display: flex; justify-content: space-between; padding: 14px; margin-bottom: 12px; border-radius: 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--neon); }
     </style>
 </head>
 <body>
 
-<h1 style="color: var(--neon-blue); margin: 10px;">DOGGYCO</h1>
+<div id="main-bg"></div>
+<header><h1 id="main-title">DOGGYCO</h1></header>
 
-<div id="game-container">
-    <div class="hud">
-        <div id="energy-bar"><div id="energy-fill"></div></div>
-        <div class="stats">
-            <span id="hearts">❤️❤️❤️</span>
-            <span id="score">0</span>
+<div id="game-view">
+    <div id="game-wrap">
+        <div id="ui-header">
+            <div id="energy-bar-wrap"><div id="energy-fill"></div></div>
+            <div id="hud-row">
+                <div id="hud-hearts">❤️❤️❤️</div>
+                <div id="hud-level" style="color:var(--gold)">LVL: 1</div>
+                <div id="hud-timer" style="color:var(--neon)">⏳ 30s</div>
+                <div id="hud-score">🏆 0</div>
+            </div>
+        </div>
+        
+        <canvas id="game-canvas"></canvas>
+
+        <div id="controls">
+            <div class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft()">◀</div>
+            <div class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight()">▶</div>
+        </div>
+
+        <div id="start-screen" class="overlay">
+            <h2 style="color:var(--gold); margin-bottom:20px;">START MISSION</h2>
+            <input type="text" id="pName" placeholder="DEIN NAME" style="padding:15px; border-radius:15px; margin-bottom:20px; text-align:center; font-family:'Orbitron'; outline:none; border:2px solid var(--neon); background:rgba(0,0,0,0.5); color:#fff;">
+            <button class="neon-btn" onclick="startGame(false)">DOGGYCO</button>
+            <button class="neon-btn cat-btn" onclick="startGame(true)">CATS WORLD</button>
+        </div>
+
+        <div id="end-screen" class="overlay" style="display:none;">
+            <h1 id="f-score-val" style="font-size: 60px; color: var(--gold);">0</h1>
+            <button class="neon-btn" onclick="location.reload()">RETRY</button>
         </div>
     </div>
-
-    <canvas id="gameCanvas"></canvas>
-
-    <div id="start-screen" class="overlay">
-        <h2 style="color:var(--neon-blue); margin-bottom:20px;">BEREIT FÜR DOGGYCO?</h2>
-        <button class="btn-start" onclick="startGame()">START MISSION</button>
-    </div>
-
-    <div id="game-over" class="overlay" style="display:none;">
-        <h1 style="color:var(--neon-red);">MISSION FEHLGESCHLAGEN</h1>
-        <h2 id="final-score" style="color:var(--gold); font-size: 50px;">0</h2>
-        <button class="btn-start" onclick="location.reload()">NEUSTART</button>
-    </div>
 </div>
 
-<div id="controls">
-    <div class="ctrl-btn" ontouchstart="moveLeft()">◀</div>
-    <div class="ctrl-btn" ontouchstart="moveRight()">▶</div>
-</div>
+<div class="content-area">
+    <div class="tile">
+        <h3 style="color:var(--gold); margin-bottom:25px;">🏆 WELTRANGLISTE</h3>
+        <div id="leaderboard">Ranking lädt...</div>
+    </div>
 
-<audio id="bgMusic" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
-<audio id="collectSound" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+    <div class="tile" style="border-color: var(--gold);">
+        <h3 style="color:var(--gold); margin-bottom:15px;">💎 SUPPORT</h3>
+        <div class="qr-box">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" width="160" height="160">
+        </div>
+        <p id="wallet-addr" style="font-size:10px; margin-top:20px; color:var(--gold); word-break: break-all;">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
+    </div>
+</div>
 
 <script>
-/**
- * DOGGYCO ENGINE - ENDGÜLTIGE STRUKTUR
- */
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const bgMusic = document.getElementById('bgMusic');
-const collectSound = document.getElementById('collectSound');
+const SUPABASE_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Spiel-Konfiguration
-let gameActive = false;
-let score = 0;
-let energy = 100;
-let hearts = 3;
-let currentLane = 2; // Start in der Mitte (0,1,2,3,4)
-const laneWidth = 80;
-
-let items = [];
-let spiders = [];
-let particles = [];
-
-// Hund-Objekt
-const dog = {
-    x: 200,
-    y: 0,
-    targetX: 200,
-    width: 60
-};
+const canvas = document.getElementById("game-canvas");
+const ctx = canvas.getContext("2d");
+const W = 400; 
+let H, dogX, targetX, dogLane = 2, active = false, isCat = false;
+let items = [], spiders = [], floaters = [], lastTime = 0;
+let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
+let dogShake = 0, jumpY = 0;
 
 function init() {
-    canvas.width = 400;
-    canvas.height = document.getElementById('game-container').offsetHeight;
-    dog.y = canvas.height - 120;
+    canvas.width = W; 
+    H = canvas.height = document.getElementById("game-wrap").offsetHeight;
+    targetX = (dogLane * 80) + 40; dogX = targetX;
 }
 
-function startGame() {
-    document.getElementById('start-screen').style.display = 'none';
-    gameActive = true;
-    bgMusic.play();
-    gameLoop();
+let audioCtx;
+function playSfx(f, t, d, v=0.05) {
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+    g.gain.setValueAtTime(v, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + d);
 }
 
-function moveLeft() { if(currentLane > 0) currentLane--; }
-function moveRight() { if(currentLane < 4) currentLane++; }
+function startGame(catMode) {
+    if(!document.getElementById("pName").value) { alert("Bitte Name eingeben!"); return; }
+    isCat = catMode;
+    if(isCat) {
+        document.getElementById("game-wrap").classList.add("cat-theme");
+        document.getElementById("main-title").innerText = "CATS WORLD";
+        document.getElementById("main-title").style.color = "var(--cat-purple)";
+    }
+    document.getElementById("start-screen").style.display = "none";
+    active = true; lastTime = performance.now();
+    requestAnimationFrame(loop);
+}
 
-// Tastatur-Support
-window.addEventListener('keydown', (e) => {
-    if(e.key === "ArrowLeft") moveLeft();
-    if(e.key === "ArrowRight") moveRight();
-});
+function mLeft() { if(active && dogLane > 0) { dogLane--; targetX = (dogLane * 80) + 40; } }
+function mRight() { if(active && dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; } }
 
-function spawnEntity() {
-    if(!gameActive) return;
+function loop(t) {
+    if(!active) return;
+    let dt = (t - lastTime) / 1000; lastTime = t;
+    if(dt > 0.1) dt = 0.016;
+    ctx.clearRect(0,0,W,H);
+
+    // UPDATES
+    timeLeft -= dt; energy -= (5 + level * 0.5) * dt;
+    if(timeLeft <= 0) { 
+        level++; timeLeft = 30; 
+        energy = Math.min(100, energy + 25); 
+        playSfx(800, 'sine', 0.4); 
+    }
     
-    // Items (Knochen oder Hindernisse)
-    if(Math.random() < 0.03) {
-        items.push({
-            x: (Math.floor(Math.random() * 5) * laneWidth) + 40,
-            y: -50,
-            type: Math.random() > 0.2 ? '🦴' : '👮',
-            speed: 5 + (score / 100)
-        });
-    }
+    // UI SYNC
+    document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
+    document.getElementById("hud-score").innerText = "🏆 " + Math.floor(score);
+    document.getElementById("hud-timer").innerText = "⏳ " + Math.ceil(timeLeft) + "s";
+    document.getElementById("hud-level").innerText = "LVL: " + level;
+    document.getElementById("hud-hearts").innerText = "❤️".repeat(hearts);
+    
+    if(energy <= 0 || hearts <= 0) { endGame(); return; }
 
-    // Spinnen-Logik (Max 2!)
-    if(spiders.length < 2 && Math.random() < 0.01) {
-        spiders.push({
-            x: (Math.floor(Math.random() * 5) * laneWidth) + 40,
-            y: -100,
-            speed: 3
-        });
-    }
-}
+    // OBSTACLES (Spiders/Snakes)
+    if(spiders.length < 2 && Math.random() < 0.015) spiders.push({lane: Math.floor(Math.random()*5), y: -50});
+    spiders.forEach((s, i) => {
+        s.y += (200 + level * 20) * dt;
+        let sx = (s.lane * 80) + 40;
+        ctx.textAlign = "center";
+        if(isCat) {
+            ctx.strokeStyle = "rgba(0, 255, 0, 0.5)"; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+            ctx.font = "45px Arial"; ctx.fillText("🐍", sx, s.y + 20);
+        } else {
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.3)"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+            ctx.font = "42px Arial"; ctx.fillText("🕷️", sx, s.y + 20);
+        }
+        if(s.lane === dogLane && s.y > H-180 && s.y < H-80) { 
+            energy -= 25; dogShake = 15; playSfx(120, 'sawtooth', 0.3); spiders.splice(i,1); 
+        }
+        if(s.y > H) spiders.splice(i,1);
+    });
 
-function createFloatingScore(x, y, text) {
-    const el = document.createElement('div');
-    el.className = 'floating-score';
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
-    el.innerText = text;
-    document.getElementById('game-container').appendChild(el);
-    setTimeout(() => el.remove(), 1000);
-}
-
-function update() {
-    if(!gameActive) return;
-
-    // Energie-Verbrauch
-    energy -= 0.1;
-    document.getElementById('energy-fill').style.width = energy + "%";
-    if(energy <= 0) gameOver();
-
-    // Hund-Symmetrie Bewegung
-    dog.targetX = (currentLane * laneWidth) + 40;
-    dog.x += (dog.targetX - dog.x) * 0.2;
-
-    // Items
+    // ITEMS
+    if(Math.random() < 0.025) items.push({lane: Math.floor(Math.random()*5), y: -60, type: isCat?'🍼':'🦴'});
     items.forEach((it, i) => {
-        it.y += it.speed;
-        // Kollision
-        if(Math.abs(it.x - dog.x) < 40 && Math.abs(it.y - dog.y) < 40) {
-            if(it.type === '🦴') {
-                score += 10;
-                energy = Math.min(100, energy + 10);
-                collectSound.play();
-                createFloatingScore(it.x, it.y, "+10");
-            } else {
-                hearts--;
-                energy -= 20;
-            }
+        it.y += (250 + level * 15) * dt; 
+        let ix = (it.lane * 80) + 40;
+        ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
+        if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
+            score += 50; energy = Math.min(100, energy + 15); jumpY = -20; 
+            playSfx(isCat ? 1000 : 600, 'sine', 0.1);
+            floaters.push({x: ix, y: it.y, txt: "+50", life: 1});
             items.splice(i, 1);
         }
-        if(it.y > canvas.height) items.splice(i, 1);
+        if(it.y > H) items.splice(i,1);
     });
 
-    // Spinnen
-    spiders.forEach((s, i) => {
-        s.y += s.speed;
-        if(Math.abs(s.x - dog.x) < 40 && Math.abs(s.y - dog.y) < 40) {
-            energy -= 30;
-            spiders.splice(i, 1);
-        }
-        if(s.y > canvas.height) spiders.splice(i, 1);
-    });
-
-    if(hearts <= 0) gameOver();
+    // PLAYER MOVE & RENDER
+    dogX += (targetX - dogX) * 0.25;
+    ctx.font = "85px Arial"; ctx.textAlign = "center"; 
+    let shake = (Math.random()-0.5) * dogShake;
+    ctx.fillText(isCat ? "🐱" : "🐶", dogX + shake, H - 105 + jumpY);
     
-    document.getElementById('score').innerText = score;
-    document.getElementById('hearts').innerText = "❤️".repeat(hearts);
-}
+    // Smooth Resets
+    if(dogShake > 0) dogShake *= 0.8; 
+    if(jumpY < 0) jumpY += 2; else jumpY = 0;
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Bahnen zeichnen
-    ctx.strokeStyle = "rgba(0, 242, 255, 0.1)";
-    for(let i=1; i<5; i++) {
-        ctx.beginPath();
-        ctx.moveTo(i * laneWidth, 0);
-        ctx.lineTo(i * laneWidth, canvas.height);
-        ctx.stroke();
-    }
-
-    // Items zeichnen
-    ctx.font = "40px Arial";
-    items.forEach(it => ctx.fillText(it.type, it.x - 20, it.y));
-
-    // Spinnen zeichnen (mit Faden)
-    spiders.forEach(s => {
-        ctx.strokeStyle = "#fff";
-        ctx.beginPath();
-        ctx.moveTo(s.x, 0);
-        ctx.lineTo(s.x, s.y);
-        ctx.stroke();
-        ctx.fillText("🕷️", s.x - 20, s.y);
+    // FLOATERS
+    floaters.forEach((f, i) => { 
+        f.y -= 3; f.life -= dt; 
+        ctx.globalAlpha = f.life; ctx.fillStyle = "var(--green)"; 
+        ctx.font = "bold 28px Orbitron"; ctx.fillText(f.txt, f.x, f.y); 
+        if(f.life <= 0) floaters.splice(i,1); 
     });
+    ctx.globalAlpha = 1;
 
-    // Hund zeichnen
-    ctx.font = "70px Arial";
-    ctx.fillText("🐶", dog.x - 35, dog.y + 25);
+    requestAnimationFrame(loop);
 }
 
-function gameLoop() {
-    update();
-    draw();
-    spawnEntity();
-    if(gameActive) requestAnimationFrame(gameLoop);
+function endGame() { 
+    active = false; 
+    document.getElementById("end-screen").style.display = "flex"; 
+    document.getElementById("f-score-val").innerText = Math.floor(score);
+    saveToDb(); 
 }
 
-function gameOver() {
-    gameActive = false;
-    bgMusic.pause();
-    document.getElementById('game-over').style.display = 'flex';
-    document.getElementById('final-score').innerText = score;
+async function saveToDb() {
+    const n = document.getElementById("pName").value;
+    await supabaseClient.from('leaderboard').insert([{ n, s: Math.floor(score) }]);
+    updateRanks();
 }
 
-window.onload = init;
+async function updateRanks() {
+    try {
+        let { data } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
+        if(data) document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
+            let m = i===0?'🥇':(i===1?'🥈':(i===2?'🥉':'🔹'));
+            return `<div class="rank-row"><span>${m} ${x.n}</span><span>${x.s}</span></div>`;
+        }).join('');
+    } catch(e) {}
+}
+window.onload = () => { init(); updateRanks(); };
+window.addEventListener('keydown', e => {
+    if(!active) return;
+    if(e.key === "ArrowLeft") mLeft();
+    if(e.key === "ArrowRight") mRight();
+});
 </script>
 </body>
 </html>
