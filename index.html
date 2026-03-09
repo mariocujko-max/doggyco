@@ -13,120 +13,136 @@
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
             --silver: #e0e0e0; --rose: #ff66cc; --copper: #cd7f32; --wood: #8b4513;
-            --glass: rgba(0, 0, 0, 0.7); /* Dunkle transparente Kacheln */
+            --glass: rgba(0, 0, 0, 0.75);
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         body { background: #000; font-family: 'Plus Jakarta Sans', sans-serif; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
         
-        /* Hintergrund gestreckt und heller */
-        #main-bg { position: fixed; inset: 0; background-image: url('hintergrund.png'); background-size: 100% 100%; z-index: -2; opacity: 0.8; }
+        /* Hintergrund gestreckt wie im Spiel */
+        #main-bg { position: fixed; inset: 0; background-image: url('hintergrund.png'); background-size: 100% 100%; z-index: -2; opacity: 0.85; }
         
-        header h1 { font-family: 'Orbitron'; font-size: clamp(30px, 10vw, 60px); color: var(--neon); text-align: center; padding: 25px; letter-spacing: 10px; text-shadow: 0 0 20px #000; }
+        /* Blinkende Neon Überschrift */
+        header h1 { 
+            font-family: 'Orbitron'; font-size: clamp(35px, 12vw, 65px); 
+            color: var(--neon); text-align: center; padding: 30px; 
+            letter-spacing: 10px; 
+            animation: neonBlink 1.5s infinite alternate; 
+        }
+        @keyframes neonBlink {
+            0% { text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); opacity: 1; }
+            100% { text-shadow: 0 0 5px var(--neon), 0 0 10px var(--neon); opacity: 0.7; }
+        }
 
-        .wrapper { width: 100%; max-width: 500px; padding: 15px; display: flex; flex-direction: column; gap: 20px; z-index: 10; }
+        .wrapper { width: 100%; max-width: 500px; padding: 15px; display: flex; flex-direction: column; gap: 25px; z-index: 10; }
 
         /* DIE FÜNF RAHMEN */
         .frame { 
-            background: var(--glass); backdrop-filter: blur(15px); 
-            border: 2px solid var(--neon); border-radius: 30px; 
-            padding: 30px; text-align: center; transition: 0.3s ease-in-out;
+            background: var(--glass); backdrop-filter: blur(20px); 
+            border: 3px solid var(--neon); border-radius: 35px; 
+            padding: 35px; text-align: center; transition: 0.3s ease;
         }
-        /* Namensfeld Rahmen - Größtes Fenster */
-        .f1 { box-shadow: 0 0 40px var(--neon); padding: 40px 30px; }
-        .f2 { box-shadow: 0 0 25px var(--neon); border-color: rgba(0, 242, 255, 0.6); }
-        .f3 { box-shadow: 0 0 15px var(--neon); border-color: rgba(0, 242, 255, 0.4); }
-        .f4 { box-shadow: 0 0 10px var(--neon); border-color: rgba(0, 242, 255, 0.2); }
+        /* Gestreckter Namens-Rahmen */
+        .f1 { box-shadow: 0 0 50px var(--neon); padding: 50px 35px; }
+        .f2 { box-shadow: 0 0 30px var(--neon); border-color: rgba(0, 242, 255, 0.7); }
+        .f3 { box-shadow: 0 0 20px var(--neon); border-color: rgba(0, 242, 255, 0.5); }
+        .f4 { box-shadow: 0 0 10px var(--neon); border-color: rgba(0, 242, 255, 0.3); }
         .f5 { box-shadow: 0 0 5px var(--neon); border-color: rgba(0, 242, 255, 0.1); }
 
-        /* INPUT STRETCHED */
+        /* NAME INPUT */
         #pName { 
-            width: 100%; padding: 20px; background: rgba(255,255,255,0.1); 
-            border: 2px solid var(--neon); border-radius: 15px; color: #fff;
-            text-align: center; font-family: 'Orbitron'; margin-bottom: 25px; font-size: 22px;
-            outline: none;
+            width: 100%; padding: 22px; background: rgba(255,255,255,0.1); 
+            border: 3px solid var(--neon); border-radius: 20px; color: #fff;
+            text-align: center; font-family: 'Orbitron'; margin-bottom: 30px; font-size: 24px;
+            outline: none; box-shadow: inset 0 0 15px var(--neon);
         }
 
-        /* BUTTONS LIFT EFFECT */
+        /* BUTTONS LIFT EFFECT & ICONS */
         .btn { 
-            display: flex; align-items: center; justify-content: space-between;
-            width: 100%; padding: 16px 25px; margin: 10px 0;
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+            width: 100%; padding: 18px; margin: 12px 0;
             border: none; border-radius: 20px; font-family: 'Orbitron'; font-weight: 900;
-            cursor: pointer; transition: 0.3s; font-size: 15px;
+            cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 16px; position: relative;
         }
-        .btn:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.8); }
+        .btn:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.9); }
+        
+        .lvl-tag { position: absolute; top: -10px; left: 20px; background: #000; padding: 2px 10px; font-size: 10px; border: 1px solid var(--neon); border-radius: 5px; color: var(--gold); }
 
         .btn-dog { background: var(--neon); color: #000; }
         .btn-cat { background: #bc13fe; color: #fff; }
         .btn-rab { background: #ff8e00; color: #fff; }
-        
-        /* SOCIAL BUTTONS */
-        .btn-tk { background: #000; border: 1px solid #ff0050; color: #fff; }
-        .btn-pp { background: #003087; color: #fff; }
-        .btn-wa { background: #f7931a; color: #fff; }
-        .btn-qr { background: #fff; color: #000; }
 
         /* RANGLISTE */
-        .rank-row { display: flex; justify-content: space-between; padding: 12px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Orbitron'; }
+        .rank-row { display: flex; justify-content: space-between; padding: 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Orbitron'; }
         .r1 { color: var(--gold); } .r2 { color: var(--silver); } .r3 { color: var(--rose); } .r4 { color: var(--copper); } .r5 { color: var(--wood); }
 
         /* GAME OVERLAY */
         #game-view { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; }
-        #hud { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-around; font-family: 'Orbitron'; font-size: 16px; z-index: 100; }
-        .controls { position: absolute; bottom: 40px; width: 100%; display: flex; justify-content: space-evenly; }
-        .arrow { width: 90px; height: 90px; border: 3px solid var(--neon); border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 40px; background: rgba(255,255,255,0.1); cursor: pointer; }
+        #hud { position: absolute; top: 25px; width: 100%; display: flex; justify-content: space-around; font-family: 'Orbitron'; font-size: 18px; z-index: 100; text-shadow: 2px 2px #000; }
+
+        .controls { position: absolute; bottom: 50px; width: 100%; display: flex; justify-content: space-evenly; }
+        .arrow { width: 95px; height: 95px; border: 4px solid var(--neon); border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 45px; background: rgba(255,255,255,0.1); cursor: pointer; }
     </style>
 </head>
-<body onclick="startAudio()">
+<body onclick="playMusic()">
 
 <div id="main-bg"></div>
-<header><h1>DOGGYCO</h1></header>
+<header><h1>DOGGYCO 🐶</h1></header>
 
 <div class="wrapper" id="menu-ui">
     <div class="frame f1">
         <input type="text" id="pName" placeholder="ENTER NAME" maxlength="12">
-        <button class="btn btn-dog" onclick="launchGame('dog')"><span><i class="fas fa-dog"></i> DOGGY ADVENTURE</span><i class="fas fa-play"></i></button>
-        <button class="btn btn-cat" onclick="launchGame('cat')"><span><i class="fas fa-cat"></i> CATS WORLD</span><i class="fas fa-lock"></i></button>
-        <button class="btn btn-rab" onclick="launchGame('rab')"><span><i class="fas fa-rabbit"></i> RABBIT LAND</span><i class="fas fa-lock"></i></button>
+        <button class="btn btn-dog" onclick="startGame('dog')"><i class="fas fa-dog"></i> DOGGY ADVENTURE</button>
+        
+        <div style="position:relative; margin-top:20px;">
+            <span class="lvl-tag">LEVEL 10</span>
+            <button class="btn btn-cat" onclick="startGame('cat')"><i class="fas fa-cat"></i> CATS WORLD <i class="fas fa-lock" style="font-size:12px; margin-left:10px;"></i></button>
+        </div>
+
+        <div style="position:relative; margin-top:10px;">
+            <span class="lvl-tag">LEVEL 10</span>
+            <button class="btn btn-rab" onclick="startGame('rab')"><i class="fas fa-rabbit"></i> RABBIT LAND <i class="fas fa-lock" style="font-size:12px; margin-left:10px;"></i></button>
+        </div>
     </div>
 
     <div class="frame f2">
         <h3 style="font-family:'Orbitron'; color:var(--neon); margin-bottom:15px;"><i class="fas fa-trophy"></i> GLOBAL RANKING</h3>
-        <div id="ranking-box">Loading Database...</div>
+        <div id="ranking-box" style="font-size: 14px;">Syncing Scores...</div>
     </div>
 
     <div class="frame f3">
-        <h3 style="font-family:'Orbitron'; margin-bottom:15px;"><i class="fas fa-share-alt"></i> SUPPORT</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <a href="https://tiktok.com" class="btn btn-tk"><i class="fab fa-tiktok"></i> TIKTOK</a>
-            <a href="https://paypal.me" class="btn btn-pp"><i class="fab fa-paypal"></i> PAYPAL</a>
-            <button class="btn btn-wa" onclick="copyBTC()"><i class="fas fa-wallet"></i> WALLET</button>
-            <button class="btn btn-qr" onclick="showQR()"><i class="fas fa-qrcode"></i> QR CODE</button>
+        <h3 style="font-family:'Orbitron'; margin-bottom:15px;"><i class="fas fa-share-nodes"></i> CONNECT</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <a href="https://tiktok.com" class="btn" style="background:#000; color:#fff; border:1px solid #ff0050;"><i class="fab fa-tiktok"></i> TIKTOK</a>
+            <a href="https://paypal.me" class="btn" style="background:#003087; color:#fff;"><i class="fab fa-paypal"></i> PAYPAL</a>
+            <button class="btn" onclick="copyBTC()" style="background:#f7931a; color:#fff;"><i class="fas fa-wallet"></i> BTC COPY</button>
+            <button class="btn" onclick="alert('QR: bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed')" style="background:#fff; color:#000;"><i class="fas fa-qrcode"></i> QR CODE</button>
         </div>
     </div>
 
     <div class="frame f4">
-        <h3 style="font-family:'Orbitron'; color:var(--green);"><i class="fas fa-book-open"></i> HOW TO PLAY</h3>
-        <p style="font-size:13px; line-height:1.6; text-align:left; margin-top:10px;">
-            <i class="fas fa-arrow-right"></i> Use ARROWS to move.<br>
-            <i class="fas fa-bone"></i> Get FOOD for +10 to +50 points.<br>
-            <i class="fas fa-bug"></i> AVOID Spiders & Police 👮!<br>
-            <i class="fas fa-heart"></i> Watch your LIVES and ENERGY.
+        <h3 style="font-family:'Orbitron'; color:var(--green);"><i class="fas fa-book-open"></i> GAME MANUAL</h3>
+        <p style="font-size:13px; line-height:1.7; text-align:left; margin-top:15px;">
+            <i class="fas fa-star" style="color:var(--gold)"></i> <b>OBJECTIVE:</b> Survive as long as possible while collecting treats to boost your score.<br><br>
+            <i class="fas fa-gamepad"></i> <b>CONTROLS:</b> Tap the large Neon-Arrows at the bottom to switch between 5 lanes.<br><br>
+            <i class="fas fa-bone"></i> <b>ITEMS:</b> Bones (+10), Meat (+50), Milk (+25). Cookies give a huge boost!<br><br>
+            <i class="fas fa-skull-crossbones" style="color:var(--red)"></i> <b>DANGERS:</b> Spiders drop from the top. Police 👮 will take a heart!
         </p>
     </div>
 
     <div class="frame f5">
-        <h3 style="font-family:'Orbitron'; opacity:0.5;"><i class="fas fa-gavel"></i> LEGAL</h3>
-        <p style="font-size:11px; opacity:0.4; margin-top:5px;">
-            © 2026 DOGGYCO PRO. All rights reserved. Play responsible.
+        <h3 style="font-family:'Orbitron'; opacity:0.6;"><i class="fas fa-scale-balanced"></i> LEGAL TERMS</h3>
+        <p style="font-size:11px; opacity:0.5; margin-top:15px; text-align: justify;">
+            This software is provided "as is" for entertainment purposes only. By entering your name, you agree to our global leaderboard terms. Digital points (DOGGYCO) have no real-world monetary value. All icons and soundtracks are property of their respective owners. © 2026 DOGGYCO ULTIMATE PRO.
         </p>
     </div>
 </div>
 
 <div id="game-view">
     <div id="hud">
-        <div id="hud-n">PLAYER: -</div>
-        <div id="hud-l">❤️❤️❤️</div>
-        <div id="hud-s">SCORE: 0</div>
+        <div id="h-n">PRO: -</div>
+        <div id="h-l">❤️❤️❤️</div>
+        <div id="h-s">🏆 0</div>
     </div>
     <canvas id="game-canvas"></canvas>
     <div class="controls">
@@ -138,23 +154,23 @@
 <audio id="bgMusic" src="musik.mp3" loop></audio>
 
 <script>
-// --- DATABASE ---
+// --- DB SETUP ---
 const S_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 const supabase = window.supabase ? window.supabase.createClient(S_URL, S_KEY) : null;
 
-let isPlaying = false, score = 0, hearts = 3, lane = 2, lastTime = 0;
-let charX = 200, targetX = 200, floaters = [], mode = 'dog';
+let isLive = false, score = 0, hearts = 3, lane = 2, lastT = 0;
+let charX = 200, targetX = 200, mode = 'dog';
 
-function startAudio() {
+function playMusic() {
     const audio = document.getElementById("bgMusic");
-    if(audio.paused) audio.play().catch(() => {});
+    if(audio && audio.paused) audio.play().catch(() => {});
 }
 
 async function loadRanking() {
     if(!supabase) return;
     try {
-        const { data } = await supabase.from('leaderboard').select('n, s').order('s', { ascending: false }).limit(5);
+        const { data, error } = await supabase.from('leaderboard').select('n, s').order('s', { ascending: false }).limit(5);
         if(data) {
             document.getElementById("ranking-box").innerHTML = data.map((r, i) => `
                 <div class="rank-row r${i+1}">
@@ -162,20 +178,25 @@ async function loadRanking() {
                     <span>${r.s} pts</span>
                 </div>`).join('');
         }
-    } catch(e) { document.getElementById("ranking-box").innerText = "Offline Mode"; }
+    } catch(e) { console.error(e); }
 }
 
-function launchGame(m) {
+function startGame(m) {
     const name = document.getElementById("pName").value.trim();
     if(!name) return alert("ENTER YOUR NAME!");
     
     mode = m;
     document.getElementById("menu-ui").style.display = "none";
     document.getElementById("game-view").style.display = "flex";
-    document.getElementById("hud-n").innerText = name.toUpperCase();
+    document.getElementById("h-n").innerText = name.toUpperCase();
     
-    isPlaying = true;
-    lastTime = performance.now();
+    // Background Switch for Cats World
+    if(m === 'cat') {
+        document.getElementById("main-bg").style.filter = "hue-rotate(280deg) brightness(0.6)";
+    }
+    
+    isLive = true;
+    lastT = performance.now();
     const cvs = document.getElementById("game-canvas");
     cvs.width = 400; cvs.height = window.innerHeight;
     requestAnimationFrame(gameLoop);
@@ -187,24 +208,22 @@ function m(dir) {
 }
 
 function gameLoop(t) {
-    if(!isPlaying) return;
+    if(!isLive) return;
     const ctx = document.getElementById("game-canvas").getContext("2d");
     ctx.clearRect(0,0,400,window.innerHeight);
 
-    charX += (targetX - charX) * 0.15;
-    ctx.font = "75px Arial"; ctx.textAlign = "center";
+    charX += (targetX - charX) * 0.18;
+    ctx.font = "80px Arial"; ctx.textAlign = "center";
     let icon = mode === 'dog' ? "🐶" : (mode === 'cat' ? "🐱" : "🐰");
-    ctx.fillText(icon, charX, window.innerHeight - 150);
+    ctx.fillText(icon, charX, window.innerHeight - 180);
 
-    // Score Update
-    document.getElementById("hud-s").innerText = "SCORE: " + Math.floor(score);
-
+    document.getElementById("h-s").innerText = "🏆 " + Math.floor(score);
     requestAnimationFrame(gameLoop);
 }
 
 function copyBTC() {
     navigator.clipboard.writeText('bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed');
-    alert("BTC ADDRESS COPIED!");
+    alert("BTC WALLET COPIED!");
 }
 
 window.onload = loadRanking;
