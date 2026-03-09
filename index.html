@@ -3,51 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO ULTIMATE PRO - V100 FINAL MAX</title>
+    <title>DOGGYCO ULTIMATE PRO - V100 MAX</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
             --silver: #e0e0e0; --rose: #ff66cc; --copper: #cd7f32; --wood: #8b4513;
-            --glass: rgba(255, 255, 255, 0.12);
+            --milky: rgba(0, 0, 0, 0.75); 
         }
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #000; font-family: 'Plus Jakarta Sans', sans-serif; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
-        #main-bg { position: fixed; inset: 0; background-image: url('hintergrund.png'); background-size: 100% 100%; z-index: -2; opacity: 1; transition: 0.8s; }
+        body { 
+            background: #000; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            color: #fff; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
         
+        /* Hintergrund 100% gestreckt wie im Spiel */
+        #main-bg { 
+            position: fixed; 
+            inset: 0; 
+            background-image: url('hintergrund.png'); 
+            background-size: 100% 100%; 
+            z-index: -2; 
+            opacity: 1; 
+            transition: 1s ease-in-out;
+        }
+
+        /* Blinkende Neon Überschrift */
         header h1 { 
-            font-family: 'Orbitron'; font-size: clamp(35px, 12vw, 65px); 
-            color: var(--neon); text-align: center; padding: 25px; 
-            animation: neonPulse 1.5s infinite alternate; 
+            font-family: 'Orbitron'; 
+            font-size: clamp(35px, 12vw, 60px); 
+            color: var(--neon); 
+            text-align: center; 
+            padding: 30px; 
+            letter-spacing: 8px; 
+            animation: neonBlink 1.5s infinite alternate; 
         }
-        @keyframes neonPulse { 0% { text-shadow: 0 0 20px var(--neon); opacity: 1; } 100% { text-shadow: 0 0 5px var(--neon); opacity: 0.7; } }
+        @keyframes neonBlink {
+            0% { text-shadow: 0 0 20px var(--neon), 0 0 40px var(--neon); opacity: 1; }
+            100% { text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); opacity: 0.7; }
+        }
 
-        .wrapper { width: 100%; max-width: 500px; padding: 15px; display: flex; flex-direction: column; gap: 25px; z-index: 10; }
+        .wrapper { 
+            width: 100%; 
+            max-width: 500px; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px; 
+            z-index: 10; 
+        }
 
+        /* DIE FÜNF RAHMEN - MILCHIG TRANSPARENT */
         .frame { 
-            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(25px); 
-            border: 2px solid var(--neon); border-radius: 40px; 
-            text-align: center; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: var(--milky); 
+            backdrop-filter: blur(25px); 
+            border: 3px solid var(--neon); 
+            border-radius: 40px; 
+            text-align: center; 
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .f1 { padding: 80px 30px; min-height: 520px; box-shadow: 0 0 50px var(--neon); display: flex; flex-direction: column; justify-content: center; }
-        .f2, .f3, .f4, .f5 { padding: 30px; box-shadow: 0 0 20px var(--neon); }
 
+        /* Frame 1: Gestreckt wie das Spielfeld */
+        .f1 { 
+            padding: 60px 30px; 
+            min-height: 550px; 
+            box-shadow: 0 0 60px var(--neon); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+        }
+        .f2 { padding: 30px; box-shadow: 0 0 30px var(--neon); }
+        .f3 { padding: 25px; box-shadow: 0 0 20px var(--neon); }
+        .f4 { padding: 25px; box-shadow: 0 0 10px var(--neon); }
+        .f5 { padding: 20px; border-color: rgba(0, 242, 255, 0.3); }
+
+        /* INPUT STYLES */
         #pName { 
-            width: 100%; padding: 22px; background: rgba(255,255,255,0.1); 
-            border: 2px solid var(--neon); border-radius: 18px; color: #fff;
-            text-align: center; font-family: 'Orbitron'; font-size: 22px; margin-bottom: 30px; outline: none;
+            width: 100%; 
+            padding: 22px; 
+            background: rgba(255,255,255,0.1); 
+            border: 3px solid var(--neon); 
+            border-radius: 20px; 
+            color: #fff; 
+            text-align: center; 
+            font-family: 'Orbitron'; 
+            font-size: 24px; 
+            margin-bottom: 35px; 
+            box-shadow: inset 0 0 15px var(--neon);
         }
 
+        /* BUTTONS MIT LIFT-EFFEKT */
         .btn { 
-            display: flex; align-items: center; justify-content: center; gap: 15px;
-            width: 100%; padding: 20px; margin: 12px 0;
-            border: none; border-radius: 22px; font-family: 'Orbitron'; font-weight: 900;
-            cursor: pointer; transition: 0.3s; font-size: 16px; position: relative;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 15px; 
+            width: 100%; 
+            padding: 20px; 
+            margin: 12px 0; 
+            border: none; 
+            border-radius: 22px; 
+            font-family: 'Orbitron'; 
+            font-weight: 900; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            font-size: 16px; 
+            position: relative; 
         }
         .btn:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.8); }
         
@@ -56,16 +130,20 @@
         .b-rab { background: #ff8e00; color: #fff; }
         .b-social { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--neon); }
 
-        .rank-row { display: flex; justify-content: space-between; padding: 15px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Orbitron'; font-size: 16px; }
+        /* RANGLISTE MEDAILLEN */
+        .rank-row { display: flex; justify-content: space-between; padding: 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Orbitron'; font-size: 18px; }
         .r1 { color: var(--gold); } .r2 { color: var(--silver); } .r3 { color: var(--rose); } .r4 { color: var(--copper); } .r5 { color: var(--wood); }
 
+        /* GAME OVERLAY */
         #game-view { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; }
+        
+        /* HUD & ENERGY */
         #hud { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-around; font-family: 'Orbitron'; font-size: 18px; z-index: 100; text-shadow: 2px 2px #000; }
-        #energy-bar { position: absolute; top: 55px; width: 85%; height: 14px; background: #222; border: 1px solid var(--neon); border-radius: 7px; overflow: hidden; }
+        #energy-container { position: absolute; top: 60px; width: 85%; height: 16px; background: #222; border: 2px solid var(--neon); border-radius: 8px; overflow: hidden; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.3s; }
         
         .controls { position: absolute; bottom: 50px; width: 100%; display: flex; justify-content: space-evenly; }
-        .arrow { width: 95px; height: 95px; border: 4px solid var(--neon); border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 45px; background: rgba(0,0,0,0.5); }
+        .arrow { width: 95px; height: 95px; border: 4px solid var(--neon); border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 45px; background: rgba(0,0,0,0.6); cursor: pointer; }
     </style>
 </head>
 <body onclick="playMusic()">
@@ -76,9 +154,9 @@
 <div class="wrapper" id="menu">
     <div class="frame f1">
         <input type="text" id="pName" placeholder="ENTER PLAYER NAME" maxlength="12">
-        <button class="btn b-dog" onclick="run('dog')"><i class="fas fa-dog"></i> DOGGY ADVENTURE</button>
-        <button class="btn b-cat" onclick="run('cat')"><i class="fas fa-cat"></i> CATS WORLD <i class="fas fa-lock" style="font-size:12px;"></i></button>
-        <button class="btn b-rab" onclick="run('rab')"><i class="fas fa-rabbit"></i> RABBIT LAND <i class="fas fa-lock" style="font-size:12px;"></i></button>
+        <button class="btn b-dog" onclick="startGame('dog')"><i class="fas fa-dog"></i> DOGGY ADVENTURE</button>
+        <button class="btn b-cat" onclick="startGame('cat')"><i class="fas fa-cat"></i> CATS WORLD <i class="fas fa-lock" style="font-size:12px;"></i></button>
+        <button class="btn b-rab" onclick="startGame('rab')"><i class="fas fa-rabbit"></i> RABBIT LAND <i class="fas fa-lock" style="font-size:12px;"></i></button>
     </div>
 
     <div class="frame f2">
@@ -87,7 +165,7 @@
     </div>
 
     <div class="frame f3">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <button class="btn b-social" onclick="window.open('https://tiktok.com')"><i class="fab fa-tiktok"></i> TIKTOK</button>
             <button class="btn b-social" onclick="window.open('https://paypal.me')"><i class="fab fa-paypal"></i> PAYPAL</button>
             <button class="btn b-social" onclick="copyBTC()"><i class="fas fa-wallet"></i> BTC WALLET</button>
@@ -96,163 +174,184 @@
     </div>
 
     <div class="frame f4">
-        <h3 style="font-family:'Orbitron'; color:var(--green);"><i class="fas fa-book-open"></i> MANUAL</h3>
+        <h3 style="font-family:'Orbitron'; color:var(--green);"><i class="fas fa-book-open"></i> GAME MANUAL</h3>
         <p style="font-size:14px; text-align:left; line-height:1.7; margin-top:10px;">
-            <i class="fas fa-chevron-right"></i> USE ARROWS to switch lanes.<br>
+            <i class="fas fa-star" style="color:var(--gold)"></i> Use ARROWS to switch between 5 lanes.<br>
             <i class="fas fa-bone"></i> COLLECT Food for Score & Energy.<br>
             <i class="fas fa-spider"></i> AVOID Spiders and Police 👮.<br>
-            <i class="fas fa-heart"></i> DON'T lose your 3 hearts!
+            <i class="fas fa-heart" style="color:var(--red)"></i> DON'T lose your 3 hearts!
         </p>
     </div>
 
     <div class="frame f5">
-        <p style="font-size:11px; opacity:0.6;">© 2026 DOGGYCO ULTIMATE PRO. V100 FINAL MAX.</p>
+        <p style="font-size:11px; opacity:0.6;">© 2026 DOGGYCO ULTIMATE PRO. V100 OWNER EDITION.</p>
     </div>
 </div>
 
 <div id="game-view">
     <div id="hud">
-        <div id="h-n">PRO: -</div><div id="h-l">❤️❤️❤️</div><div id="h-s">🏆 0</div>
+        <div id="hud-name">PRO: -</div><div id="hud-lives">❤️❤️❤️</div><div id="hud-score">🏆 0</div>
     </div>
-    <div id="energy-bar"><div id="energy-fill"></div></div>
+    <div id="energy-container"><div id="energy-fill"></div></div>
     <canvas id="game-canvas"></canvas>
     <div class="controls">
-        <div class="arrow" onmousedown="mv(-1)" ontouchstart="mv(-1)"><i class="fas fa-chevron-left"></i></div>
-        <div class="arrow" onmousedown="mv(1)" ontouchstart="mv(1)"><i class="fas fa-chevron-right"></i></div>
+        <div class="arrow" onmousedown="move(-1)" ontouchstart="move(-1)"><i class="fas fa-chevron-left"></i></div>
+        <div class="arrow" onmousedown="move(1)" ontouchstart="move(1)"><i class="fas fa-chevron-right"></i></div>
     </div>
 </div>
 
 <audio id="bgMusic" src="musik.mp3" loop></audio>
 
+
+
 <script>
-// --- CORE CONFIG ---
+// --- DB SETUP ---
 const S_URL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 const supabase = window.supabase ? window.supabase.createClient(S_URL, S_KEY) : null;
 
-let isPlaying = false, score = 0, hearts = 3, energy = 100, lane = 2, lastT = 0;
-let charX = 200, targetX = 200, items = [], enemies = [], floaters = [], mode = 'dog';
+// --- GAME CONFIG & STATE ---
+let isStarted = false, score = 0, hearts = 3, energy = 100, lane = 2, lastTime = 0;
+let charX = 200, targetX = 200, items = [], enemies = [], floaters = [], currentMode = 'dog';
 
+// --- INITIALIZE ---
 function playMusic() {
     const audio = document.getElementById("bgMusic");
     if(audio.paused) audio.play().catch(() => {});
 }
 
-async function loadRanking() {
+async function loadRanks() {
     if(!supabase) return;
     try {
-        const { data } = await supabase.from('leaderboard').select('n, s').order('s', { ascending: false }).limit(5);
+        const { data, error } = await supabase.from('leaderboard').select('n, s').order('s', { ascending: false }).limit(5);
         if(data) {
+            const colors = ['r1', 'r2', 'r3', 'r4', 'r5'];
             document.getElementById("ranking-box").innerHTML = data.map((r, i) => `
-                <div class="rank-row r${i+1}"><span>${i+1}. ${r.n}</span><span>${r.s} pts</span></div>
+                <div class="rank-row ${colors[i]}"><span>${i+1}. ${r.n}</span><span>${r.s} pts</span></div>
             `).join('');
         }
     } catch(e) { document.getElementById("ranking-box").innerText = "Database Offline"; }
 }
 
-function run(m) {
-    const name = document.getElementById("pName").value.trim();
-    if(!name) return alert("ENTER PLAYER NAME!");
+function startGame(m) {
+    const nameInput = document.getElementById("pName").value.trim();
+    if(!nameInput) return alert("PLEASE ENTER YOUR NAME!");
     
-    mode = m;
+    currentMode = m;
     document.getElementById("menu").style.display = "none";
     document.getElementById("game-view").style.display = "flex";
-    document.getElementById("h-n").innerText = name.toUpperCase();
+    document.getElementById("hud-name").innerText = "PRO: " + nameInput.toUpperCase();
     
+    // Background & Music logic
+    const bg = document.getElementById("main-bg");
     if(m === 'cat') {
-        document.getElementById("main-bg").style.backgroundImage = "url('forest_background.png')";
-        document.getElementById("main-bg").style.filter = "hue-rotate(280deg)";
-        document.getElementById("bgMusic").src = "cats_world_theme.mp3";
-        document.getElementById("bgMusic").play().catch(() => {});
+        bg.style.backgroundImage = "url('forest_background.png')";
+        bg.style.filter = "hue-rotate(280deg) brightness(0.8)";
+        const music = document.getElementById("bgMusic");
+        music.src = "cats_world_theme.mp3";
+        music.play().catch(()=>{});
     }
     
-    isPlaying = true;
-    lastT = performance.now();
+    isStarted = true;
+    lastTime = performance.now();
     const cvs = document.getElementById("game-canvas");
-    cvs.width = 400; cvs.height = window.innerHeight;
-    requestAnimationFrame(loop);
+    cvs.width = 400; 
+    cvs.height = window.innerHeight;
+    
+    requestAnimationFrame(gameLoop);
 }
 
-function mv(dir) { lane = Math.max(0, Math.min(4, lane + dir)); targetX = lane * 80 + 40; }
+function move(dir) { 
+    lane = Math.max(0, Math.min(4, lane + dir)); 
+    targetX = lane * 80 + 40; 
+}
 
-function loop(t) {
-    if(!isPlaying) return;
+function gameLoop(t) {
+    if(!isStarted) return;
     const ctx = document.getElementById("game-canvas").getContext("2d");
     const cvs = document.getElementById("game-canvas");
-    let dt = (t - lastT) / 1000; lastT = t;
+    let dt = (t - lastTime) / 1000; lastTime = t;
     if(dt > 0.1) dt = 0.016;
 
     ctx.clearRect(0,0,400,cvs.height);
 
-    // Stats Logic
-    energy -= 5.5 * dt;
+    // 1. STATS LOGIC
+    energy -= 6.0 * dt;
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
 
-    // Spawning
+    // 2. SPAWNING
+    // Items
     if(Math.random() < 0.04) {
         let l = Math.floor(Math.random()*5);
         let r = Math.random();
-        let type = r < 0.7 ? '🦴' : (r < 0.9 ? '🥩' : '🍪');
+        let type = r < 0.6 ? '🦴' : (r < 0.9 ? '🥩' : '🍪');
         items.push({ x: l*80+40, y: -60, lane: l, type });
     }
-    if(Math.random() < 0.018) {
+    // Enemies
+    if(Math.random() < 0.02) {
         let l = Math.floor(Math.random()*5);
         enemies.push({ x: l*80+40, y: -60, lane: l, type: Math.random() < 0.6 ? '🕷️' : '👮' });
     }
 
-    // Process Items
+    // 3. MOVE & COLLISION: ITEMS
     items.forEach((it, i) => {
-        it.y += (240 + score/15) * dt;
+        it.y += (250 + score/20) * dt;
         ctx.font = "50px Arial"; ctx.textAlign = "center";
         ctx.fillText(it.type, it.x, it.y);
+        
         if(it.lane === lane && it.y > cvs.height - 180 && it.y < cvs.height - 80) {
-            let pts = it.type === '🦴' ? 15 : (it.type === '🥩' ? 50 : 100);
-            score += pts; energy = Math.min(100, energy + 20);
+            let pts = it.type === '🦴' ? 15 : (it.type === '🥩' ? 50 : 120);
+            score += pts; 
+            energy = Math.min(100, energy + 20);
             floaters.push({ x: it.x, y: it.y, txt: "+" + pts, a: 1, c: "0, 255, 136" });
             items.splice(i,1);
         }
         if(it.y > cvs.height) items.splice(i,1);
     });
 
-    // Process Enemies
+    // 4. MOVE & COLLISION: ENEMIES
     enemies.forEach((en, i) => {
-        en.y += (320 + score/20) * dt;
-        ctx.font = "50px Arial";
+        en.y += (350 + score/15) * dt;
+        ctx.font = "55px Arial";
         ctx.fillText(en.type, en.x, en.y);
+        
         if(en.lane === lane && en.y > cvs.height - 180 && en.y < cvs.height - 80) {
-            hearts--; energy -= 25;
+            hearts--; 
+            energy -= 25;
             floaters.push({ x: en.x, y: en.y, txt: "-LIFE", a: 1, c: "255, 49, 49" });
             enemies.splice(i,1);
         }
         if(en.y > cvs.height) enemies.splice(i,1);
     });
 
-    // Floating Texts
+    // 5. FLOATING TEXTS
     floaters.forEach((f, i) => {
-        f.y -= 2.5; f.a -= 0.02;
+        f.y -= 2.5; f.a -= 0.025;
         ctx.fillStyle = `rgba(${f.c}, ${f.a})`;
-        ctx.font = "bold 28px Orbitron";
+        ctx.font = "bold 30px Orbitron";
         ctx.fillText(f.txt, f.x, f.y);
         if(f.a <= 0) floaters.splice(i,1);
     });
 
-    // Character
+    // 6. CHARACTER ANIMATION
     charX += (targetX - charX) * 0.22;
-    ctx.font = "90px Arial";
-    let icon = mode === 'dog' ? "🐶" : (mode === 'cat' ? "🐱" : "🐰");
+    ctx.font = "95px Arial";
+    let icon = currentMode === 'dog' ? "🐶" : (currentMode === 'cat' ? "🐱" : "🐰");
     ctx.fillText(icon, charX, cvs.height - 130);
 
-    // UI Updates
-    document.getElementById("h-s").innerText = "🏆 " + Math.floor(score);
-    document.getElementById("h-l").innerText = "❤️".repeat(Math.max(0, hearts));
+    // 7. HUD UPDATES
+    document.getElementById("hud-score").innerText = "🏆 " + Math.floor(score);
+    document.getElementById("hud-lives").innerText = "❤️".repeat(Math.max(0, hearts));
 
+    // 8. GAME OVER
     if(hearts <= 0 || energy <= 0) {
         if(supabase) supabase.from('leaderboard').insert([{ n: document.getElementById("pName").value, s: Math.floor(score) }]);
-        isPlaying = false;
+        isStarted = false;
         alert("GAME OVER! FINAL SCORE: " + Math.floor(score));
         location.reload();
     }
-    requestAnimationFrame(loop);
+
+    requestAnimationFrame(gameLoop);
 }
 
 function copyBTC() {
@@ -260,7 +359,7 @@ function copyBTC() {
     alert("BTC WALLET COPIED!");
 }
 
-window.onload = loadRanking;
+window.onload = loadRanks;
 </script>
 </body>
 </html>
