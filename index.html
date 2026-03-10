@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO - V200 ULTIMATE SOVEREIGN</title>
+    <title>DOGGYCO OMEGA V210</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -13,55 +13,43 @@
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
-        body { 
-            background: #000; font-family: 'Orbitron', sans-serif; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            overflow-x: hidden;
-        }
+        body { background: #000; font-family: 'Orbitron', sans-serif; color: #fff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
 
-        #main-bg {
-            position: fixed; inset: 0;
-            background: url('hintergrund.png') center/cover no-repeat #000;
-            filter: brightness(0.75); z-index: -10;
-        }
+        #main-bg { position: fixed; inset: 0; background: url('hintergrund.png') center/cover no-repeat #000; filter: brightness(0.75); z-index: -10; }
 
+        @keyframes neonPulse { 0%, 100% { border-color: var(--neon); box-shadow: 0 0 20px var(--neon); } 50% { border-color: #fff; box-shadow: 0 0 35px var(--neon); } }
         header h1 { font-size: clamp(20px, 6vw, 36px); color: var(--neon); text-shadow: 0 0 15px var(--neon); padding: 15px; text-align: center; text-transform: uppercase; }
 
         #game-view { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; z-index: 5; }
-        #game-wrap { 
-            position:relative; width: 400px; height: 620px; 
-            background: rgba(0,0,0,0.6); border: 4px solid var(--neon); border-radius: 45px; 
-            overflow: hidden; box-shadow: 0 0 40px var(--neon); transition: 0.5s;
-        }
+        #game-wrap { position:relative; width: 400px; height: 620px; background: rgba(0,0,0,0.65); border: 4px solid var(--neon); border-radius: 45px; overflow: hidden; animation: neonPulse 3s infinite; transition: 0.5s; }
 
         /* HUD */
         #ui-header { position: absolute; top: 10px; width: 100%; z-index: 200; pointer-events: none; }
         #energy-bar-wrap { width: 90%; height: 18px; margin: 0 auto 8px; background: rgba(0,0,0,0.8); border: 2px solid #fff; border-radius: 9px; overflow: hidden; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.3s; }
-        
-        #hud-main-row { display: flex; justify-content: space-between; align-items: center; width: 92%; margin: 0 auto; font-size: 11px; font-weight: 900; background: rgba(0,0,0,0.5); padding: 6px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px); }
-        .hud-item { display: flex; align-items: center; gap: 4px; }
+        #hud-main-row { display: flex; justify-content: space-between; align-items: center; width: 92%; margin: 0 auto; font-size: 11px; font-weight: 900; background: rgba(0,0,0,0.6); padding: 6px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(8px); }
 
         canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
 
-        /* PANELS */
-        .glass-panel { 
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 2.5px solid var(--neon); border-radius: 30px; padding: 25px; 
-            width: 95vw; max-width: 400px; margin: 12px 0; text-align: center; 
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); transition: 0.5s;
-        }
+        /* OVERLAYS & GLASS */
+        .glass-panel { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 2.5px solid var(--neon); border-radius: 30px; padding: 25px; width: 95vw; max-width: 400px; margin: 12px 0; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.7); transition: 0.3s; }
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.92); border-radius: 40px; padding: 25px; }
 
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.9); border-radius: 40px; padding: 25px; }
-        .neon-btn { padding: 16px; background: var(--green); color: #000; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; margin: 8px 0; width: 100%; box-shadow: 0 0 12px var(--green); transition: 0.2s; font-size: 14px; }
+        /* INTERACTIVE BUTTONS */
+        .neon-btn { padding: 16px; background: var(--green); color: #000; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; margin: 8px 0; width: 100%; box-shadow: 0 0 12px var(--green); transition: 0.3s; font-size: 14px; }
+        .neon-btn:hover { transform: translateY(-3px) scale(1.02); filter: brightness(1.2); }
+        .cat-btn { background: var(--cat-purple); color: #fff; box-shadow: 0 0 15px var(--cat-purple); }
+        .rabbit-btn { background: var(--rabbit-orange); color: #fff; box-shadow: 0 0 15px var(--rabbit-orange); }
 
-        #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; }
-        .btn-arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.05); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-        .active-ring { background: rgba(0, 112, 255, 0.5) !important; box-shadow: 0 0 40px var(--blue-glow) !important; border-color: #fff !important; }
+        /* WALLET BOX HOVER */
+        .wallet-card { background: #fff; padding: 15px; border-radius: 20px; display: inline-block; margin-top: 15px; transition: 0.4s; border: 4px solid var(--gold); cursor: pointer; }
+        .wallet-card:hover { transform: scale(1.1) rotate(2deg); box-shadow: 0 0 30px var(--gold); }
+
+        #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 45px; z-index: 300; }
+        .btn-arrow { width: 85px; height: 85px; background: rgba(255,255,255,0.1); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+        .btn-arrow:active { background: rgba(0, 112, 255, 0.5); box-shadow: 0 0 40px var(--blue-glow); border-color: #fff; }
 
         #pName { width: 100%; padding: 18px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.7); color: #fff; text-align: center; font-family: 'Orbitron'; outline: none; margin-bottom: 12px; }
-        
-        #lvl-banner { position: absolute; top: 40%; width: 100%; text-align: center; color: var(--gold); font-size: 35px; font-weight: 900; z-index: 600; display: none; text-shadow: 0 0 20px #000; }
         .rank-row { display: flex; justify-content: space-between; padding: 10px; margin-bottom: 5px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid var(--neon); }
     </style>
 </head>
@@ -75,18 +63,17 @@
         <div id="ui-header">
             <div id="energy-bar-wrap"><div id="energy-fill"></div></div>
             <div id="hud-main-row">
-                <div class="hud-item"><span id="display-name" style="color:var(--neon)">AGENT</span></div>
-                <div class="hud-item" id="hearts-display">❤️❤️❤️</div>
-                <div class="hud-item" style="color:var(--gold)">⏱️<span id="timer-display">30</span>s</div>
-                <div class="hud-item">🏆<span id="score-display">0</span></div>
-                <div class="hud-item" style="background:#fff; color:#000; padding:1px 4px; border-radius:4px;">L<span id="lvl-num">1</span></div>
+                <div id="hud-name" style="color:#fff">AGENT</div>
+                <div id="hearts-display">❤️❤️❤️</div>
+                <div style="color:var(--gold)">⏱️<span id="timer-display">30</span>s</div>
+                <div>🏆<span id="score-display">0</span></div>
+                <div style="background:#fff; color:#000; padding:1px 4px; border-radius:4px;">L<span id="lvl-num">1</span></div>
             </div>
         </div>
-        <div id="lvl-banner">LEVEL UP! ⚡</div>
         <canvas id="game-canvas"></canvas>
         <div id="controls">
-            <div id="l-btn" class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft(event)">◀</div>
-            <div id="r-btn" class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight(event)">▶</div>
+            <div class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft(event)">◀</div>
+            <div class="btn-arrow" onmousedown="mRight()" ontouchstart="mRight(event)">▶</div>
         </div>
 
         <div id="name-screen" class="overlay">
@@ -98,14 +85,16 @@
 
         <div id="start-screen" class="overlay" style="display:none;">
             <div class="glass-panel" style="border:none; background:none;">
-                <button class="neon-btn" onclick="startGame('dog')">DOGGY MISSION</button>
-                <button class="neon-btn" style="background:var(--cat-purple); color:#fff;" onclick="startGame('cat')">CATS WORLD</button>
-                <button class="neon-btn" style="background:var(--rabbit-orange); color:#fff;" onclick="startGame('rabbit')">RABBIT FOREST</button>
+                <button class="neon-btn" onclick="startGame('dog')">DOGGY WORLD</button>
+                <button class="neon-btn cat-btn" onclick="startGame('cat')">CATS WORLD</button>
+                <button class="neon-btn rabbit-btn" onclick="startGame('rabbit')">RABBIT FOREST</button>
             </div>
         </div>
 
         <div id="end-screen" class="overlay" style="display:none;">
-            <h1 id="f-score" style="font-size: 50px; color: var(--gold);">0</h1>
+            <h2 style="color:#fff; margin-bottom:10px;">GAME OVER</h2>
+            <h1 id="final-agent-name" style="color:#fff; font-size:28px; margin-bottom:15px;">AGENT ...</h1>
+            <h1 id="f-score" style="font-size: 60px; color: var(--gold); margin-bottom:20px;">0</h1>
             <button class="neon-btn" onclick="location.reload()">NEUSTART</button>
         </div>
     </div>
@@ -118,50 +107,46 @@
 
 <div class="glass-panel">
     <h3 style="color:var(--green); margin-bottom:15px;">💎 SUPPORT</h3>
-    <button class="neon-btn" style="background:#ff0050; color:#fff;" onclick="window.open('https://tiktok.com')">TikTok</button>
-    <div style="background:#fff; padding:12px; border-radius:20px; display:inline-block; margin-top:15px; border:3px solid var(--gold);">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=BITCOIN_WALLET" width="140">
-        <p style="color:#000; font-size:10px; font-weight:bold; margin-top:5px;">BTC SCAN</p>
+    <button class="neon-btn" style="background:#ff0050; color:#fff;" onclick="window.open('https://tiktok.com')">🎵 TikTok</button>
+    <button class="neon-btn" style="background:#0070ba; color:#fff;" onclick="window.open('https://paypal.me')">🅿️ PayPal</button>
+    <div class="wallet-card">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=BITCOIN_WALLET_XYZ" width="140">
+        <p style="color:#000; font-size:11px; font-weight:bold; margin-top:5px;">BITCOIN WALLET</p>
     </div>
-</div>
-
-<div class="glass-panel">
-    <h3 style="color:var(--neon); margin-bottom:10px;">📖 ANLEITUNG</h3>
-    <p style="font-size:11px; text-align:left; line-height:1.5;">
-        • <b>Plus:</b> 10, 20, 30 Pkt (Steigt +10% pro LVL).<br>
-        • <b>Minus:</b> Seil-Gegner (-30% Energie).<br>
-        • <b>Lebensgefahr:</b> Blinkende Gegner (-1 Herz).<br>
-        • <b>Level-Up:</b> Alle 30 Sek. Banner-Anzeige.
-    </p>
-</div>
-
-<div class="glass-panel" style="border-color: var(--red); opacity: 0.7;">
-    <p style="font-size:10px;">© 2026 DOGGYCO | Alle Rechte vorbehalten.</p>
 </div>
 
 <script>
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 let W, H, dogX, targetX, dogLane = 2, active = false, mode = 'dog', pName = "AGENT";
-let items = [], spiders = [], floaters = [], clouds = [], birds = [], lastTime = 0;
+let items = [], spiders = [], floaters = [], lastTime = 0;
 let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30, shakeTime = 0;
 let audioCtx, music;
 
 function init() {
     W = canvas.width = 400; H = canvas.height = 620;
     targetX = (dogLane * 80) + 40; dogX = targetX;
-    for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: 100+Math.random()*80, s: 0.2+Math.random()*0.4});
 }
 
 function toMenu() {
     let nameInput = document.getElementById("pName").value;
     if(nameInput) {
         pName = nameInput.toUpperCase();
-        document.getElementById("display-name").innerText = pName;
+        document.getElementById("hud-name").innerText = pName;
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         document.getElementById("name-screen").style.display = "none";
         document.getElementById("start-screen").style.display = "flex";
     }
+}
+
+function playSfx(f, t, d, v=0.3) {
+    if(!audioCtx) return;
+    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+    g.gain.setValueAtTime(v, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + d);
 }
 
 function startGame(m) {
@@ -170,7 +155,6 @@ function startGame(m) {
     let color = 'var(--neon)';
     if(mode==='cat') color = 'var(--cat-purple)';
     else if(mode==='rabbit') color = 'var(--rabbit-orange)';
-    
     document.documentElement.style.setProperty('--neon', color);
     document.getElementById("main-title").innerText = mode.toUpperCase() + (mode==='dog'?" MISSION":" WORLD");
     document.getElementById("main-title").style.color = color;
@@ -181,13 +165,8 @@ function startGame(m) {
     requestAnimationFrame(loop);
 }
 
-function mLeft() { if(active && dogLane > 0) { dogLane--; targetX = (dogLane * 80) + 40; highlight('l-btn'); } }
-function mRight() { if(active && dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; highlight('r-btn'); } }
-
-function highlight(id) {
-    const el = document.getElementById(id); el.classList.add('active-ring');
-    setTimeout(() => el.classList.remove('active-ring'), 150);
-}
+function mLeft() { if(active && dogLane > 0) { dogLane--; targetX = (dogLane * 80) + 40; playSfx(300, 'sine', 0.1); } }
+function mRight() { if(active && dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; playSfx(300, 'sine', 0.1); } }
 
 function loop(t) {
     if(!active) return;
@@ -197,11 +176,7 @@ function loop(t) {
     timeLeft -= dt; 
     let mult = Math.pow(1.1, level - 1);
     energy -= (4.5 * mult) * dt;
-    if(timeLeft <= 0) { 
-        level++; timeLeft = 30; energy = 100;
-        document.getElementById("lvl-banner").style.display = "block";
-        setTimeout(()=>document.getElementById("lvl-banner").style.display="none", 2000);
-    }
+    if(timeLeft <= 0) { level++; timeLeft = 30; energy = 100; playSfx(880, 'sine', 0.4); }
 
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
     document.getElementById("timer-display").innerText = Math.ceil(timeLeft);
@@ -209,16 +184,18 @@ function loop(t) {
     document.getElementById("lvl-num").innerText = level;
     document.getElementById("hearts-display").innerText = "❤️".repeat(Math.max(0, hearts));
 
-    if(energy <= 0 || hearts <= 0) { active = false; document.getElementById("end-screen").style.display = "flex"; document.getElementById("f-score").innerText = "SCORE: " + Math.floor(score); return; }
+    if(energy <= 0 || hearts <= 0) { 
+        active = false; 
+        document.getElementById("end-screen").style.display = "flex"; 
+        document.getElementById("final-agent-name").innerText = "AGENT " + pName;
+        document.getElementById("f-score").innerText = Math.floor(score); 
+        return; 
+    }
 
-    ctx.font = "40px Arial";
-    clouds.forEach(c => { c.x += c.s; if(c.x > W+50) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
-
-    // SPAWNING
-    if(items.length < 4 && Math.random() < 0.03) {
-        let reserved = spiders.map(s => s.lane);
+    // Spawn Logic
+    if(items.length < 5 && Math.random() < 0.03) {
         let lane = Math.floor(Math.random()*5);
-        if(!reserved.includes(lane)) {
+        if(!spiders.map(s => s.lane).includes(lane)) {
             let r = Math.random(), type, val;
             if(mode === 'rabbit') {
                 if(r < 0.2) { type = '🥕'; val = 30*mult; } else if(r < 0.5) { type = '🍎'; val = 20*mult; } else { type = '🌼'; val = 10*mult; }
@@ -230,10 +207,9 @@ function loop(t) {
             items.push({lane, y: -60, type, val});
         }
     }
-
     if(Math.random() < 0.007) items.push({lane: Math.floor(Math.random()*5), y: -60, type: mode==='rabbit'?'🦊':(mode==='cat'?'🐕':'👮'), val: -999, blink: true});
 
-    // SEILE
+    // Seil-Gegner
     spiders.forEach((s, i) => {
         s.y += (180 + level * 10) * dt * s.d;
         if(s.y > H - 180) s.d = -1; if(s.y < 0) { s.d = 1; s.lane = Math.floor(Math.random()*5); }
@@ -241,30 +217,30 @@ function loop(t) {
         ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "35px Arial"; ctx.textAlign = "center";
         ctx.fillText(mode==='rabbit'?"🦉":(mode==='cat'?"🐍":"🕷️"), sx, s.y + 25);
-        if(s.lane === dogLane && s.y > H-180 && s.y < H-80) { energy -= 30; shakeTime = 15; floaters.push({x: sx, y: s.y, txt: "-30%", c: "red", l: 1, vx: 0}); spiders.splice(i,1); spiders.push({lane: Math.floor(Math.random()*5), y: 0, d: 1}); }
+        if(s.lane === dogLane && s.y > H-180 && s.y < H-80) { energy -= 30; shakeTime = 15; floaters.push({x: sx, y: s.y, txt: "-30%", c: "var(--red)", l: 1, vx: 0}); playSfx(150, 'sawtooth', 0.3); }
     });
 
-    // ITEMS
+    // Items
     items.forEach((it, i) => {
         it.y += (240 + level * 8) * dt; let ix = it.lane * 80 + 40;
         if(it.blink && Math.floor(t/150)%2===0) ctx.globalAlpha = 0.3;
-        ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
-        ctx.globalAlpha = 1;
+        ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y); ctx.globalAlpha = 1;
         if(it.lane === dogLane && it.y > H-150 && it.y < H-70) {
-            if(it.val === -999) { hearts--; shakeTime = 20; floaters.push({x: ix, y: it.y, txt: "-LIFE", c: "red", l: 1, vx: 0}); }
-            else { score += it.val; energy = Math.min(100, energy + 10); floaters.push({x: ix, y: it.y, txt: "+"+Math.floor(it.val), c: "var(--green)", l: 1, vx: 0.8}); }
+            if(it.val === -999) { hearts--; shakeTime = 20; playSfx(80, 'square', 0.4); floaters.push({x: ix, y: it.y, txt: "-❤️", c: "var(--red)", l: 1, vx: 0}); }
+            else { score += it.val; energy = Math.min(100, energy + 10); playSfx(600, 'sine', 0.1); floaters.push({x: ix, y: it.y, txt: "+"+Math.floor(it.val), c: "var(--green)", l: 1, vx: 0.8}); }
             items.splice(i, 1);
         }
         if(it.y > H) items.splice(i,1);
     });
 
+    // Player Shake
     dogX += (targetX - dogX) * 0.22;
     let visualX = dogX;
     if(shakeTime > 0) { visualX += Math.sin(shakeTime * 2) * 8; shakeTime--; }
-    ctx.font = "75px Arial"; ctx.textAlign = "center";
-    ctx.fillText(mode==='dog'?"🐶":(mode==='cat'?"🐱":"🐰"), visualX, H - 100);
+    ctx.font = "75px Arial"; ctx.textAlign = "center"; ctx.fillText(mode==='dog'?"🐶":(mode==='cat'?"🐱":"🐰"), visualX, H - 100);
 
-    floaters.forEach((f, i) => { f.y -= 2.5; f.x += f.vx; f.l -= dt; ctx.globalAlpha = f.l; ctx.fillStyle = f.c; ctx.font = "bold 22px Orbitron"; ctx.fillText(f.txt, f.x, f.y); if(f.l <= 0) floaters.splice(i,1); });
+    // Floating Texts
+    floaters.forEach((f, i) => { f.y -= 2.5; f.x += f.vx; f.l -= dt; ctx.globalAlpha = f.l; ctx.fillStyle = f.c; ctx.font = "bold 24px Orbitron"; ctx.fillText(f.txt, f.x, f.y); if(f.l <= 0) floaters.splice(i,1); });
     ctx.globalAlpha = 1; requestAnimationFrame(loop);
 }
 init();
