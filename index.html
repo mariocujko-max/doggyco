@@ -3,45 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO, CATS & RABBIT - V140 ABSOLUTE SOVEREIGN</title>
+    <title>DOGGYCO, CATS & RABBIT - V150 EMOTION</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --blue-glow: #0070ff; --cat-purple: #bc13fe; --rabbit-pink: #ff69b4;
+            --blue-glow: #0070ff; --cat-purple: #bc13fe; --rabbit-orange: #ff8c00;
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background: #000; font-family: 'Orbitron', sans-serif; color: #fff; 
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            overflow-x: hidden; scroll-behavior: smooth;
+            overflow-x: hidden;
         }
 
-        /* HINTERGRUND JETZT HELLER UND SICHTBAR */
         #main-bg {
             position: fixed; inset: 0;
             background: url('hintergrund.png') center/cover no-repeat #000;
-            filter: brightness(0.75); z-index: -10;
+            filter: brightness(0.7); z-index: -10;
         }
 
-        header { width: 100%; text-align: center; padding: 10px 0; z-index: 10; }
-        header h1 { 
-            font-size: clamp(22px, 6vw, 36px); 
-            color: var(--neon); text-shadow: 0 0 15px var(--neon); 
-            text-transform: uppercase;
-        }
+        header { width: 100%; text-align: center; padding: 15px 0; z-index: 10; }
+        header h1 { font-size: clamp(20px, 7vw, 38px); color: var(--neon); text-shadow: 0 0 15px var(--neon); transition: 0.5s; }
 
-        /* GAME CONTAINER */
         #game-view { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; z-index: 5; }
         #game-wrap { 
             position:relative; width: 400px; height: 600px; 
-            background: rgba(0,0,0,0.6); border: 4px solid var(--neon); border-radius: 45px; 
-            overflow: hidden; box-shadow: 0 0 40px var(--neon);
+            background: rgba(0,0,0,0.65); border: 4px solid var(--neon); border-radius: 45px; 
+            overflow: hidden; box-shadow: 0 0 40px var(--neon); transition: border-color 0.5s;
         }
 
-        /* HUD */
         #ui-header { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
         #energy-bar-wrap { width: 85%; height: 22px; margin: 0 auto; background: rgba(0,0,0,0.8); border: 2px solid #fff; border-radius: 11px; overflow: hidden; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.3s; }
@@ -49,36 +42,31 @@
 
         canvas { position: absolute; inset: 0; z-index: 50; background: transparent; pointer-events: none; }
 
-        /* MAXIMUM GLASS PANELS */
+        /* GLASS PANELS - UNIFORM WIDTH */
         .glass-panel { 
             background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 2px solid var(--neon); border-radius: 30px; padding: 25px; 
-            width: 95vw; max-width: 500px; margin: 12px 0; text-align: center; 
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+            width: 95vw; max-width: 400px; margin: 12px 0; text-align: center; 
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); transition: border-color 0.5s;
         }
 
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.8); border-radius: 40px; padding: 25px; }
+        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.85); border-radius: 40px; padding: 25px; }
 
-        .neon-btn { padding: 16px; background: var(--green); color: #000; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; margin: 8px 0; width: 100%; box-shadow: 0 0 12px var(--green); transition: 0.2s; font-size: 15px; }
+        .neon-btn { padding: 16px; background: var(--green); color: #000; border-radius: 30px; font-weight: 900; cursor: pointer; border: none; font-family: 'Orbitron'; margin: 8px 0; width: 100%; box-shadow: 0 0 12px var(--green); transition: 0.2s; }
         .cat-btn { background: var(--cat-purple); color: #fff; box-shadow: 0 0 15px var(--cat-purple); }
-        .rabbit-btn { background: var(--rabbit-pink); color: #fff; box-shadow: 0 0 15px var(--rabbit-pink); }
+        .rabbit-btn { background: var(--rabbit-orange); color: #fff; box-shadow: 0 0 15px var(--rabbit-orange); }
 
-        /* CONTROLS */
         #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 40px; z-index: 300; }
-        .btn-arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.05); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.1s; }
+        .btn-arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.05); border: 3px solid var(--neon); border-radius: 50%; color: #fff; font-size: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
         .active-ring { background: rgba(0, 112, 255, 0.6) !important; box-shadow: 0 0 40px var(--blue-glow) !important; border-color: #fff !important; }
 
-        #pName { width: 100%; padding: 18px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.7); color: #fff; text-align: center; font-family: 'Orbitron'; outline: none; margin-bottom: 12px; font-size: 18px; }
-        
-        #lvl-banner { position: absolute; top: 40%; width: 100%; text-align: center; color: var(--gold); font-size: 32px; font-weight: 900; z-index: 600; display: none; text-shadow: 0 0 20px #000; }
-        
-        .rank-row { display: flex; justify-content: space-between; padding: 10px; margin-bottom: 6px; border-radius: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--neon); }
+        #pName { width: 100%; padding: 18px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.8); color: #fff; text-align: center; font-family: 'Orbitron'; outline: none; margin-bottom: 12px; font-size: 18px; }
     </style>
 </head>
 <body>
 
 <div id="main-bg"></div>
-<header><h1 id="main-title">DOGGYCO MISSION</h1></header>
+<header><h1 id="main-title">DOGGY MISSION</h1></header>
 
 <div id="game-view">
     <div id="game-wrap">
@@ -90,7 +78,6 @@
                 <div style="background:#fff; color:#000; padding:2px 8px; border-radius:8px;">LVL <span id="lvl-num">1</span></div>
             </div>
         </div>
-        <div id="lvl-banner">LEVEL UP! ⚡</div>
         <canvas id="game-canvas"></canvas>
         <div id="controls">
             <div id="l-btn" class="btn-arrow" onmousedown="mLeft()" ontouchstart="mLeft(event)">◀</div>
@@ -99,7 +86,7 @@
 
         <div id="name-screen" class="overlay">
             <div class="glass-panel" style="border:none; background:none;">
-                <input type="text" id="pName" placeholder="NAME EINGEBEN">
+                <input type="text" id="pName" placeholder="DEIN NAME">
                 <button class="neon-btn" onclick="toMenu()">BESTÄTIGEN</button>
             </div>
         </div>
@@ -121,31 +108,15 @@
 
 <div class="glass-panel">
     <h3 style="color:var(--gold); margin-bottom:12px;">🏆 BESTENLISTE</h3>
-    <div id="leaderboard">Lade Ranking...</div>
+    <div id="leaderboard">Lade...</div>
 </div>
 
 <div class="glass-panel">
-    <h3 style="color:var(--green); margin-bottom:15px;">💎 SUPPORT & SPENDEN</h3>
+    <h3 style="color:var(--green); margin-bottom:15px;">💎 SUPPORT</h3>
     <button class="neon-btn" style="background:#ff0050; color:#fff;" onclick="window.open('https://tiktok.com')">TikTok</button>
-    <button class="neon-btn" style="background:#0070ba; color:#fff;" onclick="window.open('https://paypal.me')">PayPal</button>
-    <div style="background:#fff; padding:12px; border-radius:20px; display:inline-block; margin-top:10px; border:3px solid var(--gold);">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=BTC_ADDRESS" width="140" height="140">
-        <p style="color:#000; font-size:10px; font-weight:bold; margin-top:5px;">BTC WALLET SCAN</p>
+    <div style="background:#fff; padding:10px; border-radius:15px; display:inline-block; margin-top:10px;">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=BTC" width="130">
     </div>
-</div>
-
-<div class="glass-panel">
-    <h3 style="color:var(--neon); margin-bottom:10px;">📖 SPIELANLEITUNG</h3>
-    <p style="font-size:12px; text-align:left; line-height:1.6;">
-        <b>Ziele:</b> Sammle Items für Punkte & Energie. <br>
-        <b>Punkte:</b> Löwenzahn (+10), Apfel (+20), Karotte (+30). <br>
-        <b>Gefahren:</b> Eulen (-30% Energie), Füchse (-1 Herz). <br>
-        <b>Steuerung:</b> Pfeiltasten oder Buttons nutzen.
-    </p>
-</div>
-
-<div class="glass-panel" style="border-color: var(--red);">
-    <p style="font-size:10px; opacity:0.7;">© 2026 DOGGYCO | Private Project | Alle Rechte vorbehalten.</p>
 </div>
 
 <script>
@@ -158,20 +129,11 @@ const ctx = canvas.getContext("2d");
 let W, H, dogX, targetX, dogLane = 2, active = false, mode = 'dog';
 let items = [], spiders = [], floaters = [], lastTime = 0;
 let score = 0, hearts = 3, energy = 100, level = 1, timeLeft = 30;
-let audioCtx, music;
+let shakeTime = 0, audioCtx;
 
 function init() {
-    W = canvas.width = 400; 
-    H = canvas.height = 600;
+    W = canvas.width = 400; H = canvas.height = 600;
     targetX = (dogLane * 80) + 40; dogX = targetX;
-}
-
-function toMenu() {
-    if(document.getElementById("pName").value) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        document.getElementById("name-screen").style.display = "none";
-        document.getElementById("start-screen").style.display = "flex";
-    }
 }
 
 function playSfx(f, t, d, v=0.3) {
@@ -184,46 +146,39 @@ function playSfx(f, t, d, v=0.3) {
     o.start(); o.stop(audioCtx.currentTime + d);
 }
 
+function toMenu() {
+    if(document.getElementById("pName").value) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        document.getElementById("name-screen").style.display = "none";
+        document.getElementById("start-screen").style.display = "flex";
+    }
+}
+
 function startGame(m) {
     mode = m;
     document.getElementById("start-screen").style.display = "none";
-    let mFile = 'musik.mp3';
-    if(mode==='cat') { 
-        mFile = 'cats_world_theme.mp3'; 
-        document.getElementById("main-title").innerText = "CATS WORLD";
-        document.getElementById("main-title").style.color = "var(--cat-purple)";
-    }
-    if(mode==='rabbit') {
-        document.getElementById("main-title").innerText = "RABBIT FOREST";
-        document.getElementById("main-title").style.color = "var(--rabbit-pink)";
-    }
-    music = new Audio(mFile); music.loop = true; music.volume = 0.15; music.play().catch(()=>{});
+    let color = 'var(--neon)';
+    if(mode === 'cat') color = 'var(--cat-purple)';
+    if(mode === 'rabbit') color = 'var(--rabbit-orange)';
+    
+    document.documentElement.style.setProperty('--neon', color);
+    document.getElementById("main-title").innerText = mode === 'dog' ? "DOGGY MISSION" : (mode === 'cat' ? "CATS WORLD" : "RABBIT FOREST");
+    document.getElementById("main-title").style.color = color;
+
     active = true; lastTime = performance.now();
     requestAnimationFrame(loop);
 }
 
-function highlight(id) {
-    const el = document.getElementById(id);
-    el.classList.add('active-ring');
-    setTimeout(() => el.classList.remove('active-ring'), 150);
-}
-
-function mLeft() { if(active && dogLane > 0) { dogLane--; targetX = (dogLane * 80) + 40; highlight('l-btn'); playSfx(300, 'sine', 0.1); } }
-function mRight() { if(active && dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; highlight('r-btn'); playSfx(300, 'sine', 0.1); } }
+function mLeft() { if(active && dogLane > 0) { dogLane--; targetX = (dogLane * 80) + 40; playSfx(300, 'sine', 0.1); } }
+function mRight() { if(active && dogLane < 4) { dogLane++; targetX = (dogLane * 80) + 40; playSfx(300, 'sine', 0.1); } }
 
 function loop(t) {
     if(!active) return;
     let dt = (t - lastTime) / 1000; lastTime = t;
-    if(dt > 0.1) dt = 0.016;
     ctx.clearRect(0,0,W,H);
 
     timeLeft -= dt; energy -= (4.8 + level * 0.4) * dt;
-    if(timeLeft <= 0) { 
-        level++; timeLeft = 30; energy = 100;
-        document.getElementById("lvl-banner").style.display = "block";
-        setTimeout(()=>document.getElementById("lvl-banner").style.display="none", 2000);
-        playSfx(880, 'sine', 0.5);
-    }
+    if(timeLeft <= 0) { level++; timeLeft = 30; energy = 100; playSfx(880, 'sine', 0.4); }
 
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
     document.getElementById("timer-display").innerText = Math.ceil(timeLeft) + "s";
@@ -232,91 +187,60 @@ function loop(t) {
 
     if(energy <= 0 || hearts <= 0) { active = false; document.getElementById("end-screen").style.display = "flex"; document.getElementById("f-score").innerText = score; return; }
 
-    // SPAWNING (3 Positive, 2 Negative)
+    // Spawning
     if(items.length + spiders.length < 5 && Math.random() < 0.025) {
         let lane = Math.floor(Math.random()*5);
-        if(Math.random() < 0.7) {
+        if(Math.random() < 0.75) {
             let r = Math.random(), type, val;
             if(mode === 'rabbit') {
-                if(r < 0.2) { type = '🥕'; val = 30; }
-                else if(r < 0.5) { type = '🍎'; val = 20; }
-                else { type = '🌼'; val = 10; }
+                if(r < 0.2) { type = '🥕'; val = 30; } else if(r < 0.5) { type = '🍎'; val = 20; } else { type = '🌼'; val = 10; }
             } else if(mode === 'cat') {
-                if(r < 0.2) { type = '🍰'; val = 30; }
-                else if(r < 0.5) { type = '🐟'; val = 20; }
-                else { type = '🍼'; val = 15; }
+                if(r < 0.2) { type = '🍰'; val = 30; } else if(r < 0.5) { type = '🐟'; val = 20; } else { type = '🍼'; val = 15; }
             } else {
-                if(r < 0.2) { type = '🥩'; val = 30; }
-                else if(r < 0.5) { type = '🍪'; val = 20; }
-                else { type = '🦴'; val = 10; }
+                if(r < 0.2) { type = '🥩'; val = 30; } else if(r < 0.5) { type = '🍪'; val = 20; } else { type = '🦴'; val = 10; }
             }
             items.push({lane, y: -60, type, val});
-        } else if(spiders.length < 2) { // Max 2 Seil-Gegner
-            spiders.push({lane: Math.floor(Math.random()*5), y: 0, d: 1});
-        }
+        } else if(spiders.length < 2) spiders.push({lane: Math.floor(Math.random()*5), y: 0, d: 1});
     }
 
-    // DRAW ENEMIES (Rauf/Runter an Seilen)
+    // Enemies
     spiders.forEach((s, i) => {
         s.y += (180 + level * 15) * dt * s.d;
         if(s.y > H - 180) s.d = -1; if(s.y < 0) spiders.splice(i, 1);
         let sx = s.lane * 80 + 40;
         ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "35px Arial"; ctx.textAlign = "center"; 
-        ctx.fillText(mode==='rabbit'?"🦉":"🕷️", sx, s.y + 25);
+        ctx.fillText(mode==='rabbit'?"🦉":(mode==='cat'?"🐍":"🕷️"), sx, s.y + 25);
         if(s.lane === dogLane && s.y > H-180 && s.y < H-80) { 
-            energy -= 30; floaters.push({x: sx, y: s.y, txt: "-30%", c: "red", l: 1}); 
-            playSfx(150, 'sawtooth', 0.3); spiders.splice(i,1); 
+            energy -= 30; shakeTime = 15; playSfx(100, 'sawtooth', 0.3); floaters.push({x: sx, y: s.y, txt: "-30%", c: "red", l: 1}); spiders.splice(i,1); 
         }
     });
 
-    // POSITIVE ITEMS & POLICE/FOX
-    if(Math.random() < 0.008) {
-        items.push({lane: Math.floor(Math.random()*5), y: -60, type: mode==='rabbit'?'🦊':'👮', val: -999});
-    }
+    // Special Hazard
+    if(Math.random() < 0.008) items.push({lane: Math.floor(Math.random()*5), y: -60, type: mode==='rabbit'?'🦊':(mode==='cat'?'🐕':'👮'), val: -999});
 
     items.forEach((it, i) => {
         it.y += (250 + level * 12) * dt; let ix = it.lane * 80 + 40;
-        ctx.font = "42px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
+        ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText(it.type, ix, it.y);
         if(it.lane === dogLane && it.y > H-160 && it.y < H-80) {
-            if(it.val === -999) { 
-                hearts--; playSfx(100, 'square', 0.4); 
-                floaters.push({x: ix, y: it.y, txt: "-LIFE", c: "red", l: 1}); 
-            } else { 
-                score += it.val; energy = Math.min(100, energy + 12); 
-                playSfx(600, 'sine', 0.1); 
-                floaters.push({x: ix, y: it.y, txt: "+"+it.val, c: "var(--green)", l: 1}); 
-            }
+            if(it.val === -999) { hearts--; shakeTime = 20; playSfx(80, 'square', 0.4); }
+            else { score += it.val; energy = Math.min(100, energy + 12); playSfx(600, 'sine', 0.1); floaters.push({x: ix, y: it.y, txt: "+"+it.val, c: "var(--green)", l: 1}); }
             items.splice(i, 1);
         }
         if(it.y > H) items.splice(i,1);
     });
 
-    // PLAYER
+    // Player with Shake-Animation
     dogX += (targetX - dogX) * 0.22;
+    let visualX = dogX;
+    if(shakeTime > 0) { visualX += Math.sin(shakeTime * 2) * 10; shakeTime--; }
     ctx.font = "75px Arial"; ctx.textAlign = "center";
-    ctx.fillText(mode==='dog'?"🐶":(mode==='cat'?"🐱":"🐰"), dogX, H - 110);
+    ctx.fillText(mode==='dog'?"🐶":(mode==='cat'?"🐱":"🐰"), visualX, H - 110);
 
-    // FLOATING TEXTS
-    floaters.forEach((f, i) => { 
-        f.y -= 2; f.l -= dt; ctx.globalAlpha = f.l; ctx.fillStyle = f.c;
-        ctx.font = "bold 24px Orbitron"; ctx.fillText(f.txt, f.x, f.y); 
-        if(f.l <= 0) floaters.splice(i,1); 
-    });
-    ctx.globalAlpha = 1;
-    requestAnimationFrame(loop);
+    floaters.forEach((f, i) => { f.y -= 2; f.l -= dt; ctx.globalAlpha = f.l; ctx.fillStyle = f.c; ctx.font = "bold 24px Orbitron"; ctx.fillText(f.txt, f.x, f.y); if(f.l <= 0) floaters.splice(i,1); });
+    ctx.globalAlpha = 1; requestAnimationFrame(loop);
 }
-
-async function updateRanks() {
-    try {
-        let { data } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
-        if(data) document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
-            let m = i===0?'🥇':(i===1?'🥈':(i===2?'🥉':'🐾'));
-            return `<div class="rank-row"><span>${m} ${x.n}</span><span>${x.s}</span></div>`;
-        }).join('');
-    } catch(e) {}
-}
-window.onload = () => { init(); updateRanks(); };
+init();
 </script>
 </body>
 </html>
