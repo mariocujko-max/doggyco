@@ -20,7 +20,6 @@
             overflow-x: hidden;
         }
 
-        /* HINTERGRUND */
         #bg-fx { 
             position: fixed; inset: 0; 
             background-image: url('hintergrund.png'); 
@@ -34,7 +33,6 @@
         header { padding: 20px 0 10px; text-align: center; width: 100%; }
         header h1 { font-size: clamp(24px, 8vw, 40px); color: var(--neon); text-shadow: 0 0 20px var(--neon); letter-spacing: 2px; }
 
-        /* SPIELBEREICH */
         #game-container { width: 100%; display: flex; justify-content: center; padding: 10px; }
         #game-wrap { 
             position:relative; width: 100%; max-width: 420px; height: 75vh; min-height: 600px;
@@ -42,7 +40,6 @@
             overflow: hidden; box-shadow: 0 0 40px rgba(0, 242, 255, 0.25);
         }
 
-        /* HUD */
         #hud { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
         #energy-box { width: 85%; height: 12px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 10px; border: 1px solid #fff; overflow: hidden; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
@@ -55,7 +52,6 @@
 
         canvas { position: absolute; inset: 0; z-index: 50; width: 100%; height: 100%; }
 
-        /* OVERLAYS & MENÜS */
         .screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.92); padding: 20px; text-align: center; backdrop-filter: blur(10px); }
         
         .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.5); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 20px; }
@@ -70,28 +66,23 @@
         .btn-char:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
         .span-2 { grid-column: span 2; }
 
-        /* STEUERUNG */
         #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 35px; z-index: 300; }
         .arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; backdrop-filter: blur(5px); }
         .arrow:active { background: var(--neon); color: #000; border-color: var(--neon); transform: scale(0.9); }
 
-        /* INFO BEREICH (UNTER DEM SPIEL) */
         .info-wrapper { width: 100%; max-width: 450px; padding: 15px; display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px; }
         .panel { background: var(--glass); border: 1px solid var(--panel-border); border-radius: 20px; padding: 20px; backdrop-filter: blur(15px); }
         .panel h3 { color: var(--gold); border-bottom: 1px solid rgba(255,215,0,0.3); padding-bottom: 10px; margin-bottom: 15px; font-size: 16px; text-align: center; }
         
-        /* RANGLISTE */
         .rank-row { display: flex; justify-content: space-between; padding: 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; }
         .rank-row.first { color: var(--gold); font-weight: 900; font-size: 16px; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
 
-        /* SUPPORT & WALLET */
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .btn-sup { padding: 12px; border-radius: 12px; border: none; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; }
         .bg-tk { background: #ff0050; } .bg-pp { background: #0070ba; }
         .wallet-box { background: #fff; padding: 15px; border-radius: 15px; text-align: center; margin: 15px auto; width: 140px; }
         .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; }
         
-        /* ANLEITUNG & RECHT */
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; line-height: 1.6; color: #ccc; }
         ul.rules { padding-left: 20px; margin-bottom: 10px; }
         ul.rules li { margin-bottom: 5px; }
@@ -129,7 +120,7 @@
 
         <div id="scr-name" class="screen">
             <h2 style="color:var(--neon); margin-bottom:20px;">AGENT ACCESS</h2>
-            <input type="text" id="pName" class="name-input" placeholder="CODENAME EINGEBEN" maxlength="12" autocomplete="off">
+            <input type="text" id="pName" class="name-input" placeholder="CODENAME EINGEBEN" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
             <button class="btn-main" onclick="authAgent()">AUTHENTIFIZIEREN</button>
         </div>
 
@@ -156,7 +147,7 @@
 <div class="info-wrapper">
     <div class="panel">
         <h3>🏆 GLOBAL RANKING</h3>
-        <div id="leaderboard" class="text-sm" style="text-align:center;">Verbinde mit DoggyCo Mainframe...</div>
+        <div id="leaderboard" class="text-sm" style="text-align:center;">Lade Mainframe...</div>
     </div>
 
     <div class="panel">
@@ -193,29 +184,28 @@
 </div>
 
 <audio id="snd-menu" src="menu.mp3" loop></audio>
-<audio id="snd-action" loop></audio> <audio id="snd-coll" src="collect.mp3"></audio>
+<audio id="snd-action" loop></audio> 
+<audio id="snd-coll" src="collect.mp3"></audio>
 <audio id="snd-hit" src="hit.mp3"></audio>
 <audio id="snd-over" src="gameover.mp3"></audio>
 
 <script>
-// --- SUPABASE RANGLISTE ---
+// --- SUPABASE RANGLISTE (Dein Original-Weg) ---
 const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
-let supabase = null;
+let supabaseClient = null;
 
-window.addEventListener('load', () => {
-    try {
-        if(window.supabase) {
-            supabase = window.supabase.createClient(SURL, SKEY);
-            fetchRanks();
-        }
-    } catch(e) { document.getElementById("leaderboard").innerText = "Datenbank Offline."; }
-});
+try {
+    supabaseClient = supabase.createClient(SURL, SKEY);
+    fetchRanks();
+} catch(e) {
+    document.getElementById("leaderboard").innerText = "Datenbank nicht erreichbar.";
+}
 
 async function fetchRanks() {
-    if(!supabase) return;
+    if(!supabaseClient) return;
     try {
-        let { data } = await supabase.from('leaderboard').select('n, s').order('s', { ascending: false }).limit(5);
+        let { data } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
         if(data && data.length > 0) {
             document.getElementById("leaderboard").innerHTML = data.map((x, i) => `
                 <div class="rank-row ${i===0 ? 'first' : ''}">
@@ -224,20 +214,20 @@ async function fetchRanks() {
                 </div>
             `).join('');
         } else {
-            document.getElementById("leaderboard").innerText = "Noch keine Einträge.";
+            document.getElementById("leaderboard").innerText = "Keine Einträge gefunden.";
         }
-    } catch(e) { document.getElementById("leaderboard").innerText = "Fehler beim Laden."; }
+    } catch(e) { 
+        document.getElementById("leaderboard").innerText = "Fehler beim Laden."; 
+    }
 }
 
 // --- SPIEL LOGIK ---
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-// Interne Canvas Auflösung für perfekte Kollision
 const W = 400; const H = 700;
 canvas.width = W; canvas.height = H;
 
-// 5 Bahnen exakt berechnet (40, 120, 200, 280, 360)
 const lanes = [40, 120, 200, 280, 360];
 let currLane = 2, playerX = lanes[2], targetX = lanes[2];
 
@@ -245,14 +235,13 @@ let active = false, mode = 'dog', agent = "UNKNOWN";
 let entities = [], floaters = [], lastT = 0;
 let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
 
-// Audios
-const aMenu = document.getElementById("snd-menu");
-const aAction = document.getElementById("snd-action");
-const aColl = document.getElementById("snd-coll");
-const aHit = document.getElementById("snd-hit");
-const aOver = document.getElementById("snd-over");
-
-function playSnd(a) { a.currentTime = 0; a.play().catch(()=>{}); }
+function safePlayAudio(id) {
+    try {
+        let a = document.getElementById(id);
+        a.currentTime = 0;
+        a.play().catch(()=>{});
+    } catch(e) {}
+}
 
 function authAgent() {
     let n = document.getElementById("pName").value.trim().toUpperCase();
@@ -260,7 +249,7 @@ function authAgent() {
         agent = n;
         document.getElementById("scr-name").style.display = "none";
         document.getElementById("scr-start").style.display = "flex";
-        aMenu.play().catch(()=>{}); // Browser erlaubt Audio nach Klick
+        try { document.getElementById("snd-menu").play().catch(()=>{}); } catch(e){}
     } else {
         let input = document.getElementById("pName");
         input.style.borderColor = "var(--red)";
@@ -280,12 +269,15 @@ function start(m) {
 
     document.getElementById("scr-start").style.display = "none";
 
-    aMenu.pause();
-    aAction.src = mode + ".mp3"; 
-    aAction.play().catch(()=>{});
+    try { 
+        document.getElementById("snd-menu").pause();
+        let aAct = document.getElementById("snd-action");
+        aAct.src = mode + ".mp3";
+        aAct.play().catch(()=>{});
+    } catch(e){}
 
     active = true;
-    lastT = performance.now(); // WICHTIG: Verhindert sofortigen Game Over
+    lastT = performance.now();
     requestAnimationFrame(loop);
 }
 
@@ -300,15 +292,13 @@ function loop(t) {
     
     let dt = (t - lastT) / 1000;
     lastT = t;
-    if(dt > 0.1) dt = 0.016; // Tab-Wechsel Schutz
+    if(dt > 0.1) dt = 0.016;
 
     ctx.clearRect(0,0,W,H);
 
-    // Linien zeichnen
     ctx.strokeStyle = "rgba(255,255,255,0.05)"; ctx.lineWidth = 2;
     [80, 160, 240, 320].forEach(lx => { ctx.beginPath(); ctx.moveTo(lx,0); ctx.lineTo(lx,H); ctx.stroke(); });
 
-    // Werte berechnen
     timeLeft -= dt;
     energy -= (4 + level * 0.5) * dt;
 
@@ -317,7 +307,6 @@ function loop(t) {
         addFloat(targetX, H/2, "LEVEL UP!", "var(--gold)", 40);
     }
 
-    // UI Update
     document.getElementById("hp-txt").innerText = "❤️".repeat(Math.max(0, hp));
     document.getElementById("score-txt").innerText = Math.floor(score) + " PTS";
     document.getElementById("time-txt").innerText = Math.ceil(timeLeft) + "s";
@@ -325,11 +314,9 @@ function loop(t) {
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
     document.getElementById("energy-fill").style.background = energy < 20 ? "var(--red)" : "linear-gradient(90deg, var(--red), var(--gold), var(--green))";
 
-    // Item Symbole
     const items = { 'dog':'🦴', 'cat':'🐟', 'rabbit':'🥕', 'fox':'🍗', 'panda':'🎋' };
     const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼' }[mode];
 
-    // Spawning
     if(Math.random() < (0.04 + level*0.005)) {
         let l = Math.floor(Math.random()*5);
         entities.push({ l: l, x: lanes[l], y: -50, t: items[mode], bad: false, rope: false, s: 220+(level*15) });
@@ -338,16 +325,13 @@ function loop(t) {
         let l = Math.floor(Math.random()*5);
         entities.push({ l: l, x: lanes[l], y: -50, t: '👮', bad: true, rope: false, s: 260+(level*20) });
     }
-    // Ameisen / Spinnen am Faden
     if(Math.random() < (0.008 + level*0.001)) {
         let l = Math.floor(Math.random()*5);
         entities.push({ l: l, x: lanes[l], y: -100, t: '🕷️', bad: true, rope: true, s: 150+(level*10) });
     }
 
-    // Hitbox
     const hitTop = H - 150; const hitBottom = H - 50;
 
-    // Entities bewegen & Kollision (Rückwärts-Schleife für perfekte Erkennung)
     for(let i = entities.length - 1; i >= 0; i--) {
         let e = entities[i];
         e.y += e.s * dt;
@@ -362,14 +346,14 @@ function loop(t) {
             if(e.bad) {
                 if(e.rope) { energy -= 25; addFloat(e.x, e.y, "-25 ENERGIE", "var(--red)", 20); }
                 else { hp--; energy -= 15; addFloat(e.x, e.y, "-LEBEN", "var(--red)", 25); }
-                playSnd(aHit);
+                safePlayAudio("snd-hit");
                 document.getElementById("game-wrap").classList.remove("shake");
                 void document.getElementById("game-wrap").offsetWidth;
                 document.getElementById("game-wrap").classList.add("shake");
             } else {
                 let pts = 10 * level;
                 score += pts; energy = Math.min(100, energy + 10);
-                playSnd(aColl);
+                safePlayAudio("snd-coll");
                 addFloat(e.x, e.y, "+"+pts, "var(--green)", 20);
             }
             entities.splice(i, 1);
@@ -378,12 +362,10 @@ function loop(t) {
         }
     }
 
-    // Spieler
     playerX += (targetX - playerX) * 0.3;
     ctx.font = "70px Arial";
     ctx.fillText(charIcon, playerX, H - 80);
 
-    // Floater rendern
     for(let i = floaters.length - 1; i >= 0; i--) {
         let f = floaters[i];
         f.y -= 2; f.o -= 1.5 * dt;
@@ -394,18 +376,18 @@ function loop(t) {
     }
     ctx.globalAlpha = 1;
 
-    // Game Over Trigger
     if(hp <= 0 || energy <= 0) {
         active = false;
-        aAction.pause(); playSnd(aOver);
+        try { document.getElementById("snd-action").pause(); } catch(e){}
+        safePlayAudio("snd-over");
         
         ctx.fillStyle = "rgba(0,0,0,0.8)"; ctx.fillRect(0,0,W,H);
         
         document.getElementById("scr-end").style.display = "flex";
         document.getElementById("f-score").innerText = Math.floor(score);
         
-        if(supabase) {
-            supabase.from('leaderboard').insert([{ n: agent, s: Math.floor(score) }]).catch(()=>{});
+        if(supabaseClient) {
+            supabaseClient.from('leaderboard').insert([{ n: agent, s: Math.floor(score) }]).catch(()=>{});
         }
         return;
     }
