@@ -1,1 +1,335 @@
 
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DOGGYCO MISSION - V330 MAXIMA AUDIO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { 
+            --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
+            --cat-purple: #bc13fe; --rabbit-orange: #ff8c00; --fox-red: #ff4500; --panda-white: #ffffff;
+            --panel: rgba(0, 0, 0, 0.85);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body { 
+            background: #000; font-family: 'Orbitron', sans-serif; color: #fff; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            overflow-x: hidden; touch-action: none;
+        }
+
+        /* DEIN HINTERGRUNDBILD - Hell und klar! */
+        #bg-fx { 
+            position: fixed; inset: 0; 
+            background-image: url('hintergrund.png'); 
+            background-size: cover; background-position: center; 
+            z-index: -1; 
+        }
+
+        header { padding: 15px 0; text-align: center; width: 100%; }
+        header h1 { font-size: clamp(16px, 5vw, 28px); color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; }
+
+        /* SPIELFELD - WIE VON DIR GEWÜNSCHT MIT MARGIN-RIGHT */
+        #game-view { width: 100%; display: flex; justify-content: center; padding: 10px; margin-right: 20px; }
+        #game-wrap { 
+            position:relative; width: 100%; max-width: 400px; height: 620px; 
+            background: rgba(0,0,0,0.8); border: 4px solid var(--neon); border-radius: 40px; 
+            overflow: hidden; box-shadow: 0 0 30px rgba(0, 242, 255, 0.2); transition: 0.4s;
+        }
+
+        /* HUD */
+        #hud { position: absolute; top: 12px; width: 100%; z-index: 200; pointer-events: none; }
+        #energy-container { width: 80%; height: 8px; margin: 0 auto 10px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #444; }
+        #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.3s; }
+        
+        #stats-bar { 
+            display: flex; justify-content: space-between; align-items: center; width: 92%; margin: 0 auto; 
+            background: var(--panel); padding: 6px 10px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(8px);
+        }
+        .stat-val { font-weight: 900; font-size: 12px; }
+
+        canvas { position: absolute; inset: 0; z-index: 50; }
+
+        /* SCREENS */
+        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.95); padding: 20px; text-align: center; }
+        
+        /* GRID FÜR ALLE 5 MISSIONS-BILDER */
+        .mission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; margin-top: 10px; }
+        .mission-btn { 
+            padding: 12px 5px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(255,255,255,0.03);
+            color: #fff; cursor: pointer; transition: 0.2s; font-family: 'Orbitron'; font-size: 10px; text-transform: uppercase;
+        }
+        .mission-btn span { display: block; font-size: 28px; margin-bottom: 4px; }
+        .mission-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
+
+        .btn-full { grid-column: span 2; background: var(--green); color: #000; font-weight: 900; border: none; font-size: 12px; }
+
+        input { 
+            width: 100%; padding: 12px; border-radius: 10px; border: 2px solid var(--neon); 
+            background: #000; color: #fff; text-align: center; font-family: 'Orbitron'; margin-bottom: 10px; font-size: 14px;
+        }
+
+        #controls { position: absolute; bottom: 20px; width: 100%; display: flex; justify-content: space-around; z-index: 300; }
+        .ctrl-btn { 
+            width: 75px; height: 75px; background: rgba(255,255,255,0.03); border: 2px solid var(--neon); 
+            border-radius: 50%; color: #fff; font-size: 25px; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; user-select: none; backdrop-filter: blur(5px);
+        }
+        .ctrl-btn:active { background: var(--neon); color: #000; }
+
+        .info-panel { width: 95%; max-width: 400px; margin: 8px 0; padding: 12px; background: var(--panel); border-radius: 20px; border: 1px solid #222; }
+        
+        .rank-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 11px; }
+    </style>
+</head>
+<body>
+
+<div id="bg-fx"></div>
+<header><h1 id="title">DOGGYCO MISSION</h1></header>
+
+<div id="game-view">
+    <div id="game-wrap">
+        <div id="hud">
+            <div id="energy-container"><div id="energy-fill"></div></div>
+            <div id="stats-bar">
+                <div id="hp-ui">❤️❤️❤️</div>
+                <div id="score-ui" style="color:var(--gold)" class="stat-val">0</div>
+                <div id="time-ui" style="color:var(--neon)" class="stat-val">30</div>
+                <div style="background:var(--neon); color:#000; padding:2px 6px; border-radius:4px; font-weight:900; font-size:10px;">L<span id="lvl-ui">1</span></div>
+            </div>
+        </div>
+
+        <canvas id="canvas"></canvas>
+
+        <div id="controls">
+            <button class="ctrl-btn" onmousedown="move(-1)" ontouchstart="move(-1)">◀</button>
+            <button class="ctrl-btn" onmousedown="move(1)" ontouchstart="move(1)">▶</button>
+        </div>
+
+        <div id="scr-name" class="screen">
+            <h2 style="color:var(--neon); margin-bottom:15px; font-size:18px;">AGENT ACCESS</h2>
+            <input type="text" id="pName" placeholder="CODENAME" maxlength="10">
+            <button class="mission-btn btn-full" onclick="initUser()">AUTHENFISIZIEREN</button>
+        </div>
+
+        <div id="scr-start" class="screen" style="display:none">
+            <h3 style="margin-bottom:10px; font-size:12px; color:var(--gold)">WÄHLE DEINE ELITE-EINHEIT</h3>
+            <div class="mission-grid">
+                <button class="mission-btn" style="border-color:#00f2ff" onclick="start('dog')"><span>🐶</span>DOG UNIT</button>
+                <button class="mission-btn" style="border-color:#bc13fe" onclick="start('cat')"><span>🐱</span>CAT OPS</button>
+                <button class="mission-btn" style="border-color:#ff8c00" onclick="start('rabbit')"><span>🐰</span>RABBIT SQD</button>
+                <button class="mission-btn" style="border-color:#ff4500" onclick="start('fox')"><span>🦊</span>FOX TACTICAL</button>
+                <button class="mission-btn" style="border-color:#ffffff; grid-column: span 2;" onclick="start('panda')"><span>🐼</span>PANDA SPECIAL FORCES</button>
+            </div>
+        </div>
+
+        <div id="scr-end" class="screen" style="display:none">
+            <h2 style="color:var(--red); font-size:20px;">MISSION ABGEBROCHEN</h2>
+            <h1 id="final-score" style="font-size:45px; color:var(--gold); margin:10px 0">0</h1>
+            <button class="mission-btn btn-full" onclick="location.reload()">RE-BOOT SYSTEM</button>
+        </div>
+    </div>
+</div>
+
+<div class="info-panel">
+    <h3 style="color:var(--gold); font-size:10px; margin-bottom:4px">🏆 GLOBAL RANKING</h3>
+    <div id="leaderboard" style="font-size:10px; color:#fff">Verbinde mit DoggyCo Mainframe...</div>
+</div>
+
+<audio id="snd-menu" loop><source src="menu.mp3" type="audio/mpeg"></audio>
+<audio id="snd-action" loop><source src="dog.mp3" type="audio/mpeg"></audio>
+<audio id="snd-collect"><source src="collect.mp3" type="audio/mpeg"></audio>
+<audio id="snd-hit"><source src="hit.mp3" type="audio/mpeg"></audio>
+<audio id="snd-gameover"><source src="gameover.mp3" type="audio/mpeg"></audio>
+
+<script>
+// --- RANGLISTE (SUPABASE) ---
+const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
+const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
+let supabase = null;
+
+window.onload = () => {
+    try {
+        if(window.supabase) {
+            supabase = window.supabase.createClient(SURL, SKEY);
+            updateRanks();
+        }
+    } catch(e) { 
+        document.getElementById("leaderboard").innerHTML = "Datenbank nicht erreichbar."; 
+    }
+};
+
+async function updateRanks() {
+    if(!supabase) return;
+    try {
+        let { data, error } = await supabase.from('leaderboard').select('n, s').order('s', { ascending: false }).limit(5);
+        if(data && data.length > 0) {
+            document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
+                return `<div class="rank-item"><span style="${i===0?'color:gold;font-weight:bold;':''}">${i+1}. ${x.n}</span><span style="color:gold">${x.s}</span></div>`;
+            }).join('');
+        }
+    } catch(e) { 
+        document.getElementById("leaderboard").innerHTML = "Fehler beim Laden der Rangliste."; 
+    }
+}
+
+// --- SPIEL LOGIK ---
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let W = 400, H = 620;
+let lanes = [50, 125, 200, 275, 350], currentLane = 2;
+let playerX = lanes[2], targetX = lanes[2];
+let active = false, mode = 'dog', agent = "AGENT";
+let entities = [], floaters = [], clouds = [], lastT = 0;
+let score = 0, hp = 3, energy = 100, level = 1, time = 30, shake = 0;
+
+// Audio Objekte
+const sMenu = document.getElementById("snd-menu");
+const sAction = document.getElementById("snd-action");
+const sCollect = document.getElementById("snd-collect");
+const sHit = document.getElementById("snd-hit");
+const sOver = document.getElementById("snd-gameover");
+
+function init() { 
+    canvas.width = W; canvas.height = H; 
+    for(let i=0; i<3; i++) clouds.push({x: Math.random()*W, y: Math.random()*100, s: 0.3+Math.random()*0.4});
+}
+
+function initUser() {
+    let n = document.getElementById("pName").value;
+    if(n) { 
+        agent = n.toUpperCase(); 
+        document.getElementById("scr-name").style.display = "none"; 
+        document.getElementById("scr-start").style.display = "flex";
+        sMenu.play().catch(()=>{}); // Musik startet bei Klick
+    }
+}
+
+function start(m) {
+    mode = m;
+    const themes = { 'dog':'#00f2ff', 'cat':'#bc13fe', 'rabbit':'#ff8c00', 'fox':'#ff4500', 'panda':'#ffffff' };
+    document.documentElement.style.setProperty('--neon', themes[mode]);
+    document.getElementById("title").style.color = themes[mode];
+    document.getElementById("scr-start").style.display = "none";
+    
+    // Musik wechseln
+    sMenu.pause();
+    sAction.src = mode + ".mp3"; 
+    sAction.play().catch(()=>{});
+
+    active = true; 
+    lastT = performance.now(); // HIER WAR DER FEHLER: Das verhindert, dass die Energie sofort auf 0 springt!
+    requestAnimationFrame(loop);
+}
+
+function playSound(sound) { sound.currentTime = 0; sound.play().catch(()=>{}); }
+
+function move(dir) {
+    if(!active) return;
+    currentLane = Math.max(0, Math.min(4, currentLane + dir));
+    targetX = lanes[currentLane];
+}
+
+function loop(t) {
+    if(!active) return;
+    
+    // Zeit-Berechnung korrigiert
+    if(!lastT) lastT = t;
+    let dt = (t - lastT) / 1000; 
+    lastT = t;
+    if(dt > 0.1) dt = 0.016; // Verhindert Bug, wenn man den Tab wechselt
+
+    ctx.clearRect(0,0,W,H);
+
+    // Bahnen
+    ctx.strokeStyle = "rgba(255,255,255,0.03)";
+    lanes.forEach(lx => { ctx.beginPath(); ctx.moveTo(lx,0); ctx.lineTo(lx,H); ctx.stroke(); });
+
+    // Gameplay Dynamik
+    time -= dt; 
+    energy -= (5 + level) * dt;
+    if(time <= 0) { level++; time = 30; energy = Math.min(100, energy + 25); }
+
+    // HUD Update
+    document.getElementById("hp-ui").innerText = "❤️".repeat(Math.max(0, hp));
+    document.getElementById("score-ui").innerText = Math.floor(score);
+    document.getElementById("time-ui").innerText = Math.ceil(time);
+    document.getElementById("lvl-ui").innerText = level;
+    document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
+
+    // GAME OVER
+    if(hp <= 0 || energy <= 0) {
+        active = false;
+        sAction.pause();
+        playSound(sOver);
+        document.getElementById("scr-end").style.display = "flex";
+        document.getElementById("final-score").innerText = Math.floor(score);
+        
+        // Supabase Score senden
+        if(supabase) {
+            supabase.from('leaderboard').insert([{ n: agent, s: Math.floor(score) }]).then(()=>{}).catch(()=>{});
+        }
+        return;
+    }
+
+    // Clouds
+    ctx.font = "30px Arial"; ctx.textAlign = "center";
+    clouds.forEach(c => { c.x += c.s; if(c.x > W+50) c.x = -60; ctx.fillText("☁️", c.x, c.y); });
+
+    // Spawning (Ameisen/Spinnen & Items)
+    if(Math.random() < 0.045) {
+        let items = { 'dog':'🦴', 'cat':'🐟', 'rabbit':'🥕', 'fox':'🍗', 'panda':'🎋' };
+        entities.push({l: Math.floor(Math.random()*5), y: -50, t: items[mode], v: 10*level, s: 180+(level*15)});
+    }
+    if(Math.random() < 0.012) entities.push({l: Math.floor(Math.random()*5), y: -50, t: '😈', v: -1, s: 220});
+    // DEINE AMEISEN/SPINNEN AM FADEN SIND WIEDER DA:
+    if(Math.random() < 0.008) entities.push({l: Math.floor(Math.random()*5), y: -100, t: '🕷️', v: -20, s: 150, rope: true});
+
+    entities.forEach((en, i) => {
+        en.y += en.s * dt;
+        let ex = lanes[en.l];
+        
+        // Faden für die Ameise zeichnen
+        if(en.rope) { 
+            ctx.strokeStyle = "rgba(255,255,255,0.15)"; 
+            ctx.beginPath(); ctx.moveTo(ex,0); ctx.lineTo(ex, en.y); ctx.stroke(); 
+        }
+        ctx.font = en.rope ? "35px Arial" : "30px Arial";
+        ctx.fillText(en.t, ex, en.y);
+
+        // Kollision
+        if(en.l === currentLane && en.y > H-120 && en.y < H-60) {
+            if(en.t === '😈') { hp--; shake = 20; playSound(sHit); floaters.push({x:ex, y:en.y, txt:"-LIFE", c:"red"}); }
+            else if(en.rope) { energy -= 25; shake = 15; playSound(sHit); floaters.push({x:ex, y:en.y, txt:"-25%", c:"red"}); }
+            else { score += en.v; energy = Math.min(100, energy + 10); playSound(sCollect); floaters.push({x:ex, y:en.y, txt:"+"+en.v, c:"#00ff88"}); }
+            entities.splice(i, 1);
+        }
+        if(en.y > H + 50) entities.splice(i, 1);
+    });
+
+    // Spieler
+    playerX += (targetX - playerX) * 0.25;
+    let visualX = playerX; if(shake > 0) { visualX += Math.sin(shake) * 6; shake--; }
+    ctx.font = "60px Arial";
+    let pImg = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼' };
+    ctx.fillText(pImg[mode], visualX, H-80);
+
+    // Text-Effekte (Floaters)
+    floaters.forEach((f, i) => {
+        f.y -= 2; f.o = (f.o || 1) - 0.02;
+        ctx.globalAlpha = Math.max(0, f.o); 
+        ctx.fillStyle = f.c; ctx.font = "bold 16px Orbitron";
+        ctx.fillText(f.txt, f.x + 35, f.y);
+        if(f.o <= 0) floaters.splice(i, 1);
+    });
+    ctx.globalAlpha = 1;
+    
+    requestAnimationFrame(loop);
+}
+init();
+</script>
+</body>
+</html>
