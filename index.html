@@ -27,18 +27,8 @@
         header { padding: 20px 0 10px; text-align: center; width: 100%; }
         header h1 { font-size: clamp(24px, 8vw, 40px); color: var(--neon); text-shadow: 0 0 20px var(--neon); letter-spacing: 2px; }
 
-        /* MASTER CONTAINER: Erzwingt, dass ALLES exakt gleich breit ist (max 420px) */
-        .app-container {
-            width: 100%;
-            max-width: 420px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0 10px;
-            position: relative;
-        }
+        .app-container { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; padding: 0 10px; position: relative; }
 
-        /* SPIELBEREICH */
         #game-wrap { 
             position:relative; width: 100%; height: 70vh; min-height: 550px;
             background: rgba(0,0,0,0.4); border: 4px solid var(--neon); border-radius: 35px; 
@@ -57,7 +47,6 @@
 
         canvas { position: absolute; inset: 0; z-index: 50; width: 100%; height: 100%; }
 
-        /* SCHÖNES LEVEL UP POPUP */
         #lvl-up-popup {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
             background: linear-gradient(45deg, var(--gold), #ff8c00); color: #000;
@@ -67,7 +56,6 @@
         }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        /* SCREENS (Milchig) */
         .screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.6); padding: 20px; text-align: center; backdrop-filter: blur(5px); }
         .inner-panel { background: var(--glass); border: 2px solid var(--neon); border-radius: 20px; padding: 25px; backdrop-filter: blur(20px); box-shadow: 0 0 20px rgba(0,242,255,0.2); width: 100%; }
         .inner-panel h3, .inner-panel h2 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; }
@@ -75,21 +63,26 @@
         .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 20px; }
         .name-input:focus { border-color: var(--gold); box-shadow: 0 0 20px var(--gold); }
 
-        .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 16px; width: 100%; cursor: pointer; box-shadow: 0 0 15px var(--green); transition: 0.2s; }
-        .btn-main:active { transform: scale(0.95); }
+        /* 3D LIFT BUTTONS DESIGN */
+        .btn-main { 
+            padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 16px; width: 100%; cursor: pointer; 
+            box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.4); transition: 0.1s; transform: translateY(0);
+        }
+        .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
 
         .flex-chars { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; margin-bottom: 15px; }
-        .btn-char { flex: 1 1 30%; min-width: 85px; padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 10px; text-transform: uppercase; transition: 0.2s; display: flex; flex-direction: column; align-items: center; }
+        .btn-char { 
+            flex: 1 1 30%; min-width: 85px; padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.6); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 10px; text-transform: uppercase; transition: 0.1s; display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.5); transform: translateY(0);
+        }
         .btn-char span { font-size: 32px; margin-bottom: 5px; }
-        .btn-char:hover { background: rgba(255,255,255,0.2); box-shadow: 0 0 15px var(--neon); }
-        .btn-char:active { transform: scale(0.95); }
+        .btn-char:hover { background: rgba(255,255,255,0.2); }
+        .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.5); }
 
-        /* CONTROLS */
         #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 35px; z-index: 300; }
-        .arrow { width: 75px; height: 75px; background: rgba(255,255,255,0.15); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; backdrop-filter: blur(8px); transition: 0.2s; box-shadow: 0 0 10px var(--neon); }
-        .arrow:active { background: var(--neon); color: #000; transform: scale(0.85); box-shadow: 0 0 25px var(--neon); }
+        .arrow { width: 75px; height: 75px; background: rgba(255,255,255,0.15); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; backdrop-filter: blur(8px); transition: 0.1s; box-shadow: 0 6px 0 var(--neon), 0 10px 20px rgba(0,242,255,0.3); }
+        .arrow:active { background: var(--neon); color: #000; transform: translateY(6px) scale(0.9); box-shadow: 0 0px 0 var(--neon); }
 
-        /* UNTERE PANELS (Absolut gleich breit wie das Spiel) */
         .info-panel { width: 100%; background: var(--glass); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 15px; backdrop-filter: blur(20px); box-shadow: 0 0 20px rgba(0,242,255,0.1); }
         .info-panel h3 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 16px; text-align: center; text-transform: uppercase; }
         
@@ -101,10 +94,15 @@
         .rank-wood { color: var(--wood); }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-sup { padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.3s; }
+        .btn-sup { 
+            padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); transform: translateY(0);
+        }
         .bg-tk { background: linear-gradient(45deg, #000, #ff0050); } 
         .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); }
-        .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; }
+        .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; box-shadow: 0 4px 0 var(--gold); transform: translateY(0); }
+        .btn-sup:active, .btn-copy:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.5); }
+        
         .wallet-box { background: rgba(255,255,255,0.9); padding: 10px; border-radius: 15px; text-align: center; margin: 15px auto; width: 130px; }
         
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
@@ -181,12 +179,12 @@
     <div class="info-panel">
         <h3 style="color:var(--neon)">📖 HOW TO PLAY</h3>
         <ul class="rules text-sm">
-            <li>Gleite sanft mit <b>Pfeilen ◀ ▶</b>.</li>
+            <li>Weiche mit <b>Pfeilen ◀ ▶</b> oder <b>Tastatur (Links/Rechts)</b> aus.</li>
             <li><b>Grüne Punkte (10% Steigerung):</b><br>
                 Essen = <span style="color:var(--green)">10, 20 oder 30 PTS</span>
             </li>
             <li><b>Polizei 👮</b> = -1 Herz.</li>
-            <li><b>Spinnen 🕷️</b> = -30% Energie. Sie patrouillieren auf und ab!</li>
+            <li><b>Spinnen 🕷️</b> = -30% Energie. Immer sichtbar!</li>
             <li><b>Level 10:</b> Feuerwerk & Horn!</li>
         </ul>
     </div>
@@ -212,7 +210,6 @@
             © 2026 DOGGYCO GLOBAL ACADEMY.
         </p>
     </div>
-
 </div>
 
 <audio id="snd-menu" src="menu.mp3" loop></audio>
@@ -223,10 +220,8 @@
 <audio id="snd-horn" src="horn.mp3"></audio>
 
 <script>
-// Lautstärke 30%
 document.querySelectorAll('audio').forEach(a => a.volume = 0.3);
 
-// Supabase
 const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 let supabaseClient = null;
@@ -259,6 +254,13 @@ let entities = [], floaters = [], permSpiders = [], fireworks = [], lastT = 0;
 let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
 let charShake = 0, charJump = 0, lvl10Triggered = false, spawnDelay = 0;
 
+// TASTATUR STEUERUNG (Handy + PC)
+window.addEventListener("keydown", function(e) {
+    if(!active) return;
+    if(e.key === "ArrowLeft") move(-1);
+    if(e.key === "ArrowRight") move(1);
+});
+
 function safePlayAudio(id) {
     try { let a = document.getElementById(id); a.currentTime = 0; a.play().catch(()=>{}); } catch(e) {}
 }
@@ -281,7 +283,6 @@ function start(m) {
     document.getElementById("main-title").style.color = colors[mode];
     document.getElementById("main-title").style.textShadow = `0 0 20px ${colors[mode]}`;
     
-    // Panels Rahmen anpassen
     document.querySelectorAll('.info-panel, .inner-panel').forEach(p => p.style.borderColor = colors[mode]);
     document.getElementById("game-wrap").style.borderColor = colors[mode];
     document.getElementById("game-wrap").style.boxShadow = `0 0 40px ${colors[mode]}80`;
@@ -294,8 +295,8 @@ function start(m) {
         aAct.src = mode + ".mp3"; aAct.play().catch(()=>{});
     } catch(e){}
 
-    // Spinnen starten OBEN, damit sie runter gehen und erst OBEN wechseln
-    permSpiders = [ { lane: 0, y: -200, dy: 1 }, { lane: 4, y: -400, dy: 1 } ];
+    // Spinnen starten sichtbar oben und unten
+    permSpiders = [ { lane: 0, y: 60, dy: 1 }, { lane: 4, y: H-200, dy: -1 } ];
 
     active = true; lastT = 0; 
     requestAnimationFrame(loop);
@@ -307,14 +308,12 @@ function move(dir) {
     targetX = lanes[currLane]; 
 }
 
-// SPINNEN WECHSELN NUR OBEN
 function getSafeSpiderLane(currentSpider) {
     let otherL = permSpiders.find(sp => sp !== currentSpider).lane;
     let avail = [0,1,2,3,4].filter(l => l !== otherL);
     return avail[Math.floor(Math.random() * avail.length)];
 }
 
-// ÜBERSCHNEIDUNGS-VERBOT FÜR ITEMS
 function getSafeLaneForItems() {
     let blockedLanes = permSpiders.map(s => s.lane);
     let safeLanes = [0,1,2,3,4].filter(l => !blockedLanes.includes(l));
@@ -373,26 +372,26 @@ function loop(t) {
     };
     const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼' }[mode];
 
-    // SPAWN LOGIK: Nur wenn Bildschirm leer ist (Kein Chaos!)
-    if(entities.length === 0) {
+    // MEHR ITEMS (Löschen bis 2 Items erlaubt)
+    if(entities.length < 2) {
         spawnDelay -= dt;
         if(spawnDelay <= 0) {
             let safeL = getSafeLaneForItems();
             if(safeL !== -1) {
-                if(Math.random() < 0.75) {
+                if(Math.random() < 0.85) { // 85% Chance auf Nahrung (Macht Überleben machbar)
                     let r = Math.random(); let tier = r < 0.5 ? 0 : (r < 0.8 ? 1 : 2);
                     entities.push({ l: safeL, x: lanes[safeL], y: -50, t: items[mode][tier].i, pts: items[mode][tier].p, bad: false, s: 230 * speedMult });
                 } else {
                     entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '👮', pts: 0, bad: true, s: 260 * speedMult });
                 }
             }
-            spawnDelay = 0.5; // Warte kurz
+            spawnDelay = 0.35; // Items fallen jetzt öfter!
         }
     }
 
     const hitTop = H - 150; const hitBottom = H - 50;
 
-    // SPINNEN (Gehen runter, berühren Boden, gehen rauf -> Wechseln OBEN die Bahn)
+    // SPINNEN SIND IMMER SICHTBAR
     permSpiders.forEach(s => {
         s.y += (180 * speedMult * s.dy) * dt;
         let sx = lanes[s.lane];
@@ -400,17 +399,23 @@ function loop(t) {
         ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🕷️', sx, s.y);
 
-        if(s.y > H + 50) { s.dy = -1; } // Berührt Boden -> geht wieder rauf
-        if(s.y < -100) { 
-            s.dy = 1; // Berührt Decke -> geht wieder runter
-            s.lane = getSafeSpiderLane(s); // WECHSELT BAHN NUR OBEN
-            s.y = -99; 
+        // Geht runter, prallt ab (Bleibt sichtbar)
+        if(s.y >= H - 100) { s.dy = -1; s.y = H - 100; }
+        // Geht hoch, wechselt NUR OBEN die Bahn (Bleibt sichtbar)
+        if(s.y <= 60) { 
+            s.dy = 1; 
+            s.lane = getSafeSpiderLane(s); 
+            s.y = 60; 
         }
 
         if(Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
             energy -= 30; charShake = 20; safePlayAudio("snd-hit");
             addFloat(sx + 40, s.y, "-30%", "var(--red)", 25);
-            s.y = s.dy === 1 ? H+100 : -200; 
+            
+            // Setzt Spinne nach Treffer wieder nach ganz oben auf neue Bahn
+            s.y = 60; 
+            s.dy = 1;
+            s.lane = getSafeSpiderLane(s);
         }
     });
 
