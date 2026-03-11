@@ -11,26 +11,26 @@
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #ffd700; 
-            --glass: rgba(20, 20, 30, 0.6); --glass-border: rgba(255, 255, 255, 0.2);
+            --glass: rgba(20, 20, 30, 0.75); --glass-border: rgba(255, 255, 255, 0.2);
             --cat-purple: #bc13fe; --rab-orange: #ff9f43; --blur: blur(20px);
         }
         
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
         body, html { 
-            width: 100%; height: 100%; overflow-x: hidden; background: #050505; 
+            width: 100%; height: 100%; overflow-x: hidden; background-color: #050505; 
             font-family: 'Orbitron', sans-serif; color: #fff;
         }
 
-        /* FULLSCREEN BACKGROUND */
+        /* HINTERGRUND REPARIERT */
         #main-bg {
-            position: fixed; inset: 0; 
-            background-image: url('hintergrund.png'); /* Deine eigene Datei */
-            background-size: cover; background-position: center; 
-            z-index: -1; transition: filter 1.5s ease;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: url('hintergrund.png'); 
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            z-index: -2; transition: filter 1.5s ease;
         }
         #bg-overlay {
-            position: fixed; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); z-index: -1;
+            position: fixed; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.85) 100%); z-index: -1; pointer-events: none;
         }
 
         /* ANIMATED NEON HEADER */
@@ -49,8 +49,7 @@
             border: 1px solid var(--glass-border); border-top: 1px solid rgba(255,255,255,0.4);
             border-radius: 25px; padding: 30px; margin: 20px auto; width: 420px; max-width: 90%;
             text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 15px rgba(0, 242, 255, 0.2);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative; overflow: hidden;
+            transition: transform 0.3s ease; position: relative;
         }
 
         /* BUTTONS */
@@ -65,34 +64,35 @@
         .cat-btn { background: linear-gradient(45deg, #8e2de2, var(--cat-purple)); color: #fff; box-shadow: 0 5px 15px rgba(188,19,254,0.4); }
         .rab-btn { background: linear-gradient(45deg, #f12711, var(--rab-orange)); color: #fff; box-shadow: 0 5px 15px rgba(255,159,67,0.4); }
 
-        /* NAME INPUT ANIMATION */
-        .input-container { position: relative; margin-bottom: 25px; }
+        /* NAME INPUT & FLOATING ICONS (Optimiert) */
+        .input-container { position: relative; margin-bottom: 35px; margin-top: 15px; }
         @keyframes borderPulse {
-            0% { border-color: rgba(0, 242, 255, 0.3); box-shadow: 0 0 0px var(--neon); }
+            0%, 100% { border-color: rgba(0, 242, 255, 0.3); box-shadow: 0 0 0px var(--neon); }
             50% { border-color: var(--neon); box-shadow: 0 10px 20px rgba(0, 242, 255, 0.2); }
-            100% { border-color: rgba(0, 242, 255, 0.3); box-shadow: 0 0 0px var(--neon); }
         }
         #pName {
-            background: rgba(0,0,0,0.5); border: 2px solid var(--neon); border-radius: 15px;
+            background: rgba(0,0,0,0.6); border: 2px solid var(--neon); border-radius: 15px;
             color: white; font-family: 'Orbitron'; font-size: 1.5rem; letter-spacing: 2px;
             text-align: center; width: 100%; outline: none; padding: 20px 10px;
             animation: borderPulse 2s infinite; transition: 0.3s;
         }
-        #pName:focus { background: rgba(0,0,0,0.8); animation: none; border-color: var(--gold); box-shadow: 0 0 20px var(--gold); }
+        #pName:focus { background: rgba(0,0,0,0.9); animation: none; border-color: var(--gold); box-shadow: 0 0 20px var(--gold); }
         
-        .floating-icons { position: absolute; top: -15px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; pointer-events: none; font-size: 1.2rem; opacity: 0.8; }
-        @keyframes floatUpDown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .floating-icons span { animation: floatUpDown 3s infinite ease-in-out; }
-        .floating-icons span:nth-child(2) { animation-delay: 0.5s; }
-        .floating-icons span:nth-child(3) { animation-delay: 1s; }
-        .floating-icons span:nth-child(4) { animation-delay: 1.5s; }
-        .floating-icons span:nth-child(5) { animation-delay: 2s; }
+        .floating-icons { 
+            position: absolute; top: -35px; width: 100%; 
+            display: flex; justify-content: space-evenly; 
+            pointer-events: none; font-size: 2.2rem; opacity: 1; z-index: 10;
+        }
+        @keyframes floatUpDown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        .floating-icons span { animation: floatUpDown 3s infinite ease-in-out; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .floating-icons span:nth-child(2) { animation-delay: 1s; }
+        .floating-icons span:nth-child(3) { animation-delay: 2s; }
 
         /* SUPPORT & INFO */
         .sup-row { display: flex; gap: 10px; margin-top: 15px; }
         .tk-btn { background: #ff0050; color: white; }
         .pp-btn { background: #0070ba; color: white; }
-        .copy-btn { background: #333; border: 1px solid var(--gold); color: var(--gold); }
+        .copy-btn { background: #222; border: 2px solid var(--gold); color: var(--gold); }
 
         /* RANKING */
         .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.95rem; }
@@ -137,7 +137,7 @@
     <div class="glass-panel">
         <div class="input-container">
             <div class="floating-icons">
-                <span>🐶</span><span>🦴</span><span>🐱</span><span>💎</span><span>🐰</span>
+                <span>🐶</span><span>🐱</span><span>🐰</span>
             </div>
             <input type="text" id="pName" placeholder="ENTER AGENT NAME" autocomplete="off" maxlength="12">
         </div>
@@ -205,22 +205,40 @@
 <audio id="bgMusic" src="musik.mp3" loop></audio>
 
 <script>
-// --- SUPABASE SETUP ---
+// --- SUPABASE SETUP (Repariert) ---
 const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 let supabase = null;
 
-// --- AUDIO SYNTH (Keine Dateien nötig für Effekte!) ---
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// --- AUDIO SYNTH FIX (Crash-sicher) ---
+let audioCtx = null;
+function initAudio() {
+    try {
+        if (!audioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if(AudioContext) audioCtx = new AudioContext();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const a = document.getElementById("bgMusic");
+        if (a && a.paused) {
+            a.play().catch(e => console.log("Hintergrundmusik wartet auf Interaktion."));
+        }
+    } catch(e) { console.error("Audio blockiert", e); }
+}
+
 function playTone(freq, type, duration, vol=0.1) {
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(); osc.stop(audioCtx.currentTime + duration);
+    if(!audioCtx || audioCtx.state !== 'running') return;
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {}
 }
 function sfxCollect() { playTone(600, 'sine', 0.1, 0.1); setTimeout(() => playTone(1200, 'sine', 0.15, 0.1), 80); }
 function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.2); setTimeout(() => playTone(100, 'square', 0.4, 0.2), 100); }
@@ -233,37 +251,37 @@ let score = 0, level = 1, hearts = 3, energy = 100, active = false, mode = 'dog'
 let items = [], floaters = [], enemies = [];
 let dogLane = 2, dogX = 200, targetX = 200, lastTime = 0, timeLeft = 30;
 
-// Konstanten für perfekte Bahnen (Breite = 400. 5 Bahnen a 80px)
-const LANE_WIDTH = 80;
 const LANE_CENTERS = [40, 120, 200, 280, 360];
 
-function initAudio() {
-    const a = document.getElementById("bgMusic");
-    if(a.paused) a.play().catch(()=>{});
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-}
-
-// ASYNC LEADERBOARD LOAD
+// ASYNC LEADERBOARD LOAD (Sicher)
 window.addEventListener('load', () => {
     try {
         if(window.supabase) {
             supabase = window.supabase.createClient(SURL, SKEY);
             updateRanks();
         }
-    } catch(e) { console.log("DB Offline"); }
+    } catch(e) { 
+        document.getElementById("leaderboard").innerHTML = "<div style='text-align:center; color:#ff3131;'>Verbindung fehlgeschlagen</div>"; 
+    }
 });
 
 async function updateRanks() {
     if(!supabase) return;
     try {
-        let { data } = await supabase.from('leaderboard').select('n, s').order('s', { ascending: false }).limit(5);
+        let { data, error } = await supabase.from('leaderboard').select('n, s').order('s', { ascending: false }).limit(5);
+        if(error) throw error;
+        
         if(data && data.length > 0) {
             document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
                 let rClass = i === 0 ? 'r1' : (i === 1 ? 'r2' : (i === 2 ? 'r3' : ''));
                 return `<div class="rank-item ${rClass}"><span>#${i+1} ${x.n}</span><span>${x.s} PTS</span></div>`;
             }).join('');
+        } else {
+            document.getElementById("leaderboard").innerHTML = "<div style='text-align:center; color:#aaa;'>Keine Scores gefunden</div>";
         }
-    } catch(e) { document.getElementById("leaderboard").innerHTML = "<div style='text-align:center; color:#ff3131;'>No data available</div>"; }
+    } catch(e) { 
+        document.getElementById("leaderboard").innerHTML = "<div style='text-align:center; color:#ff3131;'>Laden der Rangliste fehlgeschlagen.</div>"; 
+    }
 }
 
 // --- START LOGIC ---
@@ -274,6 +292,9 @@ function startTheApp(selectedMode) {
         setTimeout(() => document.getElementById("pName").style.borderColor = "var(--neon)", 500);
         return; 
     }
+    
+    // Audio erzwingen
+    initAudio();
     
     mode = selectedMode;
     document.getElementById("ui-layer").style.display = "none";
@@ -294,9 +315,9 @@ function startTheApp(selectedMode) {
         wrap.style.boxShadow = "0 0 50px rgba(255,159,67,0.3)";
     }
     
-    // Canvas fix logic
+    // Canvas interne Auflösung (für perfekte Bahnen)
     canvas.width = 400; 
-    canvas.height = 700; // Feste interne Auflösung für saubere Kollision
+    canvas.height = 700; 
     
     dogLane = 2;
     dogX = LANE_CENTERS[dogLane];
@@ -317,7 +338,7 @@ function mv(dir) {
 function gameTick(t) {
     if(!active) return;
     let dt = (t - lastTime) / 1000; lastTime = t;
-    if(dt > 0.1) dt = 0.016; // Prevent lag jump
+    if(dt > 0.1) dt = 0.016; 
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -343,7 +364,7 @@ function gameTick(t) {
     if(mode === 'cat') { nItem = '🐟'; rItem = '🥛'; icon = "🐱"; }
     if(mode === 'rab') { nItem = '🥕'; rItem = '🍎'; icon = "🐰"; }
 
-    // SPAWN LOGIC (abhängig vom Level)
+    // SPAWN LOGIC 
     if(Math.random() < (0.03 + level*0.005)) {
         let l = Math.floor(Math.random()*5);
         items.push({ x: LANE_CENTERS[l], y: -50, lane: l, type: Math.random() < 0.8 ? nItem : rItem });
@@ -353,11 +374,11 @@ function gameTick(t) {
         enemies.push({ x: LANE_CENTERS[l], y: -50, lane: l, type: Math.random() < 0.5 ? '🕷️' : '👮' });
     }
 
-    // HITBOX BEREICH (Character Y = 600, Größe = 80)
+    // HITBOX BEREICH
     const hitZoneTop = canvas.height - 150;
     const hitZoneBottom = canvas.height - 50;
 
-    // ITEMS BERECHNEN (Rückwärts-Schleife gegen Flackern!)
+    // ITEMS BERECHNEN
     for (let i = items.length - 1; i >= 0; i--) {
         let it = items[i];
         it.y += (250 + level * 15) * dt;
@@ -365,7 +386,6 @@ function gameTick(t) {
         ctx.font = "45px Arial"; ctx.textAlign = "center";
         ctx.fillText(it.type, it.x, it.y);
 
-        // KOLLISION PERFEKTIONIERT: Gleiche Bahn UND richtige Höhe
         if(it.lane === dogLane && it.y > hitZoneTop && it.y < hitZoneBottom) {
             let pts = (it.type === nItem) ? 10 : 35;
             score += pts * level;
@@ -397,7 +417,7 @@ function gameTick(t) {
         }
     }
 
-    // CHARACTER RENDER (Smooth Movement)
+    // CHARACTER RENDER
     dogX += (targetX - dogX) * 0.25;
     ctx.font = "75px Arial"; 
     ctx.fillText(icon, dogX, canvas.height - 80);
@@ -414,7 +434,7 @@ function gameTick(t) {
     }
     ctx.globalAlpha = 1;
 
-    // GAME OVER CHECK
+    // GAME OVER
     if(hearts <= 0 || energy <= 0) { 
         active = false; 
         handleGameOver();
@@ -428,7 +448,7 @@ async function handleGameOver() {
     const pName = document.getElementById("pName").value.trim().toUpperCase() || "UNKNOWN";
     const finalScore = Math.floor(score);
     
-    ctx.fillStyle = "rgba(0,0,0,0.7)";
+    ctx.fillStyle = "rgba(0,0,0,0.85)";
     ctx.fillRect(0,0,canvas.width, canvas.height);
     ctx.fillStyle = "var(--red)";
     ctx.font = "bold 50px Orbitron";
@@ -440,16 +460,16 @@ async function handleGameOver() {
     if(supabase) {
         try {
             await supabase.from('leaderboard').insert([{ n: pName, s: finalScore }]);
-        } catch(e) { console.error("Upload failed", e); }
+        } catch(e) { console.error("Upload fehlgeschlagen", e); }
     }
     
-    setTimeout(() => location.reload(), 3000);
+    setTimeout(() => location.reload(), 3500);
 }
 
 function addF(x, y, t, c, size) { floaters.push({ x, y, t, c, size, l: 1.0 }); }
 function shakeScreen() { 
     document.getElementById("game-wrap").classList.remove("shake");
-    void document.getElementById("game-wrap").offsetWidth; // Trigger reflow
+    void document.getElementById("game-wrap").offsetWidth; 
     document.getElementById("game-wrap").classList.add("shake"); 
 }
 function copyWallet() { 
