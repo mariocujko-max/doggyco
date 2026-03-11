@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -27,7 +27,15 @@
         header { padding: 20px 0 10px; text-align: center; width: 100%; }
         header h1 { font-size: clamp(24px, 8vw, 40px); color: var(--neon); text-shadow: 0 0 20px var(--neon); letter-spacing: 2px; }
 
-        .app-container { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; padding: 0 10px; position: relative; }
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 10px;
+            position: relative;
+        }
 
         #game-wrap { 
             position:relative; width: 100%; height: 70vh; min-height: 550px;
@@ -60,29 +68,26 @@
         .inner-panel { background: var(--glass); border: 2px solid var(--neon); border-radius: 20px; padding: 25px; backdrop-filter: blur(20px); box-shadow: 0 0 20px rgba(0,242,255,0.2); width: 100%; }
         .inner-panel h3, .inner-panel h2 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; }
         
-        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 20px; }
+        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 20px; transition: 0.3s; }
         .name-input:focus { border-color: var(--gold); box-shadow: 0 0 20px var(--gold); }
 
-        /* 3D LIFT BUTTONS DESIGN */
-        .btn-main { 
-            padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 16px; width: 100%; cursor: pointer; 
-            box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.4); transition: 0.1s; transform: translateY(0);
-        }
-        .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
+        /* BUTTONS MIT LIFT-EFFEKT */
+        .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 16px; width: 100%; cursor: pointer; box-shadow: 0 0 15px var(--green); transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .btn-main:hover { transform: translateY(-4px); box-shadow: 0 10px 25px var(--green); }
+        .btn-main:active { transform: translateY(2px) scale(0.98); box-shadow: 0 2px 5px var(--green); }
 
         .flex-chars { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; margin-bottom: 15px; }
-        .btn-char { 
-            flex: 1 1 30%; min-width: 85px; padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.6); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 10px; text-transform: uppercase; transition: 0.1s; display: flex; flex-direction: column; align-items: center;
-            box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.5); transform: translateY(0);
-        }
+        .btn-char { flex: 1 1 30%; min-width: 85px; padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 10px; text-transform: uppercase; transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; align-items: center; }
         .btn-char span { font-size: 32px; margin-bottom: 5px; }
-        .btn-char:hover { background: rgba(255,255,255,0.2); }
-        .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.5); }
+        .btn-char:hover { transform: translateY(-4px); background: rgba(255,255,255,0.2); box-shadow: 0 8px 20px var(--neon); }
+        .btn-char:active { transform: translateY(2px) scale(0.95); box-shadow: 0 2px 5px var(--neon); }
 
         #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 35px; z-index: 300; }
-        .arrow { width: 75px; height: 75px; background: rgba(255,255,255,0.15); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; backdrop-filter: blur(8px); transition: 0.1s; box-shadow: 0 6px 0 var(--neon), 0 10px 20px rgba(0,242,255,0.3); }
-        .arrow:active { background: var(--neon); color: #000; transform: translateY(6px) scale(0.9); box-shadow: 0 0px 0 var(--neon); }
+        .arrow { width: 75px; height: 75px; background: rgba(255,255,255,0.15); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; backdrop-filter: blur(8px); transition: all 0.2s ease; box-shadow: 0 0 10px var(--neon); }
+        .arrow:hover { transform: translateY(-5px); box-shadow: 0 10px 25px var(--neon); }
+        .arrow:active { background: var(--neon); color: #000; transform: translateY(2px) scale(0.9); box-shadow: 0 2px 10px var(--neon); }
 
+        /* INFO PANELS */
         .info-panel { width: 100%; background: var(--glass); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 15px; backdrop-filter: blur(20px); box-shadow: 0 0 20px rgba(0,242,255,0.1); }
         .info-panel h3 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 16px; text-align: center; text-transform: uppercase; }
         
@@ -94,15 +99,15 @@
         .rank-wood { color: var(--wood); }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-sup { 
-            padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); transform: translateY(0);
-        }
+        .btn-sup { padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .bg-tk { background: linear-gradient(45deg, #000, #ff0050); } 
         .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); }
-        .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; box-shadow: 0 4px 0 var(--gold); transform: translateY(0); }
-        .btn-sup:active, .btn-copy:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.5); }
+        .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; transition: all 0.3s ease; }
         
+        /* HOVER FÜR SUPPORT */
+        .btn-sup:hover, .btn-copy:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 15px rgba(255,255,255,0.2); border-color: #fff; }
+        .btn-sup:active, .btn-copy:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
         .wallet-box { background: rgba(255,255,255,0.9); padding: 10px; border-radius: 15px; text-align: center; margin: 15px auto; width: 130px; }
         
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
@@ -173,19 +178,19 @@
 
     <div class="info-panel">
         <h3>🏆 GLOBAL HALL OF FAME</h3>
-        <div id="leaderboard" class="text-sm" style="text-align:center;">Lade Mainframe...</div>
+        <div id="leaderboard" class="text-sm" style="text-align:center;">Connecting to Mainframe...</div>
     </div>
 
     <div class="info-panel">
         <h3 style="color:var(--neon)">📖 HOW TO PLAY</h3>
         <ul class="rules text-sm">
-            <li>Weiche mit <b>Pfeilen ◀ ▶</b> oder <b>Tastatur (Links/Rechts)</b> aus.</li>
-            <li><b>Grüne Punkte (10% Steigerung):</b><br>
-                Essen = <span style="color:var(--green)">10, 20 oder 30 PTS</span>
+            <li>Dodge using <b>Arrows ◀ ▶</b> or <b>Keyboard (Left/Right)</b>.</li>
+            <li><b>Green Points (10% Scaling):</b><br>
+                Food = <span style="color:var(--green)">10, 20 or 30 PTS</span>
             </li>
-            <li><b>Polizei 👮</b> = -1 Herz.</li>
-            <li><b>Spinnen 🕷️</b> = -30% Energie. Immer sichtbar!</li>
-            <li><b>Level 10:</b> Feuerwerk & Horn!</li>
+            <li><b>Police 👮</b> = -1 Heart.</li>
+            <li><b>Spiders 🕷️</b> = -30% Energy. Always visible!</li>
+            <li><b>Level 10:</b> Fireworks & Horn!</li>
         </ul>
     </div>
 
@@ -200,27 +205,51 @@
             <div style="color:#000; font-family:'Orbitron'; font-size:11px; font-weight:900; margin-top:5px;">BTC WALLET</div>
         </div>
         <p style="font-size:10px; color:var(--gold); text-align:center; word-break:break-all; font-family:monospace; margin-top:5px;">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
-        <button class="btn-sup btn-copy" onclick="copyBTC()">ADRESSE KOPIEREN</button>
+        <button class="btn-sup btn-copy" onclick="copyBTC()">COPY ADDRESS</button>
     </div>
 
     <div class="legal-box">
         <h4 style="color:#aaa; text-align:center; margin-bottom:5px; font-family:'Orbitron'; letter-spacing:1px;">⚖️ LEGAL NOTICE</h4>
         <p class="text-sm" style="text-align:center; color:#ddd; font-size:10px;">
-            Privates, nicht-kommerzielles Projekt.<br>Spenden sind freiwillige Geschenke.<br>
-            © 2026 DOGGYCO GLOBAL ACADEMY.
+            Private, non-commercial project. Donations are voluntary gifts.<br>
+            © 2026 DOGGYCO GLOBAL ACADEMY. All Rights Reserved.
         </p>
     </div>
 </div>
 
 <audio id="snd-menu" src="menu.mp3" loop></audio>
 <audio id="snd-action" loop></audio> 
-<audio id="snd-coll" src="collect.mp3"></audio>
-<audio id="snd-hit" src="hit.mp3"></audio>
-<audio id="snd-over" src="gameover.mp3"></audio>
-<audio id="snd-horn" src="horn.mp3"></audio>
 
 <script>
 document.querySelectorAll('audio').forEach(a => a.volume = 0.3);
+
+// --- SYNTH AUDIO GENERATOR (Immer funktionierende Sounds!) ---
+let audioCtx = null;
+function initSynth() {
+    if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if(AudioContext) audioCtx = new AudioContext();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playTone(freq, type, duration, vol=0.1) {
+    if(!audioCtx || audioCtx.state !== 'running') return;
+    try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {}
+}
+
+function sfxCollect() { playTone(600, 'sine', 0.1, 0.1); setTimeout(() => playTone(1200, 'sine', 0.15, 0.1), 80); }
+function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.2); setTimeout(() => playTone(100, 'square', 0.4, 0.2), 100); }
+function sfxLevelUp() { [400, 500, 600, 800].forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.2, 0.1), i*100)); }
+
 
 const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
@@ -254,16 +283,11 @@ let entities = [], floaters = [], permSpiders = [], fireworks = [], lastT = 0;
 let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
 let charShake = 0, charJump = 0, lvl10Triggered = false, spawnDelay = 0;
 
-// TASTATUR STEUERUNG (Handy + PC)
 window.addEventListener("keydown", function(e) {
     if(!active) return;
     if(e.key === "ArrowLeft") move(-1);
     if(e.key === "ArrowRight") move(1);
 });
-
-function safePlayAudio(id) {
-    try { let a = document.getElementById(id); a.currentTime = 0; a.play().catch(()=>{}); } catch(e) {}
-}
 
 function authAgent() {
     let n = document.getElementById("pName").value.trim().toUpperCase();
@@ -271,6 +295,7 @@ function authAgent() {
         agent = n;
         document.getElementById("scr-name").style.display = "none";
         document.getElementById("scr-start").style.display = "flex";
+        initSynth(); // Aktiviere Sound-Context
         try { document.getElementById("snd-menu").play().catch(()=>{}); } catch(e){}
     }
 }
@@ -295,7 +320,6 @@ function start(m) {
         aAct.src = mode + ".mp3"; aAct.play().catch(()=>{});
     } catch(e){}
 
-    // Spinnen starten sichtbar oben und unten
     permSpiders = [ { lane: 0, y: 60, dy: 1 }, { lane: 4, y: H-200, dy: -1 } ];
 
     active = true; lastT = 0; 
@@ -347,11 +371,10 @@ function loop(t) {
     if(timeLeft <= 0) {
         level++; timeLeft = 30; energy = Math.min(100, energy + (25 * speedMult));
         
-        // LEVEL UP POPUP & HORN
         let pop = document.getElementById("lvl-up-popup");
         pop.innerText = "NEXT LEVEL " + level;
         pop.classList.add("show");
-        safePlayAudio("snd-horn");
+        sfxLevelUp(); // Synthi Sound Level UP
         setTimeout(() => pop.classList.remove("show"), 1500);
         
         if(level === 10 && !lvl10Triggered) { lvl10Triggered = true; launchFireworks(); }
@@ -372,26 +395,24 @@ function loop(t) {
     };
     const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼' }[mode];
 
-    // MEHR ITEMS (Löschen bis 2 Items erlaubt)
     if(entities.length < 2) {
         spawnDelay -= dt;
         if(spawnDelay <= 0) {
             let safeL = getSafeLaneForItems();
             if(safeL !== -1) {
-                if(Math.random() < 0.85) { // 85% Chance auf Nahrung (Macht Überleben machbar)
+                if(Math.random() < 0.85) { 
                     let r = Math.random(); let tier = r < 0.5 ? 0 : (r < 0.8 ? 1 : 2);
                     entities.push({ l: safeL, x: lanes[safeL], y: -50, t: items[mode][tier].i, pts: items[mode][tier].p, bad: false, s: 230 * speedMult });
                 } else {
                     entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '👮', pts: 0, bad: true, s: 260 * speedMult });
                 }
             }
-            spawnDelay = 0.35; // Items fallen jetzt öfter!
+            spawnDelay = 0.35; 
         }
     }
 
     const hitTop = H - 150; const hitBottom = H - 50;
 
-    // SPINNEN SIND IMMER SICHTBAR
     permSpiders.forEach(s => {
         s.y += (180 * speedMult * s.dy) * dt;
         let sx = lanes[s.lane];
@@ -399,45 +420,36 @@ function loop(t) {
         ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🕷️', sx, s.y);
 
-        // Geht runter, prallt ab (Bleibt sichtbar)
         if(s.y >= H - 100) { s.dy = -1; s.y = H - 100; }
-        // Geht hoch, wechselt NUR OBEN die Bahn (Bleibt sichtbar)
-        if(s.y <= 60) { 
-            s.dy = 1; 
-            s.lane = getSafeSpiderLane(s); 
-            s.y = 60; 
-        }
+        if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; }
 
         if(Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-            energy -= 30; charShake = 20; safePlayAudio("snd-hit");
-            addFloat(sx + 40, s.y, "-30%", "var(--red)", 25);
-            
-            // Setzt Spinne nach Treffer wieder nach ganz oben auf neue Bahn
-            s.y = 60; 
-            s.dy = 1;
-            s.lane = getSafeSpiderLane(s);
+            energy -= 30; charShake = 20; 
+            sfxHit(); // SYNTH SOUND
+            addFloat(sx + 40, s.y, "-30% ENERGY", "#ff3131", 22);
+            s.y = 60; s.dy = 1; s.lane = getSafeSpiderLane(s);
         }
     });
 
-    // ITEMS & COPS
     for(let i = entities.length - 1; i >= 0; i--) {
         let e = entities[i]; e.y += e.s * dt;
         ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e.t, e.x, e.y);
 
         if(Math.abs(e.x - playerX) < 40 && e.y > hitTop && e.y < hitBottom) {
             if(e.bad) {
-                hp--; charShake = 20; safePlayAudio("snd-hit");
-                addFloat(e.x + 40, e.y, "-1 HERZ", "var(--red)", 25);
+                hp--; charShake = 20; 
+                sfxHit(); // SYNTH SOUND
+                addFloat(e.x + 40, e.y, "-1 HEART", "#ff3131", 22);
             } else {
                 let pG = Math.floor(e.pts * speedMult);
-                score += pG; energy = Math.min(100, energy + 5); charJump = 15; safePlayAudio("snd-coll");
-                addFloat(e.x + 40, e.y, "+"+pG+" PTS", "var(--green)", 22);
+                score += pG; energy = Math.min(100, energy + 5); charJump = 15; 
+                sfxCollect(); // SYNTH SOUND
+                addFloat(e.x + 40, e.y, "+"+pG+" PTS", "#00ff88", 22);
             }
             entities.splice(i, 1);
         } else if (e.y > H + 60) { entities.splice(i, 1); }
     }
 
-    // SANFTES GLEITEN
     playerX += (targetX - playerX) * 0.15;
     
     let drawX = playerX; let drawY = H - 80;
@@ -445,16 +457,22 @@ function loop(t) {
     if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
     ctx.font = "70px Arial"; ctx.fillText(charIcon, drawX, drawY);
 
-    // FLOATERS (Aufsteigend)
+    // BESSER LESBARE FLOATERS (Mit dickem schwarzen Rand)
     for(let i = floaters.length - 1; i >= 0; i--) {
         let f = floaters[i]; f.y -= 2.5; f.o -= 1.2 * dt;
         ctx.globalAlpha = Math.max(0, f.o);
-        ctx.fillStyle = f.c; ctx.font = `bold ${f.s}px Orbitron`;
+        ctx.fillStyle = f.c; 
+        ctx.font = `bold ${f.s}px Orbitron`;
+        
+        // Schwarze Umrandung für bessere Lesbarkeit
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 4;
+        ctx.strokeText(f.txt, f.x, f.y);
         ctx.fillText(f.txt, f.x, f.y);
+        
         if(f.o <= 0) floaters.splice(i, 1);
     }
     
-    // FEUERWERK
     for(let i=fireworks.length-1; i>=0; i--) {
         let p = fireworks[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life -= dt;
         ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.c;
@@ -463,11 +481,10 @@ function loop(t) {
     }
     ctx.globalAlpha = 1;
 
-    // GAME OVER
     if(hp <= 0 || energy <= 0) {
         active = false;
         try { document.getElementById("snd-action").pause(); } catch(e){}
-        safePlayAudio("snd-over");
+        sfxHit(); // Fallback
         
         ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
         
@@ -482,7 +499,7 @@ function loop(t) {
 }
 
 function addFloat(x, y, txt, c, s) { floaters.push({ x, y, txt, c, s, o: 1 }); }
-function copyBTC() { navigator.clipboard.writeText("bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed"); alert("Bitcoin Adresse kopiert!"); }
+function copyBTC() { navigator.clipboard.writeText("bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed"); alert("Bitcoin Address copied successfully!"); }
 </script>
 </body>
 </html>
