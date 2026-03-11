@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DOGGYCO MISSION - V-ULTRA</title>
+    <title>DOGGYCO MISSION - V-ULTRA PERFECT</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -11,7 +11,7 @@
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; 
             --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; --wood: #8b5a2b;
             --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff;
-            --glass: rgba(255, 255, 255, 0.15); /* MILCHIG TRANSPARENT */
+            --glass: rgba(255, 255, 255, 0.15); 
             --panel-border: var(--neon);
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -54,8 +54,8 @@
 
         canvas { position: absolute; inset: 0; z-index: 50; width: 100%; height: 100%; }
 
-        /* SCREENS & PANELS (ALLES EINHEITLICH MILCHIG) */
-        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.5); padding: 20px; text-align: center; }
+        /* SCREENS & PANELS */
+        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.6); padding: 20px; text-align: center; backdrop-filter: blur(5px); }
         .panel { background: var(--glass); border: 2px solid var(--neon); border-radius: 20px; padding: 25px; backdrop-filter: blur(20px); box-shadow: 0 0 20px rgba(0,242,255,0.2); width: 100%; max-width: 380px; }
         .panel h3, .panel h2 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
         
@@ -65,19 +65,17 @@
         .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 16px; width: 100%; cursor: pointer; box-shadow: 0 0 15px var(--green); transition: 0.2s; }
         .btn-main:active { transform: scale(0.95); }
 
-        .grid-5 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 15px; }
-        .btn-char { padding: 12px 5px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; text-transform: uppercase; transition: 0.2s; }
-        .btn-char span { display: block; font-size: 35px; margin-bottom: 5px; }
+        /* NEUES FLEX-LAYOUT FÜR GLEICH BREITE RAHMEN */
+        .flex-chars { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; margin-bottom: 15px; }
+        .btn-char { flex: 1 1 30%; min-width: 90px; padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 10px; text-transform: uppercase; transition: 0.2s; display: flex; flex-direction: column; align-items: center; }
+        .btn-char span { font-size: 32px; margin-bottom: 5px; }
         .btn-char:hover { background: rgba(255,255,255,0.2); box-shadow: 0 0 15px var(--neon); }
         .btn-char:active { transform: scale(0.95); }
-        .span-2 { grid-column: span 2; }
 
-        /* KONTROLLEN - FIX FÜR HANDYS */
         #controls { position: absolute; bottom: 25px; width: 100%; display: flex; justify-content: space-between; padding: 0 35px; z-index: 300; }
         .arrow { width: 80px; height: 80px; background: rgba(255,255,255,0.15); border: 2px solid var(--neon); border-radius: 50%; color: #fff; font-size: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; backdrop-filter: blur(8px); transition: all 0.2s ease; box-shadow: 0 0 10px var(--neon); }
         .arrow:active { background: var(--neon); color: #000; transform: scale(0.85); box-shadow: 0 0 25px var(--neon); }
 
-        /* INFO BEREICH UNTEN */
         .info-wrapper { width: 100%; max-width: 450px; padding: 15px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }
         
         @keyframes pulseGold { 0%, 100% { text-shadow: 0 0 10px var(--gold); } 50% { text-shadow: 0 0 25px var(--gold), 0 0 10px #fff; } }
@@ -89,13 +87,11 @@
         .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-wood { color: var(--wood); }
 
-        /* SUPPORT BUTTONS */
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .btn-sup { padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 14px; text-align: center; text-decoration: none; color: #fff; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .btn-sup { padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 14px; text-align: center; text-decoration: none; color: #fff; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .bg-tk { background: linear-gradient(45deg, #000, #ff0050); } 
         .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); }
         .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; }
-        
         .btn-sup:hover { transform: translateY(-6px); box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 15px rgba(255,255,255,0.2); border-color: #fff; }
         .btn-sup:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
@@ -146,12 +142,12 @@
         <div id="scr-start" class="screen" style="display:none">
             <div class="panel">
                 <h3 style="color:var(--gold); text-shadow: 0 0 10px var(--gold);">CHOOSE YOUR SQUAD</h3>
-                <div class="grid-5">
+                <div class="flex-chars">
                     <button class="btn-char" style="border-color:var(--neon)" onclick="start('dog')"><span>🐶</span>DOG UNIT</button>
                     <button class="btn-char" style="border-color:var(--cat)" onclick="start('cat')"><span>🐱</span>CAT OPS</button>
-                    <button class="btn-char" style="border-color:var(--rabbit)" onclick="start('rabbit')"><span>🐰</span>RABBIT SQD</button>
+                    <button class="btn-char" style="border-color:var(--rabbit)" onclick="start('rabbit')"><span>🐰</span>RABBIT</button>
                     <button class="btn-char" style="border-color:var(--fox)" onclick="start('fox')"><span>🦊</span>FOX TACTIC</button>
-                    <button class="btn-char span-2" style="border-color:var(--panda)" onclick="start('panda')"><span>🐼</span>PANDA FORCES</button>
+                    <button class="btn-char" style="border-color:var(--panda)" onclick="start('panda')"><span>🐼</span>PANDA</button>
                 </div>
             </div>
         </div>
@@ -178,7 +174,7 @@
         <h3 style="color:var(--neon)">📖 HOW TO PLAY</h3>
         <ul class="rules text-sm">
             <li>Glide one step at a time using <b>Arrows ◀ ▶</b>.</li>
-            <li><b>Green Points System:</b><br>
+            <li><b>Green Points System (10% Scaling):</b><br>
                 Tier 1 Food = <span style="color:var(--green)">10 PTS</span><br>
                 Tier 2 Food = <span style="color:var(--green)">20 PTS</span><br>
                 Tier 3 Food = <span style="color:var(--green)">30 PTS</span>
@@ -218,11 +214,11 @@
 <audio id="snd-coll" src="collect.mp3"></audio>
 <audio id="snd-hit" src="hit.mp3"></audio>
 <audio id="snd-over" src="gameover.mp3"></audio>
-<audio id="snd-horn" src="horn.mp3"></audio> <script>
-// --- AUDIO 30% LAUTSTÄRKE ---
+<audio id="snd-horn" src="horn.mp3"></audio>
+
+<script>
 document.querySelectorAll('audio').forEach(a => a.volume = 0.3);
 
-// --- SUPABASE RANGLISTE ---
 const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 let supabaseClient = null;
@@ -244,20 +240,14 @@ async function fetchRanks() {
                 if(i===0) rankClass = "rank-gold";
                 else if(i===1) rankClass = "rank-silver";
                 else if(i===2) rankClass = "rank-bronze";
-                return `
-                <div class="rank-row ${rankClass}">
-                    <span>#${i+1} ${x.n}</span>
-                    <span>${x.s} PTS</span>
-                </div>`;
+                return `<div class="rank-row ${rankClass}"><span>#${i+1} ${x.n}</span><span>${x.s} PTS</span></div>`;
             }).join('');
         }
     } catch(e) {}
 }
 
-// --- SPIEL LOGIK ---
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-
 const W = 400; const H = 700;
 canvas.width = W; canvas.height = H;
 
@@ -268,6 +258,8 @@ let active = false, mode = 'dog', agent = "UNKNOWN";
 let entities = [], floaters = [], permSpiders = [], fireworks = [], lastT = 0;
 let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
 let charShake = 0, charJump = 0, lvl10Triggered = false;
+let lvlPopupTimer = 0;
+let spawnDelay = 0;
 
 function safePlayAudio(id) {
     try { let a = document.getElementById(id); a.currentTime = 0; a.play().catch(()=>{}); } catch(e) {}
@@ -302,22 +294,29 @@ function start(m) {
         aAct.play().catch(()=>{});
     } catch(e){}
 
-    // Immer genau 2 Spinnen
     permSpiders = [ { lane: 0, y: -200, dy: 1 }, { lane: 4, y: H + 200, dy: -1 } ];
 
-    active = true; lastT = performance.now();
+    active = true; 
+    lastT = 0; // STÖRSTREIFEN-FIX: Exakt auf 0 setzen!
     requestAnimationFrame(loop);
 }
 
 function move(dir) {
     if(!active) return;
     currLane = Math.max(0, Math.min(4, currLane + dir));
-    targetX = lanes[currLane]; // Tasten bewegen exakt EINE Bahn
+    targetX = lanes[currLane]; 
 }
 
-// Hilfsfunktion: Prüft ob die Bahn frei von Spinnen ist
-function getSafeLane() {
-    let safeLanes = [0, 1, 2, 3, 4].filter(l => !permSpiders.some(s => s.lane === l && s.y < 250 && s.y > -50));
+// SPINNEN-SICHERER BAHNWECHSEL
+function getSafeSpiderLane(currentSpider) {
+    let otherSpider = permSpiders.find(sp => sp !== currentSpider);
+    let available = [0,1,2,3,4].filter(l => l !== otherSpider.lane);
+    return available[Math.floor(Math.random() * available.length)];
+}
+
+// ITEM-SICHERE BAHN (Weicht Spinnen aus)
+function getSafeLaneForItems() {
+    let safeLanes = [0, 1, 2, 3, 4].filter(l => !permSpiders.some(s => s.lane === l && s.y < 350 && s.y > -50));
     if (safeLanes.length === 0) return -1;
     return safeLanes[Math.floor(Math.random() * safeLanes.length)];
 }
@@ -339,20 +338,25 @@ function launchFireworks() {
 function loop(t) {
     if(!active) return;
     
-    let dt = (t - lastT) / 1000; lastT = t;
+    // PERFEKTE FRAME BERECHNUNG
+    if(lastT === 0) lastT = t; 
+    let dt = (t - lastT) / 1000; 
+    lastT = t;
     if(dt > 0.1) dt = 0.016;
 
     ctx.clearRect(0,0,W,H);
 
-    let speedMult = Math.pow(1.1, level - 1); // 10% Steigerung pro Level
+    // 10% Steigerung
+    let speedMult = Math.pow(1.1, level - 1); 
+    
     timeLeft -= dt;
-    energy -= (4 + level * 0.5) * dt;
+    energy -= (4 * speedMult) * dt;
 
     if(timeLeft <= 0) {
         level++; timeLeft = 30; energy = Math.min(100, energy + 25);
-        addFloat(targetX, H/2, "LEVEL UP!", "var(--gold)", 40);
+        lvlPopupTimer = 1.5; // Level-Up Fenster für 1.5 Sekunden
+        safePlayAudio("snd-horn");
         
-        // Level 10 Feuerwerk!
         if(level === 10 && !lvl10Triggered) {
             lvl10Triggered = true;
             launchFireworks();
@@ -374,25 +378,27 @@ function loop(t) {
     };
     const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼' }[mode];
 
-    // SPAWN REDUZIERT AUF DIE HÄLFTE & OHNE ÜBERSCHNEIDUNG
-    if(Math.random() < 0.02 * speedMult) {
-        let safeL = getSafeLane();
-        if(safeL !== -1) {
-            let roll = Math.random(); let tier = roll < 0.5 ? 0 : (roll < 0.8 ? 1 : 2);
-            let itemObj = items[mode][tier];
-            entities.push({ l: safeL, x: lanes[safeL], y: -50, t: itemObj.i, pts: itemObj.p, bad: false, s: 220 * speedMult });
-        }
-    }
-    if(Math.random() < 0.0075 * speedMult) {
-        let safeL = getSafeLane();
-        if(safeL !== -1) {
-            entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '👮', pts: 0, bad: true, s: 250 * speedMult });
+    // SPAWN LOGIK: IMMER NUR 1 ITEM GLEICHZEITIG & KEINE ÜBERSCHNEIDUNG
+    if(entities.length === 0) {
+        spawnDelay -= dt;
+        if(spawnDelay <= 0) {
+            let safeL = getSafeLaneForItems();
+            if(safeL !== -1) {
+                if(Math.random() < 0.75) {
+                    let roll = Math.random(); let tier = roll < 0.5 ? 0 : (roll < 0.8 ? 1 : 2);
+                    let itemObj = items[mode][tier];
+                    entities.push({ l: safeL, x: lanes[safeL], y: -50, t: itemObj.i, baseP: itemObj.p, bad: false, s: 220 * speedMult });
+                } else {
+                    entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '👮', baseP: 0, bad: true, s: 250 * speedMult });
+                }
+            }
+            spawnDelay = 0.6; // Mindestens halbe Sekunde warten bis zum nächsten
         }
     }
 
     const hitTop = H - 150; const hitBottom = H - 50;
 
-    // SPINNEN LOGIK
+    // SPINNEN LOGIK (Immer 2, wechseln immer die Bahn, keine Überschneidung)
     permSpiders.forEach(s => {
         s.y += (180 * speedMult * s.dy) * dt;
         let sx = lanes[s.lane];
@@ -400,12 +406,12 @@ function loop(t) {
         ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🕷️', sx, s.y);
 
-        if(s.y > H + 50) { s.dy = -1; s.lane = Math.floor(Math.random()*5); }
-        if(s.y < -100) { s.dy = 1; s.lane = Math.floor(Math.random()*5); }
+        if(s.y > H + 50) { s.dy = -1; s.lane = getSafeSpiderLane(s); s.y = H + 49; }
+        if(s.y < -100) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = -99; }
 
         if(Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
             energy -= 30; charShake = 20; safePlayAudio("snd-hit");
-            addFloat(sx, s.y, "-30% ENERGIE", "var(--red)", 20);
+            addFloat(sx + 50, s.y, "-30%", "var(--red)", 25); // Seitlich versetzt!
             s.y = s.dy === 1 ? H+100 : -200; 
         }
     });
@@ -418,10 +424,11 @@ function loop(t) {
         if(Math.abs(e.x - playerX) < 40 && e.y > hitTop && e.y < hitBottom) {
             if(e.bad) {
                 hp--; charShake = 20; safePlayAudio("snd-hit");
-                addFloat(e.x, e.y, "-1 HERZ", "var(--red)", 25);
+                addFloat(e.x + 50, e.y, "-1 HERZ", "var(--red)", 25); // Seitlich!
             } else {
-                score += e.pts; energy = Math.min(100, energy + 5); charJump = 15; safePlayAudio("snd-coll");
-                addFloat(e.x, e.y, "+"+e.pts+" PTS", "var(--green)", 22);
+                let pointsGained = Math.floor(e.baseP * speedMult); // 10% mehr pro Level
+                score += pointsGained; energy = Math.min(100, energy + 5); charJump = 15; safePlayAudio("snd-coll");
+                addFloat(e.x + 50, e.y, "+"+pointsGained+" PTS", "var(--green)", 22); // Seitlich!
             }
             entities.splice(i, 1);
         } else if (e.y > H + 60) { entities.splice(i, 1); }
@@ -436,7 +443,7 @@ function loop(t) {
     if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
     ctx.font = "70px Arial"; ctx.fillText(charIcon, drawX, drawY);
 
-    // SCHICKE GRÜNE & ROTE PUNKTE (Floaters)
+    // FLOATERS (PUNKTE & ABZUG RENDERN)
     for(let i = floaters.length - 1; i >= 0; i--) {
         let f = floaters[i]; f.y -= 2.5; f.o -= 1.2 * dt;
         ctx.globalAlpha = Math.max(0, f.o);
@@ -454,6 +461,17 @@ function loop(t) {
     }
     ctx.globalAlpha = 1;
 
+    // LEVEL UP POPUP RENDER
+    if(lvlPopupTimer > 0) {
+        lvlPopupTimer -= dt;
+        ctx.fillStyle = "rgba(0,0,0,0.75)";
+        ctx.fillRect(0, Math.floor(H/2) - 60, W, 120);
+        ctx.fillStyle = "var(--neon)";
+        ctx.font = "bold 40px Orbitron";
+        ctx.textAlign = "center";
+        ctx.fillText("NEXT LEVEL " + level, W/2, Math.floor(H/2) + 15);
+    }
+
     // GAME OVER
     if(hp <= 0 || energy <= 0) {
         active = false;
@@ -463,7 +481,7 @@ function loop(t) {
         ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
         
         document.getElementById("scr-end").style.display = "flex";
-        document.getElementById("end-agent-name").innerText = "AGENT " + agent;
+        document.getElementById("end-agent-name").innerText = "AGENT " + agent; // NAME IM GAME OVER
         document.getElementById("f-score").innerText = Math.floor(score);
         
         if(supabaseClient) { supabaseClient.from('leaderboard').insert([{ n: agent, s: Math.floor(score) }]).catch(()=>{}); }
