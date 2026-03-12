@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOGGYCO MISSION - V-ULTRA PERFECT</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐶</text></svg>">
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -68,28 +70,31 @@
         }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
+        /* SCREENS */
         .screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.6); padding: 20px; text-align: center; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        
+        /* NAMENSFELD & START SCREEN ABSOLUT TRANSPARENT (Kein Milchglas, 100% Durchsicht) */
+        #scr-name, #scr-start { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
         
         #scr-name .inner-panel, #scr-start .inner-panel, #scr-end .inner-panel { 
             background: transparent; border: none; box-shadow: none; width: 100%; 
             display: flex; flex-direction: column; align-items: center; 
+            backdrop-filter: none; -webkit-backdrop-filter: none;
         }
         
-        .inner-panel h3, .inner-panel h2 { color: var(--gold); padding-bottom: 0px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; border-bottom: none; }
+        .inner-panel h3, .inner-panel h2 { color: var(--gold); padding-bottom: 0px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; border-bottom: none; text-shadow: 2px 2px 5px #000; }
         
-        /* NAMENSFELD MAXIMAL TRANSPARENT */
+        /* NAMENS-EINGABEFELD MAXIMAL TRANSPARENT */
         .name-input { 
             width: 100%; padding: 15px; border-radius: 15px; 
             border: 2px solid var(--neon); 
-            background: transparent; /* Komplett durchsichtig */
+            background: transparent; /* 100% durchsichtig */
             color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; 
-            backdrop-filter: none; /* Kein Milchglas */
-            -webkit-backdrop-filter: none;
-            box-shadow: none;
+            backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none;
+            text-shadow: 1px 1px 5px #000;
         }
         .name-input:focus { 
-            border-color: var(--gold); box-shadow: 0 0 15px var(--gold); 
-            background: transparent; outline: none;
+            border-color: var(--gold); box-shadow: 0 0 15px var(--gold); outline: none; background: transparent;
         }
 
         .btn-main { 
@@ -207,7 +212,7 @@
         </div>
 
         <div id="scr-end" class="screen" style="display:none">
-            <div class="inner-panel"> 
+            <div class="inner-panel" style="background:rgba(0,0,0,0.8); backdrop-filter: blur(10px);"> 
                 <h2 class="red-neon-text">MISSION FAILED</h2> 
                 <h3 id="end-agent-name" class="neon-text" style="border:none;">AGENT</h3> 
                 <h1 id="f-score" style="font-size:55px; color:var(--gold); margin:0 0 15px 0; text-shadow: 0 0 20px var(--gold);">0</h1> 
@@ -380,6 +385,10 @@ window.addEventListener("keydown", function(e) {
     if(e.key === "ArrowLeft") triggerMove(-1, 'btn-left');
     if(e.key === "ArrowRight") triggerMove(1, 'btn-right');
 });
+
+function safePlayAudio(id) {
+    try { let a = document.getElementById(id); a.currentTime = 0; a.play().catch(()=>{}); } catch(e) {}
+}
 
 function authAgent() {
     hapticClick();
