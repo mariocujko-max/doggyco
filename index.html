@@ -68,18 +68,18 @@
         }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.6); padding: 20px; text-align: center; backdrop-filter: blur(5px); }
-        #scr-name, #scr-start { background: rgba(0,0,0,0.2); backdrop-filter: blur(5px); }
+        /* SCREENS: Innerer Rahmen komplett entfernt, weicheres Design */
+        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.85); padding: 20px; text-align: center; backdrop-filter: blur(8px); }
         
-        #scr-name .inner-panel, #scr-start .inner-panel { 
-            background: rgba(255,255,255,0.05); border: 2px solid var(--neon); border-radius: 20px; padding: 25px; backdrop-filter: blur(10px); box-shadow: 0 0 15px rgba(0,242,255,0.1); width: 100%; 
+        #scr-name .inner-panel, #scr-start .inner-panel, #scr-end .inner-panel { 
+            background: transparent; border: none; box-shadow: none; width: 100%; 
             display: flex; flex-direction: column; align-items: center; 
         }
         
         .inner-panel h3, .inner-panel h2 { color: var(--gold); padding-bottom: 0px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; border-bottom: none; }
         
-        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 20px; }
-        .name-input:focus { border-color: var(--gold); box-shadow: 0 0 20px var(--gold); background: rgba(0,0,0,0.6); }
+        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 20px; }
+        .name-input:focus { border-color: var(--gold); box-shadow: 0 0 20px var(--gold); background: rgba(0,0,0,0.8); }
 
         .btn-main { 
             padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 16px; width: 100%; cursor: pointer; 
@@ -102,10 +102,10 @@
             background: transparent; border: none; 
             color: rgba(255, 255, 255, 0.5); font-size: 60px; 
             display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; user-select: none; transition: 0.1s; 
+            cursor: pointer; user-select: none; transition: 0.15s; 
             text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
         }
-        .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 20px var(--neon), 0 0 40px var(--neon); }
+        .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); }
 
         .info-panel { width: 100%; background: var(--glass); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 15px; backdrop-filter: blur(20px); box-shadow: 0 0 20px rgba(0,242,255,0.1); }
         .info-panel h3 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 16px; text-align: center; text-transform: uppercase; }
@@ -132,10 +132,11 @@
 
         .legal-box { 
             width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 40px;
-            backdrop-filter: blur(20px); box-shadow: 0 0 20px rgba(0,242,255,0.1);
+            backdrop-filter: blur(20px); box-shadow: 0 0 20px rgba(0,242,255,0.1); 
         }
         
-        #dog-head-icon { font-size: 60px; margin-bottom: -15px; text-shadow: 0 0 15px var(--neon); }
+        /* Hundekopf höher gesetzt */
+        #dog-head-icon { font-size: 70px; margin-bottom: 10px; text-shadow: 0 0 15px var(--neon); }
 
         .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
         .red-neon-text { color: var(--red); text-shadow: 0 0 10px var(--red), 0 0 20px var(--red); }
@@ -172,7 +173,7 @@
 
         <div id="scr-name" class="screen">
             <div class="inner-panel">
-                <div id="dog-head-icon">🐶</div>
+                <div id="dog-head-icon">🐶</div> 
                 <h2>MISSION BRIEFING</h2> 
                 <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
                 <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
@@ -194,7 +195,7 @@
         </div>
 
         <div id="scr-end" class="screen" style="display:none">
-            <div class="inner-panel" style="background:rgba(0,0,0,0.8);">
+            <div class="inner-panel">
                 <h2 class="red-neon-text">MISSION FAILED</h2> 
                 <h3 id="end-agent-name" class="neon-text" style="border:none; margin-bottom:0;">AGENT</h3> 
                 <h1 id="f-score" style="font-size:50px; color:var(--gold); margin:10px 0; text-shadow: 0 0 20px var(--gold);">0</h1> 
@@ -251,19 +252,23 @@
 <script>
 document.querySelectorAll('audio').forEach(a => a.volume = 0.3);
 
-// --- HAPTISCHES FEEDBACK ---
+// --- HAPTISCHES FEEDBACK MIT LOGIK ---
 function triggerVibration(pattern) {
     if ("vibrate" in navigator) {
         try { navigator.vibrate(pattern); } catch(e) {}
     }
 }
-function hapticClick() { triggerVibration(5); } // Winziges Zucken für Tasten
+function hapticClick() { triggerVibration(10); } // Menü-Klick
+function hapticMove() { triggerVibration(5); } // Sehr leichtes Tasten-Zucken beim Spielen
+function hapticCollect() { triggerVibration([15, 30, 15]); } // Doppel-Zucken für Plus-Punkte
+function hapticSpiderHit() { triggerVibration([60, 30, 60, 30, 60]); } // Längeres Stottern für Energie-Verlust
+function hapticDamage() { triggerVibration([100, 50, 100, 50, 100]); } // Heftiges Pochen für Leben-Verlust
+function hapticGameOver() { triggerVibration([200, 100, 200, 100, 400]); } // Finales Beben
 
 // --- SYNTH AUDIO GENERATOR ---
 let audioCtx = null;
 let menuMusicTimer = null;
 let menuStep = 0;
-// Cooler Hacker-Bassloop für das Startmenü
 const menuNotes = [110, 110, 220, 110, 110, 146.83, 164.81, 146.83];
 
 function initSynth() {
@@ -290,7 +295,7 @@ function playTone(freq, type, duration, vol=0.1) {
 function playMenuNote() {
     if(!audioCtx || audioCtx.state !== 'running') return;
     let freq = menuNotes[menuStep % menuNotes.length];
-    playTone(freq, 'sawtooth', 0.15, 0.03); // Sehr leiser Cyberpunk-Bass
+    playTone(freq, 'sawtooth', 0.15, 0.03); 
     menuStep++;
     menuMusicTimer = setTimeout(playMenuNote, 250); 
 }
@@ -349,7 +354,7 @@ let charShake = 0, charJump = 0, spawnDelay = 0;
 
 function triggerMove(dir, btnId) {
     if(!active) return;
-    hapticClick(); 
+    hapticMove(); // Leichte Vibration beim Spielen
     move(dir);
     let btn = document.getElementById(btnId);
     if(btn) {
@@ -371,7 +376,7 @@ function authAgent() {
         agent = n;
         document.getElementById("scr-name").style.display = "none";
         document.getElementById("scr-start").style.display = "flex";
-        startMenuMusic(); // Startet den Synth-Loop statt mp3
+        startMenuMusic(); 
     }
 }
 
@@ -381,7 +386,7 @@ function updateTheme(newMode) {
     document.documentElement.style.setProperty('--neon', col);
     document.getElementById("main-title").style.color = col;
     document.getElementById("main-title").style.textShadow = `0 0 20px ${col}`;
-    document.querySelectorAll('.info-panel, .inner-panel, .name-input, .btn-char').forEach(p => { p.style.borderColor = col; });
+    document.querySelectorAll('.info-panel, .name-input, .btn-char').forEach(p => { p.style.borderColor = col; });
     document.getElementById("game-wrap").style.borderColor = col;
     document.getElementById("game-wrap").style.boxShadow = `0 0 40px ${col}80`;
     document.getElementById("stats-bar").style.borderColor = col;
@@ -401,7 +406,7 @@ function start(m, startLvl) {
     updateTheme(mode);
     document.getElementById("scr-start").style.display = "none";
     
-    stopMenuMusic(); // Beendet Synth-Loop
+    stopMenuMusic(); 
     
     try { 
         let aAct = document.getElementById("snd-action");
@@ -470,7 +475,7 @@ function loop(t) {
     ctx.clearRect(0,0,W,H);
 
     let capLvl = Math.min(level, 20);
-    let speedMult = 1.0 + ((capLvl - 1) * (1.0 / 19)); 
+    let speedMult = 1.3 + ((capLvl - 1) * (1.3 / 19)); 
 
     timeLeft -= dt; energy -= (4 * speedMult) * dt;
 
@@ -485,8 +490,6 @@ function loop(t) {
         
         let pop = document.getElementById("lvl-up-popup");
         
-        triggerVibration([20, 40, 60, 80]); // Aufsteigende Vibration
-
         if(mode !== expectedMode) {
             mode = expectedMode; updateTheme(mode); launchFireworks();
             hp = 3; 
@@ -506,8 +509,8 @@ function loop(t) {
             energy = 100;
             charShake = 20;
             sfxHit();
-            triggerVibration([100, 50, 100]); 
-            addFloat(playerX, H/2, "❤️", "#ff3131", 35); // Herz fliegt hoch
+            hapticDamage();
+            addFloat(playerX, H/2, "❤️", "#ff3131", 35); // Rotes Herz steigt auf
         }
     }
 
@@ -535,7 +538,7 @@ function loop(t) {
                     let r = Math.random(); let tier = r < 0.5 ? 0 : (r < 0.8 ? 1 : 2);
                     entities.push({ l: safeL, x: lanes[safeL], y: -50, t: items[mode][tier].i, pts: items[mode][tier].p, bad: false, s: 230 * speedMult });
                 } else {
-                    entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '🥷', pts: 0, bad: true, s: 260 * speedMult }); // Ninja als schwarzer Sensenmann-Ersatz
+                    entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '🥷', pts: 0, bad: true, s: 260 * speedMult }); 
                 }
             }
             spawnDelay = 0.35; 
@@ -557,7 +560,8 @@ function loop(t) {
         if(Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
             energy -= 30; charShake = 20; 
             sfxHit();
-            triggerVibration([50, 30, 50]);
+            hapticSpiderHit(); // Stotternde Vibration
+            addFloat(sx + 40, s.y, "-⚡", "#ff3131", 35); // Energie-Symbol beim Spinne-Treffer
             s.y = 60; s.dy = 1; s.lane = getSafeSpiderLane(s);
         }
     });
@@ -570,15 +574,15 @@ function loop(t) {
             if(e.bad) {
                 hp--; charShake = 20; 
                 sfxHit();
-                triggerVibration([100, 50, 100]);
-                addFloat(e.x + 40, e.y, "❤️", "#ff3131", 35); // Fliegendes Herz
+                hapticDamage(); // Schweres Pochen
+                addFloat(e.x + 40, e.y, "❤️", "#ff3131", 35); // Rotes Herz steigt auf
             } else {
                 let ptsScaling = 1.0 + ((level - 1) * (1.0 / 19)); 
                 let pG = Math.floor(e.pts * ptsScaling);
                 score += pG; energy = Math.min(100, energy + 5); charJump = 15; 
                 sfxCollect(); 
-                triggerVibration(5);
-                addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); // Nur die Zahl
+                hapticCollect(); // Doppel-Zucken
+                addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); // Nur Punkte (+10)
             }
             entities.splice(i, 1);
         } else if (e.y > H + 60) { entities.splice(i, 1); }
@@ -591,9 +595,15 @@ function loop(t) {
     if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
     ctx.font = "70px Arial"; ctx.fillText(charIcon, drawX, drawY);
 
+    // FLOATERS: ZUR MITTE HIN AUFSTEIGEN
     for(let i = floaters.length - 1; i >= 0; i--) {
         let f = floaters[i]; 
-        f.y -= 1.5; f.o -= 0.8 * dt; 
+        
+        f.y -= 2.0; 
+        // Bewegung zur Mitte hin (W/2 = 200)
+        f.x += (200 - f.x) * 0.05; 
+
+        f.o -= 0.8 * dt; 
         ctx.globalAlpha = Math.max(0, f.o);
         ctx.font = `900 ${f.s}px 'Orbitron'`;
         ctx.textAlign = "center";
@@ -616,7 +626,7 @@ function loop(t) {
         active = false;
         try { document.getElementById("snd-action").pause(); } catch(e){}
         sfxHit(); 
-        triggerVibration([100, 50, 100, 50, 200]); 
+        hapticGameOver(); // Langes Beben bei Game Over
         
         ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
         
