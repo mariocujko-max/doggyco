@@ -25,7 +25,15 @@
         #bg-overlay { position: fixed; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%); z-index: -1; }
 
         header { padding: 20px 0 10px; text-align: center; width: 100%; }
-        header h1 { font-size: clamp(24px, 8vw, 40px); color: var(--neon); text-shadow: 0 0 20px var(--neon); letter-spacing: 2px; }
+        header h1 { 
+            font-size: clamp(24px, 8vw, 40px); color: var(--gold); text-shadow: 0 0 20px var(--gold); letter-spacing: 2px;
+            animation: blinkGold 2s infinite ease-in-out;
+        }
+
+        @keyframes blinkGold {
+            0%, 100% { opacity: 1; text-shadow: 0 0 20px var(--gold); }
+            50% { opacity: 0.7; text-shadow: 0 0 10px var(--gold); }
+        }
 
         .app-container { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; padding: 0 10px; position: relative; }
 
@@ -47,25 +55,28 @@
 
         canvas { position: absolute; inset: 0; z-index: 50; width: 100%; height: 100%; }
 
-        /* LEVEL-UP POPUP WIEDER MAXIMAL TRANSPARENT & MODERN */
         #lvl-up-popup {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            background: rgba(0, 0, 0, 0.15); /* Sehr transparent */
-            backdrop-filter: blur(5px); /* Milchglas Effekt */
+            background: rgba(0, 0, 0, 0.15); 
+            backdrop-filter: blur(5px); 
             border: 1px solid rgba(255, 215, 0, 0.4);
             color: #fff;
             padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900;
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); 
-            text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); /* Kräftiger Schatten für die Lesbarkeit */
+            text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); 
             z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center;
         }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
         .screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.6); padding: 20px; text-align: center; backdrop-filter: blur(5px); }
         #scr-name, #scr-start { background: rgba(0,0,0,0.2); backdrop-filter: blur(5px); }
-        #scr-name .inner-panel, #scr-start .inner-panel { background: rgba(255,255,255,0.05); border: 2px solid var(--neon); border-radius: 20px; padding: 25px; backdrop-filter: blur(10px); box-shadow: 0 0 15px rgba(0,242,255,0.1); width: 100%; }
         
-        .inner-panel h3, .inner-panel h2 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; }
+        #scr-name .inner-panel, #scr-start .inner-panel { 
+            background: rgba(255,255,255,0.05); border: 2px solid var(--neon); border-radius: 20px; padding: 25px; backdrop-filter: blur(10px); box-shadow: 0 0 15px rgba(0,242,255,0.1); width: 100%; 
+            display: flex; flex-direction: column; align-items: center; 
+        }
+        
+        .inner-panel h3, .inner-panel h2 { color: var(--gold); padding-bottom: 0px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; border-bottom: none; }
         
         .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 20px; }
         .name-input:focus { border-color: var(--gold); box-shadow: 0 0 20px var(--gold); background: rgba(0,0,0,0.6); }
@@ -85,7 +96,6 @@
         .btn-char:hover { background: rgba(255,255,255,0.2); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
-        /* PFEILTASTEN - WENIGER AGGRESSIVER DRUCK-EFFEKT */
         #controls { position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; }
         .arrow { 
             width: 80px; height: 80px; 
@@ -120,7 +130,15 @@
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 5px; }
 
-        .legal-box { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; padding: 15px; margin-bottom: 40px; }
+        .legal-box { 
+            width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 40px;
+            backdrop-filter: blur(20px); box-shadow: 0 0 20px rgba(0,242,255,0.1);
+        }
+        
+        #dog-head-icon { font-size: 60px; margin-bottom: -15px; text-shadow: 0 0 15px var(--neon); }
+
+        .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
+        .red-neon-text { color: var(--red); text-shadow: 0 0 10px var(--red), 0 0 20px var(--red); }
     </style>
 </head>
 <body>
@@ -137,7 +155,7 @@
             <div id="energy-box"><div id="energy-fill"></div></div>
             <div id="stats-bar">
                 <div id="hp-txt" class="stat">❤️❤️❤️</div>
-                <div id="score-txt" class="stat" style="color:var(--gold)">0 PTS</div>
+                <div id="score-txt" class="stat" style="color:var(--gold)">0</div>
                 <div id="time-txt" class="stat" style="color:var(--neon)">30s</div>
                 <div class="stat" style="background:var(--neon); color:#000; padding:2px 6px; border-radius:5px;">LVL <span id="lvl-txt">1</span></div>
             </div>
@@ -154,7 +172,8 @@
 
         <div id="scr-name" class="screen">
             <div class="inner-panel">
-                <h2 style="color:var(--neon); text-shadow: 0 0 10px var(--neon);">AGENT ACCESS</h2>
+                <div id="dog-head-icon">🐶</div>
+                <h2>MISSION BRIEFING</h2> 
                 <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
                 <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
             </div>
@@ -162,7 +181,8 @@
 
         <div id="scr-start" class="screen" style="display:none">
             <div class="inner-panel">
-                <h3 style="color:var(--gold); text-shadow: 0 0 10px var(--gold);">CHOOSE START LEVEL</h3>
+                <div id="dog-head-icon">🐶</div> 
+                <h3>CHOOSE START LEVEL</h3>
                 <div class="flex-chars">
                     <button class="btn-char" style="border-color:var(--neon)" onclick="start('dog', 1)"><span>🐶</span>FREE DOG</button>
                     <button class="btn-char" style="border-color:var(--cat)" onclick="start('cat', 5)"><span>🐱</span>LVL 5 CAT</button>
@@ -175,10 +195,10 @@
 
         <div id="scr-end" class="screen" style="display:none">
             <div class="inner-panel" style="background:rgba(0,0,0,0.8);">
-                <h2 style="color:var(--red); text-shadow: 0 0 15px var(--red);">MISSION FAILED</h2>
-                <h3 id="end-agent-name" style="color:#fff; border:none; margin-bottom:0;">AGENT</h3>
-                <h1 id="f-score" style="font-size:50px; color:var(--gold); margin:10px 0; text-shadow: 0 0 20px var(--gold);">0</h1>
-                <button class="btn-main" onclick="hapticClick(); location.reload()">RE-BOOT SYSTEM</button>
+                <h2 class="red-neon-text">MISSION FAILED</h2> 
+                <h3 id="end-agent-name" class="neon-text" style="border:none; margin-bottom:0;">AGENT</h3> 
+                <h1 id="f-score" style="font-size:50px; color:var(--gold); margin:10px 0; text-shadow: 0 0 20px var(--gold);">0</h1> 
+                <button class="btn-main" onclick="hapticClick(); location.reload()">NEW GAME</button> 
             </div>
         </div>
     </div>
@@ -194,10 +214,10 @@
             <li>Dodge using <b>Arrows ◀ ▶</b> or <b>Keyboard</b>.</li>
             <li><b>EVERY 4 LEVELS: Theme changes & 3 Lives Restored!</b></li>
             <li><b>Green Points:</b><br>
-                Food = <span style="color:var(--green)">10, 20 or 30 PTS</span>
+                Food = <span style="color:var(--green)">+10, +20, +30</span>
             </li>
-            <li><b>Grim Reaper 💀</b> = -1 Heart.</li>
-            <li><b>Spiders 🕷️</b> = -30% Energy. Always visible!</li>
+            <li><b>Black Ninja 🥷</b> = -1 Heart.</li>
+            <li><b>Spiders 🕷️</b> = -30% Energy.</li>
             <li><b>0 Energy</b> = -1 Heart & Refill!</li>
             <li>Speed maxes out at <b>Level 20!</b></li>
         </ul>
@@ -217,7 +237,7 @@
         <button class="btn-sup btn-copy" onclick="copyBTC(this)">COPY ADDRESS</button>
     </div>
 
-    <div class="legal-box">
+    <div class="legal-box"> 
         <h4 style="color:#aaa; text-align:center; margin-bottom:5px; font-family:'Orbitron'; letter-spacing:1px;">⚖️ LEGAL NOTICE</h4>
         <p class="text-sm" style="text-align:center; color:#ddd; font-size:10px;">
             Private, non-commercial project. Donations are voluntary gifts.<br>
@@ -226,23 +246,26 @@
     </div>
 </div>
 
-<audio id="snd-menu" src="menu.mp3" loop></audio>
 <audio id="snd-action" src="music.mp3" loop></audio> 
 
 <script>
 document.querySelectorAll('audio').forEach(a => a.volume = 0.3);
 
-// --- HAPTISCHES FEEDBACK (Ganz leichte Vibration) ---
+// --- HAPTISCHES FEEDBACK ---
 function triggerVibration(pattern) {
     if ("vibrate" in navigator) {
         try { navigator.vibrate(pattern); } catch(e) {}
     }
 }
-// Nur noch ein winziges "Zucken" für die Tasten
-function hapticClick() { triggerVibration(5); } 
+function hapticClick() { triggerVibration(5); } // Winziges Zucken für Tasten
 
 // --- SYNTH AUDIO GENERATOR ---
 let audioCtx = null;
+let menuMusicTimer = null;
+let menuStep = 0;
+// Cooler Hacker-Bassloop für das Startmenü
+const menuNotes = [110, 110, 220, 110, 110, 146.83, 164.81, 146.83];
+
 function initSynth() {
     if (!audioCtx) {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -264,6 +287,29 @@ function playTone(freq, type, duration, vol=0.1) {
     } catch(e) {}
 }
 
+function playMenuNote() {
+    if(!audioCtx || audioCtx.state !== 'running') return;
+    let freq = menuNotes[menuStep % menuNotes.length];
+    playTone(freq, 'sawtooth', 0.15, 0.03); // Sehr leiser Cyberpunk-Bass
+    menuStep++;
+    menuMusicTimer = setTimeout(playMenuNote, 250); 
+}
+
+function startMenuMusic() {
+    initSynth();
+    if(!menuMusicTimer) {
+        menuStep = 0;
+        playMenuNote();
+    }
+}
+
+function stopMenuMusic() {
+    if(menuMusicTimer) {
+        clearTimeout(menuMusicTimer);
+        menuMusicTimer = null;
+    }
+}
+
 function sfxCollect() { playTone(600, 'sine', 0.1, 0.1); setTimeout(() => playTone(1200, 'sine', 0.15, 0.1), 80); }
 function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.2); setTimeout(() => playTone(100, 'square', 0.4, 0.2), 100); }
 function sfxLevelUp() { [400, 500, 600, 800].forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.2, 0.1), i*100)); }
@@ -282,7 +328,7 @@ async function fetchRanks() {
         if(data && data.length > 0) {
             document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
                 let rC = i === 0 ? "rank-gold" : "rank-white";
-                return `<div class="rank-row ${rC}"><span>#${i+1} ${x.n}</span><span>${x.s} PTS</span></div>`;
+                return `<div class="rank-row ${rC}"><span>#${i+1} ${x.n}</span><span>${x.s}</span></div>`;
             }).join('');
         }
     } catch(e) {}
@@ -299,9 +345,8 @@ let currLane = 2, playerX = lanes[2], targetX = lanes[2];
 let active = false, mode = 'dog', agent = "UNKNOWN";
 let entities = [], floaters = [], permSpiders = [], fireworks = [], lastT = 0;
 let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
-let charShake = 0, charJump = 0, lvl10Triggered = false, spawnDelay = 0;
+let charShake = 0, charJump = 0, spawnDelay = 0;
 
-// TASTATUR & BUTTON GLOW LOGIK
 function triggerMove(dir, btnId) {
     if(!active) return;
     hapticClick(); 
@@ -319,10 +364,6 @@ window.addEventListener("keydown", function(e) {
     if(e.key === "ArrowRight") triggerMove(1, 'btn-right');
 });
 
-function safePlayAudio(id) {
-    try { let a = document.getElementById(id); a.currentTime = 0; a.play().catch(()=>{}); } catch(e) {}
-}
-
 function authAgent() {
     hapticClick();
     let n = document.getElementById("pName").value.trim().toUpperCase();
@@ -330,8 +371,7 @@ function authAgent() {
         agent = n;
         document.getElementById("scr-name").style.display = "none";
         document.getElementById("scr-start").style.display = "flex";
-        initSynth();
-        try { document.getElementById("snd-menu").play().catch(()=>{}); } catch(e){}
+        startMenuMusic(); // Startet den Synth-Loop statt mp3
     }
 }
 
@@ -347,7 +387,6 @@ function updateTheme(newMode) {
     document.getElementById("stats-bar").style.borderColor = col;
 }
 
-// START FUNKTION: 3 Leben Garantie & Werte Reset
 function start(m, startLvl) {
     hapticClick();
     mode = m;
@@ -361,9 +400,10 @@ function start(m, startLvl) {
     
     updateTheme(mode);
     document.getElementById("scr-start").style.display = "none";
-
+    
+    stopMenuMusic(); // Beendet Synth-Loop
+    
     try { 
-        document.getElementById("snd-menu").pause();
         let aAct = document.getElementById("snd-action");
         aAct.currentTime = 0;
         aAct.play().catch(()=>{});
@@ -445,6 +485,8 @@ function loop(t) {
         
         let pop = document.getElementById("lvl-up-popup");
         
+        triggerVibration([20, 40, 60, 80]); // Aufsteigende Vibration
+
         if(mode !== expectedMode) {
             mode = expectedMode; updateTheme(mode); launchFireworks();
             hp = 3; 
@@ -464,13 +506,13 @@ function loop(t) {
             energy = 100;
             charShake = 20;
             sfxHit();
-            triggerVibration([80, 40, 80]); 
-            addFloat(playerX, H/2, "0 ENERGY = -1 HEART", "#ff3131", 20);
+            triggerVibration([100, 50, 100]); 
+            addFloat(playerX, H/2, "❤️", "#ff3131", 35); // Herz fliegt hoch
         }
     }
 
     document.getElementById("hp-txt").innerText = "❤️".repeat(Math.max(0, hp));
-    document.getElementById("score-txt").innerText = Math.floor(score) + " PTS";
+    document.getElementById("score-txt").innerText = Math.floor(score);
     document.getElementById("time-txt").innerText = Math.ceil(timeLeft) + "s";
     document.getElementById("lvl-txt").innerText = level;
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
@@ -493,7 +535,7 @@ function loop(t) {
                     let r = Math.random(); let tier = r < 0.5 ? 0 : (r < 0.8 ? 1 : 2);
                     entities.push({ l: safeL, x: lanes[safeL], y: -50, t: items[mode][tier].i, pts: items[mode][tier].p, bad: false, s: 230 * speedMult });
                 } else {
-                    entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '💀', pts: 0, bad: true, s: 260 * speedMult });
+                    entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '🥷', pts: 0, bad: true, s: 260 * speedMult }); // Ninja als schwarzer Sensenmann-Ersatz
                 }
             }
             spawnDelay = 0.35; 
@@ -515,8 +557,7 @@ function loop(t) {
         if(Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
             energy -= 30; charShake = 20; 
             sfxHit();
-            triggerVibration([40, 30, 40]);
-            addFloat(sx + 40, s.y, "-30%", "#ff3131", 28);
+            triggerVibration([50, 30, 50]);
             s.y = 60; s.dy = 1; s.lane = getSafeSpiderLane(s);
         }
     });
@@ -529,15 +570,15 @@ function loop(t) {
             if(e.bad) {
                 hp--; charShake = 20; 
                 sfxHit();
-                triggerVibration([80, 40, 80]);
-                addFloat(e.x + 40, e.y, "-1 HEART", "#ff3131", 28);
+                triggerVibration([100, 50, 100]);
+                addFloat(e.x + 40, e.y, "❤️", "#ff3131", 35); // Fliegendes Herz
             } else {
                 let ptsScaling = 1.0 + ((level - 1) * (1.0 / 19)); 
                 let pG = Math.floor(e.pts * ptsScaling);
                 score += pG; energy = Math.min(100, energy + 5); charJump = 15; 
                 sfxCollect(); 
-                triggerVibration(5); // Mini-Zucken für den Punkt
-                addFloat(e.x + 40, e.y, "+"+pG+" PTS", "#00ff88", 28);
+                triggerVibration(5);
+                addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); // Nur die Zahl
             }
             entities.splice(i, 1);
         } else if (e.y > H + 60) { entities.splice(i, 1); }
@@ -575,12 +616,12 @@ function loop(t) {
         active = false;
         try { document.getElementById("snd-action").pause(); } catch(e){}
         sfxHit(); 
-        triggerVibration([100, 50, 100, 50, 200]);
+        triggerVibration([100, 50, 100, 50, 200]); 
         
         ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
         
         document.getElementById("scr-end").style.display = "flex";
-        document.getElementById("end-agent-name").innerText = "AGENT " + agent; 
+        document.getElementById("end-agent-name").innerText = agent; 
         document.getElementById("f-score").innerText = Math.floor(score);
         
         saveScoreAndRefresh(Math.floor(score));
