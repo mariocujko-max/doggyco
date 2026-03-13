@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -230,7 +230,7 @@
             <li><b>EVERY 3 LEVELS: Theme changes!</b></li>
             <li><b>Green Points:</b><br>
                 Food = <span style="color:var(--green)">+10, +20, +30</span><br>
-                <b>🌟 UFO Stern = <span style="color:var(--gold)">+1 ❤️ (oder Bonuspunkte bei 3 Leben)</span></b>
+                <b>🌟 UFO Star = <span style="color:var(--gold)">+1 ❤️ (oder Bonuspunkte bei 3 Leben)</span></b>
             </li>
             <li><b>Black Ninja 🥷</b> = -1 Heart.</li>
             <li><b>Spiders 🕷️</b> = -50% Energy.</li>
@@ -399,7 +399,7 @@ let currentOpponentIcon = '🐦';
 
 function initBackgroundGraphics() {
     clouds = [];
-    for(let i=0; i<8; i++) { // Mehr Wolken
+    for(let i=0; i<8; i++) {
         clouds.push({ x: Math.random()*W, y: Math.random()*H/2, s: 30 + Math.random()*30 }); 
     }
     
@@ -530,18 +530,19 @@ function loop(t) {
     const hitTop = H - 150; 
     const hitBottom = H - 50;
 
-    // GESCHWINDIGKEIT: Unendlich steigernd (gecappt bei lvl 40 für Stabilität)
+    // SPEED: Endless increasing (cap at 40 for stability)
     let capLvl = Math.min(level, 40);
     let speedMult = 1.3 + ((capLvl - 1) * 0.06); 
 
     timeLeft -= dt; energy -= (4 * speedMult) * dt;
     starTimer -= dt;
 
-    // --- UFO SPAWN LOGIK (Wirft Stern ab) ---
+    // --- 3. UFO LOGIC (Drops Star) ---
     if(starTimer <= 0) {
         let safeL = getSafeLaneForItems();
         if(safeL !== -1) {
-            ufos.push({ x: W + 50, y: 70, s: 150 + (50 * speedMult), targetLane: safeL, dropped: false });
+            // UFO SPAWN: Setting UFO flying deeper
+            ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false });
             starTimer = 20 + Math.random() * 5; 
         } else {
             starTimer = 0.5; 
@@ -590,7 +591,7 @@ function loop(t) {
     document.getElementById("lvl-txt").innerText = level;
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
 
-    // 1. WOLKEN (Mehr Wolken im Hintergrund)
+    // 1. CLOUDS (More clouds in background)
     ctx.globalAlpha = 0.3; 
     clouds.forEach(c => {
         c.x += (10 + speedMult*5) * dt; 
@@ -601,7 +602,7 @@ function loop(t) {
     });
     ctx.globalAlpha = 1.0; 
 
-    // 2. VÖGEL (Bis zu 3 gleichzeitig)
+    // 2. BIRDS (Up to 3 at once)
     if(Math.random() < 0.015 && opponents.length < 3) { 
         opponents.push({ x: W + 50, y: Math.random()*H/2 + 50, s: (100 + Math.random()*50) * speedMult });
     }
@@ -613,13 +614,13 @@ function loop(t) {
         if(o.x < -50) opponents.splice(i, 1);
     });
 
-    // 3. UFO LOGIK (Bewegung und Abwurf)
+    // 3. UFO LOGIC (Movement and Drop)
     for(let i = ufos.length - 1; i >= 0; i--) {
         let u = ufos[i];
         u.x -= u.s * dt;
         ctx.font = "45px Arial";
         ctx.textAlign = "center";
-        // Schwebender Effekt
+        // Floating effect
         ctx.fillText('🛸', u.x, u.y + Math.sin(t / 150) * 10);
 
         let dropX = lanes[u.targetLane];
@@ -632,7 +633,7 @@ function loop(t) {
         }
     }
 
-    // 4. FALLENDE STERNE
+    // 4. FALLING STARS
     for(let i = fallingStars.length - 1; i >= 0; i--) {
         let s = fallingStars[i]; s.y += s.s * dt;
         ctx.font = "40px Arial"; 
@@ -697,7 +698,7 @@ function loop(t) {
         if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; }
 
         if(Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-            // SPINNEN-UPDATE: 50% der AKTUELLEN Energie abziehen
+            // SPIDER UPDATE: Substract 50% of CURRENT energy
             let lostEnergy = energy * 0.5;
             energy -= lostEnergy; 
             
