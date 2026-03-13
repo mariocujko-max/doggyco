@@ -233,7 +233,7 @@
                 <b>🌟 UFO Star = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS if full)</span></b>
             </li>
             <li><b>Black Ninja 🥷</b> = -1 Heart.</li>
-            <li><b>Spiders 🕷️</b> = <span style="color:var(--red)">-30 PTS (scales up!)</span>.</li>
+            <li><b>Spiders 🕷️</b> = <span style="color:var(--red)">-30 PTS & Energy drain!</span></li>
             <li><b>0 Energy</b> = -1 Heart & Refill!</li>
             <li>Endless Speed & Levels! (Loops back to Dog)</li>
         </ul>
@@ -265,7 +265,7 @@
 <audio id="snd-action" src="music.mp3" loop></audio> 
 
 <script>
-document.querySelectorAll('audio').forEach(a => a.volume = 0.3);
+document.querySelectorAll('audio').forEach(a => a.volume = 0.5);
 
 let systemActive = false;
 
@@ -275,9 +275,10 @@ function enableSystem() {
     
     initSynth();
     
-    if (!active && (document.getElementById("scr-start").style.display !== "none" || document.getElementById("scr-name").style.display !== "none")) {
-        startMenuMusic();
-    }
+    // HINTERGRUNDMUSIK STARTET SOFORT UND LÄUFT IMMER WEITER
+    let bgMusic = document.getElementById("snd-action");
+    bgMusic.volume = 0.5;
+    bgMusic.play().catch(()=>{});
 }
 
 function unlockSystemOnce() {
@@ -304,9 +305,6 @@ function hapticDamage() { triggerVibration([100, 50, 100, 50, 100]); }
 function hapticGameOver() { triggerVibration([200, 100, 200, 100, 400]); } 
 
 let audioCtx = null;
-let menuMusicTimer = null;
-let menuStep = 0;
-const menuNotes = [110, 110, 220, 110, 110, 146.83, 164.81, 146.83];
 
 function initSynth() {
     if (!audioCtx) {
@@ -329,31 +327,6 @@ function playTone(freq, type, duration, vol=0.1) {
     } catch(e) {}
 }
 
-function playMenuNote() {
-    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
-    let freq = menuNotes[menuStep % menuNotes.length];
-    // MUSIK LAUTER GEMACHT (vol: 0.12 statt 0.03)
-    playTone(freq, 'sawtooth', 0.15, 0.12); 
-    menuStep++;
-    menuMusicTimer = setTimeout(playMenuNote, 250); 
-}
-
-function startMenuMusic() {
-    if(!systemActive) return;
-    initSynth();
-    if(!menuMusicTimer) {
-        menuStep = 0;
-        playMenuNote();
-    }
-}
-
-function stopMenuMusic() {
-    if(menuMusicTimer) {
-        clearTimeout(menuMusicTimer);
-        menuMusicTimer = null;
-    }
-}
-
 function sfxCollect() { playTone(600, 'sine', 0.1, 0.1); setTimeout(() => playTone(1200, 'sine', 0.15, 0.1), 80); }
 function sfxStarCollect() { [800, 1000, 1200].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.1, 0.1), i*50)); } 
 function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.2); setTimeout(() => playTone(100, 'square', 0.4, 0.2), 100); }
@@ -374,7 +347,6 @@ async function fetchRanks() {
         let { data, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
         
         if (error) {
-            alert("Error loading leaderboard: " + error.message);
             document.getElementById("leaderboard").innerHTML = "Database Error: " + error.message;
             return;
         }
@@ -387,9 +359,7 @@ async function fetchRanks() {
         } else {
             document.getElementById("leaderboard").innerHTML = "No players yet! Be the first.";
         }
-    } catch(e) {
-        alert("Code Error: " + e.message);
-    }
+    } catch(e) {}
 }
 
 const canvas = document.getElementById("canvas");
@@ -440,10 +410,6 @@ window.addEventListener("keydown", function(e) {
     if(e.key === "ArrowRight") triggerMove(1, 'btn-right');
 });
 
-function safePlayAudio(id) {
-    try { let a = document.getElementById(id); a.currentTime = 0; a.play().catch(()=>{}); } catch(e) {}
-}
-
 function authAgent() {
     enableSystem(); 
     hapticClick();
@@ -452,7 +418,6 @@ function authAgent() {
         agent = n;
         document.getElementById("scr-name").style.display = "none";
         document.getElementById("scr-start").style.display = "flex";
-        startMenuMusic(); 
     }
 }
 
@@ -485,16 +450,6 @@ function start(m, startLvl) {
     updateTheme(mode);
     document.getElementById("scr-start").style.display = "none";
     
-    stopMenuMusic(); 
-    
-    if(systemActive) {
-        try { 
-            let aAct = document.getElementById("snd-action");
-            aAct.currentTime = 0;
-            aAct.play().catch(()=>{});
-        } catch(e){}
-    }
-
     permSpiders = [ { lane: 0, y: 60, dy: 1 }, { lane: 4, y: H-120, dy: -1 } ];
 
     active = true; lastT = 0; 
@@ -536,24 +491,17 @@ async function saveScoreAndRefresh(newScore) {
     try {
         let { data, error: selectError } = await supabaseClient.from('leaderboard').select('*').eq('n', agent);
         
-        if (selectError) {
-            alert("Database read error: " + selectError.message);
-            return;
-        }
+        if (selectError) return;
 
         if(data && data.length > 0) {
             if(newScore > data[0].s) {
-                let { error: updateError } = await supabaseClient.from('leaderboard').update({ s: newScore }).eq('n', agent);
-                if (updateError) alert("Update error: " + updateError.message);
+                await supabaseClient.from('leaderboard').update({ s: newScore }).eq('n', agent);
             }
         } else {
-            let { error: insertError } = await supabaseClient.from('leaderboard').insert([{ n: agent, s: newScore }]);
-            if (insertError) alert("Save error: " + insertError.message);
+            await supabaseClient.from('leaderboard').insert([{ n: agent, s: newScore }]);
         }
         fetchRanks();
-    } catch(e) {
-        alert("Save code error: " + e.message);
-    }
+    } catch(e) {}
 }
 
 function loop(t) {
@@ -570,7 +518,6 @@ function loop(t) {
 
     let capLvl = Math.min(level, 40);
     let speedMult = 1.3 + ((capLvl - 1) * 0.06); 
-    // PTS SCALING FÜR PUNKTE & SPINNEN
     let ptsScaling = 1.3 + ((capLvl - 1) * 0.06); 
 
     timeLeft -= dt; energy -= (4 * speedMult) * dt;
@@ -678,8 +625,8 @@ function loop(t) {
                 charJump = 15; 
                 sfxStarCollect(); 
                 triggerVibration([30, 50, 30]); 
-                // NEU: Stern + Herz Symbol
-                addFloat(s.x + 40, s.y, "🌟 +1 ❤️", "#ff3131", 35); 
+                // GRÜNES HERZ SYMBOL
+                addFloat(s.x + 40, s.y, "🌟 +1 ❤️", "#00ff88", 35); 
             } else {
                 let bonusPts = 100 + (level * 10);
                 score += bonusPts;
@@ -728,14 +675,15 @@ function loop(t) {
         if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; }
 
         if(Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-            // SPINNEN UPDATE: Zieht Punkte (wie Sammelpunkte skaliert) ab! KEINE Energie mehr!
+            // SPINNEN UPDATE: Zieht Punkte UND Energie ab!
             let pLoss = Math.floor(30 * ptsScaling);
-            score = Math.max(0, score - pLoss); // Verhindert Minuspunkte
+            score = Math.max(0, score - pLoss); 
+            energy -= 30; // Zieht 30 Energie ab
             
             charShake = 20; 
             sfxHit();
             hapticSpiderHit(); 
-            addFloat(sx + 40, s.y, "-" + pLoss + " PTS", "#ff3131", 30); 
+            addFloat(sx + 40, s.y, "-" + pLoss + " PTS & -⚡", "#ff3131", 25); 
             s.y = 60; s.dy = 1; s.lane = getSafeSpiderLane(s);
         }
     });
@@ -795,7 +743,7 @@ function loop(t) {
 
     if(hp <= 0) {
         active = false;
-        try { document.getElementById("snd-action").pause(); } catch(e){}
+        // WICHTIG: Keine Musik-Pause mehr hier! Musik läuft weiter.
         sfxHit(); 
         hapticGameOver(); 
         
