@@ -18,49 +18,48 @@
         
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
-        /* 1. GRUNDGERÜST (Zentriert das Spiel auf großen Bildschirmen) */
         body { 
             background: #050505; font-family: 'Orbitron', sans-serif; color: #fff; 
             width: 100vw; height: 100dvh; overflow: hidden; 
-            display: flex; justify-content: center; align-items: center; /* Zentriert alles am PC */
+            display: flex; justify-content: center; align-items: center; 
         }
 
+        /* HINTERGRUNDBILD IST WIEDER DA UND GANZ HINTEN */
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); z-index: 2; }
 
-        /* 2. DER VIRTUELLE HANDY-BILDSCHIRM */
         #phone-container {
             position: relative;
             width: 100%;
-            max-width: 420px; /* Begrenzt die Breite auf PC */
-            height: 100%;     /* Füllt das Handy komplett aus */
-            background: #000;
+            max-width: 420px; 
+            height: 100%;     
+            background: transparent; /* WAR VORHER SCHWARZ - JETZT DURCHSICHTIG FÜR DAS BILD! */
             z-index: 10;
             overflow: hidden;
         }
 
-        /* 3. WENN DER BILDSCHIRM GROSS IST (PC / TABLET), ZEIGE EINEN RAHMEN */
         @media (min-width: 450px) {
             #phone-container {
-                height: 90vh; /* Lässt oben und unten etwas Platz am PC */
+                height: 90vh; 
                 max-height: 850px;
                 border-radius: 35px;
                 border: 4px solid var(--neon);
                 box-shadow: 0 0 50px rgba(0,242,255,0.3);
+                background: rgba(0,0,0,0.4); /* Leichte Abdunkelung am PC, damit es gut aussieht */
             }
-            #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.95) 100%); }
+            #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.95) 100%); }
         }
 
-        /* SPIELFELD INNERHALB DES HANDY-CONTAINERS */
         #game-wrap { 
             position: absolute; inset: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3); /* Leichte Tönung für den Kontrast */
             touch-action: none; 
             overflow: hidden;
         }
 
         canvas { 
             position: absolute; inset: 0; width: 100%; height: 100%; 
-            object-fit: contain; /* Nichts wird mehr abgeschnitten! */
+            object-fit: contain; 
             z-index: 50; 
         }
 
@@ -94,7 +93,6 @@
         }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        /* MENÜS BLEIBEN IN DER HANDY-BOX */
         .screen { 
             position: absolute; inset: 0; z-index: 1000; 
             background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -272,7 +270,9 @@
         </div>
     </div>
 
-</div> <audio id="snd-action" src="music.mp3" loop></audio> 
+</div> 
+
+<audio id="snd-action" src="music.mp3" loop></audio> 
 
 <script>
 document.querySelectorAll('audio').forEach(a => a.volume = 0.15);
@@ -281,33 +281,30 @@ bgMusic.volume = 0.15;
 
 window.onload = function() {
     let savedName = localStorage.getItem("doggycoAgent");
-    if(savedName) {
-        document.getElementById("pName").value = savedName;
-    }
+    if(savedName) { document.getElementById("pName").value = savedName; }
 }
 
 let systemActive = false;
 
 function forceAudioStart() {
-    if(!systemActive) {
-        systemActive = true;
-        initSynth();
-    }
+    if(!systemActive) { systemActive = true; initSynth(); }
     if(bgMusic.paused) bgMusic.play().catch(e => {});
 }
 
 document.body.addEventListener('click', forceAudioStart, { once: true });
 document.body.addEventListener('touchstart', forceAudioStart, { once: true });
 
+// --- NEUE, INTELLIGENTE VIBRATIONS-MUSTER ---
 function triggerVibration(pattern) {
-    if (systemActive && "vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
+    if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
 }
 function hapticClick() { triggerVibration(10); } 
-function hapticMove() { triggerVibration(5); } 
-function hapticCollect() { triggerVibration([15, 30, 15]); } 
-function hapticSpiderHit() { triggerVibration([60, 30, 60, 30, 60]); } 
-function hapticDamage() { triggerVibration([100, 50, 100, 50, 100]); } 
-function hapticGameOver() { triggerVibration([200, 100, 200, 100, 400]); } 
+function hapticMove() { triggerVibration(5); } // Sehr leichtes Tippen
+function hapticCollect() { triggerVibration(15); } // Kurzes Plopp
+function hapticStar() { triggerVibration([20, 30, 20]); } // Fröhliches Doppel-Pulsieren
+function hapticSpiderHit() { triggerVibration([30, 40, 30]); } // Dumpfes Warnen
+function hapticDamage() { triggerVibration([50, 30, 50, 30, 50]); } // Harter Alarm
+function hapticGameOver() { triggerVibration([100, 50, 100, 50, 300]); } // Langes Brummen
 
 let audioCtx = null;
 let menuMusicTimer = null;
@@ -457,8 +454,8 @@ function updateTheme(newMode) {
     });
     
     document.querySelectorAll('.info-panel, .name-input, .btn-char').forEach(p => { p.style.borderColor = col; });
-    document.getElementById("phone-container").style.borderColor = col; /* Aktualisiert */
-    document.getElementById("phone-container").style.boxShadow = `0 0 50px ${col}60`; /* Aktualisiert */
+    document.getElementById("phone-container").style.borderColor = col;
+    document.getElementById("phone-container").style.boxShadow = `0 0 50px ${col}60`;
     document.getElementById("stats-bar").style.borderColor = col;
 }
 
@@ -641,11 +638,11 @@ function loop(t) {
         
         if(Math.abs(s.x - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
             if (hp < 3) {
-                hp++; charJump = 15; sfxStarCollect(); triggerVibration([30, 50, 30]); 
+                hp++; charJump = 15; sfxStarCollect(); hapticStar(); 
                 addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35); 
             } else {
                 let bonusPts = 100 + (level * 10);
-                score += bonusPts; charJump = 15; sfxStarCollect(); triggerVibration([30, 50, 30]); 
+                score += bonusPts; charJump = 15; sfxStarCollect(); hapticStar(); 
                 addFloat(s.x + 40, s.y, "+" + bonusPts, "#FFD700", 30); 
             }
             fallingStars.splice(i, 1);
