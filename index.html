@@ -18,39 +18,63 @@
         
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
+        /* 1. GRUNDGERÜST (Zentriert das Spiel auf großen Bildschirmen) */
         body { 
-            background: #000; font-family: 'Orbitron', sans-serif; color: #fff; 
+            background: #050505; font-family: 'Orbitron', sans-serif; color: #fff; 
             width: 100vw; height: 100dvh; overflow: hidden; 
-            overscroll-behavior-y: none; 
+            display: flex; justify-content: center; align-items: center; /* Zentriert alles am PC */
         }
 
-        #bg-fx { position: fixed; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
-        #bg-overlay { position: fixed; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%); z-index: 2; }
+        #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
+        #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); z-index: 2; }
 
-        /* PERFEKTES FULLSCREEN-WRAPPER OHNE ABSCHNEIDEN */
-        #game-wrap { 
-            position: fixed; inset: 0; width: 100vw; height: 100dvh;
-            z-index: 10; touch-action: none; 
+        /* 2. DER VIRTUELLE HANDY-BILDSCHIRM */
+        #phone-container {
+            position: relative;
+            width: 100%;
+            max-width: 420px; /* Begrenzt die Breite auf PC */
+            height: 100%;     /* Füllt das Handy komplett aus */
+            background: #000;
+            z-index: 10;
             overflow: hidden;
         }
 
-        /* OBJECT-FIT: CONTAIN LÖST DAS RAND-PROBLEM */
-        canvas { 
-            position: absolute; inset: 0; width: 100%; height: 100%; 
-            object-fit: contain; z-index: 50; 
+        /* 3. WENN DER BILDSCHIRM GROSS IST (PC / TABLET), ZEIGE EINEN RAHMEN */
+        @media (min-width: 450px) {
+            #phone-container {
+                height: 90vh; /* Lässt oben und unten etwas Platz am PC */
+                max-height: 850px;
+                border-radius: 35px;
+                border: 4px solid var(--neon);
+                box-shadow: 0 0 50px rgba(0,242,255,0.3);
+            }
+            #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.95) 100%); }
         }
 
-        #hud { position: absolute; top: env(safe-area-inset-top, 20px); width: 100%; z-index: 200; pointer-events: none; padding-top: 15px; }
+        /* SPIELFELD INNERHALB DES HANDY-CONTAINERS */
+        #game-wrap { 
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            touch-action: none; 
+            overflow: hidden;
+        }
+
+        canvas { 
+            position: absolute; inset: 0; width: 100%; height: 100%; 
+            object-fit: contain; /* Nichts wird mehr abgeschnitten! */
+            z-index: 50; 
+        }
+
+        #hud { position: absolute; top: env(safe-area-inset-top, 15px); width: 100%; z-index: 200; pointer-events: none; padding-top: 15px; }
         #energy-box { width: 85%; height: 14px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 10px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
         
         #stats-bar { 
-            display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; max-width: 420px;
+            display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; 
             background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px);
         }
         .stat { font-weight: 900; font-size: 14px; text-shadow: 1px 1px 3px #000; }
 
-        #controls { position: absolute; bottom: env(safe-area-inset-bottom, 20px); left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; pointer-events: none; }
+        #controls { position: absolute; bottom: env(safe-area-inset-bottom, 15px); left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; pointer-events: none; }
         .arrow { 
             width: 80px; height: 80px; 
             background: transparent; border: none; 
@@ -70,14 +94,15 @@
         }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
+        /* MENÜS BLEIBEN IN DER HANDY-BOX */
         .screen { 
-            position: fixed; inset: 0; z-index: 1000; 
+            position: absolute; inset: 0; z-index: 1000; 
             background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             overflow-y: auto; overscroll-behavior-y: contain; 
         }
         
         .screen-inner {
-            width: 100%; max-width: 420px; min-height: 100%; margin: 0 auto;
+            width: 100%; min-height: 100%; margin: 0 auto;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 40px 15px 60px 15px; 
         }
@@ -143,109 +168,111 @@
 <div id="bg-fx"></div>
 <div id="bg-overlay"></div>
 
-<div id="game-wrap">
-    <div id="hud">
-        <div id="energy-box"><div id="energy-fill"></div></div>
-        <div id="stats-bar">
-            <div class="stat" style="background:var(--neon); color:#000; padding:2px 8px; border-radius:5px; font-weight:900; font-size:16px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
-            <div id="hp-txt" class="stat">❤️❤️❤️</div>
-            <div id="score-txt" class="stat" style="color:var(--gold)">0 PTS</div>
-            <div id="time-txt" class="stat" style="color:var(--neon)">30s</div>
-        </div>
-    </div>
-
-    <canvas id="canvas"></canvas>
-
-    <div id="lvl-up-popup">NEXT LEVEL!</div>
-
-    <div id="controls">
-        <div id="btn-left" class="arrow" onmousedown="triggerMove(-1, 'btn-left')" ontouchstart="event.preventDefault(); triggerMove(-1, 'btn-left')">◀</div>
-        <div id="btn-right" class="arrow" onmousedown="triggerMove(1, 'btn-right')" ontouchstart="event.preventDefault(); triggerMove(1, 'btn-right')">▶</div>
-    </div>
-</div>
-
-<div id="scr-name" class="screen">
-    <div class="screen-inner">
-        <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
-        <div class="inner-panel">
-            <div id="dog-head-icon">🐶</div> 
-            <h2>MISSION BRIEFING</h2> 
-            <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
-            <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
-        </div>
-    </div>
-</div>
-
-<div id="scr-start" class="screen" style="display:none;">
-    <div class="screen-inner start-menu">
-        <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
-        
-        <div class="inner-panel">
-            <h3>CHOOSE START LEVEL</h3>
-            <div class="flex-chars">
-                <button class="btn-char" style="border-color:var(--neon)" onclick="start('dog', 1)"><span>🐶</span>FREE DOG</button>
-                <button class="btn-char" style="border-color:var(--cat)" onclick="start('cat', 4)"><span>🐱</span>LVL 4 CAT</button>
-                <button class="btn-char" style="border-color:var(--rabbit)" onclick="start('rabbit', 7)"><span>🐰</span>LVL 7 RABBIT</button>
-                <button class="btn-char" style="border-color:var(--fox)" onclick="start('fox', 10)"><span>🦊</span>LVL 10 FOX</button>
-                <button class="btn-char" style="border-color:var(--panda)" onclick="start('panda', 13)"><span>🐼</span>LVL 13 PANDA</button>
+<div id="phone-container">
+    
+    <div id="game-wrap">
+        <div id="hud">
+            <div id="energy-box"><div id="energy-fill"></div></div>
+            <div id="stats-bar">
+                <div class="stat" style="background:var(--neon); color:#000; padding:2px 8px; border-radius:5px; font-weight:900; font-size:16px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
+                <div id="hp-txt" class="stat">❤️❤️❤️</div>
+                <div id="score-txt" class="stat" style="color:var(--gold)">0 PTS</div>
+                <div id="time-txt" class="stat" style="color:var(--neon)">30s</div>
             </div>
         </div>
 
-        <div class="info-panel">
-            <h3>🏆 GLOBAL HALL OF FAME</h3>
-            <div id="leaderboard" class="text-sm" style="text-align:center;">Connecting to Mainframe...</div>
-        </div>
+        <canvas id="canvas"></canvas>
 
-        <div class="info-panel">
-            <h3 style="color:var(--neon)">📖 HOW TO PLAY</h3>
-            <ul class="rules text-sm">
-                <li>Dodge using <b>Arrows ◀ ▶</b> or <b>Keyboard</b>.</li>
-                <li><b>EVERY 3 LEVELS: Theme changes!</b></li>
-                <li><b>Green Points:</b><br>
-                    Food = <span style="color:var(--green)">+10, +20, +30</span><br>
-                    <b>🌟 UFO Star = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS if full)</span></b>
-                </li>
-                <li><b>Black Ninja 🥷</b> = -1 Heart.</li>
-                <li><b>Spiders 🕷️</b> = <span style="color:var(--red)">-30 PTS & Energy drain!</span></li>
-                <li><b>0 Energy</b> = -1 Heart & Refill!</li>
-                <li>Endless Speed & Levels! (Loops back to Dog)</li>
-            </ul>
-        </div>
+        <div id="lvl-up-popup">NEXT LEVEL!</div>
 
-        <div class="info-panel">
-            <h3 style="color:var(--green)">💎 SUPPORT CREATOR</h3>
-            <div class="sup-grid">
-                <a href="https://www.tiktok.com/@doggyco0" target="_blank" class="btn-sup bg-tk" onclick="hapticClick()">TIKTOK</a>
-                <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=give-me.org@gmx.net&item_name=Support+Doggyco+Mission&currency_code=EUR" target="_blank" class="btn-sup bg-pp" onclick="hapticClick()">PAYPAL</a>
-            </div>
-            <div class="wallet-box">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" width="110" alt="QR">
-                <div style="color:#000; font-family:'Orbitron'; font-size:11px; font-weight:900; margin-top:8px;">BTC WALLET</div>
-            </div>
-            <p style="font-size:10px; color:var(--gold); text-align:center; word-break:break-all; font-family:monospace; margin-top:5px;">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
-            <button class="btn-sup btn-copy" onclick="copyBTC(this)">COPY ADDRESS</button>
-        </div>
-
-        <div class="legal-box"> 
-            <h4 style="color:#aaa; text-align:center; margin-bottom:5px; font-family:'Orbitron'; letter-spacing:1px;">⚖️ LEGAL NOTICE</h4>
-            <p class="text-sm" style="text-align:center; color:#ddd; font-size:10px;">
-                Private, non-commercial project. Donations are voluntary gifts.<br>
-                © 2026 DOGGYCO GLOBAL ACADEMY. All Rights Reserved.
-            </p>
+        <div id="controls">
+            <div id="btn-left" class="arrow" onmousedown="triggerMove(-1, 'btn-left')" ontouchstart="event.preventDefault(); triggerMove(-1, 'btn-left')">◀</div>
+            <div id="btn-right" class="arrow" onmousedown="triggerMove(1, 'btn-right')" ontouchstart="event.preventDefault(); triggerMove(1, 'btn-right')">▶</div>
         </div>
     </div>
-</div>
 
-<div id="scr-end" class="screen" style="display:none">
-    <div class="screen-inner"> 
-        <h2 class="red-neon-text" style="font-size:28px; margin-bottom:10px;">MISSION FAILED</h2> 
-        <h3 id="end-agent-name" class="neon-text" style="font-size:36px; letter-spacing:2px; margin-bottom:10px;">AGENT</h3> 
-        <h1 id="f-score" style="font-size:55px; color:var(--gold); margin:0 0 25px 0; text-shadow: 0 0 20px var(--gold);">0 PTS</h1> 
-        <button class="btn-main" onclick="hapticClick(); location.reload()">NEW GAME</button> 
+    <div id="scr-name" class="screen">
+        <div class="screen-inner">
+            <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
+            <div class="inner-panel">
+                <div id="dog-head-icon">🐶</div> 
+                <h2>MISSION BRIEFING</h2> 
+                <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
+                <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
+            </div>
+        </div>
     </div>
-</div>
 
-<audio id="snd-action" src="music.mp3" loop></audio> 
+    <div id="scr-start" class="screen" style="display:none;">
+        <div class="screen-inner start-menu">
+            <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
+            
+            <div class="inner-panel">
+                <h3>CHOOSE START LEVEL</h3>
+                <div class="flex-chars">
+                    <button class="btn-char" style="border-color:var(--neon)" onclick="start('dog', 1)"><span>🐶</span>FREE DOG</button>
+                    <button class="btn-char" style="border-color:var(--cat)" onclick="start('cat', 4)"><span>🐱</span>LVL 4 CAT</button>
+                    <button class="btn-char" style="border-color:var(--rabbit)" onclick="start('rabbit', 7)"><span>🐰</span>LVL 7 RABBIT</button>
+                    <button class="btn-char" style="border-color:var(--fox)" onclick="start('fox', 10)"><span>🦊</span>LVL 10 FOX</button>
+                    <button class="btn-char" style="border-color:var(--panda)" onclick="start('panda', 13)"><span>🐼</span>LVL 13 PANDA</button>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>🏆 GLOBAL HALL OF FAME</h3>
+                <div id="leaderboard" class="text-sm" style="text-align:center;">Connecting to Mainframe...</div>
+            </div>
+
+            <div class="info-panel">
+                <h3 style="color:var(--neon)">📖 HOW TO PLAY</h3>
+                <ul class="rules text-sm">
+                    <li>Dodge using <b>Arrows ◀ ▶</b> or <b>Keyboard</b>.</li>
+                    <li><b>EVERY 3 LEVELS: Theme changes!</b></li>
+                    <li><b>Green Points:</b><br>
+                        Food = <span style="color:var(--green)">+10, +20, +30</span><br>
+                        <b>🌟 UFO Star = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS if full)</span></b>
+                    </li>
+                    <li><b>Black Ninja 🥷</b> = -1 Heart.</li>
+                    <li><b>Spiders 🕷️</b> = <span style="color:var(--red)">-30 PTS & Energy drain!</span></li>
+                    <li><b>0 Energy</b> = -1 Heart & Refill!</li>
+                    <li>Endless Speed & Levels! (Loops back to Dog)</li>
+                </ul>
+            </div>
+
+            <div class="info-panel">
+                <h3 style="color:var(--green)">💎 SUPPORT CREATOR</h3>
+                <div class="sup-grid">
+                    <a href="https://www.tiktok.com/@doggyco0" target="_blank" class="btn-sup bg-tk" onclick="hapticClick()">TIKTOK</a>
+                    <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=give-me.org@gmx.net&item_name=Support+Doggyco+Mission&currency_code=EUR" target="_blank" class="btn-sup bg-pp" onclick="hapticClick()">PAYPAL</a>
+                </div>
+                <div class="wallet-box">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" width="110" alt="QR">
+                    <div style="color:#000; font-family:'Orbitron'; font-size:11px; font-weight:900; margin-top:8px;">BTC WALLET</div>
+                </div>
+                <p style="font-size:10px; color:var(--gold); text-align:center; word-break:break-all; font-family:monospace; margin-top:5px;">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
+                <button class="btn-sup btn-copy" onclick="copyBTC(this)">COPY ADDRESS</button>
+            </div>
+
+            <div class="legal-box"> 
+                <h4 style="color:#aaa; text-align:center; margin-bottom:5px; font-family:'Orbitron'; letter-spacing:1px;">⚖️ LEGAL NOTICE</h4>
+                <p class="text-sm" style="text-align:center; color:#ddd; font-size:10px;">
+                    Private, non-commercial project. Donations are voluntary gifts.<br>
+                    © 2026 DOGGYCO GLOBAL ACADEMY. All Rights Reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="scr-end" class="screen" style="display:none">
+        <div class="screen-inner"> 
+            <h2 class="red-neon-text" style="font-size:28px; margin-bottom:10px;">MISSION FAILED</h2> 
+            <h3 id="end-agent-name" class="neon-text" style="font-size:36px; letter-spacing:2px; margin-bottom:10px;">AGENT</h3> 
+            <h1 id="f-score" style="font-size:55px; color:var(--gold); margin:0 0 25px 0; text-shadow: 0 0 20px var(--gold);">0 PTS</h1> 
+            <button class="btn-main" onclick="hapticClick(); location.reload()">NEW GAME</button> 
+        </div>
+    </div>
+
+</div> <audio id="snd-action" src="music.mp3" loop></audio> 
 
 <script>
 document.querySelectorAll('audio').forEach(a => a.volume = 0.15);
@@ -430,8 +457,8 @@ function updateTheme(newMode) {
     });
     
     document.querySelectorAll('.info-panel, .name-input, .btn-char').forEach(p => { p.style.borderColor = col; });
-    document.getElementById("game-wrap").style.borderColor = col;
-    document.getElementById("game-wrap").style.boxShadow = `0 0 40px ${col}80`;
+    document.getElementById("phone-container").style.borderColor = col; /* Aktualisiert */
+    document.getElementById("phone-container").style.boxShadow = `0 0 50px ${col}60`; /* Aktualisiert */
     document.getElementById("stats-bar").style.borderColor = col;
 }
 
