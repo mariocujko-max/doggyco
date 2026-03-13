@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DOGGYCO MISSION - V-ULTRA PERFECT</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐶</text></svg>">
     
@@ -15,41 +15,28 @@
             --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff;
             --glass: rgba(255, 255, 255, 0.15); 
         }
+        
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
+        /* 1. PERFEKTER VOLLBILDMODUS & SCROLL-SPERRE FÜRS SPIEL */
         body { 
             background: #000; font-family: 'Orbitron', sans-serif; color: #fff; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-            overflow-x: hidden;
-            /* NEU: Verhindert das Herunterziehen zum Aktualisieren auf dem Handy */
-            overscroll-behavior-y: none; 
+            width: 100vw; height: 100dvh; overflow: hidden; /* Sperrt das native Scrollen komplett */
         }
 
-        #bg-fx { position: fixed; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: -2; }
-        #bg-overlay { position: fixed; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%); z-index: -1; }
+        #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
+        #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%); z-index: 2; }
 
-        header { padding: 15px 0 10px; text-align: center; width: 100%; }
-        header h1 { 
-            font-size: clamp(22px, 7vw, 36px); color: var(--gold); text-shadow: 0 0 20px var(--gold); letter-spacing: 2px;
-            animation: blinkGold 2s infinite ease-in-out;
-        }
-
-        @keyframes blinkGold {
-            0%, 100% { opacity: 1; text-shadow: 0 0 20px var(--gold); }
-            50% { opacity: 0.7; text-shadow: 0 0 10px var(--gold); }
-        }
-
-        .app-container { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; padding: 0 10px; position: relative; }
-
-        /* NEU: Perfekte Höhe für Handys & Anti-Scroll Sperre */
+        /* 2. DAS SPIELFELD IST JETZT IMMER 100% GROSS */
         #game-wrap { 
-            position:relative; width: 100%; height: 65vh; min-height: 480px; max-height: 650px;
-            background: rgba(0,0,0,0.4); border: 4px solid var(--neon); border-radius: 35px; 
-            overflow: hidden; box-shadow: 0 0 30px var(--neon); margin-bottom: 20px;
-            touch-action: none; /* SPERRT DAS SCROLLEN IM SPIELBEREICH! */
+            position: absolute; inset: 0; width: 100vw; height: 100dvh;
+            z-index: 10; touch-action: none; /* Keine Wischgesten im Spiel erlaubt! */
+            overflow: hidden;
         }
 
-        #hud { position: absolute; top: 15px; width: 100%; z-index: 200; pointer-events: none; }
+        canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 50; }
+
+        #hud { position: absolute; top: env(safe-area-inset-top, 20px); width: 100%; z-index: 200; pointer-events: none; padding-top: 15px; }
         #energy-box { width: 85%; height: 14px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 10px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
         
@@ -59,44 +46,52 @@
         }
         .stat { font-weight: 900; font-size: 14px; text-shadow: 1px 1px 3px #000; }
 
-        canvas { position: absolute; inset: 0; z-index: 50; width: 100%; height: 100%; }
+        #controls { position: absolute; bottom: env(safe-area-inset-bottom, 20px); width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; pointer-events: none; }
+        .arrow { 
+            width: 80px; height: 80px; 
+            background: transparent; border: none; 
+            color: rgba(255, 255, 255, 0.5); font-size: 60px; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; transition: 0.15s; pointer-events: auto;
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none;
+        }
+        .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); }
 
         #lvl-up-popup {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            background: rgba(0, 0, 0, 0.15); 
-            backdrop-filter: blur(5px); 
-            border: 1px solid rgba(255, 215, 0, 0.4);
-            color: #fff;
-            padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); 
-            text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); 
+            background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); border: 1px solid rgba(255, 215, 0, 0.4);
+            color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); 
             z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center;
         }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        .screen { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; background: rgba(0,0,0,0.6); padding: 20px; text-align: center; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); touch-action: none;}
-        
-        #scr-name, #scr-start { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; touch-action: auto;}
-        
-        #scr-name .inner-panel, #scr-start .inner-panel, #scr-end .inner-panel { 
-            background: transparent; border: none; box-shadow: none; width: 100%; 
-            display: flex; flex-direction: column; align-items: center; 
-            backdrop-filter: none; -webkit-backdrop-filter: none;
+        /* 3. MENÜS (LAYERS ÜBER DEM SPIEL, DIE MAN SCROLLEN KANN) */
+        .screen { 
+            position: absolute; inset: 0; z-index: 1000; 
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            overflow-y: auto; overscroll-behavior-y: contain; /* Erlaubt Scrollen NUR im Menü */
         }
         
-        .inner-panel h3, .inner-panel h2 { color: var(--gold); padding-bottom: 0px; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; border-bottom: none; text-shadow: 2px 2px 5px #000; }
+        .screen-inner {
+            width: 100%; max-width: 420px; min-height: 100%; margin: 0 auto;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px 15px 60px 15px; 
+        }
+
+        .screen-inner.start-menu { justify-content: flex-start; }
+
+        header { padding: 0 0 20px 0; text-align: center; width: 100%; }
+        .app-title { font-size: clamp(24px, 8vw, 36px); color: var(--gold); text-shadow: 0 0 20px var(--gold); letter-spacing: 2px; animation: blinkGold 2s infinite ease-in-out; }
+
+        .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
+        .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 18px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
         
         .name-input { 
-            width: 100%; padding: 15px; border-radius: 15px; 
-            border: 2px solid var(--neon); 
-            background: transparent; 
-            color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; 
-            backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none;
-            text-shadow: 1px 1px 5px #000;
+            width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: transparent; 
+            color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; text-shadow: 1px 1px 5px #000;
         }
-        .name-input:focus { 
-            border-color: var(--gold); box-shadow: 0 0 15px var(--gold); outline: none; background: transparent;
-        }
+        .name-input:focus { border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
 
         .btn-main { 
             padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 16px; width: 100%; cursor: pointer; 
@@ -104,7 +99,7 @@
         }
         .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
 
-        .flex-chars { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; margin-bottom: 15px; }
+        .flex-chars { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
         .btn-char { 
             flex: 1 1 30%; min-width: 85px; padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.5); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 10px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center;
             box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.3); transform: translateY(0);
@@ -113,52 +108,31 @@
         .btn-char:hover { background: rgba(255,255,255,0.2); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
-        #controls { position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; }
-        .arrow { 
-            width: 80px; height: 80px; 
-            background: transparent; border: none; 
-            color: rgba(255, 255, 255, 0.5); font-size: 60px; 
-            display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; user-select: none; transition: 0.15s; 
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-            touch-action: none; /* NEU: Tasten drücken scrollt nicht mehr das Bild */
-        }
-        .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); }
-
-        .info-panel { width: 100%; background: var(--glass); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 15px; backdrop-filter: blur(20px); box-shadow: 0 0 20px rgba(0,242,255,0.1); }
+        .info-panel { width: 100%; background: var(--glass); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); }
         .info-panel h3 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 16px; text-align: center; text-transform: uppercase; }
         
         .rank-row { display: flex; justify-content: space-between; padding: 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; }
-        @keyframes pulseGold { 0%, 100% { text-shadow: 0 0 10px var(--gold); } 50% { text-shadow: 0 0 25px var(--gold), 0 0 10px #fff; } }
-        .rank-gold { color: var(--gold); font-size: 16px; animation: pulseGold 2s infinite; }
+        .rank-gold { color: var(--gold); font-size: 16px; text-shadow: 0 0 10px var(--gold); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .btn-sup { 
             padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); transform: translateY(0);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block;
         }
         .bg-tk { background: linear-gradient(45deg, #000, #ff0050); } 
         .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); }
-        .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; box-shadow: 0 4px 0 var(--gold); transform: translateY(0); }
+        .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; box-shadow: 0 4px 0 var(--gold); }
         .btn-sup:active, .btn-copy:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.5); }
         
         .wallet-box { background: rgba(255,255,255,0.9); padding: 10px; border-radius: 15px; text-align: center; margin: 15px auto; width: 130px; }
-        
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 5px; }
 
-        .legal-box { 
-            width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 40px;
-            backdrop-filter: blur(20px); box-shadow: 0 0 20px rgba(0,242,255,0.1); 
-        }
-        
-        #dog-head-icon { font-size: 75px; margin-bottom: 25px; text-shadow: 0 0 15px var(--neon); }
-
+        .legal-box { width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; }
+        #dog-head-icon { font-size: 75px; margin-bottom: 15px; text-shadow: 0 0 15px var(--neon); }
         .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
         .red-neon-text { color: var(--red); text-shadow: 0 0 10px var(--red), 0 0 20px var(--red); }
-        
-        #end-agent-name { font-size: 36px; letter-spacing: 2px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -166,104 +140,105 @@
 <div id="bg-fx"></div>
 <div id="bg-overlay"></div>
 
-<header><h1 id="main-title">DOGGYCO MISSION</h1></header>
-
-<div class="app-container">
-    
-    <div id="game-wrap">
-        <div id="hud">
-            <div id="energy-box"><div id="energy-fill"></div></div>
-            <div id="stats-bar">
-                <div class="stat" style="background:var(--neon); color:#000; padding:2px 8px; border-radius:5px; font-weight:900; font-size:16px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
-                <div id="hp-txt" class="stat">❤️❤️❤️</div>
-                <div id="score-txt" class="stat" style="color:var(--gold)">0 PTS</div>
-                <div id="time-txt" class="stat" style="color:var(--neon)">30s</div>
-            </div>
-        </div>
-
-        <canvas id="canvas"></canvas>
-
-        <div id="lvl-up-popup">NEXT LEVEL!</div>
-
-        <div id="controls">
-            <div id="btn-left" class="arrow" onmousedown="triggerMove(-1, 'btn-left')" ontouchstart="event.preventDefault(); triggerMove(-1, 'btn-left')">◀</div>
-            <div id="btn-right" class="arrow" onmousedown="triggerMove(1, 'btn-right')" ontouchstart="event.preventDefault(); triggerMove(1, 'btn-right')">▶</div>
-        </div>
-
-        <div id="scr-name" class="screen">
-            <div class="inner-panel">
-                <div id="dog-head-icon">🐶</div> 
-                <h2>MISSION BRIEFING</h2> 
-                <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
-                <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
-            </div>
-        </div>
-
-        <div id="scr-start" class="screen" style="display:none">
-            <div class="inner-panel">
-                <div id="dog-head-icon">🐶</div> 
-                <h3>CHOOSE START LEVEL</h3>
-                <div class="flex-chars">
-                    <button class="btn-char" style="border-color:var(--neon)" onclick="start('dog', 1)"><span>🐶</span>FREE DOG</button>
-                    <button class="btn-char" style="border-color:var(--cat)" onclick="start('cat', 4)"><span>🐱</span>LVL 4 CAT</button>
-                    <button class="btn-char" style="border-color:var(--rabbit)" onclick="start('rabbit', 7)"><span>🐰</span>LVL 7 RABBIT</button>
-                    <button class="btn-char" style="border-color:var(--fox)" onclick="start('fox', 10)"><span>🦊</span>LVL 10 FOX</button>
-                    <button class="btn-char span-2" style="border-color:var(--panda)" onclick="start('panda', 13)"><span>🐼</span>LVL 13 PANDA</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="scr-end" class="screen" style="display:none">
-            <div class="inner-panel" style="background:rgba(0,0,0,0.8); backdrop-filter: blur(10px);"> 
-                <h2 class="red-neon-text">MISSION FAILED</h2> 
-                <h3 id="end-agent-name" class="neon-text" style="border:none;">AGENT</h3> 
-                <h1 id="f-score" style="font-size:55px; color:var(--gold); margin:0 0 15px 0; text-shadow: 0 0 20px var(--gold);">0 PTS</h1> 
-                <button class="btn-main" onclick="hapticClick(); location.reload()">NEW GAME</button> 
-            </div>
+<div id="game-wrap">
+    <div id="hud">
+        <div id="energy-box"><div id="energy-fill"></div></div>
+        <div id="stats-bar">
+            <div class="stat" style="background:var(--neon); color:#000; padding:2px 8px; border-radius:5px; font-weight:900; font-size:16px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
+            <div id="hp-txt" class="stat">❤️❤️❤️</div>
+            <div id="score-txt" class="stat" style="color:var(--gold)">0 PTS</div>
+            <div id="time-txt" class="stat" style="color:var(--neon)">30s</div>
         </div>
     </div>
 
-    <div class="info-panel">
-        <h3>🏆 GLOBAL HALL OF FAME</h3>
-        <div id="leaderboard" class="text-sm" style="text-align:center;">Connecting to Mainframe...</div>
-    </div>
+    <canvas id="canvas"></canvas>
 
-    <div class="info-panel">
-        <h3 style="color:var(--neon)">📖 HOW TO PLAY</h3>
-        <ul class="rules text-sm">
-            <li>Dodge using <b>Arrows ◀ ▶</b> or <b>Keyboard</b>.</li>
-            <li><b>EVERY 3 LEVELS: Theme changes!</b></li>
-            <li><b>Green Points:</b><br>
-                Food = <span style="color:var(--green)">+10, +20, +30</span><br>
-                <b>🌟 UFO Star = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS if full)</span></b>
-            </li>
-            <li><b>Black Ninja 🥷</b> = -1 Heart.</li>
-            <li><b>Spiders 🕷️</b> = <span style="color:var(--red)">-30 PTS & Energy drain!</span></li>
-            <li><b>0 Energy</b> = -1 Heart & Refill!</li>
-            <li>Endless Speed & Levels! (Loops back to Dog)</li>
-        </ul>
-    </div>
+    <div id="lvl-up-popup">NEXT LEVEL!</div>
 
-    <div class="info-panel">
-        <h3 style="color:var(--green)">💎 SUPPORT CREATOR</h3>
-        <div class="sup-grid">
-            <a href="https://www.tiktok.com/@doggyco0" target="_blank" class="btn-sup bg-tk" onclick="hapticClick()">TIKTOK</a>
-            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=give-me.org@gmx.net&item_name=Support+Doggyco+Mission&currency_code=EUR" target="_blank" class="btn-sup bg-pp" onclick="hapticClick()">PAYPAL</a>
+    <div id="controls">
+        <div id="btn-left" class="arrow" onmousedown="triggerMove(-1, 'btn-left')" ontouchstart="event.preventDefault(); triggerMove(-1, 'btn-left')">◀</div>
+        <div id="btn-right" class="arrow" onmousedown="triggerMove(1, 'btn-right')" ontouchstart="event.preventDefault(); triggerMove(1, 'btn-right')">▶</div>
+    </div>
+</div>
+
+<div id="scr-name" class="screen">
+    <div class="screen-inner">
+        <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
+        <div class="inner-panel">
+            <div id="dog-head-icon">🐶</div> 
+            <h2>MISSION BRIEFING</h2> 
+            <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
+            <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
         </div>
-        <div class="wallet-box">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" width="110" alt="QR">
-            <div style="color:#000; font-family:'Orbitron'; font-size:11px; font-weight:900; margin-top:8px;">BTC WALLET</div>
-        </div>
-        <p style="font-size:10px; color:var(--gold); text-align:center; word-break:break-all; font-family:monospace; margin-top:5px;">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
-        <button class="btn-sup btn-copy" onclick="copyBTC(this)">COPY ADDRESS</button>
     </div>
+</div>
 
-    <div class="legal-box"> 
-        <h4 style="color:#aaa; text-align:center; margin-bottom:5px; font-family:'Orbitron'; letter-spacing:1px;">⚖️ LEGAL NOTICE</h4>
-        <p class="text-sm" style="text-align:center; color:#ddd; font-size:10px;">
-            Private, non-commercial project. Donations are voluntary gifts.<br>
-            © 2026 DOGGYCO GLOBAL ACADEMY. All Rights Reserved.
-        </p>
+<div id="scr-start" class="screen" style="display:none;">
+    <div class="screen-inner start-menu">
+        <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
+        
+        <div class="inner-panel">
+            <h3>CHOOSE START LEVEL</h3>
+            <div class="flex-chars">
+                <button class="btn-char" style="border-color:var(--neon)" onclick="start('dog', 1)"><span>🐶</span>FREE DOG</button>
+                <button class="btn-char" style="border-color:var(--cat)" onclick="start('cat', 4)"><span>🐱</span>LVL 4 CAT</button>
+                <button class="btn-char" style="border-color:var(--rabbit)" onclick="start('rabbit', 7)"><span>🐰</span>LVL 7 RABBIT</button>
+                <button class="btn-char" style="border-color:var(--fox)" onclick="start('fox', 10)"><span>🦊</span>LVL 10 FOX</button>
+                <button class="btn-char" style="border-color:var(--panda)" onclick="start('panda', 13)"><span>🐼</span>LVL 13 PANDA</button>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>🏆 GLOBAL HALL OF FAME</h3>
+            <div id="leaderboard" class="text-sm" style="text-align:center;">Connecting to Mainframe...</div>
+        </div>
+
+        <div class="info-panel">
+            <h3 style="color:var(--neon)">📖 HOW TO PLAY</h3>
+            <ul class="rules text-sm">
+                <li>Dodge using <b>Arrows ◀ ▶</b> or <b>Keyboard</b>.</li>
+                <li><b>EVERY 3 LEVELS: Theme changes!</b></li>
+                <li><b>Green Points:</b><br>
+                    Food = <span style="color:var(--green)">+10, +20, +30</span><br>
+                    <b>🌟 UFO Star = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS if full)</span></b>
+                </li>
+                <li><b>Black Ninja 🥷</b> = -1 Heart.</li>
+                <li><b>Spiders 🕷️</b> = <span style="color:var(--red)">-30 PTS & Energy drain!</span></li>
+                <li><b>0 Energy</b> = -1 Heart & Refill!</li>
+                <li>Endless Speed & Levels! (Loops back to Dog)</li>
+            </ul>
+        </div>
+
+        <div class="info-panel">
+            <h3 style="color:var(--green)">💎 SUPPORT CREATOR</h3>
+            <div class="sup-grid">
+                <a href="https://www.tiktok.com/@doggyco0" target="_blank" class="btn-sup bg-tk" onclick="hapticClick()">TIKTOK</a>
+                <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=give-me.org@gmx.net&item_name=Support+Doggyco+Mission&currency_code=EUR" target="_blank" class="btn-sup bg-pp" onclick="hapticClick()">PAYPAL</a>
+            </div>
+            <div class="wallet-box">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" width="110" alt="QR">
+                <div style="color:#000; font-family:'Orbitron'; font-size:11px; font-weight:900; margin-top:8px;">BTC WALLET</div>
+            </div>
+            <p style="font-size:10px; color:var(--gold); text-align:center; word-break:break-all; font-family:monospace; margin-top:5px;">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
+            <button class="btn-sup btn-copy" onclick="copyBTC(this)">COPY ADDRESS</button>
+        </div>
+
+        <div class="legal-box"> 
+            <h4 style="color:#aaa; text-align:center; margin-bottom:5px; font-family:'Orbitron'; letter-spacing:1px;">⚖️ LEGAL NOTICE</h4>
+            <p class="text-sm" style="text-align:center; color:#ddd; font-size:10px;">
+                Private, non-commercial project. Donations are voluntary gifts.<br>
+                © 2026 DOGGYCO GLOBAL ACADEMY. All Rights Reserved.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="scr-end" class="screen" style="display:none">
+    <div class="screen-inner"> 
+        <h2 class="red-neon-text" style="font-size:28px; margin-bottom:10px;">MISSION FAILED</h2> 
+        <h3 id="end-agent-name" class="neon-text" style="font-size:36px; letter-spacing:2px; margin-bottom:10px;">AGENT</h3> 
+        <h1 id="f-score" style="font-size:55px; color:var(--gold); margin:0 0 25px 0; text-shadow: 0 0 20px var(--gold);">0 PTS</h1> 
+        <button class="btn-main" onclick="hapticClick(); location.reload()">NEW GAME</button> 
     </div>
 </div>
 
@@ -271,9 +246,16 @@
 
 <script>
 document.querySelectorAll('audio').forEach(a => a.volume = 0.15);
-
 let bgMusic = document.getElementById("snd-action");
 bgMusic.volume = 0.15; 
+
+// Namen-Speicher auslesen
+window.onload = function() {
+    let savedName = localStorage.getItem("doggycoAgent");
+    if(savedName) {
+        document.getElementById("pName").value = savedName;
+    }
+}
 
 let systemActive = false;
 
@@ -282,18 +264,14 @@ function forceAudioStart() {
         systemActive = true;
         initSynth();
     }
-    if(bgMusic.paused) {
-        bgMusic.play().catch(e => console.log("Audio waiting for interaction..."));
-    }
+    if(bgMusic.paused) bgMusic.play().catch(e => {});
 }
 
 document.body.addEventListener('click', forceAudioStart, { once: true });
 document.body.addEventListener('touchstart', forceAudioStart, { once: true });
 
 function triggerVibration(pattern) {
-    if (systemActive && "vibrate" in navigator) {
-        try { navigator.vibrate(pattern); } catch(e) {}
-    }
+    if (systemActive && "vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
 }
 function hapticClick() { triggerVibration(10); } 
 function hapticMove() { triggerVibration(5); } 
@@ -339,17 +317,11 @@ function playMenuNote() {
 function startMenuMusic() {
     if(!systemActive) return;
     initSynth();
-    if(!menuMusicTimer) {
-        menuStep = 0;
-        playMenuNote();
-    }
+    if(!menuMusicTimer) { menuStep = 0; playMenuNote(); }
 }
 
 function stopMenuMusic() {
-    if(menuMusicTimer) {
-        clearTimeout(menuMusicTimer);
-        menuMusicTimer = null;
-    }
+    if(menuMusicTimer) { clearTimeout(menuMusicTimer); menuMusicTimer = null; }
 }
 
 function sfxCollect() { playTone(600, 'sine', 0.1, 0.1); setTimeout(() => playTone(1200, 'sine', 0.15, 0.1), 80); }
@@ -371,7 +343,6 @@ async function fetchRanks() {
     }
     try {
         let { data, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
-        
         if (error) throw error; 
 
         if(data && data.length > 0) {
@@ -411,12 +382,9 @@ function initBackgroundGraphics() {
     for(let i=0; i<8; i++) {
         clouds.push({ x: Math.random()*W, y: Math.random()*H/2, s: 30 + Math.random()*30 }); 
     }
-    
     const ops = ['🐦', '🦅', '🦉', '🦇', '🦋'];
     currentOpponentIcon = ops[Math.floor(Math.random()*ops.length)];
-    opponents = [];
-    fallingStars = [];
-    ufos = [];
+    opponents = []; fallingStars = []; ufos = [];
 }
 
 function triggerMove(dir, btnId) {
@@ -442,6 +410,7 @@ function authAgent() {
     let n = document.getElementById("pName").value.trim().toUpperCase();
     if(n) {
         agent = n;
+        localStorage.setItem("doggycoAgent", agent); // NAMEN SPEICHERN!
         document.getElementById("scr-name").style.display = "none";
         document.getElementById("scr-start").style.display = "flex";
         startMenuMusic(); 
@@ -452,8 +421,13 @@ function updateTheme(newMode) {
     const colors = { 'dog':'#00f2ff', 'cat':'#bc13fe', 'rabbit':'#ff8c00', 'fox':'#ff4500', 'panda':'#ffffff' };
     let col = colors[newMode];
     document.documentElement.style.setProperty('--neon', col);
-    document.getElementById("main-title").style.color = col;
-    document.getElementById("main-title").style.textShadow = `0 0 20px ${col}`;
+    
+    // Alle Titel anpassen
+    document.querySelectorAll('.app-title').forEach(el => {
+        el.style.color = col;
+        el.style.textShadow = `0 0 20px ${col}`;
+    });
+    
     document.querySelectorAll('.info-panel, .name-input, .btn-char').forEach(p => { p.style.borderColor = col; });
     document.getElementById("game-wrap").style.borderColor = col;
     document.getElementById("game-wrap").style.boxShadow = `0 0 40px ${col}80`;
@@ -520,7 +494,6 @@ async function saveScoreAndRefresh(newScore) {
     if(!supabaseClient) return;
     try {
         let { data, error: selectError } = await supabaseClient.from('leaderboard').select('*').eq('n', agent);
-        
         if (selectError) return;
 
         if(data && data.length > 0) {
@@ -573,7 +546,6 @@ function loop(t) {
         let expectedMode = modeOrder[expectedModeIndex];
         
         let pop = document.getElementById("lvl-up-popup");
-        
         triggerVibration([20, 40, 60, 80]); 
 
         if(mode !== expectedMode) {
@@ -593,8 +565,7 @@ function loop(t) {
         if(hp > 0) {
             energy = 100;
             charShake = 20;
-            sfxHit();
-            hapticDamage(); 
+            sfxHit(); hapticDamage(); 
             addFloat(playerX, H/2, "-1 ❤️", "#ff3131", 35); 
         }
     }
@@ -609,9 +580,7 @@ function loop(t) {
     clouds.forEach(c => {
         c.x += (10 + speedMult*5) * dt; 
         if(c.x > W + 50) c.x = -50; 
-        ctx.font = c.s + "px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText('☁️', c.x, c.y);
+        ctx.font = c.s + "px Arial"; ctx.textAlign = "center"; ctx.fillText('☁️', c.x, c.y);
     });
     ctx.globalAlpha = 1.0; 
 
@@ -620,17 +589,14 @@ function loop(t) {
     }
     opponents.forEach((o, i) => {
         o.x -= o.s * dt;
-        ctx.font = "25px Arial"; 
-        ctx.textAlign = "center"; 
-        ctx.fillText(currentOpponentIcon, o.x, o.y);
+        ctx.font = "25px Arial"; ctx.textAlign = "center"; ctx.fillText(currentOpponentIcon, o.x, o.y);
         if(o.x < -50) opponents.splice(i, 1);
     });
 
     for(let i = ufos.length - 1; i >= 0; i--) {
         let u = ufos[i];
         u.x -= u.s * dt;
-        ctx.font = "45px Arial";
-        ctx.textAlign = "center";
+        ctx.font = "45px Arial"; ctx.textAlign = "center";
         ctx.fillText('🛸', u.x, u.y + Math.sin(t / 150) * 10);
 
         let dropX = lanes[u.targetLane];
@@ -638,30 +604,20 @@ function loop(t) {
             fallingStars.push({ x: dropX, y: u.y, s: 280 * speedMult });
             u.dropped = true;
         }
-        if(u.x < -50) {
-            ufos.splice(i, 1);
-        }
+        if(u.x < -50) ufos.splice(i, 1);
     }
 
     for(let i = fallingStars.length - 1; i >= 0; i--) {
         let s = fallingStars[i]; s.y += s.s * dt;
-        ctx.font = "40px Arial"; 
-        ctx.textAlign = "center"; 
-        ctx.fillText('🌟', s.x, s.y);
+        ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText('🌟', s.x, s.y);
         
         if(Math.abs(s.x - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
             if (hp < 3) {
-                hp++;
-                charJump = 15; 
-                sfxStarCollect(); 
-                triggerVibration([30, 50, 30]); 
+                hp++; charJump = 15; sfxStarCollect(); triggerVibration([30, 50, 30]); 
                 addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35); 
             } else {
                 let bonusPts = 100 + (level * 10);
-                score += bonusPts;
-                charJump = 15; 
-                sfxStarCollect(); 
-                triggerVibration([30, 50, 30]); 
+                score += bonusPts; charJump = 15; sfxStarCollect(); triggerVibration([30, 50, 30]); 
                 addFloat(s.x + 40, s.y, "+" + bonusPts, "#FFD700", 30); 
             }
             fallingStars.splice(i, 1);
@@ -706,12 +662,7 @@ function loop(t) {
         if(Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
             let pLoss = Math.floor(30 * ptsScaling);
             score = Math.max(0, score - pLoss); 
-            energy -= 30; 
-            
-            charShake = 20; 
-            sfxHit();
-            hapticSpiderHit(); 
-            // NUR ROTE BLITZE
+            energy -= 30; charShake = 20; sfxHit(); hapticSpiderHit(); 
             addFloat(sx + 40, s.y, "-⚡", "#ff3131", 35); 
             s.y = 60; s.dy = 1; s.lane = getSafeSpiderLane(s);
         }
@@ -723,15 +674,12 @@ function loop(t) {
 
         if(Math.abs(e.x - playerX) < 40 && e.y > hitTop && e.y < hitBottom) {
             if(e.bad) {
-                hp--; charShake = 20; 
-                sfxHit();
-                hapticDamage(); 
+                hp--; charShake = 20; sfxHit(); hapticDamage(); 
                 addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); 
             } else {
                 let pG = Math.floor(e.pts * ptsScaling);
                 score += pG; energy = Math.min(100, energy + 5); charJump = 15; 
-                sfxCollect(); 
-                hapticCollect(); 
+                sfxCollect(); hapticCollect(); 
                 addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); 
             }
             entities.splice(i, 1);
@@ -747,18 +695,10 @@ function loop(t) {
 
     for(let i = floaters.length - 1; i >= 0; i--) {
         let f = floaters[i]; 
-        
-        f.y -= 2.0; 
-        f.x += (200 - f.x) * 0.05; 
-
-        f.o -= 0.8 * dt; 
-        ctx.globalAlpha = Math.max(0, f.o);
-        ctx.font = `900 ${f.s}px 'Orbitron'`;
-        ctx.textAlign = "center";
-        
+        f.y -= 2.0; f.x += (200 - f.x) * 0.05; f.o -= 0.8 * dt; 
+        ctx.globalAlpha = Math.max(0, f.o); ctx.font = `900 ${f.s}px 'Orbitron'`; ctx.textAlign = "center";
         ctx.strokeStyle = "#000000"; ctx.lineWidth = 5; ctx.strokeText(f.txt, f.x, f.y); 
         ctx.fillStyle = f.c; ctx.fillText(f.txt, f.x, f.y);
-        
         if(f.o <= 0) floaters.splice(i, 1);
     }
     
@@ -772,9 +712,7 @@ function loop(t) {
 
     if(hp <= 0) {
         active = false;
-        sfxHit(); 
-        hapticGameOver(); 
-        
+        sfxHit(); hapticGameOver(); 
         ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
         
         document.getElementById("scr-end").style.display = "flex";
@@ -782,7 +720,6 @@ function loop(t) {
         document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
         
         saveScoreAndRefresh(Math.floor(score));
-        
         return;
     }
     requestAnimationFrame(loop);
@@ -793,8 +730,7 @@ function addFloat(x, y, txt, c, s) { floaters.push({ x, y, txt, c, s, o: 1 }); }
 function copyBTC(btn) { 
     hapticClick();
     navigator.clipboard.writeText("bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed"); 
-    let oldTxt = btn.innerText;
-    btn.innerHTML = "✅";
+    let oldTxt = btn.innerText; btn.innerHTML = "✅";
     setTimeout(() => { btn.innerText = oldTxt; }, 2000);
 }
 </script>
