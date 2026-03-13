@@ -265,32 +265,26 @@
 <audio id="snd-action" src="music.mp3" loop></audio> 
 
 <script>
-document.querySelectorAll('audio').forEach(a => a.volume = 0.5);
+// --- HANDY AUDIO FIX & DEZENTE LAUTSTÄRKE ---
+let bgMusic = document.getElementById("snd-action");
+bgMusic.volume = 0.15; // Sehr dezent für den Hintergrund!
 
 let systemActive = false;
 
-function enableSystem() {
-    if (systemActive) return; 
-    systemActive = true;
-    
-    initSynth();
-    
-    // HINTERGRUNDMUSIK STARTET SOFORT UND LÄUFT IMMER WEITER
-    let bgMusic = document.getElementById("snd-action");
-    bgMusic.volume = 0.5;
-    bgMusic.play().catch(()=>{});
+function forceAudioStart() {
+    if(!systemActive) {
+        systemActive = true;
+        initSynth();
+    }
+    // Garantiert den Start der Hintergrundmusik beim ersten Klick!
+    if(bgMusic.paused) {
+        bgMusic.play().catch(e => console.log("Audio waiting for interaction..."));
+    }
 }
 
-function unlockSystemOnce() {
-    enableSystem();
-    document.removeEventListener('click', unlockSystemOnce);
-    document.removeEventListener('touchstart', unlockSystemOnce);
-    document.removeEventListener('keydown', unlockSystemOnce);
-}
-
-document.addEventListener('click', unlockSystemOnce);
-document.addEventListener('touchstart', unlockSystemOnce, {passive: true});
-document.addEventListener('keydown', unlockSystemOnce);
+// Binde Audio-Start an das gesamte Fenster für Mobile-Browser
+document.body.addEventListener('click', forceAudioStart, { once: true });
+document.body.addEventListener('touchstart', forceAudioStart, { once: true });
 
 function triggerVibration(pattern) {
     if (systemActive && "vibrate" in navigator) {
@@ -305,6 +299,9 @@ function hapticDamage() { triggerVibration([100, 50, 100, 50, 100]); }
 function hapticGameOver() { triggerVibration([200, 100, 200, 100, 400]); } 
 
 let audioCtx = null;
+let menuMusicTimer = null;
+let menuStep = 0;
+const menuNotes = [110, 110, 220, 110, 110, 146.83, 164.81, 146.83];
 
 function initSynth() {
     if (!audioCtx) {
@@ -327,6 +324,31 @@ function playTone(freq, type, duration, vol=0.1) {
     } catch(e) {}
 }
 
+function playMenuNote() {
+    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
+    let freq = menuNotes[menuStep % menuNotes.length];
+    // DEZENTE LAUTSTÄRKE FÜR SYNTH (0.02)
+    playTone(freq, 'sawtooth', 0.15, 0.02); 
+    menuStep++;
+    menuMusicTimer = setTimeout(playMenuNote, 250); 
+}
+
+function startMenuMusic() {
+    if(!systemActive) return;
+    initSynth();
+    if(!menuMusicTimer) {
+        menuStep = 0;
+        playMenuNote();
+    }
+}
+
+function stopMenuMusic() {
+    if(menuMusicTimer) {
+        clearTimeout(menuMusicTimer);
+        menuMusicTimer = null;
+    }
+}
+
 function sfxCollect() { playTone(600, 'sine', 0.1, 0.1); setTimeout(() => playTone(1200, 'sine', 0.15, 0.1), 80); }
 function sfxStarCollect() { [800, 1000, 1200].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.1, 0.1), i*50)); } 
 function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.2); setTimeout(() => playTone(100, 'square', 0.4, 0.2), 100); }
@@ -338,18 +360,17 @@ let supabaseClient = null;
 
 try { supabaseClient = supabase.createClient(SURL, SKEY); fetchRanks(); } catch(e) {}
 
+// --- RANGLISTE MIT AUTO-RETRY (Verhindert Fehler auf dem Handy) ---
 async function fetchRanks() {
     if(!supabaseClient) {
-        document.getElementById("leaderboard").innerHTML = "ERROR: Client could not load. Please reload.";
+        document.getElementById("leaderboard").innerHTML = "Mainframe offline. Retrying...";
+        setTimeout(fetchRanks, 5000);
         return;
     }
     try {
         let { data, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
         
-        if (error) {
-            document.getElementById("leaderboard").innerHTML = "Database Error: " + error.message;
-            return;
-        }
+        if (error) throw error; // Löst den Catch Block aus zum Neu-Laden
 
         if(data && data.length > 0) {
             document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
@@ -357,9 +378,12 @@ async function fetchRanks() {
                 return `<div class="rank-row ${rC}"><span>#${i+1} ${x.n}</span><span>${x.s} PTS</span></div>`;
             }).join('');
         } else {
-            document.getElementById("leaderboard").innerHTML = "No players yet! Be the first.";
+            document.getElementById("leaderboard").innerHTML = "No agents yet! Be the first.";
         }
-    } catch(e) {}
+    } catch(e) {
+        document.getElementById("leaderboard").innerHTML = "Syncing with Mainframe...";
+        setTimeout(fetchRanks, 5000); // Automatischer Neustart nach 5 Sekunden
+    }
 }
 
 const canvas = document.getElementById("canvas");
@@ -411,13 +435,14 @@ window.addEventListener("keydown", function(e) {
 });
 
 function authAgent() {
-    enableSystem(); 
+    forceAudioStart(); // Audio-Start zwingen
     hapticClick();
     let n = document.getElementById("pName").value.trim().toUpperCase();
     if(n) {
         agent = n;
         document.getElementById("scr-name").style.display = "none";
         document.getElementById("scr-start").style.display = "flex";
+        startMenuMusic(); 
     }
 }
 
@@ -434,6 +459,7 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
+    forceAudioStart(); // Audio-Start zwingen
     hapticClick();
     mode = m;
     level = startLvl;
@@ -450,6 +476,8 @@ function start(m, startLvl) {
     updateTheme(mode);
     document.getElementById("scr-start").style.display = "none";
     
+    stopMenuMusic(); 
+
     permSpiders = [ { lane: 0, y: 60, dy: 1 }, { lane: 4, y: H-120, dy: -1 } ];
 
     active = true; lastT = 0; 
@@ -625,8 +653,8 @@ function loop(t) {
                 charJump = 15; 
                 sfxStarCollect(); 
                 triggerVibration([30, 50, 30]); 
-                // GRÜNES HERZ SYMBOL
-                addFloat(s.x + 40, s.y, "🌟 +1 ❤️", "#00ff88", 35); 
+                // NUR GRÜNES HERZ
+                addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35); 
             } else {
                 let bonusPts = 100 + (level * 10);
                 score += bonusPts;
@@ -675,15 +703,15 @@ function loop(t) {
         if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; }
 
         if(Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-            // SPINNEN UPDATE: Zieht Punkte UND Energie ab!
             let pLoss = Math.floor(30 * ptsScaling);
             score = Math.max(0, score - pLoss); 
-            energy -= 30; // Zieht 30 Energie ab
+            energy -= 30; 
             
             charShake = 20; 
             sfxHit();
             hapticSpiderHit(); 
-            addFloat(sx + 40, s.y, "-" + pLoss + " PTS & -⚡", "#ff3131", 25); 
+            // NUR ENERGIE SYMBOL (-)
+            addFloat(sx + 40, s.y, "-⚡", "#ff3131", 35); 
             s.y = 60; s.dy = 1; s.lane = getSafeSpiderLane(s);
         }
     });
@@ -743,7 +771,6 @@ function loop(t) {
 
     if(hp <= 0) {
         active = false;
-        // WICHTIG: Keine Musik-Pause mehr hier! Musik läuft weiter.
         sfxHit(); 
         hapticGameOver(); 
         
