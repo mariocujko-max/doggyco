@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DOGGYCO MISSION - V-ULTRA PERFECT</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐶</text></svg>">
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -229,12 +230,12 @@
             <li><b>EVERY 3 LEVELS: Theme changes!</b></li>
             <li><b>Green Points:</b><br>
                 Food = <span style="color:var(--green)">+10, +20, +30</span><br>
-                <b>🌟 Stern = <span style="color:var(--gold)">+1 ❤️ (oder Bonuspunkte bei max. Leben)</span></b>
+                <b>🌟 UFO Stern = <span style="color:var(--gold)">+1 ❤️ (oder Bonuspunkte bei 3 Leben)</span></b>
             </li>
             <li><b>Black Ninja 🥷</b> = -1 Heart.</li>
-            <li><b>Spiders 🕷️</b> = -30% Energy.</li>
+            <li><b>Spiders 🕷️</b> = -50% Energy.</li>
             <li><b>0 Energy</b> = -1 Heart & Refill!</li>
-            <li>Speed maxes out at <b>Level 15!</b></li>
+            <li>Endless Speed & Levels! (Loops back to Dog)</li>
         </ul>
     </div>
 
@@ -242,7 +243,7 @@
         <h3 style="color:var(--green)">💎 SUPPORT CREATOR</h3>
         <div class="sup-grid">
             <a href="https://www.tiktok.com/@doggyco0" target="_blank" class="btn-sup bg-tk" onclick="hapticClick()">TIKTOK</a>
-            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=mariocujko@gmx.de&item_name=Support+Doggyco+Mission&currency_code=EUR" target="_blank" class="btn-sup bg-pp" onclick="hapticClick()">PAYPAL</a>
+            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=give-me.org@gmx.net&item_name=Support+Doggyco+Mission&currency_code=EUR" target="_blank" class="btn-sup bg-pp" onclick="hapticClick()">PAYPAL</a>
         </div>
         <div class="wallet-box">
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" width="110" alt="QR">
@@ -389,24 +390,24 @@ let currLane = 2, playerX = lanes[2], targetX = lanes[2];
 let active = false, mode = 'dog', agent = "UNKNOWN";
 let entities = [], floaters = [], permSpiders = [], fireworks = [], lastT = 0;
 
-let clouds = [], opponents = [], fallingStars = []; 
+let clouds = [], opponents = [], fallingStars = [], ufos = []; 
 let starTimer = 20; 
 
-// MAXIMAL 3 LEBEN FIX:
 let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
 let charShake = 0, charJump = 0, spawnDelay = 0;
 let currentOpponentIcon = '🐦'; 
 
 function initBackgroundGraphics() {
     clouds = [];
-    for(let i=0; i<4; i++) {
-        clouds.push({ x: Math.random()*W, y: Math.random()*H/3 + 20, s: 30 + Math.random()*20 }); 
+    for(let i=0; i<8; i++) { // Mehr Wolken
+        clouds.push({ x: Math.random()*W, y: Math.random()*H/2, s: 30 + Math.random()*30 }); 
     }
     
     const ops = ['🐦', '🦅', '🦉', '🦇', '🦋'];
     currentOpponentIcon = ops[Math.floor(Math.random()*ops.length)];
     opponents = [];
     fallingStars = [];
+    ufos = [];
 }
 
 function triggerMove(dir, btnId) {
@@ -459,7 +460,7 @@ function start(m, startLvl) {
     mode = m;
     level = startLvl;
     
-    hp = 3; // Startet immer mit maximal 3 Leben
+    hp = 3; 
     energy = 100;
     score = 0;
     starTimer = 20; 
@@ -526,20 +527,21 @@ function loop(t) {
 
     ctx.clearRect(0,0,W,H);
 
-    // KOLLISIONSLINIEN
     const hitTop = H - 150; 
     const hitBottom = H - 50;
 
-    let capLvl = Math.min(level, 15);
-    let speedMult = 1.3 + ((capLvl - 1) * (0.7 / 14)); 
+    // GESCHWINDIGKEIT: Unendlich steigernd (gecappt bei lvl 40 für Stabilität)
+    let capLvl = Math.min(level, 40);
+    let speedMult = 1.3 + ((capLvl - 1) * 0.06); 
 
     timeLeft -= dt; energy -= (4 * speedMult) * dt;
     starTimer -= dt;
 
+    // --- UFO SPAWN LOGIK (Wirft Stern ab) ---
     if(starTimer <= 0) {
         let safeL = getSafeLaneForItems();
         if(safeL !== -1) {
-            fallingStars.push({ x: lanes[safeL], y: -50, s: 280 * speedMult });
+            ufos.push({ x: W + 50, y: 70, s: 150 + (50 * speedMult), targetLane: safeL, dropped: false });
             starTimer = 20 + Math.random() * 5; 
         } else {
             starTimer = 0.5; 
@@ -561,7 +563,6 @@ function loop(t) {
 
         if(mode !== expectedMode) {
             mode = expectedMode; updateTheme(mode); launchFireworks();
-            // Leben werden NICHT mehr aufgefüllt (hp = 3 entfernt)
             pop.innerHTML = "LEVEL " + level + "<br><span style='font-size:20px; color:#fff'>" + mode.toUpperCase() + " UNLOCKED!</span>";
         } else {
             pop.innerHTML = "NEXT LEVEL " + level;
@@ -589,6 +590,7 @@ function loop(t) {
     document.getElementById("lvl-txt").innerText = level;
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
 
+    // 1. WOLKEN (Mehr Wolken im Hintergrund)
     ctx.globalAlpha = 0.3; 
     clouds.forEach(c => {
         c.x += (10 + speedMult*5) * dt; 
@@ -599,7 +601,8 @@ function loop(t) {
     });
     ctx.globalAlpha = 1.0; 
 
-    if(Math.random() < 0.005 && opponents.length < 1) { 
+    // 2. VÖGEL (Bis zu 3 gleichzeitig)
+    if(Math.random() < 0.015 && opponents.length < 3) { 
         opponents.push({ x: W + 50, y: Math.random()*H/2 + 50, s: (100 + Math.random()*50) * speedMult });
     }
     opponents.forEach((o, i) => {
@@ -610,7 +613,26 @@ function loop(t) {
         if(o.x < -50) opponents.splice(i, 1);
     });
 
-    // --- NEUE STERN LOGIK: Leben oder Bonuspunkte (Levelbasiert) ---
+    // 3. UFO LOGIK (Bewegung und Abwurf)
+    for(let i = ufos.length - 1; i >= 0; i--) {
+        let u = ufos[i];
+        u.x -= u.s * dt;
+        ctx.font = "45px Arial";
+        ctx.textAlign = "center";
+        // Schwebender Effekt
+        ctx.fillText('🛸', u.x, u.y + Math.sin(t / 150) * 10);
+
+        let dropX = lanes[u.targetLane];
+        if(u.x <= dropX && !u.dropped) {
+            fallingStars.push({ x: dropX, y: u.y, s: 280 * speedMult });
+            u.dropped = true;
+        }
+        if(u.x < -50) {
+            ufos.splice(i, 1);
+        }
+    }
+
+    // 4. FALLENDE STERNE
     for(let i = fallingStars.length - 1; i >= 0; i--) {
         let s = fallingStars[i]; s.y += s.s * dt;
         ctx.font = "40px Arial"; 
@@ -620,15 +642,12 @@ function loop(t) {
         if(Math.abs(s.x - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
             
             if (hp < 3) {
-                // Heilt +1 Leben (Max 3)
                 hp++;
                 charJump = 15; 
                 sfxStarCollect(); 
                 triggerVibration([30, 50, 30]); 
                 addFloat(s.x + 40, s.y, "+1 ❤️", "#ff3131", 35); 
             } else {
-                // HP ist voll (3) -> Gibt Bonuspunkte basierend auf Level!
-                // Lvl 1 = 110, Lvl 2 = 120, Lvl 3 = 130...
                 let bonusPts = 100 + (level * 10);
                 score += bonusPts;
                 charJump = 15; 
@@ -678,10 +697,14 @@ function loop(t) {
         if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; }
 
         if(Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-            energy -= 30; charShake = 20; 
+            // SPINNEN-UPDATE: 50% der AKTUELLEN Energie abziehen
+            let lostEnergy = energy * 0.5;
+            energy -= lostEnergy; 
+            
+            charShake = 20; 
             sfxHit();
             hapticSpiderHit(); 
-            addFloat(sx + 40, s.y, "-⚡", "#ff3131", 35); 
+            addFloat(sx + 40, s.y, "-50% ⚡", "#ff3131", 30); 
             s.y = 60; s.dy = 1; s.lane = getSafeSpiderLane(s);
         }
     });
@@ -697,7 +720,7 @@ function loop(t) {
                 hapticDamage(); 
                 addFloat(e.x + 40, e.y, "❤️", "#ff3131", 35); 
             } else {
-                let ptsScaling = 1.3 + ((capLvl - 1) * (0.7 / 14)); 
+                let ptsScaling = 1.3 + ((capLvl - 1) * 0.06); 
                 let pG = Math.floor(e.pts * ptsScaling);
                 score += pG; energy = Math.min(100, energy + 5); charJump = 15; 
                 sfxCollect(); 
