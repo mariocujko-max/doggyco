@@ -230,10 +230,10 @@
             <li><b>EVERY 3 LEVELS: Theme changes!</b></li>
             <li><b>Green Points:</b><br>
                 Food = <span style="color:var(--green)">+10, +20, +30</span><br>
-                <b>🌟 UFO Star = <span style="color:var(--gold)">+1 ❤️ (oder Bonuspunkte bei 3 Leben)</span></b>
+                <b>🌟 UFO Star = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS if full)</span></b>
             </li>
             <li><b>Black Ninja 🥷</b> = -1 Heart.</li>
-            <li><b>Spiders 🕷️</b> = -50% Energy.</li>
+            <li><b>Spiders 🕷️</b> = <span style="color:var(--red)">-30 PTS (scales up!)</span>.</li>
             <li><b>0 Energy</b> = -1 Heart & Refill!</li>
             <li>Endless Speed & Levels! (Loops back to Dog)</li>
         </ul>
@@ -332,7 +332,8 @@ function playTone(freq, type, duration, vol=0.1) {
 function playMenuNote() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     let freq = menuNotes[menuStep % menuNotes.length];
-    playTone(freq, 'sawtooth', 0.15, 0.03); 
+    // MUSIK LAUTER GEMACHT (vol: 0.12 statt 0.03)
+    playTone(freq, 'sawtooth', 0.15, 0.12); 
     menuStep++;
     menuMusicTimer = setTimeout(playMenuNote, 250); 
 }
@@ -358,25 +359,23 @@ function sfxStarCollect() { [800, 1000, 1200].forEach((f, i) => setTimeout(() =>
 function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.2); setTimeout(() => playTone(100, 'square', 0.4, 0.2), 100); }
 function sfxLevelUp() { [400, 500, 600, 800].forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.2, 0.1), i*100)); }
 
-// --- HIER IST DEIN SCHLÜSSEL ---
 const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 let supabaseClient = null;
 
 try { supabaseClient = supabase.createClient(SURL, SKEY); fetchRanks(); } catch(e) {}
 
-// --- ERROR SCANNER FÜR RANGLISTE ---
 async function fetchRanks() {
     if(!supabaseClient) {
-        document.getElementById("leaderboard").innerHTML = "FEHLER: Client konnte nicht geladen werden. Bitte Seite neu laden.";
+        document.getElementById("leaderboard").innerHTML = "ERROR: Client could not load. Please reload.";
         return;
     }
     try {
         let { data, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
         
         if (error) {
-            alert("Fehler beim Laden der Rangliste: " + error.message);
-            document.getElementById("leaderboard").innerHTML = "Datenbank-Fehler: " + error.message;
+            alert("Error loading leaderboard: " + error.message);
+            document.getElementById("leaderboard").innerHTML = "Database Error: " + error.message;
             return;
         }
 
@@ -386,10 +385,10 @@ async function fetchRanks() {
                 return `<div class="rank-row ${rC}"><span>#${i+1} ${x.n}</span><span>${x.s} PTS</span></div>`;
             }).join('');
         } else {
-            document.getElementById("leaderboard").innerHTML = "Noch keine Spieler! Werde der Erste.";
+            document.getElementById("leaderboard").innerHTML = "No players yet! Be the first.";
         }
     } catch(e) {
-        alert("Code-Fehler: " + e.message);
+        alert("Code Error: " + e.message);
     }
 }
 
@@ -440,6 +439,10 @@ window.addEventListener("keydown", function(e) {
     if(e.key === "ArrowLeft") triggerMove(-1, 'btn-left');
     if(e.key === "ArrowRight") triggerMove(1, 'btn-right');
 });
+
+function safePlayAudio(id) {
+    try { let a = document.getElementById(id); a.currentTime = 0; a.play().catch(()=>{}); } catch(e) {}
+}
 
 function authAgent() {
     enableSystem(); 
@@ -528,29 +531,28 @@ function launchFireworks() {
     }
 }
 
-// --- ERROR SCANNER FÜR DAS SPEICHERN ---
 async function saveScoreAndRefresh(newScore) {
     if(!supabaseClient) return;
     try {
         let { data, error: selectError } = await supabaseClient.from('leaderboard').select('*').eq('n', agent);
         
         if (selectError) {
-            alert("Datenbank Lesefehler: " + selectError.message);
+            alert("Database read error: " + selectError.message);
             return;
         }
 
         if(data && data.length > 0) {
             if(newScore > data[0].s) {
                 let { error: updateError } = await supabaseClient.from('leaderboard').update({ s: newScore }).eq('n', agent);
-                if (updateError) alert("Update Fehler: " + updateError.message);
+                if (updateError) alert("Update error: " + updateError.message);
             }
         } else {
             let { error: insertError } = await supabaseClient.from('leaderboard').insert([{ n: agent, s: newScore }]);
-            if (insertError) alert("Speicher Fehler: " + insertError.message);
+            if (insertError) alert("Save error: " + insertError.message);
         }
         fetchRanks();
     } catch(e) {
-        alert("Speicher Code-Fehler: " + e.message);
+        alert("Save code error: " + e.message);
     }
 }
 
@@ -568,6 +570,8 @@ function loop(t) {
 
     let capLvl = Math.min(level, 40);
     let speedMult = 1.3 + ((capLvl - 1) * 0.06); 
+    // PTS SCALING FÜR PUNKTE & SPINNEN
+    let ptsScaling = 1.3 + ((capLvl - 1) * 0.06); 
 
     timeLeft -= dt; energy -= (4 * speedMult) * dt;
     starTimer -= dt;
@@ -614,7 +618,7 @@ function loop(t) {
             charShake = 20;
             sfxHit();
             hapticDamage(); 
-            addFloat(playerX, H/2, "❤️", "#ff3131", 35); 
+            addFloat(playerX, H/2, "-1 ❤️", "#ff3131", 35); 
         }
     }
 
@@ -674,7 +678,8 @@ function loop(t) {
                 charJump = 15; 
                 sfxStarCollect(); 
                 triggerVibration([30, 50, 30]); 
-                addFloat(s.x + 40, s.y, "+1 ❤️", "#ff3131", 35); 
+                // NEU: Stern + Herz Symbol
+                addFloat(s.x + 40, s.y, "🌟 +1 ❤️", "#ff3131", 35); 
             } else {
                 let bonusPts = 100 + (level * 10);
                 score += bonusPts;
@@ -723,12 +728,14 @@ function loop(t) {
         if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; }
 
         if(Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-            let lostEnergy = energy * 0.5;
-            energy -= lostEnergy; 
+            // SPINNEN UPDATE: Zieht Punkte (wie Sammelpunkte skaliert) ab! KEINE Energie mehr!
+            let pLoss = Math.floor(30 * ptsScaling);
+            score = Math.max(0, score - pLoss); // Verhindert Minuspunkte
+            
             charShake = 20; 
             sfxHit();
             hapticSpiderHit(); 
-            addFloat(sx + 40, s.y, "-50% ⚡", "#ff3131", 30); 
+            addFloat(sx + 40, s.y, "-" + pLoss + " PTS", "#ff3131", 30); 
             s.y = 60; s.dy = 1; s.lane = getSafeSpiderLane(s);
         }
     });
@@ -742,9 +749,8 @@ function loop(t) {
                 hp--; charShake = 20; 
                 sfxHit();
                 hapticDamage(); 
-                addFloat(e.x + 40, e.y, "❤️", "#ff3131", 35); 
+                addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); 
             } else {
-                let ptsScaling = 1.3 + ((capLvl - 1) * 0.06); 
                 let pG = Math.floor(e.pts * ptsScaling);
                 score += pG; energy = Math.min(100, energy + 5); charJump = 15; 
                 sfxCollect(); 
