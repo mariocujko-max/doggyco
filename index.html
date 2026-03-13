@@ -19,13 +19,12 @@
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body { 
-            background: #111; /* Etwas heller als komplett schwarz */
+            background: #111; 
             font-family: 'Orbitron', sans-serif; color: #fff; 
             width: 100vw; height: 100dvh; overflow: hidden; 
             display: flex; justify-content: center; align-items: center; 
         }
 
-        /* Hintergrundbild strahlt jetzt viel heller durch! */
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; }
 
@@ -45,8 +44,7 @@
 
         #game-wrap { 
             position: absolute; inset: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.1); /* Sehr leichter Filter, damit das Bild strahlt */
-            touch-action: none; overflow: hidden;
+            background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden;
         }
 
         canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; }
@@ -80,20 +78,16 @@
         }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        /* MENÜS: SCROLL-BUG GEFIXT UND HELLER GEMACHT */
         .screen { 
             position: absolute; inset: 0; z-index: 1000; 
-            background: rgba(0,0,0,0.55); /* Helleres Milchglas */
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            overflow-y: auto; 
-            -webkit-overflow-scrolling: touch; /* Zwingt iOS zum weichen Scrollen */
-            touch-action: pan-y; /* Erlaubt ausdrücklich hoch/runter Wischen */
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; 
         }
         
         .screen-inner {
             width: 100%; min-height: 100%; margin: 0 auto;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px 15px 100px 15px; /* Unten mehr Platz, damit man ganz runter scrollen kann */
+            padding: 40px 15px 100px 15px; 
         }
 
         .screen-inner.start-menu { justify-content: flex-start; }
@@ -104,12 +98,9 @@
         .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
         .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 18px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
         
-        /* NAMENSFELD HELLER & GLAS-EFFEKT */
         .name-input { 
-            width: 100%; padding: 15px; border-radius: 15px; 
-            border: 2px solid var(--neon); 
-            background: rgba(255, 255, 255, 0.15); /* Heller Glas-Effekt statt komplett durchsichtig/schwarz */
-            color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; 
+            width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); 
+            background: rgba(255, 255, 255, 0.15); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; 
             margin-bottom: 20px; text-shadow: 1px 1px 5px #000; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
         .name-input:focus { border-color: var(--gold); box-shadow: 0 0 15px var(--gold), inset 0 0 10px rgba(0,0,0,0.5); }
@@ -290,16 +281,17 @@ function forceAudioStart() {
 document.body.addEventListener('click', forceAudioStart, { once: true });
 document.body.addEventListener('touchstart', forceAudioStart, { once: true });
 
+// --- VERSTÄRKTE VIBRATIONEN FÜR XIAOMI & CO ---
 function triggerVibration(pattern) {
     if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
 }
-function hapticClick() { triggerVibration(10); } 
-function hapticMove() { triggerVibration(5); } 
-function hapticCollect() { triggerVibration(15); } 
-function hapticStar() { triggerVibration([20, 30, 20]); } 
-function hapticSpiderHit() { triggerVibration([30, 40, 30]); } 
-function hapticDamage() { triggerVibration([50, 30, 50, 30, 50]); } 
-function hapticGameOver() { triggerVibration([100, 50, 100, 50, 300]); } 
+function hapticClick() { triggerVibration(30); } 
+function hapticMove() { triggerVibration(25); } 
+function hapticCollect() { triggerVibration(40); } 
+function hapticStar() { triggerVibration([40, 50, 40]); } 
+function hapticSpiderHit() { triggerVibration([60, 50, 60]); } 
+function hapticDamage() { triggerVibration([80, 40, 80, 40, 80]); } 
+function hapticGameOver() { triggerVibration([150, 80, 150, 80, 400]); } 
 
 let audioCtx = null;
 let menuMusicTimer = null;
