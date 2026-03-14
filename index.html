@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DOGGYCO MISSION</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐶</text></svg>">
-    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
     
     <style>
         :root { 
@@ -44,70 +41,47 @@
             #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%); }
         }
 
+        /* SPIEL IST IM MENÜ KOMPLETT UNSICHTBAR/DEAKTIVIERT -> Verhindert Scroll-Bugs! */
         #game-wrap { 
             position: absolute; inset: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden;
+            visibility: hidden; pointer-events: none; /* WICHTIGSTER FIX! */
         }
 
         canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; }
 
         #hud { position: absolute; top: env(safe-area-inset-top, 10px); width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; }
         
-        /* NEU: MISSION TITEL TEXT */
         #mission-title {
             text-align: center; font-size: 16px; font-weight: 900; letter-spacing: 2px;
             text-transform: uppercase; margin-bottom: 8px; color: var(--neon);
             text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon);
             animation: pulseNeon 1.5s infinite alternate;
         }
-        @keyframes pulseNeon {
-            0% { opacity: 0.7; transform: scale(0.98); }
-            100% { opacity: 1; transform: scale(1.02); }
-        }
+        @keyframes pulseNeon { 0% { opacity: 0.7; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1.02); } }
 
         #energy-box { width: 85%; height: 14px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 10px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
         
-        #stats-bar { 
-            display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; 
-            background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px);
-        }
+        #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); }
         .stat { font-weight: 900; font-size: 14px; text-shadow: 1px 1px 3px #000; }
 
         #controls { position: absolute; bottom: env(safe-area-inset-bottom, 15px); left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; pointer-events: none; }
-        .arrow { 
-            width: 80px; height: 80px; background: transparent; border: none; 
-            color: rgba(255, 255, 255, 0.5); font-size: 60px; 
-            display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; transition: 0.15s; pointer-events: auto;
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none;
-        }
+        .arrow { width: 80px; height: 80px; background: transparent; border: none; color: rgba(255, 255, 255, 0.5); font-size: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none; }
         .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); }
 
-        #lvl-up-popup {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
-            background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); border: 1px solid rgba(255, 215, 0, 0.4);
-            color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); 
-            z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center;
-        }
+        #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); border: 1px solid rgba(255, 215, 0, 0.4); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        /* SCROLL-FEHLER BEHOBEN: touch-action: auto zwingt das Handy, scrollen immer zu erlauben! */
+        /* SCROLL-FIX: position: fixed erzwingt Scroll-Balken */
         .screen { 
-            position: absolute; inset: 0; z-index: 1000; 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; 
             background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            overflow-y: auto; -webkit-overflow-scrolling: touch; 
-            touch-action: auto; /* DIES BEHEBT DAS FESTSTECKEN BEIM SCROLLEN */
-            pointer-events: auto;
+            overflow-y: scroll; -webkit-overflow-scrolling: touch; 
+            overscroll-behavior: none; pointer-events: auto;
         }
         
-        .screen-inner {
-            width: 100%; min-height: 100%; margin: 0 auto;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px 15px 120px 15px; /* Noch mehr Platz unten, damit nichts abgeschnitten wird */
-        }
-
+        .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; padding: 40px 15px 120px 15px; }
         .screen-inner.start-menu { justify-content: flex-start; }
 
         header { padding: 0 0 20px 0; text-align: center; width: 100%; }
@@ -116,24 +90,14 @@
         .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
         .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 18px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
         
-        .name-input { 
-            width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); 
-            background: rgba(255, 255, 255, 0.15); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; 
-            margin-bottom: 20px; text-shadow: 1px 1px 5px #000; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-        }
+        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(255, 255, 255, 0.15); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; text-shadow: 1px 1px 5px #000; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
         .name-input:focus { border-color: var(--gold); box-shadow: 0 0 15px var(--gold), inset 0 0 10px rgba(0,0,0,0.5); }
 
-        .btn-main { 
-            padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 16px; width: 100%; cursor: pointer; 
-            box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.4); transition: 0.1s; transform: translateY(0);
-        }
+        .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 16px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.4); transition: 0.1s; transform: translateY(0); }
         .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
 
         .flex-chars { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; }
-        .btn-char { 
-            flex: 1 1 30%; min-width: 85px; padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.5); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 10px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center;
-            box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.3); transform: translateY(0);
-        }
+        .btn-char { flex: 1 1 30%; min-width: 85px; padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.5); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 10px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.3); transform: translateY(0); }
         .btn-char span { font-size: 32px; margin-bottom: 5px; }
         .btn-char:hover { background: rgba(255,255,255,0.2); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
@@ -146,10 +110,7 @@
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-sup { 
-            padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block;
-        }
+        .btn-sup { padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
         .bg-tk { background: linear-gradient(45deg, #000, #ff0050); } 
         .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); }
         .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; box-shadow: 0 4px 0 var(--gold); }
@@ -175,7 +136,6 @@
     <div id="game-wrap">
         <div id="hud">
             <div id="mission-title">DOG MISSION</div>
-            
             <div id="energy-box"><div id="energy-fill"></div></div>
             <div id="stats-bar">
                 <div class="stat" style="background:var(--neon); color:#000; padding:2px 8px; border-radius:5px; font-weight:900; font-size:16px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
@@ -224,7 +184,7 @@
 
             <div class="info-panel">
                 <h3>🏆 GLOBAL HALL OF FAME</h3>
-                <div id="leaderboard" class="text-sm" style="text-align:center;">Connecting to Mainframe...</div>
+                <div id="leaderboard" class="text-sm" style="text-align:center;">Checking Connection...</div>
             </div>
 
             <div class="info-panel">
@@ -365,20 +325,27 @@ const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 let supabaseClient = null;
 
-// SICHERHEITS-CHECK FÜR OFFLINE-MODUS!
-setTimeout(() => {
-    try { 
-        if(typeof supabase !== 'undefined') {
-            supabaseClient = supabase.createClient(SURL, SKEY); 
-            fetchRanks(); 
-        } else {
-            document.getElementById("leaderboard").innerHTML = "OFFLINE MODE - Connect to view Ranks.";
-        }
-    } catch(e) {}
-}, 500);
+// LÄDT INTERNET NUR WENN VORHANDEN! BEHEBT OFFLINE-ABSTURZ!
+function initNetwork() {
+    if (navigator.onLine) {
+        let script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        script.onload = () => {
+            if(typeof supabase !== 'undefined') {
+                supabaseClient = supabase.createClient(SURL, SKEY);
+                fetchRanks();
+            }
+        };
+        script.onerror = () => { document.getElementById("leaderboard").innerHTML = "OFFLINE MODE - Connect to view Ranks."; };
+        document.head.appendChild(script);
+    } else {
+        document.getElementById("leaderboard").innerHTML = "OFFLINE MODE - Connect to view Ranks.";
+    }
+}
+initNetwork();
 
 async function fetchRanks() {
-    if(!supabaseClient || typeof supabase === 'undefined') return;
+    if(!supabaseClient) return;
     try {
         let { data, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
         if (error) throw error; 
@@ -462,17 +429,12 @@ function updateTheme(newMode) {
     let col = colors[newMode];
     document.documentElement.style.setProperty('--neon', col);
     
-    // Neuer Mission Titel setzen und Farbe anpassen
     let mTitle = document.getElementById("mission-title");
     mTitle.innerText = titles[newMode];
     mTitle.style.color = col;
     mTitle.style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
     
-    document.querySelectorAll('.app-title').forEach(el => {
-        el.style.color = col;
-        el.style.textShadow = `0 0 20px ${col}`;
-    });
-    
+    document.querySelectorAll('.app-title').forEach(el => { el.style.color = col; el.style.textShadow = `0 0 20px ${col}`; });
     document.querySelectorAll('.info-panel, .name-input, .btn-char').forEach(p => { p.style.borderColor = col; });
     document.getElementById("phone-container").style.borderColor = col;
     document.getElementById("phone-container").style.boxShadow = `0 0 50px ${col}60`;
@@ -495,7 +457,11 @@ function start(m, startLvl) {
     initBackgroundGraphics(); 
 
     updateTheme(mode);
+    
+    // MENÜ WEG UND SPIEL SICHTBAR MACHEN!
     document.getElementById("scr-start").style.display = "none";
+    document.getElementById("game-wrap").style.visibility = "visible";
+    document.getElementById("game-wrap").style.pointerEvents = "auto";
     
     stopMenuMusic(); 
 
@@ -536,7 +502,7 @@ function launchFireworks() {
 }
 
 async function saveScoreAndRefresh(newScore) {
-    if(!supabaseClient || typeof supabase === 'undefined') return;
+    if(!supabaseClient) return;
     try {
         let { data, error: selectError } = await supabaseClient.from('leaderboard').select('*').eq('n', agent);
         if (selectError) return;
@@ -758,6 +724,11 @@ function loop(t) {
     if(hp <= 0) {
         active = false;
         sfxHit(); hapticGameOver(); 
+        
+        // SPIEL WIEDER VERSTECKEN, DAMIT MAN IM GAME OVER MENÜ SCROLLEN KANN
+        document.getElementById("game-wrap").style.pointerEvents = "none";
+        document.getElementById("game-wrap").style.visibility = "hidden";
+        
         ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
         
         document.getElementById("scr-end").style.display = "flex";
