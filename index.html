@@ -41,11 +41,10 @@
             #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%); }
         }
 
-        /* SPIEL IST IM MENÜ KOMPLETT UNSICHTBAR/DEAKTIVIERT -> Verhindert Scroll-Bugs! */
         #game-wrap { 
             position: absolute; inset: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden;
-            visibility: hidden; pointer-events: none; /* WICHTIGSTER FIX! */
+            visibility: hidden; pointer-events: none; 
         }
 
         canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; }
@@ -73,16 +72,22 @@
         #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); border: 1px solid rgba(255, 215, 0, 0.4); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        /* SCROLL-FIX: position: fixed erzwingt Scroll-Balken */
+        /* DESIGN-UPDATE: MEHR TRANSPARENZ IM MENÜ! */
         .screen { 
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; 
-            background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: rgba(0,0,0,0.15); /* Viel heller/transparenter! Vorher 0.55 */
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); /* Etwas weniger Blur für mehr Klarheit */
             overflow-y: scroll; -webkit-overflow-scrolling: touch; 
             overscroll-behavior: none; pointer-events: auto;
         }
         
-        .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; padding: 40px 15px 120px 15px; }
-        .screen-inner.start-menu { justify-content: flex-start; }
+        /* DESIGN-UPDATE: PERFEKTE ZENTRIERUNG! */
+        .screen-inner { 
+            width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; /* Zwingt alles in die perfekte Mitte */
+            padding: 40px 15px; 
+        }
 
         header { padding: 0 0 20px 0; text-align: center; width: 100%; }
         .app-title { font-size: clamp(24px, 8vw, 36px); color: var(--gold); text-shadow: 0 0 20px var(--gold); letter-spacing: 2px; animation: blinkGold 2s infinite ease-in-out; }
@@ -120,7 +125,7 @@
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 5px; }
 
-        .legal-box { width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; }
+        .legal-box { width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-top: 10px; }
         #dog-head-icon { font-size: 75px; margin-bottom: 15px; text-shadow: 0 0 15px var(--neon); }
         .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
         .red-neon-text { color: var(--red); text-shadow: 0 0 10px var(--red), 0 0 20px var(--red); }
@@ -168,7 +173,7 @@
     </div>
 
     <div id="scr-start" class="screen" style="display:none;">
-        <div class="screen-inner start-menu">
+        <div class="screen-inner">
             <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
             
             <div class="inner-panel">
@@ -325,7 +330,6 @@ const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 let supabaseClient = null;
 
-// LÄDT INTERNET NUR WENN VORHANDEN! BEHEBT OFFLINE-ABSTURZ!
 function initNetwork() {
     if (navigator.onLine) {
         let script = document.createElement('script');
@@ -458,7 +462,6 @@ function start(m, startLvl) {
 
     updateTheme(mode);
     
-    // MENÜ WEG UND SPIEL SICHTBAR MACHEN!
     document.getElementById("scr-start").style.display = "none";
     document.getElementById("game-wrap").style.visibility = "visible";
     document.getElementById("game-wrap").style.pointerEvents = "auto";
@@ -502,7 +505,7 @@ function launchFireworks() {
 }
 
 async function saveScoreAndRefresh(newScore) {
-    if(!supabaseClient) return;
+    if(!supabaseClient || typeof supabase === 'undefined') return;
     try {
         let { data, error: selectError } = await supabaseClient.from('leaderboard').select('*').eq('n', agent);
         if (selectError) return;
@@ -725,7 +728,6 @@ function loop(t) {
         active = false;
         sfxHit(); hapticGameOver(); 
         
-        // SPIEL WIEDER VERSTECKEN, DAMIT MAN IM GAME OVER MENÜ SCROLLEN KANN
         document.getElementById("game-wrap").style.pointerEvents = "none";
         document.getElementById("game-wrap").style.visibility = "hidden";
         
