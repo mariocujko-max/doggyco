@@ -61,16 +61,28 @@
         #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); border: 1px solid rgba(255, 215, 0, 0.4); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        /* NEU: GAME OVER TEXT STATT SENSENMANN */
+        /* NEU: MEGA ARCADE GAME OVER FLASH */
         #game-over-flash { 
-            position: absolute; inset: 0; z-index: 9999; background: rgba(0,0,0,0.8); 
-            display: none; justify-content: center; align-items: center; 
-            font-size: 45px; font-weight: 900; color: var(--red); 
-            text-shadow: 0 0 20px var(--red), 0 0 40px var(--red); 
-            letter-spacing: 5px; animation: popIn 0.3s ease-out; 
-            font-family: 'Orbitron', sans-serif;
+            position: absolute; inset: 0; z-index: 9999; 
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.85), rgba(0,0,0,0.85) 2px, rgba(255,0,0,0.15) 2px, rgba(255,0,0,0.15) 4px);
+            background-color: rgba(40, 0, 0, 0.8);
+            display: none; flex-direction: column; justify-content: center; align-items: center; 
+            animation: violentShake 0.1s infinite;
         }
-        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .go-text {
+            font-size: 55px; font-weight: 900; color: #fff;
+            text-shadow: 4px 4px 0px var(--neon), -4px -4px 0px var(--red);
+            letter-spacing: 5px; font-family: 'Orbitron', sans-serif; text-align: center;
+        }
+        .go-sub {
+            font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; 
+            font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center;
+        }
+        @keyframes violentShake {
+            0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) }
+            40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) }
+            80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) }
+        }
 
         .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.15); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); overflow-y: scroll; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; }
         
@@ -124,7 +136,10 @@
 <div id="bg-fx"></div>
 <div id="bg-overlay"></div>
 
-<div id="game-over-flash">GAME OVER</div>
+<div id="game-over-flash">
+    <div class="go-text">GAME OVER</div>
+    <div class="go-sub">SYSTEM FAILURE</div>
+</div>
 
 <div id="phone-container">
     
@@ -168,7 +183,6 @@
             
             <div class="inner-panel">
                 <h3>CHOOSE START LEVEL</h3>
-                
                 <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
                         <button class="btn-char" style="border-color:var(--neon); flex:1;" onclick="start('dog', 1)"><span>🐶</span>DOG</button>
@@ -183,7 +197,6 @@
                         <button class="btn-char" style="border-color:var(--lion); flex:1; max-width:48%;" onclick="start('lion', 11)"><span>🦁</span>LION</button>
                     </div>
                 </div>
-
             </div>
 
             <div class="info-panel">
@@ -471,18 +484,18 @@ function getSafeLaneForItems() {
 }
 
 function launchMassiveFireworks() {
-    for(let j=0; j<15; j++) {
+    for(let j=0; j<20; j++) {
         setTimeout(() => {
             let x = Math.random() * W; let y = Math.random() * H;
             let cList = ['#FFD700', '#00f2ff', '#00ff88', '#bc13fe', '#ff3131', '#ffaa00'];
             let col = cList[Math.floor(Math.random()*cList.length)];
-            for(let i=0; i<50; i++) fireworks.push({ x: x, y: y, vx: (Math.random()-0.5)*18, vy: (Math.random()-0.5)*18, life: 1.5 + Math.random(), c: col });
+            for(let i=0; i<60; i++) fireworks.push({ x: x, y: y, vx: (Math.random()-0.5)*20, vy: (Math.random()-0.5)*20, life: 1.5 + Math.random(), c: col });
             sfxStarCollect(); 
-        }, j * 300);
+        }, j * 250);
     }
     setTimeout(() => {
-        addFloat(W/2, H/2, "MISSION", "#FFD700", 40);
-        addFloat(W/2, H/2 + 50, "ACCOMPLISHED!", "#00ff88", 35);
+        addFloat(W/2, H/2, "MISSION", "#FFD700", 45);
+        addFloat(W/2, H/2 + 60, "ACCOMPLISHED!", "#00ff88", 35);
     }, 1000);
 }
 
@@ -513,7 +526,6 @@ function loop(t) {
     const hitTop = H - 150; 
     const hitBottom = H - 50;
 
-    // NEUE GESCHWINDIGKEIT: Steigt von 1.2 (Lvl 1) auf exakt 2.4 (Lvl 12)
     let capLvl = Math.min(level, 12);
     let speedMult = 1.2 + ((capLvl - 1) * (1.2 / 11)); 
     let ptsScaling = speedMult; 
@@ -530,9 +542,7 @@ function loop(t) {
             } else { starTimer = 0.5; }
         }
 
-        // LEVEL UP
         if(timeLeft <= 0) {
-            // ENDE BEI LEVEL 12
             if(level === 12) {
                 missionComplete = true; 
                 let heartBonus = hp * 1000;
@@ -540,7 +550,7 @@ function loop(t) {
                 launchMassiveFireworks();
                 
                 setTimeout(() => {
-                    addFloat(W/2, H/2 + 120, "+" + heartBonus + " HEART BONUS", "#ff3131", 25);
+                    addFloat(W/2, H/2 + 140, "+" + heartBonus + " HEART BONUS", "#ff3131", 25);
                 }, 2500);
 
                 setTimeout(() => {
@@ -558,33 +568,33 @@ function loop(t) {
                     
                     saveScoreAndRefresh(Math.floor(score));
                 }, 6000); 
-                return;
-            }
-
-            level++; 
-            timeLeft = 30; 
-            energy = Math.min(100, energy + (25 * speedMult));
-            
-            const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'lion'];
-            let expectedModeIndex = Math.floor((level - 1) / 2) % 6;
-            let expectedMode = modeOrder[expectedModeIndex];
-            
-            let pop = document.getElementById("lvl-up-popup");
-
-            if(mode !== expectedMode) {
-                mode = expectedMode; updateTheme(mode); 
-                for(let j=0; j<4; j++) { setTimeout(() => { let x = Math.random() * W; let y = Math.random() * (H/2) + 50; for(let i=0; i<30; i++) fireworks.push({ x: x, y: y, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.5, c: '#00f2ff' }); }, j * 300); }
-                pop.innerHTML = "LEVEL " + level + "<br><span style='font-size:20px; color:#fff'>" + mode.toUpperCase() + " UNLOCKED!</span>";
+                // DAS RETURN WURDE HIER GELÖSCHT! (Der Code läuft nun weiter und zeichnet das Feuerwerk)
             } else {
-                pop.innerHTML = "NEXT LEVEL " + level;
-            }
+                level++; 
+                timeLeft = 30; 
+                energy = Math.min(100, energy + (25 * speedMult));
+                
+                const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'lion'];
+                let expectedModeIndex = Math.floor((level - 1) / 2) % 6;
+                let expectedMode = modeOrder[expectedModeIndex];
+                
+                let pop = document.getElementById("lvl-up-popup");
 
-            pop.classList.add("show");
-            sfxLevelUp(); 
-            setTimeout(() => pop.classList.remove("show"), 2000);
+                if(mode !== expectedMode) {
+                    mode = expectedMode; updateTheme(mode); 
+                    for(let j=0; j<4; j++) { setTimeout(() => { let x = Math.random() * W; let y = Math.random() * (H/2) + 50; for(let i=0; i<30; i++) fireworks.push({ x: x, y: y, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.5, c: '#00f2ff' }); }, j * 300); }
+                    pop.innerHTML = "LEVEL " + level + "<br><span style='font-size:20px; color:#fff'>" + mode.toUpperCase() + " UNLOCKED!</span>";
+                } else {
+                    pop.innerHTML = "NEXT LEVEL " + level;
+                }
+
+                pop.classList.add("show");
+                sfxLevelUp(); 
+                setTimeout(() => pop.classList.remove("show"), 2000);
+            }
         }
 
-        if(energy <= 0) {
+        if(energy <= 0 && !missionComplete) {
             hp--;
             if(hp > 0) {
                 energy = 100; charShake = 20; sfxHit(); hapticDamage(); 
@@ -595,7 +605,7 @@ function loop(t) {
 
     document.getElementById("hp-txt").innerText = "❤️".repeat(Math.max(0, hp));
     document.getElementById("score-txt").innerText = Math.floor(score) + " PTS";
-    document.getElementById("time-txt").innerText = missionComplete ? "DONE" : Math.ceil(timeLeft) + "s";
+    document.getElementById("time-txt").innerText = missionComplete ? "WIN" : Math.ceil(timeLeft) + "s";
     document.getElementById("lvl-txt").innerText = level;
     document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
 
@@ -719,6 +729,7 @@ function loop(t) {
         if(f.o <= 0) floaters.splice(i, 1);
     }
     
+    // FEUERWERK WIRD JETZT IMMER GEZEICHNET!
     for(let i=fireworks.length-1; i>=0; i--) {
         let p = fireworks[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life -= dt;
         ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.c;
@@ -727,7 +738,7 @@ function loop(t) {
     }
     ctx.globalAlpha = 1;
 
-    // NEU: KLASSISCHES GAME OVER OHNE SENSENMANN
+    // GAME OVER LOGIK
     if(hp <= 0 && !missionComplete) {
         active = false; 
         sfxHit(); hapticGameOver(); 
@@ -754,8 +765,9 @@ function loop(t) {
             saveScoreAndRefresh(Math.floor(score));
         }, 1500); 
         
-        return;
+        return; // HIER darf der Return bleiben, weil das Spiel wirklich vorbei ist!
     }
+    
     requestAnimationFrame(loop);
 }
 
