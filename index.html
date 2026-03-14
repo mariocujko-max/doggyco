@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DOGGYCO MISSION - V-ULTRA PERFECT</title>
+    <title>DOGGYCO MISSION</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐶</text></svg>">
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
+    
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; 
@@ -49,7 +51,20 @@
 
         canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; }
 
-        #hud { position: absolute; top: env(safe-area-inset-top, 15px); width: 100%; z-index: 200; pointer-events: none; padding-top: 15px; }
+        #hud { position: absolute; top: env(safe-area-inset-top, 10px); width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; }
+        
+        /* NEU: MISSION TITEL TEXT */
+        #mission-title {
+            text-align: center; font-size: 16px; font-weight: 900; letter-spacing: 2px;
+            text-transform: uppercase; margin-bottom: 8px; color: var(--neon);
+            text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon);
+            animation: pulseNeon 1.5s infinite alternate;
+        }
+        @keyframes pulseNeon {
+            0% { opacity: 0.7; transform: scale(0.98); }
+            100% { opacity: 1; transform: scale(1.02); }
+        }
+
         #energy-box { width: 85%; height: 14px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 10px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
         
@@ -78,16 +93,19 @@
         }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
+        /* SCROLL-FEHLER BEHOBEN: touch-action: auto zwingt das Handy, scrollen immer zu erlauben! */
         .screen { 
             position: absolute; inset: 0; z-index: 1000; 
             background: rgba(0,0,0,0.55); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; 
+            overflow-y: auto; -webkit-overflow-scrolling: touch; 
+            touch-action: auto; /* DIES BEHEBT DAS FESTSTECKEN BEIM SCROLLEN */
+            pointer-events: auto;
         }
         
         .screen-inner {
             width: 100%; min-height: 100%; margin: 0 auto;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px 15px 100px 15px; 
+            padding: 40px 15px 120px 15px; /* Noch mehr Platz unten, damit nichts abgeschnitten wird */
         }
 
         .screen-inner.start-menu { justify-content: flex-start; }
@@ -156,6 +174,8 @@
     
     <div id="game-wrap">
         <div id="hud">
+            <div id="mission-title">DOG MISSION</div>
+            
             <div id="energy-box"><div id="energy-fill"></div></div>
             <div id="stats-bar">
                 <div class="stat" style="background:var(--neon); color:#000; padding:2px 8px; border-radius:5px; font-weight:900; font-size:16px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
@@ -281,7 +301,6 @@ function forceAudioStart() {
 document.body.addEventListener('click', forceAudioStart, { once: true });
 document.body.addEventListener('touchstart', forceAudioStart, { once: true });
 
-// --- VERSTÄRKTE VIBRATIONEN FÜR XIAOMI & CO ---
 function triggerVibration(pattern) {
     if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
 }
@@ -346,14 +365,20 @@ const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 let supabaseClient = null;
 
-try { supabaseClient = supabase.createClient(SURL, SKEY); fetchRanks(); } catch(e) {}
+// SICHERHEITS-CHECK FÜR OFFLINE-MODUS!
+setTimeout(() => {
+    try { 
+        if(typeof supabase !== 'undefined') {
+            supabaseClient = supabase.createClient(SURL, SKEY); 
+            fetchRanks(); 
+        } else {
+            document.getElementById("leaderboard").innerHTML = "OFFLINE MODE - Connect to view Ranks.";
+        }
+    } catch(e) {}
+}, 500);
 
 async function fetchRanks() {
-    if(!supabaseClient) {
-        document.getElementById("leaderboard").innerHTML = "Mainframe offline. Retrying...";
-        setTimeout(fetchRanks, 5000);
-        return;
-    }
+    if(!supabaseClient || typeof supabase === 'undefined') return;
     try {
         let { data, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
         if (error) throw error; 
@@ -432,8 +457,16 @@ function authAgent() {
 
 function updateTheme(newMode) {
     const colors = { 'dog':'#00f2ff', 'cat':'#bc13fe', 'rabbit':'#ff8c00', 'fox':'#ff4500', 'panda':'#ffffff' };
+    const titles = { 'dog':'DOG MISSION', 'cat':'CAT LAND', 'rabbit':'RABBIT WORLD', 'fox':'FOX TASK', 'panda':'PANDA UNIVERSE' };
+    
     let col = colors[newMode];
     document.documentElement.style.setProperty('--neon', col);
+    
+    // Neuer Mission Titel setzen und Farbe anpassen
+    let mTitle = document.getElementById("mission-title");
+    mTitle.innerText = titles[newMode];
+    mTitle.style.color = col;
+    mTitle.style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
     
     document.querySelectorAll('.app-title').forEach(el => {
         el.style.color = col;
@@ -503,7 +536,7 @@ function launchFireworks() {
 }
 
 async function saveScoreAndRefresh(newScore) {
-    if(!supabaseClient) return;
+    if(!supabaseClient || typeof supabase === 'undefined') return;
     try {
         let { data, error: selectError } = await supabaseClient.from('leaderboard').select('*').eq('n', agent);
         if (selectError) return;
