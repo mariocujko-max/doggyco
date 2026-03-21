@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DOGGYCO MISSION - THE FINAL CUT</title>
+    <title>DOGGYCO MISSION</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐶</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     
     <style>
         :root { 
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; 
-            --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; --wood: #8b5a2b;
+            --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; 
             --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff;
-            --lion: #ffaa00;
+            --donkey: #a9a9a9; /* NEU: ESEL FARBE */
             --glass: rgba(255, 255, 255, 0.15); 
         }
         
@@ -40,12 +40,7 @@
 
         #hud { position: absolute; top: env(safe-area-inset-top, 10px); width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; }
         
-        #mission-title {
-            text-align: center; font-size: 22px; font-weight: 900; letter-spacing: 2px;
-            text-transform: uppercase; margin-bottom: 8px; color: var(--neon);
-            text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon);
-            animation: pulseNeon 1.5s infinite alternate;
-        }
+        #mission-title { text-align: center; font-size: 22px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); animation: pulseNeon 1.5s infinite alternate; }
         @keyframes pulseNeon { 0% { opacity: 0.7; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1.02); } }
 
         #energy-box { width: 85%; height: 14px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 10px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
@@ -61,31 +56,12 @@
         #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); border: 1px solid rgba(255, 215, 0, 0.4); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        /* NEU: MEGA ARCADE GAME OVER FLASH */
-        #game-over-flash { 
-            position: absolute; inset: 0; z-index: 9999; 
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.85), rgba(0,0,0,0.85) 2px, rgba(255,0,0,0.15) 2px, rgba(255,0,0,0.15) 4px);
-            background-color: rgba(40, 0, 0, 0.8);
-            display: none; flex-direction: column; justify-content: center; align-items: center; 
-            animation: violentShake 0.1s infinite;
-        }
-        .go-text {
-            font-size: 55px; font-weight: 900; color: #fff;
-            text-shadow: 4px 4px 0px var(--neon), -4px -4px 0px var(--red);
-            letter-spacing: 5px; font-family: 'Orbitron', sans-serif; text-align: center;
-        }
-        .go-sub {
-            font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; 
-            font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center;
-        }
-        @keyframes violentShake {
-            0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) }
-            40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) }
-            80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) }
-        }
+        #game-over-flash { position: absolute; inset: 0; z-index: 9999; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.85), rgba(0,0,0,0.85) 2px, rgba(255,0,0,0.15) 2px, rgba(255,0,0,0.15) 4px); background-color: rgba(40, 0, 0, 0.8); display: none; flex-direction: column; justify-content: center; align-items: center; animation: violentShake 0.1s infinite; }
+        .go-text { font-size: 55px; font-weight: 900; color: #fff; text-shadow: 4px 4px 0px var(--neon), -4px -4px 0px var(--red); letter-spacing: 5px; font-family: 'Orbitron', sans-serif; text-align: center; }
+        .go-sub { font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center; }
+        @keyframes violentShake { 0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) } 40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) } 80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) } }
 
         .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.15); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); overflow-y: scroll; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; }
-        
         .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 15px 180px 15px; }
 
         #scr-name .screen-inner { justify-content: center; }
@@ -110,8 +86,12 @@
         .info-panel { width: 100%; background: var(--glass); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); }
         .info-panel h3 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 16px; text-align: center; text-transform: uppercase; }
         
-        .rank-row { display: flex; justify-content: space-between; padding: 10px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; }
-        .rank-gold { color: var(--gold); font-size: 16px; text-shadow: 0 0 10px var(--gold); }
+        /* NEU: RANGLISTE MAX HOEHE + GOLD/SILBER/BRONZE */
+        #leaderboard { max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; }
+        .rank-gold { color: var(--gold); font-size: 16px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
+        .rank-silver { color: var(--silver); font-size: 15px; text-shadow: 0 0 8px var(--silver); }
+        .rank-bronze { color: var(--bronze); font-size: 14px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -194,7 +174,7 @@
                         <button class="btn-char" style="border-color:var(--panda); flex:1; max-width:48%;" onclick="start('panda', 9)"><span>🐼</span>PANDA</button>
                     </div>
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
-                        <button class="btn-char" style="border-color:var(--lion); flex:1; max-width:48%;" onclick="start('lion', 11)"><span>🦁</span>LION</button>
+                        <button class="btn-char" style="border-color:var(--donkey); flex:1; max-width:48%;" onclick="start('donkey', 11)"><span>🫏</span>DONKEY</button>
                     </div>
                 </div>
             </div>
@@ -229,16 +209,6 @@
                     <div style="color:#000; font-family:'Orbitron'; font-size:11px; font-weight:900; margin-top:8px;">BTC WALLET</div>
                 </div>
                 <p style="font-size:10px; color:var(--gold); text-align:center; word-break:break-all; font-family:monospace; margin-top:5px;">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
-                <button class="btn-sup btn-copy" onclick="copyBTC(this)">COPY ADDRESS</button>
-            </div>
-
-            <div class="legal-box"> 
-                <h4 style="color:#aaa; text-align:center; margin-bottom:5px; font-family:'Orbitron'; letter-spacing:1px;">⚖️ LEGAL NOTICE</h4>
-                <p class="text-sm" style="text-align:center; color:#ddd; font-size:10px;">
-                    Private, non-commercial project. Donations are voluntary gifts.<br>
-                    © 2026 DOGGYCO GLOBAL ACADEMY. All Rights Reserved.<br>
-                    Design by M. Čujko
-                </p>
             </div>
         </div>
     </div>
@@ -261,24 +231,32 @@ document.querySelectorAll('audio').forEach(a => a.volume = 0.15);
 let bgMusic = document.getElementById("snd-action");
 bgMusic.volume = 0.15; 
 
+const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
+const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
+let supabaseClient = null;
+
+// UPDATE: EXTREMER OFFLINE FIX!
+// Supabase wird jetzt 1 Sekunde verzögert geladen. Blockiert das Spiel nie.
 window.onload = function() {
     let savedName = localStorage.getItem("doggycoAgent");
     if(savedName) { document.getElementById("pName").value = savedName; }
 
-    if (navigator.onLine) {
-        let script = document.createElement('script');
-        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-        script.onload = () => {
-            if(typeof supabase !== 'undefined') {
-                supabaseClient = supabase.createClient(SURL, SKEY);
-                fetchRanks();
-            }
-        };
-        script.onerror = () => { document.getElementById("leaderboard").innerHTML = "OFFLINE MODE"; };
-        document.head.appendChild(script);
-    } else {
-        document.getElementById("leaderboard").innerHTML = "OFFLINE MODE";
-    }
+    setTimeout(() => {
+        if (navigator.onLine) {
+            let script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+            script.onload = () => {
+                if(typeof supabase !== 'undefined') {
+                    supabaseClient = supabase.createClient(SURL, SKEY);
+                    fetchRanks();
+                }
+            };
+            script.onerror = () => { document.getElementById("leaderboard").innerHTML = "OFFLINE MODE"; };
+            document.head.appendChild(script);
+        } else {
+            document.getElementById("leaderboard").innerHTML = "OFFLINE MODE";
+        }
+    }, 1000);
 }
 
 let systemActive = false;
@@ -291,6 +269,7 @@ function forceAudioStart() {
 document.body.addEventListener('click', forceAudioStart, { once: true });
 document.body.addEventListener('touchstart', forceAudioStart, { once: true });
 
+// UPDATE: VIBRATION NUR NOCH BEI SCHADEN! (Nichts anderes mehr)
 function triggerVibration(pattern) {
     if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
 }
@@ -324,6 +303,23 @@ function playTone(freq, type, duration, vol=0.1) {
     } catch(e) {}
 }
 
+// NEU: UFO SCI-FI SOUND
+function sfxUfo() {
+    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
+    try {
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 1);
+        osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 2);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 2);
+    } catch(e){}
+}
+
 function playMenuNote() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     let freq = menuNotes[menuStep % menuNotes.length];
@@ -332,34 +328,28 @@ function playMenuNote() {
     menuMusicTimer = setTimeout(playMenuNote, 250); 
 }
 
-function startMenuMusic() {
-    if(!systemActive) return;
-    initSynth();
-    if(!menuMusicTimer) { menuStep = 0; playMenuNote(); }
-}
-
-function stopMenuMusic() {
-    if(menuMusicTimer) { clearTimeout(menuMusicTimer); menuMusicTimer = null; }
-}
+function startMenuMusic() { if(!systemActive) return; initSynth(); if(!menuMusicTimer) { menuStep = 0; playMenuNote(); } }
+function stopMenuMusic() { if(menuMusicTimer) { clearTimeout(menuMusicTimer); menuMusicTimer = null; } }
 
 function sfxCollect() { playTone(600, 'sine', 0.1, 0.1); setTimeout(() => playTone(1200, 'sine', 0.15, 0.1), 80); }
 function sfxStarCollect() { [800, 1000, 1200].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.1, 0.1), i*50)); } 
 function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.2); setTimeout(() => playTone(100, 'square', 0.4, 0.2), 100); }
 function sfxLevelUp() { [400, 500, 600, 800].forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.2, 0.1), i*100)); }
 
-const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
-const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
-let supabaseClient = null;
-
+// UPDATE: TOP 10 RANGLISTE + FARBEN
 async function fetchRanks() {
     if(!supabaseClient) return;
     try {
-        let { data, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(5);
+        // limit(10) holt jetzt die besten 10!
+        let { data, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(10);
         if (error) throw error; 
 
         if(data && data.length > 0) {
             document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
-                let rC = i === 0 ? "rank-gold" : "rank-white";
+                let rC = "rank-white"; // Standardfarbe ab Platz 4
+                if(i === 0) rC = "rank-gold";
+                else if(i === 1) rC = "rank-silver";
+                else if(i === 2) rC = "rank-bronze";
                 return `<div class="rank-row ${rC}"><span>#${i+1} ${x.n}</span><span>${x.s} PTS</span></div>`;
             }).join('');
         } else {
@@ -423,9 +413,10 @@ function authAgent() {
     }
 }
 
+// UPDATE: ESEL FARBEN & THEMA
 function updateTheme(newMode) {
-    const colors = { 'dog':'#00f2ff', 'cat':'#bc13fe', 'rabbit':'#ff8c00', 'fox':'#ff4500', 'panda':'#ffffff', 'lion':'#ffaa00' };
-    const titles = { 'dog':'DOG MISSION', 'cat':'CAT LAND', 'rabbit':'RABBIT WORLD', 'fox':'FOX TASK', 'panda':'PANDA UNIVERSE', 'lion':'LION AREA' };
+    const colors = { 'dog':'#00f2ff', 'cat':'#bc13fe', 'rabbit':'#ff8c00', 'fox':'#ff4500', 'panda':'#ffffff', 'donkey':'#a9a9a9' };
+    const titles = { 'dog':'DOG MISSION', 'cat':'CAT LAND', 'rabbit':'RABBIT WORLD', 'fox':'FOX TASK', 'panda':'PANDA UNIVERSE', 'donkey':'DONKEY AREA' };
     
     let col = colors[newMode];
     document.documentElement.style.setProperty('--neon', col);
@@ -487,7 +478,7 @@ function launchMassiveFireworks() {
     for(let j=0; j<20; j++) {
         setTimeout(() => {
             let x = Math.random() * W; let y = Math.random() * H;
-            let cList = ['#FFD700', '#00f2ff', '#00ff88', '#bc13fe', '#ff3131', '#ffaa00'];
+            let cList = ['#FFD700', '#00f2ff', '#00ff88', '#bc13fe', '#ff3131', '#a9a9a9'];
             let col = cList[Math.floor(Math.random()*cList.length)];
             for(let i=0; i<60; i++) fireworks.push({ x: x, y: y, vx: (Math.random()-0.5)*20, vy: (Math.random()-0.5)*20, life: 1.5 + Math.random(), c: col });
             sfxStarCollect(); 
@@ -500,7 +491,7 @@ function launchMassiveFireworks() {
 }
 
 async function saveScoreAndRefresh(newScore) {
-    if(!supabaseClient || typeof supabase === 'undefined') return;
+    if(!supabaseClient) return;
     try {
         let { data, error: selectError } = await supabaseClient.from('leaderboard').select('*').eq('n', agent);
         if (selectError) return;
@@ -538,6 +529,7 @@ function loop(t) {
             let safeL = getSafeLaneForItems();
             if(safeL !== -1) {
                 ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false });
+                sfxUfo(); // UPDATE: SOUND ABSPIELEN WENN UFO KOMMT!
                 starTimer = 20 + Math.random() * 5; 
             } else { starTimer = 0.5; }
         }
@@ -549,9 +541,7 @@ function loop(t) {
                 score += heartBonus;
                 launchMassiveFireworks();
                 
-                setTimeout(() => {
-                    addFloat(W/2, H/2 + 140, "+" + heartBonus + " HEART BONUS", "#ff3131", 25);
-                }, 2500);
+                setTimeout(() => { addFloat(W/2, H/2 + 140, "+" + heartBonus + " HEART BONUS", "#ff3131", 25); }, 2500);
 
                 setTimeout(() => {
                     active = false;
@@ -568,13 +558,12 @@ function loop(t) {
                     
                     saveScoreAndRefresh(Math.floor(score));
                 }, 6000); 
-                // DAS RETURN WURDE HIER GELÖSCHT! (Der Code läuft nun weiter und zeichnet das Feuerwerk)
             } else {
                 level++; 
                 timeLeft = 30; 
                 energy = Math.min(100, energy + (25 * speedMult));
                 
-                const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'lion'];
+                const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'donkey'];
                 let expectedModeIndex = Math.floor((level - 1) / 2) % 6;
                 let expectedMode = modeOrder[expectedModeIndex];
                 
@@ -629,8 +618,26 @@ function loop(t) {
     for(let i = ufos.length - 1; i >= 0; i--) {
         let u = ufos[i];
         if(!missionComplete) u.x -= u.s * dt;
+        
+        // UPDATE: UFO TRAKTOR-STRAHL & BLINKLICHT
+        // 1. Der grüne Strahl nach unten
+        ctx.globalAlpha = 0.3 + Math.sin(t/150)*0.1;
+        ctx.fillStyle = "#00ff88";
+        ctx.beginPath();
+        ctx.moveTo(u.x - 15, u.y + 10);
+        ctx.lineTo(u.x + 15, u.y + 10);
+        ctx.lineTo(u.x + 50, u.y + H);
+        ctx.lineTo(u.x - 50, u.y + H);
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+
+        // 2. Das UFO selbst
         ctx.font = "45px Arial"; ctx.textAlign = "center";
         ctx.fillText('🛸', u.x, u.y + Math.sin(t / 150) * 10);
+
+        // 3. Das rot/blau blinkende Warnlicht oben drauf
+        ctx.fillStyle = (Math.floor(t / 150) % 2 === 0) ? "#ff3131" : "#00f2ff";
+        ctx.beginPath(); ctx.arc(u.x, u.y - 15, 6, 0, Math.PI*2); ctx.fill();
 
         let dropX = lanes[u.targetLane];
         if(u.x <= dropX && !u.dropped && !missionComplete) {
@@ -652,15 +659,16 @@ function loop(t) {
         } else if (s.y > H + 50) { fallingStars.splice(i, 1); }
     }
 
+    // UPDATE: ESEL ITEMS & EMOJI
     const items = { 
         'dog': [{i:'🦴',p:10}, {i:'🍪',p:20}, {i:'🥩',p:30}],
         'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
         'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}],
         'fox': [{i:'🥚',p:10}, {i:'🍗',p:20}, {i:'🍖',p:30}],
         'panda': [{i:'🎋',p:10}, {i:'🍃',p:20}, {i:'🍉',p:30}],
-        'lion': [{i:'🥩',p:10}, {i:'🍖',p:20}, {i:'🦓',p:30}]
+        'donkey': [{i:'🌾',p:10}, {i:'🌽',p:20}, {i:'🍏',p:30}]
     };
-    const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'lion':'🦁' }[mode];
+    const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'donkey':'🫏' }[mode];
 
     if(entities.length < 2 && !missionComplete) {
         spawnDelay -= dt;
@@ -729,7 +737,6 @@ function loop(t) {
         if(f.o <= 0) floaters.splice(i, 1);
     }
     
-    // FEUERWERK WIRD JETZT IMMER GEZEICHNET!
     for(let i=fireworks.length-1; i>=0; i--) {
         let p = fireworks[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life -= dt;
         ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.c;
@@ -738,7 +745,6 @@ function loop(t) {
     }
     ctx.globalAlpha = 1;
 
-    // GAME OVER LOGIK
     if(hp <= 0 && !missionComplete) {
         active = false; 
         sfxHit(); hapticGameOver(); 
@@ -765,19 +771,13 @@ function loop(t) {
             saveScoreAndRefresh(Math.floor(score));
         }, 1500); 
         
-        return; // HIER darf der Return bleiben, weil das Spiel wirklich vorbei ist!
+        return; 
     }
     
     requestAnimationFrame(loop);
 }
 
 function addFloat(x, y, txt, c, s) { floaters.push({ x, y, txt, c, s, o: 1 }); }
-
-function copyBTC(btn) { 
-    navigator.clipboard.writeText("bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed"); 
-    let oldTxt = btn.innerText; btn.innerHTML = "✅";
-    setTimeout(() => { btn.innerText = oldTxt; }, 2000);
-}
 </script>
 </body>
 </html>
