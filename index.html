@@ -12,7 +12,7 @@
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; 
             --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; 
             --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff;
-            --donkey: #a9a9a9; /* NEUE FARBE FÜR DEN ESEL */
+            --donkey: #a9a9a9;
             --glass: rgba(255, 255, 255, 0.15); 
         }
         
@@ -86,7 +86,6 @@
         .info-panel { width: 100%; background: var(--glass); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); }
         .info-panel h3 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 16px; text-align: center; text-transform: uppercase; }
         
-        /* UPDATE: RANGLISTE MAX HOEHE + GOLD/SILBER/BRONZE */
         #leaderboard { max-height: 250px; overflow-y: auto; padding-right: 5px; }
         .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; }
         .rank-gold { color: var(--gold); font-size: 16px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
@@ -174,7 +173,7 @@
                         <button class="btn-char" style="border-color:var(--panda); flex:1; max-width:48%;" onclick="start('panda', 9)"><span>🐼</span>PANDA</button>
                     </div>
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
-                        <button class="btn-char" style="border-color:var(--donkey); flex:1; max-width:48%;" onclick="start('donkey', 11)"><span>🫏</span>DONKEY</button>
+                        <button class="btn-char" style="border-color:var(--donkey); flex:1; max-width:48%;" onclick="start('donkey', 11)"><span>🐴</span>DONKEY</button>
                     </div>
                 </div>
             </div>
@@ -241,8 +240,6 @@ document.querySelectorAll('audio').forEach(a => a.volume = 0.15);
 let bgMusic = document.getElementById("snd-action");
 bgMusic.volume = 0.15; 
 
-// UPDATE: EXTREMER OFFLINE FIX!
-// Supabase wird jetzt erst 1 Sekunde nach App-Start geladen. Spielt immer offline weiter.
 window.onload = function() {
     let savedName = localStorage.getItem("doggycoAgent");
     if(savedName) { document.getElementById("pName").value = savedName; }
@@ -275,7 +272,6 @@ function forceAudioStart() {
 document.body.addEventListener('click', forceAudioStart, { once: true });
 document.body.addEventListener('touchstart', forceAudioStart, { once: true });
 
-// UPDATE: VIBRATION NUR NOCH BEI SCHADEN! (Nichts anderes mehr)
 function triggerVibration(pattern) {
     if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
 }
@@ -309,7 +305,6 @@ function playTone(freq, type, duration, vol=0.1) {
     } catch(e) {}
 }
 
-// NEU: UFO SCI-FI SOUND
 function sfxUfo() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -346,17 +341,15 @@ const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
 let supabaseClient = null;
 
-// UPDATE: TOP 10 RANGLISTE + FARBEN
 async function fetchRanks() {
     if(!supabaseClient) return;
     try {
-        // limit(10) holt jetzt die besten 10!
         let { data, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(10);
         if (error) throw error; 
 
         if(data && data.length > 0) {
             document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
-                let rC = "rank-white"; // Standardfarbe ab Platz 4
+                let rC = "rank-white"; 
                 if(i === 0) rC = "rank-gold";
                 else if(i === 1) rC = "rank-silver";
                 else if(i === 2) rC = "rank-bronze";
@@ -423,7 +416,6 @@ function authAgent() {
     }
 }
 
-// UPDATE: ESEL FARBEN & THEMA
 function updateTheme(newMode) {
     const colors = { 'dog':'#00f2ff', 'cat':'#bc13fe', 'rabbit':'#ff8c00', 'fox':'#ff4500', 'panda':'#ffffff', 'donkey':'#a9a9a9' };
     const titles = { 'dog':'DOG MISSION', 'cat':'CAT LAND', 'rabbit':'RABBIT WORLD', 'fox':'FOX TASK', 'panda':'PANDA UNIVERSE', 'donkey':'DONKEY AREA' };
@@ -539,7 +531,7 @@ function loop(t) {
             let safeL = getSafeLaneForItems();
             if(safeL !== -1) {
                 ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false });
-                sfxUfo(); // UPDATE: SOUND ABSPIELEN WENN UFO KOMMT!
+                sfxUfo(); 
                 starTimer = 20 + Math.random() * 5; 
             } else { starTimer = 0.5; }
         }
@@ -629,8 +621,6 @@ function loop(t) {
         let u = ufos[i];
         if(!missionComplete) u.x -= u.s * dt;
         
-        // UPDATE: UFO TRAKTOR-STRAHL & BLINKLICHT
-        // 1. Der grüne Strahl nach unten
         ctx.globalAlpha = 0.3 + Math.sin(t/150)*0.1;
         ctx.fillStyle = "#00ff88";
         ctx.beginPath();
@@ -641,13 +631,19 @@ function loop(t) {
         ctx.fill();
         ctx.globalAlpha = 1.0;
 
-        // 2. Das UFO selbst
+        // UPDATE: GANZES UFO BLINKT UND PULSIERT
+        ctx.save();
         ctx.font = "45px Arial"; ctx.textAlign = "center";
+        
+        if (Math.floor(t / 150) % 2 === 0) {
+            ctx.shadowColor = "#ff3131"; ctx.shadowBlur = 25;
+        } else {
+            ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 25;
+        }
+        
+        ctx.globalAlpha = (Math.floor(t / 75) % 2 === 0) ? 0.8 : 1.0; 
         ctx.fillText('🛸', u.x, u.y + Math.sin(t / 150) * 10);
-
-        // 3. Das rot/blau blinkende Warnlicht oben drauf
-        ctx.fillStyle = (Math.floor(t / 150) % 2 === 0) ? "#ff3131" : "#00f2ff";
-        ctx.beginPath(); ctx.arc(u.x, u.y - 15, 6, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
 
         let dropX = lanes[u.targetLane];
         if(u.x <= dropX && !u.dropped && !missionComplete) {
@@ -669,16 +665,16 @@ function loop(t) {
         } else if (s.y > H + 50) { fallingStars.splice(i, 1); }
     }
 
-    // UPDATE: ESEL ITEMS & EMOJI
+    // UPDATE: ESEL = PFERDEKOPF UND SORTIERTES FUTTER
     const items = { 
         'dog': [{i:'🦴',p:10}, {i:'🍪',p:20}, {i:'🥩',p:30}],
         'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
         'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}],
         'fox': [{i:'🥚',p:10}, {i:'🍗',p:20}, {i:'🍖',p:30}],
         'panda': [{i:'🎋',p:10}, {i:'🍃',p:20}, {i:'🍉',p:30}],
-        'donkey': [{i:'🥕',p:10}, {i:'🍖',p:20}, {i:'🌾',p:30}]
+        'donkey': [{i:'🥕',p:10}, {i:'🍏',p:20}, {i:'🌾',p:30}] 
     };
-    const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'donkey':'🫏' }[mode];
+    const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'donkey':'🐴' }[mode];
 
     if(entities.length < 2 && !missionComplete) {
         spawnDelay -= dt;
