@@ -12,7 +12,7 @@
             --neon: #00f2ff; --green: #00ff88; --red: #ff3131; 
             --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; 
             --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff;
-            --unicorn: #ff00ff; /* NEU: MAGISCHES EINHORN PINK */
+            --unicorn: #ff00ff;
             --glass: rgba(255, 255, 255, 0.15); 
         }
         
@@ -49,8 +49,9 @@
         #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); }
         .stat { font-weight: 900; font-size: 14px; text-shadow: 1px 1px 3px #000; }
 
-        #controls { position: absolute; bottom: env(safe-area-inset-bottom, 15px); left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; z-index: 300; pointer-events: none; }
-        .arrow { width: 80px; height: 80px; background: transparent; border: none; color: rgba(255, 255, 255, 0.5); font-size: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none; }
+        /* UPDATE: PFEILTASTEN HITBOX VERGRÖSSERT AUF 120px */
+        #controls { position: absolute; bottom: env(safe-area-inset-bottom, 15px); left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 10px; z-index: 300; pointer-events: none; }
+        .arrow { width: 120px; height: 120px; background: transparent; border: none; color: rgba(255, 255, 255, 0.5); font-size: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none; }
         .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); }
 
         #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); border: 1px solid rgba(255, 215, 0, 0.4); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
@@ -97,7 +98,7 @@
         .btn-sup { padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
         .bg-tk { background: linear-gradient(45deg, #000, #ff0050); } 
         .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); }
-        .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; box-shadow: 0 4px 0 var(--gold); }
+        .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; box-shadow: 0 4px 0 var(--gold); transition: 0.2s; }
         .btn-sup:active, .btn-copy:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.5); }
         
         .wallet-box { background: rgba(255,255,255,0.9); padding: 10px; border-radius: 15px; text-align: center; margin: 15px auto; width: 130px; }
@@ -208,6 +209,7 @@
                     <div style="color:#000; font-family:'Orbitron'; font-size:11px; font-weight:900; margin-top:8px;">BTC WALLET</div>
                 </div>
                 <p style="font-size:10px; color:var(--gold); text-align:center; word-break:break-all; font-family:monospace; margin-top:5px;">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
+                <button class="btn-sup btn-copy" onclick="copyBTC(this)">COPY ADDRESS</button>
             </div>
 
             <div class="legal-box"> 
@@ -271,12 +273,14 @@ function forceAudioStart() {
 document.body.addEventListener('click', forceAudioStart, { once: true });
 document.body.addEventListener('touchstart', forceAudioStart, { once: true });
 
+// UPDATE: VIBRATION VERBESSERT! (Pfeile spürbar, negativ stärker)
 function triggerVibration(pattern) {
     if ("vibrate" in navigator) { try { navigator.vibrate(pattern); } catch(e) {} }
 }
-function hapticSpiderHit() { triggerVibration([60, 50, 60]); } 
-function hapticDamage() { triggerVibration([80, 40, 80, 40, 80]); } 
-function hapticGameOver() { triggerVibration([150, 80, 150, 80, 400]); } 
+function hapticMove() { triggerVibration(40); } 
+function hapticSpiderHit() { triggerVibration([100, 50, 100]); } 
+function hapticDamage() { triggerVibration([150, 50, 150, 50, 150]); } 
+function hapticGameOver() { triggerVibration([300, 100, 300, 100, 600]); } 
 
 let audioCtx = null;
 let menuMusicTimer = null;
@@ -390,8 +394,10 @@ function initBackgroundGraphics() {
     opponents = []; fallingStars = []; ufos = [];
 }
 
+// UPDATE: HAPTIC MOVE BEI KLICK HINZUGEFÜGT
 function triggerMove(dir, btnId) {
     if(!active || missionComplete) return;
+    hapticMove(); 
     move(dir);
     let btn = document.getElementById(btnId);
     if(btn) { btn.classList.add("glow"); setTimeout(() => btn.classList.remove("glow"), 150); }
@@ -451,7 +457,6 @@ function start(m, startLvl) {
     
     stopMenuMusic(); 
     
-    // UPDATE: SPINNEN STARTEN EXAKT GEGENGESETZT UND WERDEN NIE RESETTET
     permSpiders = [ { lane: 0, y: 60, dy: 1, hit: false }, { lane: 4, y: H-120, dy: -1, hit: false } ];
 
     active = true; lastT = 0; 
@@ -487,10 +492,6 @@ function launchMassiveFireworks() {
             sfxStarCollect(); 
         }, j * 250);
     }
-    setTimeout(() => {
-        addFloat(W/2, H/2, "MISSION", "#FFD700", 45);
-        addFloat(W/2, H/2 + 60, "ACCOMPLISHED!", "#00ff88", 35);
-    }, 1000);
 }
 
 async function saveScoreAndRefresh(newScore) {
@@ -540,11 +541,29 @@ function loop(t) {
         if(timeLeft <= 0) {
             if(level === 12) {
                 missionComplete = true; 
-                let heartBonus = hp * 1000;
-                score += heartBonus;
                 launchMassiveFireworks();
                 
-                setTimeout(() => { addFloat(W/2, H/2 + 140, "+" + heartBonus + " HEART BONUS", "#ff3131", 25); }, 2500);
+                setTimeout(() => {
+                    addFloat(W/2, H/2, "MISSION", "#FFD700", 45);
+                    addFloat(W/2, H/2 + 60, "ACCOMPLISHED!", "#00ff88", 35);
+                }, 1000);
+
+                // UPDATE: HERZEN PLATZEN EINZELN WEG UND ADDieren PUNKTE
+                let heartsToPop = hp;
+                let burstDelay = 2500;
+                
+                for(let i=0; i < heartsToPop; i++) {
+                    setTimeout(() => {
+                        hp--; 
+                        score += 1000;
+                        charJump = 20;
+                        sfxStarCollect();
+                        triggerVibration([50, 50, 100]);
+                        addFloat(W/2 + (Math.random()*40-20), H/2 + 140, "❤️ +1000", "#ff3131", 40);
+                        for(let k=0; k<15; k++) fireworks.push({ x: W/2, y: H/2+140, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.0, c: '#ff3131' });
+                    }, 2500 + (i * 800));
+                    burstDelay = 2500 + (i * 800);
+                }
 
                 setTimeout(() => {
                     active = false;
@@ -560,7 +579,8 @@ function loop(t) {
                     endT.style.textShadow = "0 0 10px var(--green), 0 0 20px var(--green)";
                     
                     saveScoreAndRefresh(Math.floor(score));
-                }, 6000); 
+                }, burstDelay + 3000); 
+
             } else {
                 level++; 
                 timeLeft = 30; 
@@ -665,14 +685,14 @@ function loop(t) {
         } else if (s.y > H + 50) { fallingStars.splice(i, 1); }
     }
 
-    // UPDATE: EINHORN ALS FINALES TIER MIT SÜSSEM FUTTER
+    // UPDATE: EISCREME (🍦) STATT DIAMANT IM EINHORN-LEVEL
     const items = { 
         'dog': [{i:'🦴',p:10}, {i:'🍪',p:20}, {i:'🥩',p:30}],
         'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
         'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}],
         'fox': [{i:'🥚',p:10}, {i:'🍗',p:20}, {i:'🍖',p:30}],
         'panda': [{i:'🎋',p:10}, {i:'🍃',p:20}, {i:'🍉',p:30}],
-        'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'💎',p:30}]
+        'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'🍦',p:30}]
     };
     const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'unicorn':'🦄' }[mode];
 
@@ -692,7 +712,6 @@ function loop(t) {
         }
     }
 
-    // UPDATE: SPINNEN PENDEL-LOGIK (Laufen nie wieder parallel)
     permSpiders.forEach(s => {
         if(!missionComplete) s.y += (180 * speedMult * s.dy) * dt;
         let sx = lanes[s.lane];
@@ -704,7 +723,6 @@ function loop(t) {
             if(s.y >= H - 120) { s.dy = -1; s.y = H - 120; s.hit = false; }
             if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; s.hit = false; }
 
-            // Keine s.y = 60 mehr! Spinne läuft nach Treffer einfach weiter.
             if(!s.hit && Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
                 let pLoss = Math.floor(30 * ptsScaling); score = Math.max(0, score - pLoss); 
                 energy -= 30; charShake = 20; sfxHit(); hapticSpiderHit(); 
@@ -786,6 +804,20 @@ function loop(t) {
 }
 
 function addFloat(x, y, txt, c, s) { floaters.push({ x, y, txt, c, s, o: 1 }); }
+
+// UPDATE: KOPIER-BUTTON SICHTBARE BESTÄTIGUNG
+function copyBTC(btn) { 
+    navigator.clipboard.writeText("bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed"); 
+    let oldTxt = btn.innerText; 
+    btn.innerHTML = "✅ COPIED!";
+    btn.style.color = "#00ff88"; 
+    btn.style.borderColor = "#00ff88";
+    setTimeout(() => { 
+        btn.innerText = oldTxt; 
+        btn.style.color = "var(--gold)"; 
+        btn.style.borderColor = "var(--gold)"; 
+    }, 2000);
+}
 </script>
 </body>
 </html>
