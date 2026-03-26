@@ -62,7 +62,8 @@
         .go-sub { font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center; }
         @keyframes violentShake { 0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) } 40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) } 80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) } }
 
-        .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.3); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; padding-bottom: 50px;}
+        /* Kein genereller Blur im Startbildschirm für klares Hintergrundbild */
+        .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.2); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; padding-bottom: 50px;}
         .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 15px 100px 15px; }
 
         #scr-name .screen-inner { justify-content: center; }
@@ -73,7 +74,11 @@
         .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
         .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 20px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
         
-        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: transparent; color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; text-shadow: 1px 1px 5px #000; box-shadow: none; outline: none; }
+        /* UPDATE: Startbildschirm Authentifizierungs-Bereich ohne Rahmen */
+        #auth-panel { background: transparent; border: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; margin-top: 10px; }
+
+        /* Das Input-Feld hat jetzt einen leicht abgedunkelten Hintergrund für Lesbarkeit */
+        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; text-shadow: 1px 1px 5px #000; box-shadow: none; outline: none; }
         .name-input:focus { border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
 
         .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.4); transition: 0.1s; transform: translateY(0); }
@@ -84,7 +89,6 @@
         .btn-char:hover { background: rgba(255,255,255,0.2); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
-        /* UPDATE: Panels passen sich automatisch in der Höhe an, kein Scrollen mehr IN der Box! */
         .info-panel { width: 100%; background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); }
         .info-panel h3 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
         
@@ -93,6 +97,11 @@
         .rank-silver { color: var(--silver); font-size: 16px; text-shadow: 0 0 8px var(--silver); }
         .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
+
+        /* UPDATE: Halbe Höhe (220px) mit Scrollfunktion für alle drei Boxen */
+        .scrollable-panel { max-height: 220px; overflow-y: auto; padding-right: 10px; }
+        .scrollable-panel::-webkit-scrollbar { width: 6px; }
+        .scrollable-panel::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .btn-sup { padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 14px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
@@ -150,7 +159,7 @@
     <div id="scr-name" class="screen">
         <div class="screen-inner">
             <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
-            <div class="info-panel inner-panel">
+            <div id="auth-panel" class="inner-panel">
                 <div id="dog-head-icon">🐶</div> 
                 <h2>MISSION BRIEFING</h2> 
                 <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
@@ -181,19 +190,19 @@
                 </div>
             </div>
 
-            <div class="info-panel">
+            <div class="info-panel scrollable-panel">
                 <h3 style="color:var(--gold)">🏆 GLOBAL HALL OF FAME</h3>
                 <div id="leaderboard" class="text-sm" style="text-align:center;">Checking Connection...</div>
             </div>
 
-            <div class="info-panel">
+            <div class="info-panel scrollable-panel">
                 <h3 style="color:var(--neon)">📖 MISSION DIRECTIVES</h3>
                 <ul class="rules text-sm">
                     <li><b>Navigation:</b> Use <b>Arrows ◀ ▶</b> to evade hazards.</li>
                     <li><b>Environments:</b> Scenery adapts every 2 levels.</li>
                     <li><b>Provisions:</b> Collect food for <span style="color:var(--green)">+10 to +30 PTS</span>.</li>
                     <li><b>Power-Ups:</b> <br>
-                        <b>☢️ Core (Rocket) = <span style="color:var(--rad)">7s Radioactive Shield & Bonus PTS!</span></b><br>
+                        <b>🚀 Rocket Core = <span style="color:var(--rad)">7s Radioactive Shield (☢️) & Bonus PTS!</span></b><br>
                         <b>❤️ Heart (UFO) = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS)</span></b>
                     </li>
                     <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & drain).</li>
@@ -201,7 +210,7 @@
                 </ul>
             </div>
 
-            <div class="info-panel" style="border-color: var(--unicorn); box-shadow: 0 0 20px rgba(255,0,255,0.2);">
+            <div class="info-panel scrollable-panel" style="border-color: var(--unicorn); box-shadow: 0 0 20px rgba(255,0,255,0.2);">
                 <h3 style="color:var(--unicorn); border-bottom: 2px solid var(--unicorn);">✨ PERSONALIZE & SUPPORT</h3>
                 
                 <p class="text-sm" style="text-align:justify; margin-bottom:10px;">
@@ -337,7 +346,6 @@ function sfxUfo() {
     } catch(e){}
 }
 
-// UPDATE: NEUER RAKETEN SOUND (Kräftiges Rauschen)
 function sfxRocket() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -599,7 +607,6 @@ function loop(t) {
             rocketSpawned = true;
             let safeL = getSafeLaneForItems();
             if(safeL === -1) safeL = 2; 
-            // Rakete ist schneller
             rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL };
             sfxRocket();
         }
@@ -708,13 +715,12 @@ function loop(t) {
     });
     ctx.globalAlpha = 1.0; 
 
-    // UPDATE: Rakete zeichnen
     if (rocket && !missionComplete) {
         rocket.x -= rocket.s * dt;
         
         ctx.save();
         ctx.translate(rocket.x, rocket.y + Math.sin(t/100)*5);
-        ctx.rotate(-Math.PI / 1.5); // Rotiert die Rakete, damit sie nach links fliegt
+        ctx.rotate(-Math.PI / 1.5);
         ctx.font = "50px Arial"; 
         ctx.textAlign = "center"; 
         ctx.textBaseline = "middle";
@@ -880,7 +886,6 @@ function loop(t) {
     if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
     if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
     
-    // Radioaktive Strahlung als Schutzschild
     if (invincibleTimer > 0) {
         ctx.save();
         ctx.font = "50px Arial";
