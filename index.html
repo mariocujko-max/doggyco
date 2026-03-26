@@ -154,7 +154,7 @@
     <div id="scr-name" class="screen">
         <div class="screen-inner">
             <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
-            <div class="inner-panel">
+            <div class="info-panel inner-panel">
                 <div id="dog-head-icon">🐶</div> 
                 <h2>MISSION BRIEFING</h2> 
                 <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
@@ -197,7 +197,7 @@
                     <li><b>Environments:</b> Scenery adapts every 2 levels.</li>
                     <li><b>Provisions:</b> Collect food for <span style="color:var(--green)">+10 to +30 PTS</span>.</li>
                     <li><b>Power-Ups:</b> <br>
-                        <b>🌟 Star (Bird) = <span style="color:var(--neon)">7s Radiant Shield & Bonus PTS!</span></b><br>
+                        <b>🌟 Star (Bird) = <span style="color:var(--neon)">7s Radioactive Shield (☢️) & Bonus PTS!</span></b><br>
                         <b>❤️ Heart (UFO) = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS)</span></b>
                     </li>
                     <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & drain).</li>
@@ -855,21 +855,13 @@ function loop(t) {
     if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
     if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
     
-    // UPDATE: PURER STRAHLEN-KÄFIG (Statisch, keine Rotation, nur Blinken)
+    // UPDATE: Radioaktiver Schutzschild
     if (invincibleTimer > 0) {
         ctx.save();
-        ctx.shadowColor = "#00f2ff";
-        ctx.shadowBlur = 15;
-        ctx.strokeStyle = (Math.floor(t / 100) % 2 === 0) ? "#00f2ff" : "#ffffff";
-        ctx.lineCap = "round";
-        ctx.lineWidth = 5;
-        
-        ctx.beginPath(); ctx.moveTo(drawX - 35, drawY + 20); ctx.lineTo(drawX - 35, drawY - 50); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(drawX - 15, drawY + 25); ctx.lineTo(drawX - 15, drawY - 65); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(drawX + 15, drawY + 25); ctx.lineTo(drawX + 15, drawY - 65); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(drawX + 35, drawY + 20); ctx.lineTo(drawX + 35, drawY - 50); ctx.stroke();
-        
-        ctx.beginPath(); ctx.moveTo(drawX - 30, drawY - 70); ctx.lineTo(drawX + 30, drawY - 70); ctx.stroke();
+        ctx.font = "50px Arial";
+        ctx.textAlign = "center";
+        ctx.fillStyle = (Math.floor(t / 100) % 2 === 0) ? "rgba(255, 255, 0, 1)" : "rgba(255, 255, 0, 0.5)"; // Radioaktives Gelb mit Flackern
+        ctx.fillText('☢️', drawX, drawY - 80); // Symbol über dem Kopf
         ctx.restore();
     }
 
