@@ -92,10 +92,10 @@
         .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
-        /* UPDATE: Großes, gut lesbares Scroll-Panel für Menüs */
-        .scroll-panel { max-height: 45vh; overflow-y: auto; padding-right: 10px; }
-        .scroll-panel::-webkit-scrollbar { width: 8px; }
-        .scroll-panel::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 4px; }
+        /* UPDATE: EXAKT GLEICHE GRÖSSE FÜR ALLE 3 PANELS */
+        .scrollable { height: 260px; overflow-y: auto; padding-right: 8px; }
+        .scrollable::-webkit-scrollbar { width: 6px; }
+        .scrollable::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .btn-sup { padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 14px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
@@ -105,7 +105,6 @@
         .btn-sup:active, .btn-copy:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.5); }
         
         .wallet-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 15px; text-align: center; margin: 20px auto; width: 160px; }
-        /* QR Code Schutz gegen Quetschen */
         .wallet-box img { width: 130px !important; height: 130px !important; min-width: 130px; min-height: 130px; object-fit: contain; margin: 0 auto; display: block; }
         
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
@@ -185,12 +184,12 @@
                 </div>
             </div>
 
-            <div class="info-panel scroll-panel">
+            <div class="info-panel scrollable">
                 <h3 style="color:var(--gold)">🏆 GLOBAL HALL OF FAME</h3>
                 <div id="leaderboard" class="text-sm" style="text-align:center;">Checking Connection...</div>
             </div>
 
-            <div class="info-panel">
+            <div class="info-panel scrollable">
                 <h3 style="color:var(--neon)">📖 MISSION DIRECTIVES</h3>
                 <ul class="rules text-sm">
                     <li><b>Navigation:</b> Use <b>Arrows ◀ ▶</b> to evade hazards.</li>
@@ -205,7 +204,7 @@
                 </ul>
             </div>
 
-            <div class="info-panel scroll-panel" style="border-color: var(--unicorn); box-shadow: 0 0 20px rgba(255,0,255,0.2);">
+            <div class="info-panel scrollable" style="border-color: var(--unicorn); box-shadow: 0 0 20px rgba(255,0,255,0.2);">
                 <h3 style="color:var(--unicorn); border-bottom: 2px solid var(--unicorn);">✨ PERSONALIZE & SUPPORT</h3>
                 
                 <p class="text-sm" style="text-align:justify; margin-bottom:10px;">
@@ -341,7 +340,6 @@ function sfxUfo() {
     } catch(e){}
 }
 
-// UPDATE: NEUER VOGEL SOUND (Krächzen)
 function sfxBird() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -747,16 +745,19 @@ function loop(t) {
         let u = ufos[i];
         if(!missionComplete) u.x -= u.s * dt;
         
-        // UPDATE: UFO STRAHL ZUM BODEN 
-        ctx.fillStyle = "rgba(0, 255, 136, 0.4)"; // Leicht transparent, damit er nichts verdeckt
+        // UPDATE: Bugfix - ctx.save() verhindert "Farb-Leck" auf andere Objekte
+        ctx.save();
+        ctx.fillStyle = "rgba(0, 255, 136, 0.4)"; 
         ctx.beginPath();
         ctx.moveTo(u.x - 15, u.y + 10);
         ctx.lineTo(u.x + 15, u.y + 10);
         ctx.lineTo(u.x + 45, u.y + H);
         ctx.lineTo(u.x - 45, u.y + H);
         ctx.fill();
+        ctx.restore(); // WICHTIG: Stellt die Farben für den Rest des Spiels wieder her!
 
         ctx.font = "45px Arial"; ctx.textAlign = "center";
+        ctx.fillStyle = "#ffffff";
         ctx.fillText('🛸', u.x, u.y + Math.sin(t / 150) * 10);
 
         let dropX = lanes[u.targetLane];
@@ -805,6 +806,7 @@ function loop(t) {
         }
     }
 
+    ctx.fillStyle = "#ffffff"; // Sicherheitshalber Farbe zurücksetzen
     permSpiders.forEach(s => {
         if(!missionComplete) s.y += (180 * speedMult * s.dy) * dt;
         let sx = lanes[s.lane];
@@ -855,13 +857,15 @@ function loop(t) {
     if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
     if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
     
-    // UPDATE: Radioaktiver Schutzschild
+    // UPDATE: Radioaktive Strahlung als Schutzschild
     if (invincibleTimer > 0) {
         ctx.save();
         ctx.font = "50px Arial";
         ctx.textAlign = "center";
-        ctx.fillStyle = (Math.floor(t / 100) % 2 === 0) ? "rgba(255, 255, 0, 1)" : "rgba(255, 255, 0, 0.5)"; // Radioaktives Gelb mit Flackern
-        ctx.fillText('☢️', drawX, drawY - 80); // Symbol über dem Kopf
+        ctx.fillStyle = (Math.floor(t / 100) % 2 === 0) ? "rgba(173, 255, 47, 1)" : "rgba(173, 255, 47, 0.4)"; // Giftgrün/Gelb leuchtend
+        ctx.shadowColor = "#adff2f";
+        ctx.shadowBlur = 20;
+        ctx.fillText('☢️', drawX, drawY - 80); 
         ctx.restore();
     }
 
