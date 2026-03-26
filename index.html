@@ -93,8 +93,8 @@
         .rank-bronze { color: var(--bronze); font-size: 14px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
-        /* NEU: Scroll-Balken Styling für das Kombi-Panel */
-        .scroll-panel { max-height: 320px; overflow-y: auto; padding-right: 10px; }
+        /* UPDATE: Scroll-Fenster hat jetzt exakt die gleiche Maximalhöhe wie die Rangliste (250px) */
+        .scroll-panel { max-height: 250px; overflow-y: auto; padding-right: 10px; }
         .scroll-panel::-webkit-scrollbar { width: 6px; }
         .scroll-panel::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
 
@@ -338,7 +338,6 @@ function sfxUfo() {
     } catch(e){}
 }
 
-// UPDATE: NEUER VOGEL SOUND (Kurzer, knackiger Quiek/Flatter Sound)
 function sfxBird() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -744,17 +743,6 @@ function loop(t) {
         let u = ufos[i];
         if(!missionComplete) u.x -= u.s * dt;
         
-        ctx.globalAlpha = 0.3 + Math.sin(t/150)*0.1;
-        ctx.fillStyle = "#00ff88";
-        ctx.beginPath();
-        ctx.moveTo(u.x - 15, u.y + 10);
-        ctx.lineTo(u.x + 15, u.y + 10);
-        ctx.lineTo(u.x + 50, u.y + H);
-        ctx.lineTo(u.x - 50, u.y + H);
-        ctx.fill();
-        ctx.globalAlpha = 1.0;
-
-        // UPDATE: STRIKTES ANTI-BLINK GESETZ FÜRS UFO
         ctx.font = "45px Arial"; ctx.textAlign = "center";
         ctx.fillText('🛸', u.x, u.y + Math.sin(t / 150) * 10);
 
@@ -808,7 +796,6 @@ function loop(t) {
         if(!missionComplete) s.y += (180 * speedMult * s.dy) * dt;
         let sx = lanes[s.lane];
         
-        // KEIN BLINKEN BEI DEN SPINNEN (War vorher schon statisch, bleibt auch so!)
         ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
         ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🕷️', sx, s.y);
 
@@ -855,22 +842,23 @@ function loop(t) {
     if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
     if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
     
-    // UPDATE: NUR DER SCHUTZSCHILD DARF BLINKEN (ctx.save & ctx.restore schützen den Rest)
+    // UPDATE: Purer Strahlen-Schutzschild (Keine Rotation, keine transparenten Blasen)
     if (invincibleTimer > 0) {
         ctx.save();
-        ctx.translate(drawX, drawY - 20);
-        ctx.rotate((t / 150) % (Math.PI * 2)); 
-        ctx.fillStyle = (Math.floor(t / 100) % 2 === 0) ? "rgba(0, 242, 255, 0.6)" : "rgba(255, 255, 255, 0.6)";
-        for(let i=0; i<8; i++) {
-            ctx.rotate(Math.PI / 4);
-            ctx.beginPath();
-            ctx.moveTo(-4, 20);
-            ctx.lineTo(4, 20);
-            ctx.lineTo(0, 70); 
-            ctx.fill();
-        }
+        ctx.shadowColor = "#00f2ff";
+        ctx.shadowBlur = 15;
+        ctx.strokeStyle = (Math.floor(t / 100) % 2 === 0) ? "#00f2ff" : "#ffffff";
+        ctx.lineCap = "round";
+        ctx.lineWidth = 4;
+        
+        // 5 vertikale Energiestrahlen (Käfig-Optik)
+        ctx.beginPath(); ctx.moveTo(drawX - 40, drawY + 10); ctx.lineTo(drawX - 40, drawY - 60); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(drawX - 20, drawY + 10); ctx.lineTo(drawX - 20, drawY - 75); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(drawX, drawY + 10);      ctx.lineTo(drawX, drawY - 80); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(drawX + 20, drawY + 10); ctx.lineTo(drawX + 20, drawY - 75); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(drawX + 40, drawY + 10); ctx.lineTo(drawX + 40, drawY - 60); ctx.stroke();
+
         ctx.restore();
-        ctx.beginPath(); ctx.arc(drawX, drawY - 20, 30, 0, Math.PI*2); ctx.fillStyle = "rgba(0, 242, 255, 0.3)"; ctx.fill();
     }
 
     ctx.font = "70px Arial"; ctx.fillText(charIcon, drawX, drawY);
