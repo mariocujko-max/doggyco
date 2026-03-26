@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,11 +41,9 @@
 
         #hud { position: absolute; top: env(safe-area-inset-top, 10px); width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; }
         
-        /* UPDATE: Level-Titel deutlich größer (28px statt 22px) */
         #mission-title { text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); animation: pulseNeon 1.5s infinite alternate; }
         @keyframes pulseNeon { 0% { opacity: 0.7; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1.02); } }
 
-        /* UPDATE: Energiebalken deutlich dicker (22px statt 14px) */
         #energy-box { width: 85%; height: 22px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 12px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
         
@@ -193,11 +192,22 @@
                     <li><b>Provisions:</b> Collect food for <span style="color:var(--green)">+10 to +30 PTS</span>.</li>
                     <li><b>Power-Ups:</b> <br>
                         <b>🌟 Star = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS)</span></b><br>
-                        <b>🥚 Dino Egg = <span style="color:var(--neon)">7s Invincibility Shield</span></b>
+                        <b>🥚 Dino Egg = <span style="color:var(--neon)">7s Radiant Shield & Life Bonus!</span></b>
                     </li>
                     <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & Energy drain).</li>
                     <li><b>Objective:</b> Survive 12 Levels to complete the mission!</li>
                 </ul>
+            </div>
+
+            <div class="info-panel" style="border-color: var(--unicorn); box-shadow: 0 0 20px rgba(255,0,255,0.2);">
+                <h3 style="color:var(--unicorn); border-bottom: 2px solid var(--unicorn);">✨ PERSONALIZE THE FINALE</h3>
+                <p class="text-sm" style="text-align:justify; margin-bottom:10px;">
+                    Want to be the star of the game? For a qualifying donation, you can personalize the final level (Unicorn Area)! 
+                    We will replace the unicorn with <b>YOUR custom face or icon</b>. You can even pick your own favorite items to catch (like 🍔 Burgers, 🍟 Fries, or 💵 Dollars).
+                </p>
+                <p class="text-sm" style="text-align:justify; font-weight:bold; color:var(--gold);">
+                    Your custom character will become the OFFICIAL game finale for all players for a limited time! Use the Support links below and add a note to your donation.
+                </p>
             </div>
 
             <div class="info-panel">
@@ -325,7 +335,6 @@ function sfxUfo() {
     } catch(e){}
 }
 
-// NEU: Saurier-Vogel Sound
 function sfxBird() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -340,7 +349,6 @@ function sfxBird() {
     } catch(e){}
 }
 
-// NEU: Schild Aktiviert Sound
 function sfxShield() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -410,7 +418,6 @@ let entities = [], floaters = [], permSpiders = [], fireworks = [], lastT = 0;
 let clouds = [], opponents = [], fallingStars = [], ufos = []; 
 let starTimer = 20; 
 
-// NEU: Archaeopteryx Variablen
 let invincibleTimer = 0;
 let archSpawned = false;
 let archaeopteryx = null;
@@ -481,7 +488,6 @@ function start(m, startLvl) {
     hp = 3; energy = 100; score = 0; starTimer = 20; 
     entities = []; floaters = []; missionComplete = false;
     
-    // Reset Dino-Event
     invincibleTimer = 0;
     archSpawned = false;
     archaeopteryx = null;
@@ -564,7 +570,6 @@ function loop(t) {
     let speedMult = 1.2 + ((capLvl - 1) * (1.2 / 11)); 
     let ptsScaling = speedMult; 
 
-    // Timer Schild
     if(invincibleTimer > 0) {
         invincibleTimer -= dt;
         if(invincibleTimer < 0) invincibleTimer = 0;
@@ -574,10 +579,12 @@ function loop(t) {
         timeLeft -= dt; energy -= (4 * speedMult) * dt;
         starTimer -= dt;
 
-        // NEU: Archaeopteryx (nach 5 Sekunden im Level)
+        // UPDATE: VOGEL FLIEGT VORWÄRTS (Von rechts nach links)
         if(timeLeft <= 25 && !archSpawned) {
             archSpawned = true;
-            archaeopteryx = { x: -50, y: 150, s: 180, laid: false };
+            let safeL = getSafeLaneForItems();
+            if(safeL === -1) safeL = 2; 
+            archaeopteryx = { x: W + 50, y: 150, s: 180, laid: false, targetLane: safeL };
             sfxBird();
         }
 
@@ -637,7 +644,6 @@ function loop(t) {
                 timeLeft = 30; 
                 energy = Math.min(100, energy + (25 * speedMult));
                 
-                // Nächstes Level: Archaeopteryx wieder bereit machen
                 archSpawned = false; 
                 archaeopteryx = null;
                 dinoEgg = null;
@@ -685,30 +691,35 @@ function loop(t) {
     });
     ctx.globalAlpha = 1.0; 
 
-    // Archaeopteryx Zeichnen
+    // UPDATE: Archaeopteryx (fliegt nach links!)
     if (archaeopteryx && !missionComplete) {
-        archaeopteryx.x += archaeopteryx.s * dt;
-        ctx.font = "50px Arial"; ctx.textAlign = "center"; ctx.fillText('🦅', archaeopteryx.x, archaeopteryx.y + Math.sin(t/100)*15);
+        archaeopteryx.x -= archaeopteryx.s * dt;
+        ctx.font = "50px Arial"; ctx.textAlign = "center"; 
+        ctx.fillText('🦅', archaeopteryx.x, archaeopteryx.y + Math.sin(t/100)*15);
         
-        // Ei abwerfen in der Mitte
-        if(archaeopteryx.x > lanes[2] && !archaeopteryx.laid) {
+        // ZUFÄLLIGE BAHN:
+        if(archaeopteryx.x <= lanes[archaeopteryx.targetLane] && !archaeopteryx.laid) {
             archaeopteryx.laid = true;
-            dinoEgg = { x: lanes[2], y: archaeopteryx.y, s: 200 * speedMult };
+            dinoEgg = { x: lanes[archaeopteryx.targetLane], y: archaeopteryx.y, s: 200 * speedMult };
         }
-        
-        if(archaeopteryx.x > W + 100) archaeopteryx = null;
+        if(archaeopteryx.x < -100) archaeopteryx = null;
     }
 
-    // Dino-Ei Zeichnen
     if (dinoEgg && !missionComplete) {
         dinoEgg.y += dinoEgg.s * dt;
         ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText('🥚', dinoEgg.x, dinoEgg.y);
         
         if (Math.abs(dinoEgg.x - playerX) < 40 && dinoEgg.y > hitTop && dinoEgg.y < hitBottom) {
-            invincibleTimer = 7.0; // 7 Sekunden Unverwundbarkeit
+            invincibleTimer = 7.0; 
             charJump = 20;
             sfxShield();
-            addFloat(dinoEgg.x + 40, dinoEgg.y, "SHIELD ACTIVATED!", "#00f2ff", 25);
+            
+            // UPDATE: GIBT JETZT LEBEN / PUNKTE WIE DER STERN
+            if (hp < 3) { 
+                hp++; sfxStarCollect(); addFloat(dinoEgg.x + 40, dinoEgg.y, "SHIELD +1 ❤️", "#00ff88", 25); 
+            } else { 
+                let bonusPts = 100 + (level * 10); score += bonusPts; sfxStarCollect(); addFloat(dinoEgg.x + 40, dinoEgg.y, "SHIELD +" + bonusPts, "#FFD700", 25); 
+            }
             dinoEgg = null;
         } else if (dinoEgg.y > H + 50) {
             dinoEgg = null;
@@ -740,10 +751,8 @@ function loop(t) {
 
         ctx.save();
         ctx.font = "45px Arial"; ctx.textAlign = "center";
-        
         if (Math.floor(t / 150) % 2 === 0) { ctx.shadowColor = "#ff3131"; ctx.shadowBlur = 25; } 
         else { ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 25; }
-        
         ctx.globalAlpha = (Math.floor(t / 75) % 2 === 0) ? 0.8 : 1.0; 
         ctx.fillText('🛸', u.x, u.y + Math.sin(t / 150) * 10);
         ctx.restore();
@@ -844,15 +853,24 @@ function loop(t) {
     if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
     if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
     
-    // NEU: Schild-Aura zeichnen
+    // UPDATE: STRAHLEN-SCHUTZSCHILD (Ray-Shield)
     if (invincibleTimer > 0) {
-        ctx.beginPath();
-        ctx.arc(drawX, drawY - 20, 45, 0, Math.PI*2);
-        ctx.fillStyle = "rgba(0, 242, 255, 0.3)";
-        ctx.fill();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = (Math.floor(t / 100) % 2 === 0) ? "#00f2ff" : "#ffffff";
-        ctx.stroke();
+        ctx.save();
+        ctx.translate(drawX, drawY - 20);
+        ctx.rotate((t / 150) % (Math.PI * 2)); // Rotiert den Schild
+        ctx.fillStyle = (Math.floor(t / 100) % 2 === 0) ? "rgba(0, 242, 255, 0.6)" : "rgba(255, 255, 255, 0.6)";
+        // Zeichne 8 Strahlen, die nach außen schießen
+        for(let i=0; i<8; i++) {
+            ctx.rotate(Math.PI / 4);
+            ctx.beginPath();
+            ctx.moveTo(-4, 20);
+            ctx.lineTo(4, 20);
+            ctx.lineTo(0, 70); 
+            ctx.fill();
+        }
+        ctx.restore();
+        // Inneres Leuchten
+        ctx.beginPath(); ctx.arc(drawX, drawY - 20, 30, 0, Math.PI*2); ctx.fillStyle = "rgba(0, 242, 255, 0.3)"; ctx.fill();
     }
 
     ctx.font = "70px Arial"; ctx.fillText(charIcon, drawX, drawY);
