@@ -28,10 +28,11 @@
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; }
 
+        /* UPDATE: Großer äußerer Rahmen entfernt! */
         #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; }
 
         @media (min-width: 450px) {
-            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; border: 4px solid var(--neon); box-shadow: 0 0 50px rgba(0,242,255,0.3); background: rgba(0,0,0,0.1); }
+            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; background: rgba(0,0,0,0.1); border: none; box-shadow: none; }
             #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%); }
         }
 
@@ -62,7 +63,6 @@
         .go-sub { font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center; }
         @keyframes violentShake { 0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) } 40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) } 80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) } }
 
-        /* Kein genereller Blur im Startbildschirm für klares Hintergrundbild */
         .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.2); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; padding-bottom: 50px;}
         .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 15px 100px 15px; }
 
@@ -74,10 +74,8 @@
         .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
         .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 20px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
         
-        /* UPDATE: Startbildschirm Authentifizierungs-Bereich ohne Rahmen */
         #auth-panel { background: transparent; border: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; margin-top: 10px; }
 
-        /* Das Input-Feld hat jetzt einen leicht abgedunkelten Hintergrund für Lesbarkeit */
         .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; text-shadow: 1px 1px 5px #000; box-shadow: none; outline: none; }
         .name-input:focus { border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
 
@@ -98,8 +96,8 @@
         .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
-        /* UPDATE: Halbe Höhe (220px) mit Scrollfunktion für alle drei Boxen */
-        .scrollable-panel { max-height: 220px; overflow-y: auto; padding-right: 10px; }
+        /* UPDATE: Exakt 150px für alle 3 Menüs (Genau die Hälfte sichtbar) */
+        .scrollable-panel { max-height: 150px; overflow-y: auto; padding-right: 10px; }
         .scrollable-panel::-webkit-scrollbar { width: 6px; }
         .scrollable-panel::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
 
