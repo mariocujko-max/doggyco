@@ -47,7 +47,7 @@
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
         
         #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); }
-        .stat { font-weight: 900; font-size: 14px; text-shadow: 1px 1px 3px #000; }
+        .stat { font-weight: 900; font-size: 16px; text-shadow: 1px 1px 3px #000; }
 
         #controls { position: absolute; bottom: env(safe-area-inset-bottom, 15px); left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 10px; z-index: 300; pointer-events: none; }
         .arrow { width: 120px; height: 120px; background: transparent; border: none; color: rgba(255, 255, 255, 0.5); font-size: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none; }
@@ -61,8 +61,8 @@
         .go-sub { font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center; }
         @keyframes violentShake { 0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) } 40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) } 80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) } }
 
-        .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.15); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); overflow-y: scroll; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; }
-        .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 15px 180px 15px; }
+        .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.15); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; padding-bottom: 50px;}
+        .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 15px 100px 15px; }
 
         #scr-name .screen-inner { justify-content: center; }
 
@@ -70,44 +70,46 @@
         .app-title { font-size: clamp(24px, 8vw, 36px); color: var(--gold); text-shadow: 0 0 20px var(--gold); letter-spacing: 2px; animation: blinkGold 2s infinite ease-in-out; }
 
         .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
-        .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 18px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
+        .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 20px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
         
         .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(255, 255, 255, 0.15); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; text-shadow: 1px 1px 5px #000; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
         .name-input:focus { border-color: var(--gold); box-shadow: 0 0 15px var(--gold), inset 0 0 10px rgba(0,0,0,0.5); }
 
-        .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 16px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.4); transition: 0.1s; transform: translateY(0); }
+        .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.4); transition: 0.1s; transform: translateY(0); }
         .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
 
-        .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.5); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 10px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.3); transform: translateY(0); }
-        .btn-char span { font-size: 32px; margin-bottom: 5px; }
+        .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.5); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 12px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.3); transform: translateY(0); }
+        .btn-char span { font-size: 36px; margin-bottom: 5px; }
         .btn-char:hover { background: rgba(255,255,255,0.2); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
         .info-panel { width: 100%; background: var(--glass); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); }
-        .info-panel h3 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 16px; text-align: center; text-transform: uppercase; }
+        .info-panel h3 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
         
-        #leaderboard { max-height: 250px; overflow-y: auto; padding-right: 5px; }
-        .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; }
-        .rank-gold { color: var(--gold); font-size: 16px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
-        .rank-silver { color: var(--silver); font-size: 15px; text-shadow: 0 0 8px var(--silver); }
-        .rank-bronze { color: var(--bronze); font-size: 14px; text-shadow: 0 0 5px var(--bronze); }
+        .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; }
+        .rank-gold { color: var(--gold); font-size: 18px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
+        .rank-silver { color: var(--silver); font-size: 16px; text-shadow: 0 0 8px var(--silver); }
+        .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
-        /* UPDATE: Scroll-Fenster hat jetzt exakt die gleiche Maximalhöhe wie die Rangliste (250px) */
-        .scroll-panel { max-height: 250px; overflow-y: auto; padding-right: 10px; }
-        .scroll-panel::-webkit-scrollbar { width: 6px; }
-        .scroll-panel::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
+        /* UPDATE: Großes, gut lesbares Scroll-Panel für Menüs */
+        .scroll-panel { max-height: 45vh; overflow-y: auto; padding-right: 10px; }
+        .scroll-panel::-webkit-scrollbar { width: 8px; }
+        .scroll-panel::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 4px; }
 
-        .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-sup { padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
+        .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .btn-sup { padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 14px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
         .bg-tk { background: linear-gradient(45deg, #000, #ff0050); } 
         .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); }
         .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; box-shadow: 0 4px 0 var(--gold); transition: 0.2s; }
         .btn-sup:active, .btn-copy:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.5); }
         
-        .wallet-box { background: rgba(255,255,255,0.9); padding: 10px; border-radius: 15px; text-align: center; margin: 15px auto; width: 130px; }
-        .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
-        ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 5px; }
+        .wallet-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 15px; text-align: center; margin: 20px auto; width: 160px; }
+        /* QR Code Schutz gegen Quetschen */
+        .wallet-box img { width: 130px !important; height: 130px !important; min-width: 130px; min-height: 130px; object-fit: contain; margin: 0 auto; display: block; }
+        
+        .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
+        ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
 
         .legal-box { width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-top: 10px; }
         #dog-head-icon { font-size: 75px; margin-bottom: 15px; text-shadow: 0 0 15px var(--neon); }
@@ -183,8 +185,8 @@
                 </div>
             </div>
 
-            <div class="info-panel">
-                <h3>🏆 GLOBAL HALL OF FAME</h3>
+            <div class="info-panel scroll-panel">
+                <h3 style="color:var(--gold)">🏆 GLOBAL HALL OF FAME</h3>
                 <div id="leaderboard" class="text-sm" style="text-align:center;">Checking Connection...</div>
             </div>
 
@@ -198,8 +200,8 @@
                         <b>🌟 Star (Bird) = <span style="color:var(--neon)">7s Radiant Shield & Bonus PTS!</span></b><br>
                         <b>❤️ Heart (UFO) = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS)</span></b>
                     </li>
-                    <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & Energy drain).</li>
-                    <li><b>Objective:</b> Survive 12 Levels to complete the mission!</li>
+                    <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & drain).</li>
+                    <li><b>Objective:</b> Survive 12 Levels to WIN!</li>
                 </ul>
             </div>
 
@@ -210,26 +212,27 @@
                     Want to be the star of the game? For a qualifying donation, you can personalize the final level (Unicorn Area)! 
                     We will replace the unicorn with <b>YOUR custom face or icon</b>. Pick your own favorite items to catch (like 🍔 Burgers, 🍟 Fries, or 💵 Dollars).
                 </p>
-                <p class="text-sm" style="text-align:center; font-weight:bold; color:var(--gold); margin-bottom: 15px; padding: 8px; background: rgba(0,0,0,0.4); border-radius: 10px; border: 1px solid rgba(255,215,0,0.3);">
+                <p class="text-sm" style="text-align:center; font-weight:bold; color:var(--gold); margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 10px; border: 1px solid rgba(255,215,0,0.3);">
                     Contact us with your donation note:
-                    <br><a href="mailto:give-me.org@gmx.net" style="color:var(--neon); text-decoration:none; display:inline-block; margin-top:5px; font-size:14px; letter-spacing:1px; text-shadow: 0 0 5px var(--neon);">📧 give-me.org@gmx.net</a>
+                    <br><a href="mailto:give-me.org@gmx.net" style="color:var(--neon); text-decoration:none; display:inline-block; margin-top:8px; font-size:16px; letter-spacing:1px; text-shadow: 0 0 5px var(--neon);">📧 give-me.org@gmx.net</a>
                 </p>
 
                 <div class="sup-grid">
                     <a href="https://www.tiktok.com/@doggyco0" target="_blank" class="btn-sup bg-tk">TIKTOK</a>
                     <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=give-me.org@gmx.net&item_name=Support+Doggyco+Mission&currency_code=EUR" target="_blank" class="btn-sup bg-pp">PAYPAL</a>
                 </div>
+                
                 <div class="wallet-box">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" width="110" alt="QR">
-                    <div style="color:#000; font-family:'Orbitron'; font-size:11px; font-weight:900; margin-top:8px;">BTC WALLET</div>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" alt="QR">
+                    <div style="color:#000; font-family:'Orbitron'; font-size:12px; font-weight:900; margin-top:8px;">BTC WALLET</div>
                 </div>
-                <p style="font-size:10px; color:var(--gold); text-align:center; word-break:break-all; font-family:monospace; margin-top:5px;">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
+                <p style="font-size:11px; color:var(--gold); text-align:center; word-break:break-all; font-family:monospace; margin-top:5px;">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</p>
                 <button class="btn-sup btn-copy" onclick="copyBTC(this)">COPY ADDRESS</button>
             </div>
 
             <div class="legal-box"> 
                 <h4 style="color:#aaa; text-align:center; margin-bottom:5px; font-family:'Orbitron'; letter-spacing:1px;">⚖️ LEGAL NOTICE</h4>
-                <p class="text-sm" style="text-align:center; color:#ddd; font-size:10px;">
+                <p class="text-sm" style="text-align:center; color:#ddd; font-size:12px;">
                     Private, non-commercial project. Donations are voluntary gifts.<br>
                     © 2026 DOGGYCO GLOBAL ACADEMY. All Rights Reserved.<br>
                     Concept, Development & Design entirely by M. Čujko.
@@ -338,19 +341,20 @@ function sfxUfo() {
     } catch(e){}
 }
 
+// UPDATE: NEUER VOGEL SOUND (Krächzen)
 function sfxBird() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
         let t = audioCtx.currentTime;
         let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(800, t);
-        osc.frequency.exponentialRampToValueAtTime(300, t + 0.2);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(600, t);
+        osc.frequency.exponentialRampToValueAtTime(100, t + 0.4);
         gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(0.05, t + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+        gain.gain.linearRampToValueAtTime(0.1, t + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
         osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(t); osc.stop(t + 0.2);
+        osc.start(t); osc.stop(t + 0.4);
     } catch(e){}
 }
 
@@ -743,6 +747,15 @@ function loop(t) {
         let u = ufos[i];
         if(!missionComplete) u.x -= u.s * dt;
         
+        // UPDATE: UFO STRAHL ZUM BODEN 
+        ctx.fillStyle = "rgba(0, 255, 136, 0.4)"; // Leicht transparent, damit er nichts verdeckt
+        ctx.beginPath();
+        ctx.moveTo(u.x - 15, u.y + 10);
+        ctx.lineTo(u.x + 15, u.y + 10);
+        ctx.lineTo(u.x + 45, u.y + H);
+        ctx.lineTo(u.x - 45, u.y + H);
+        ctx.fill();
+
         ctx.font = "45px Arial"; ctx.textAlign = "center";
         ctx.fillText('🛸', u.x, u.y + Math.sin(t / 150) * 10);
 
@@ -842,22 +855,21 @@ function loop(t) {
     if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
     if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
     
-    // UPDATE: Purer Strahlen-Schutzschild (Keine Rotation, keine transparenten Blasen)
+    // UPDATE: PURER STRAHLEN-KÄFIG (Statisch, keine Rotation, nur Blinken)
     if (invincibleTimer > 0) {
         ctx.save();
         ctx.shadowColor = "#00f2ff";
         ctx.shadowBlur = 15;
         ctx.strokeStyle = (Math.floor(t / 100) % 2 === 0) ? "#00f2ff" : "#ffffff";
         ctx.lineCap = "round";
-        ctx.lineWidth = 4;
+        ctx.lineWidth = 5;
         
-        // 5 vertikale Energiestrahlen (Käfig-Optik)
-        ctx.beginPath(); ctx.moveTo(drawX - 40, drawY + 10); ctx.lineTo(drawX - 40, drawY - 60); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(drawX - 20, drawY + 10); ctx.lineTo(drawX - 20, drawY - 75); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(drawX, drawY + 10);      ctx.lineTo(drawX, drawY - 80); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(drawX + 20, drawY + 10); ctx.lineTo(drawX + 20, drawY - 75); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(drawX + 40, drawY + 10); ctx.lineTo(drawX + 40, drawY - 60); ctx.stroke();
-
+        ctx.beginPath(); ctx.moveTo(drawX - 35, drawY + 20); ctx.lineTo(drawX - 35, drawY - 50); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(drawX - 15, drawY + 25); ctx.lineTo(drawX - 15, drawY - 65); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(drawX + 15, drawY + 25); ctx.lineTo(drawX + 15, drawY - 65); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(drawX + 35, drawY + 20); ctx.lineTo(drawX + 35, drawY - 50); ctx.stroke();
+        
+        ctx.beginPath(); ctx.moveTo(drawX - 30, drawY - 70); ctx.lineTo(drawX + 30, drawY - 70); ctx.stroke();
         ctx.restore();
     }
 
