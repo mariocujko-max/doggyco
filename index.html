@@ -94,17 +94,18 @@
         .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
-        /* UPDATE: Treppen-Layout für die 3 Panels (Groß, Mittel, Klein) mit jeweiligen Farben */
-        .panel-large { height: 240px; border-color: var(--gold) !important; box-shadow: 0 0 15px rgba(255,215,0,0.2) !important; }
-        .panel-medium { height: 190px; border-color: var(--neon) !important; box-shadow: 0 0 15px rgba(0,242,255,0.2) !important; }
-        .panel-small { height: 140px; border-color: var(--unicorn) !important; box-shadow: 0 0 15px rgba(255,0,255,0.2) !important; }
+        /* UPDATE: Alle 3 scrollbaren Menüs haben jetzt exakt dieselbe Größe (240px) */
+        .panel-standard { height: 240px; overflow-y: auto; padding-right: 10px; flex-shrink: 0; }
+        .panel-standard::-webkit-scrollbar { width: 6px; }
         
-        .panel-large, .panel-medium, .panel-small { overflow-y: auto; padding-right: 10px; flex-shrink: 0; }
-        .panel-large::-webkit-scrollbar, .panel-medium::-webkit-scrollbar, .panel-small::-webkit-scrollbar { width: 6px; }
+        .panel-gold { border-color: var(--gold) !important; box-shadow: 0 0 15px rgba(255,215,0,0.2) !important; }
+        .panel-gold::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
         
-        .panel-large::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
-        .panel-medium::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
-        .panel-small::-webkit-scrollbar-thumb { background: var(--unicorn); border-radius: 3px; }
+        .panel-neon { border-color: var(--neon) !important; box-shadow: 0 0 15px rgba(0,242,255,0.2) !important; }
+        .panel-neon::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
+        
+        .panel-unicorn { border-color: var(--unicorn) !important; box-shadow: 0 0 15px rgba(255,0,255,0.2) !important; }
+        .panel-unicorn::-webkit-scrollbar-thumb { background: var(--unicorn); border-radius: 3px; }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; flex-shrink: 0; }
         .btn-sup { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
@@ -119,7 +120,6 @@
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
 
-        /* UPDATE: Legal Notice exakt 30% höher gemacht durch Min-Height und Line-Height */
         .legal-box { 
             width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); 
             border-radius: 20px; padding: 25px 20px; margin-top: 10px; 
@@ -129,7 +129,6 @@
         
         #dog-head-icon { font-size: 75px; margin-bottom: 15px; text-shadow: 0 0 15px var(--neon); }
 
-        /* UPDATE: Endbildschirm komplett neues, sauberes und edles Design! */
         #scr-end { background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
         #scr-end .screen-inner { 
             justify-content: center; align-items: center; height: auto; min-height: unset; 
@@ -140,7 +139,10 @@
         }
         #end-game-title { font-size: 20px; color: #aaa; letter-spacing: 4px; margin-bottom: 15px; font-weight: 900; text-align: center; }
         .end-status { font-size: 38px; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; text-align: center; font-weight: 900;}
-        #end-agent-name { font-size: 20px; color: #fff; margin-bottom: 25px; letter-spacing: 3px; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 12px; text-align: center;}
+        
+        /* UPDATE: Agenten-Name Feld - Kein "Agent" mehr, nur der Name */
+        #end-agent-name { font-size: 28px; color: #fff; margin-bottom: 25px; letter-spacing: 3px; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 12px; text-align: center;}
+        
         #f-score { font-size: 60px; color: var(--gold); margin: 0 0 35px 0; text-shadow: 0 0 25px var(--gold), 2px 2px 5px #000; text-align: center; font-weight: 900; }
         
         .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
@@ -216,12 +218,12 @@
                 </div>
             </div>
 
-            <div class="info-panel panel-large">
+            <div class="info-panel panel-standard panel-gold">
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">🏆 GLOBAL HALL OF FAME</h3>
                 <div id="leaderboard" class="text-sm" style="text-align:center;">Checking Connection...</div>
             </div>
 
-            <div class="info-panel panel-medium">
+            <div class="info-panel panel-standard panel-neon">
                 <h3 style="color:var(--neon); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">📖 MISSION DIRECTIVES</h3>
                 <ul class="rules text-sm">
                     <li><b>Navigation:</b> Use <b>Arrows ◀ ▶</b> to evade hazards.</li>
@@ -236,7 +238,7 @@
                 </ul>
             </div>
 
-            <div class="info-panel panel-small">
+            <div class="info-panel panel-standard panel-unicorn">
                 <h3 style="color:var(--unicorn); border-bottom: 2px solid var(--unicorn); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">✨ PERSONALIZE & SUPPORT</h3>
                 
                 <p class="text-sm" style="text-align:justify; margin-bottom:10px;">
@@ -276,7 +278,7 @@
         <div class="screen-inner"> 
             <div id="end-game-title">DOGGYCO MISSION</div>
             <h2 id="end-title" class="end-status red-neon-text">MISSION FAILED</h2> 
-            <h3 id="end-agent-name">AGENT</h3> 
+            <h3 id="end-agent-name">PLAYER</h3> 
             <h1 id="f-score">0 PTS</h1> 
             <button class="btn-main" onclick="location.reload()">MAIN MENU</button> 
         </div>
@@ -287,9 +289,10 @@
 <audio id="snd-action" src="music.mp3" loop></audio> 
 
 <script>
-document.querySelectorAll('audio').forEach(a => a.volume = 0.15);
+// UPDATE: Musik um 15% leiser gemacht (vorher 0.15, jetzt 0.05). Soundeffekte knallen dadurch mehr!
+document.querySelectorAll('audio').forEach(a => a.volume = 0.05);
 let bgMusic = document.getElementById("snd-action");
-bgMusic.volume = 0.15; 
+bgMusic.volume = 0.05; 
 
 window.onload = function() {
     let savedName = localStorage.getItem("doggycoAgent");
@@ -412,7 +415,6 @@ function sfxShield() {
     } catch(e){}
 }
 
-// UPDATE: Kurzer, unregelmäßiger Geigerzähler-Klick
 function sfxGeigerClick() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -637,10 +639,15 @@ function loop(t) {
     let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
     let ptsScaling = speedMult; 
 
-    // UPDATE: Geigerzähler-Logik für aktiven Schild
+    // UPDATE: Musik passt sich dynamisch an die Spielgeschwindigkeit an!
+    if (bgMusic && !bgMusic.paused) {
+        // Startet bei 1.0x Tempo, endet bei ca. 1.55x Tempo in Level 12
+        bgMusic.playbackRate = 1.0 + ((capLvl - 1) * 0.05); 
+    }
+
     if(invincibleTimer > 0) {
         invincibleTimer -= dt;
-        if(Math.random() < 0.15) sfxGeigerClick(); // Spielt unregelmäßige Klicks ab!
+        if(Math.random() < 0.15) sfxGeigerClick(); 
         if(invincibleTimer < 0) invincibleTimer = 0;
     }
 
@@ -694,7 +701,8 @@ function loop(t) {
                     document.getElementById("game-wrap").style.pointerEvents = "none";
                     document.getElementById("game-wrap").style.visibility = "hidden";
                     document.getElementById("scr-end").style.display = "flex";
-                    document.getElementById("end-agent-name").innerText = "AGENT " + agent;
+                    // UPDATE: Nur noch der Agenten-Name, ohne das Wort "AGENT"
+                    document.getElementById("end-agent-name").innerText = agent;
                     document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
                     
                     let endT = document.getElementById("end-title");
@@ -790,7 +798,6 @@ function loop(t) {
         ctx.restore();
         
         if (Math.abs(fallingCore.x - playerX) < 40 && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
-            // UPDATE: Schild hält jetzt volle 10 Sekunden!
             invincibleTimer = 10.0; 
             charJump = 20;
             sfxShield();
@@ -976,7 +983,8 @@ function loop(t) {
             ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
             
             document.getElementById("scr-end").style.display = "flex";
-            document.getElementById("end-agent-name").innerText = "AGENT " + agent; 
+            // UPDATE: Zeigt nur noch den puren Namen an!
+            document.getElementById("end-agent-name").innerText = agent; 
             document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
             
             let endT = document.getElementById("end-title");
