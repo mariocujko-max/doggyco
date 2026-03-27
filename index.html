@@ -70,7 +70,6 @@
         header { padding: 0 0 20px 0; text-align: center; width: 100%; flex-shrink: 0; }
         .app-title { font-size: clamp(24px, 8vw, 36px); color: var(--gold); text-shadow: 0 0 20px var(--gold); letter-spacing: 2px; animation: blinkGold 2s infinite ease-in-out; }
 
-        /* WICHTIG: flex-shrink: 0 verhindert, dass der Browser die Boxen quetscht! */
         .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; flex-shrink: 0; }
         .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 20px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
         
@@ -87,9 +86,7 @@
         .btn-char:hover { background: rgba(255,255,255,0.2); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
-        /* WICHTIG: flex-shrink: 0 verhindert Quetschen */
         .info-panel { width: 100%; background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); flex-shrink: 0; }
-        .info-panel h3 { color: var(--gold); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
         
         .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; }
         .rank-gold { color: var(--gold); font-size: 18px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
@@ -97,28 +94,58 @@
         .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
-        /* UPDATE: Exakt 180px - zeigt immer genau die obere Hälfte lesbar an! */
-        .scrollable-panel { max-height: 180px; overflow-y: auto; padding-right: 10px; }
-        .scrollable-panel::-webkit-scrollbar { width: 6px; }
-        .scrollable-panel::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
+        /* UPDATE: Treppen-Layout für die 3 Panels (Groß, Mittel, Klein) mit jeweiligen Farben */
+        .panel-large { height: 240px; border-color: var(--gold) !important; box-shadow: 0 0 15px rgba(255,215,0,0.2) !important; }
+        .panel-medium { height: 190px; border-color: var(--neon) !important; box-shadow: 0 0 15px rgba(0,242,255,0.2) !important; }
+        .panel-small { height: 140px; border-color: var(--unicorn) !important; box-shadow: 0 0 15px rgba(255,0,255,0.2) !important; }
+        
+        .panel-large, .panel-medium, .panel-small { overflow-y: auto; padding-right: 10px; flex-shrink: 0; }
+        .panel-large::-webkit-scrollbar, .panel-medium::-webkit-scrollbar, .panel-small::-webkit-scrollbar { width: 6px; }
+        
+        .panel-large::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+        .panel-medium::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
+        .panel-small::-webkit-scrollbar-thumb { background: var(--unicorn); border-radius: 3px; }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; flex-shrink: 0; }
-        .btn-sup { padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 14px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
+        .btn-sup { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
         .bg-tk { background: linear-gradient(45deg, #000, #ff0050); } 
         .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); }
         .btn-copy { background: #222; border: 2px solid var(--gold); color: var(--gold); width: 100%; margin-top: 10px; box-shadow: 0 4px 0 var(--gold); transition: 0.2s; }
         .btn-sup:active, .btn-copy:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.5); }
         
-        .wallet-box { background: rgba(255,255,255,0.9); padding: 15px; border-radius: 15px; text-align: center; margin: 20px auto; width: 160px; flex-shrink: 0; }
-        .wallet-box img { width: 130px !important; height: 130px !important; min-width: 130px; min-height: 130px; object-fit: contain; margin: 0 auto; display: block; }
+        .wallet-box { background: rgba(255,255,255,0.9); padding: 10px; border-radius: 15px; text-align: center; margin: 15px auto; width: 140px; flex-shrink: 0; }
+        .wallet-box img { width: 110px !important; height: 110px !important; min-width: 110px; min-height: 110px; object-fit: contain; margin: 0 auto; display: block; }
         
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
 
-        .legal-box { width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-top: 10px; flex-shrink: 0; }
+        /* UPDATE: Legal Notice exakt 30% höher gemacht durch Min-Height und Line-Height */
+        .legal-box { 
+            width: 100%; background: rgba(0,0,0,0.6); border: 2px solid var(--neon); 
+            border-radius: 20px; padding: 25px 20px; margin-top: 10px; 
+            flex-shrink: 0; min-height: 145px; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        
         #dog-head-icon { font-size: 75px; margin-bottom: 15px; text-shadow: 0 0 15px var(--neon); }
+
+        /* UPDATE: Endbildschirm komplett neues, sauberes und edles Design! */
+        #scr-end { background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+        #scr-end .screen-inner { 
+            justify-content: center; align-items: center; height: auto; min-height: unset; 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            width: 90%; max-width: 380px; background: radial-gradient(circle, rgba(20,20,20,0.9) 0%, rgba(0,0,0,0.95) 100%); 
+            border: 2px solid var(--gold); border-radius: 25px; padding: 40px 20px; 
+            box-shadow: 0 0 40px rgba(255,215,0,0.2), inset 0 0 20px rgba(0,0,0,0.8); 
+        }
+        #end-game-title { font-size: 20px; color: #aaa; letter-spacing: 4px; margin-bottom: 15px; font-weight: 900; text-align: center; }
+        .end-status { font-size: 38px; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; text-align: center; font-weight: 900;}
+        #end-agent-name { font-size: 20px; color: #fff; margin-bottom: 25px; letter-spacing: 3px; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 12px; text-align: center;}
+        #f-score { font-size: 60px; color: var(--gold); margin: 0 0 35px 0; text-shadow: 0 0 25px var(--gold), 2px 2px 5px #000; text-align: center; font-weight: 900; }
+        
         .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
         .red-neon-text { color: var(--red); text-shadow: 0 0 10px var(--red), 0 0 20px var(--red); }
+        .green-neon-text { color: var(--green); text-shadow: 0 0 10px var(--green), 0 0 20px var(--green); }
     </style>
 </head>
 <body>
@@ -172,7 +199,7 @@
             <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
             
             <div class="inner-panel info-panel">
-                <h3>CHOOSE START LEVEL</h3>
+                <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">CHOOSE START LEVEL</h3>
                 <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
                         <button class="btn-char" style="border-color:var(--neon); flex:1;" onclick="start('dog', 1)"><span>🐶</span>DOG</button>
@@ -189,19 +216,19 @@
                 </div>
             </div>
 
-            <div class="info-panel scrollable-panel">
-                <h3 style="color:var(--gold)">🏆 GLOBAL HALL OF FAME</h3>
+            <div class="info-panel panel-large">
+                <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">🏆 GLOBAL HALL OF FAME</h3>
                 <div id="leaderboard" class="text-sm" style="text-align:center;">Checking Connection...</div>
             </div>
 
-            <div class="info-panel scrollable-panel">
-                <h3 style="color:var(--neon)">📖 MISSION DIRECTIVES</h3>
+            <div class="info-panel panel-medium">
+                <h3 style="color:var(--neon); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">📖 MISSION DIRECTIVES</h3>
                 <ul class="rules text-sm">
                     <li><b>Navigation:</b> Use <b>Arrows ◀ ▶</b> to evade hazards.</li>
                     <li><b>Environments:</b> Scenery adapts every 2 levels.</li>
                     <li><b>Provisions:</b> Collect food for <span style="color:var(--green)">+10 to +30 PTS</span>.</li>
                     <li><b>Power-Ups:</b> <br>
-                        <b>🚀 Rocket Core = <span style="color:var(--rad)">7s Radioactive Shield (☢️) & Bonus PTS!</span></b><br>
+                        <b>🚀 Rocket Core = <span style="color:var(--rad)">10s Radioactive Shield (☢️) & Bonus PTS!</span></b><br>
                         <b>❤️ Heart (UFO) = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS)</span></b>
                     </li>
                     <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & drain).</li>
@@ -209,8 +236,8 @@
                 </ul>
             </div>
 
-            <div class="info-panel scrollable-panel" style="border-color: var(--unicorn); box-shadow: 0 0 20px rgba(255,0,255,0.2);">
-                <h3 style="color:var(--unicorn); border-bottom: 2px solid var(--unicorn);">✨ PERSONALIZE & SUPPORT</h3>
+            <div class="info-panel panel-small">
+                <h3 style="color:var(--unicorn); border-bottom: 2px solid var(--unicorn); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">✨ PERSONALIZE & SUPPORT</h3>
                 
                 <p class="text-sm" style="text-align:justify; margin-bottom:10px;">
                     Want to be the star of the game? For a qualifying donation, you can personalize the final level (Unicorn Area)! 
@@ -235,21 +262,22 @@
             </div>
 
             <div class="legal-box"> 
-                <h4 style="color:#aaa; text-align:center; margin-bottom:5px; font-family:'Orbitron'; letter-spacing:1px;">⚖️ LEGAL NOTICE</h4>
-                <p class="text-sm" style="text-align:center; color:#ddd; font-size:12px;">
-                    Private, non-commercial project. Donations are voluntary gifts.<br>
-                    © 2026 DOGGYCO GLOBAL ACADEMY. All Rights Reserved.<br>
-                    Concept, Development & Design entirely by M. Čujko.
+                <h4 style="color:#aaa; text-align:center; margin-bottom:8px; font-family:'Orbitron'; letter-spacing:1px; font-size: 16px;">⚖️ LEGAL NOTICE</h4>
+                <p class="text-sm" style="text-align:center; color:#ddd; font-size:12px; line-height: 1.8;">
+                    Private, non-commercial project.<br>Donations are voluntary gifts.<br>
+                    © 2026 DOGGYCO GLOBAL ACADEMY.<br>All Rights Reserved.<br>
+                    Concept, Development & Design<br>entirely by M. Čujko.
                 </p>
             </div>
         </div>
     </div>
 
     <div id="scr-end" class="screen" style="display:none">
-        <div class="screen-inner" style="justify-content:center;"> 
-            <h2 id="end-title" class="red-neon-text" style="font-size:28px; margin-bottom:10px;">MISSION FAILED</h2> 
-            <h3 id="end-agent-name" class="neon-text" style="font-size:36px; letter-spacing:2px; margin-bottom:10px;">AGENT</h3> 
-            <h1 id="f-score" style="font-size:55px; color:var(--gold); margin:0 0 25px 0; text-shadow: 0 0 20px var(--gold);">0 PTS</h1> 
+        <div class="screen-inner"> 
+            <div id="end-game-title">DOGGYCO MISSION</div>
+            <h2 id="end-title" class="end-status red-neon-text">MISSION FAILED</h2> 
+            <h3 id="end-agent-name">AGENT</h3> 
+            <h1 id="f-score">0 PTS</h1> 
             <button class="btn-main" onclick="location.reload()">MAIN MENU</button> 
         </div>
     </div>
@@ -381,6 +409,21 @@ function sfxShield() {
         gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    } catch(e){}
+}
+
+// UPDATE: Kurzer, unregelmäßiger Geigerzähler-Klick
+function sfxGeigerClick() {
+    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
+    try {
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(800 + Math.random()*400, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.02);
     } catch(e){}
 }
 
@@ -594,8 +637,10 @@ function loop(t) {
     let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
     let ptsScaling = speedMult; 
 
+    // UPDATE: Geigerzähler-Logik für aktiven Schild
     if(invincibleTimer > 0) {
         invincibleTimer -= dt;
+        if(Math.random() < 0.15) sfxGeigerClick(); // Spielt unregelmäßige Klicks ab!
         if(invincibleTimer < 0) invincibleTimer = 0;
     }
 
@@ -649,13 +694,12 @@ function loop(t) {
                     document.getElementById("game-wrap").style.pointerEvents = "none";
                     document.getElementById("game-wrap").style.visibility = "hidden";
                     document.getElementById("scr-end").style.display = "flex";
-                    document.getElementById("end-agent-name").innerText = agent + " - HERO!";
+                    document.getElementById("end-agent-name").innerText = "AGENT " + agent;
                     document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
                     
                     let endT = document.getElementById("end-title");
                     endT.innerText = "MISSION ACCOMPLISHED";
-                    endT.style.color = "var(--green)";
-                    endT.style.textShadow = "0 0 10px var(--green), 0 0 20px var(--green)";
+                    endT.className = "end-status green-neon-text";
                     
                     saveScoreAndRefresh(Math.floor(score));
                 }, burstDelay + 3000); 
@@ -746,7 +790,8 @@ function loop(t) {
         ctx.restore();
         
         if (Math.abs(fallingCore.x - playerX) < 40 && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
-            invincibleTimer = 7.0; 
+            // UPDATE: Schild hält jetzt volle 10 Sekunden!
+            invincibleTimer = 10.0; 
             charJump = 20;
             sfxShield();
             
@@ -770,18 +815,15 @@ function loop(t) {
         if(o.x < -50) opponents.splice(i, 1);
     });
 
-    // UFO UPDATE: Strahl bewegt sich jetzt exakt synchron mit dem UFO!
     for(let i = ufos.length - 1; i >= 0; i--) {
         let u = ufos[i];
         if(!missionComplete) u.x -= u.s * dt;
         
-        // Berechne die exakte y-Position inkl. der Schwebe-Bewegung
         let ufoY = u.y + Math.sin(t / 150) * 10;
         
         ctx.save();
         ctx.fillStyle = "rgba(0, 255, 136, 0.4)"; 
         ctx.beginPath();
-        // Der Strahl startet jetzt bei ufoY, nicht beim statischen u.y!
         ctx.moveTo(u.x - 15, ufoY + 10);
         ctx.lineTo(u.x + 15, ufoY + 10);
         ctx.lineTo(u.x + 45, u.y + H);
@@ -934,13 +976,12 @@ function loop(t) {
             ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
             
             document.getElementById("scr-end").style.display = "flex";
-            document.getElementById("end-agent-name").innerText = agent; 
+            document.getElementById("end-agent-name").innerText = "AGENT " + agent; 
             document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
             
             let endT = document.getElementById("end-title");
             endT.innerText = "MISSION FAILED";
-            endT.style.color = "var(--red)";
-            endT.style.textShadow = "0 0 10px var(--red), 0 0 20px var(--red)";
+            endT.className = "end-status red-neon-text";
 
             saveScoreAndRefresh(Math.floor(score));
         }, 1500); 
