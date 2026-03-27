@@ -318,7 +318,8 @@ let systemActive = false;
 function forceAudioStart() {
     if(!systemActive) { systemActive = true; initSynth(); }
     if(bgMusic.paused) {
-        bgMusic.playbackRate = 0.85; // Sicherstellen, dass Musik bei 85% startet
+        // UPDATE: Startet immer sauber bei 100% im Menü!
+        bgMusic.playbackRate = 1.0; 
         bgMusic.play().catch(e => {});
     }
 }
@@ -639,13 +640,8 @@ function loop(t) {
     let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
     let ptsScaling = speedMult; 
 
-    // UPDATE: Dynamische Musik-Geschwindigkeit (Sanfter Lerp)
-    let targetRate = 1.0;
-    if (capLvl <= 6) {
-        targetRate = 0.85 + ((capLvl - 1) * 0.03); // Level 1 (0.85) bis Level 6 (1.0)
-    } else {
-        targetRate = 1.0 + ((capLvl - 6) * 0.025); // Level 6 (1.0) bis Level 12 (1.15)
-    }
+    // UPDATE: Mathe für -8% bis +8% (0.92 bis 1.08)
+    let targetRate = 0.92 + ((capLvl - 1) / 11) * 0.16;
     
     if (bgMusic && !bgMusic.paused) {
         // Weicher Übergang zur neuen Ziel-Geschwindigkeit
