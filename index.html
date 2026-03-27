@@ -94,7 +94,6 @@
         .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
-        /* UPDATE: Alle 3 scrollbaren Menüs haben jetzt exakt dieselbe Größe (240px) */
         .panel-standard { height: 240px; overflow-y: auto; padding-right: 10px; flex-shrink: 0; }
         .panel-standard::-webkit-scrollbar { width: 6px; }
         
@@ -140,7 +139,6 @@
         #end-game-title { font-size: 20px; color: #aaa; letter-spacing: 4px; margin-bottom: 15px; font-weight: 900; text-align: center; }
         .end-status { font-size: 38px; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; text-align: center; font-weight: 900;}
         
-        /* UPDATE: Agenten-Name Feld - Kein "Agent" mehr, nur der Name */
         #end-agent-name { font-size: 28px; color: #fff; margin-bottom: 25px; letter-spacing: 3px; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 12px; text-align: center;}
         
         #f-score { font-size: 60px; color: var(--gold); margin: 0 0 35px 0; text-shadow: 0 0 25px var(--gold), 2px 2px 5px #000; text-align: center; font-weight: 900; }
@@ -289,7 +287,6 @@
 <audio id="snd-action" src="music.mp3" loop></audio> 
 
 <script>
-// UPDATE: Musik um 15% leiser gemacht (vorher 0.15, jetzt 0.05). Soundeffekte knallen dadurch mehr!
 document.querySelectorAll('audio').forEach(a => a.volume = 0.05);
 let bgMusic = document.getElementById("snd-action");
 bgMusic.volume = 0.05; 
@@ -320,7 +317,10 @@ let systemActive = false;
 
 function forceAudioStart() {
     if(!systemActive) { systemActive = true; initSynth(); }
-    if(bgMusic.paused) bgMusic.play().catch(e => {});
+    if(bgMusic.paused) {
+        bgMusic.playbackRate = 0.85; // Sicherstellen, dass Musik bei 85% startet
+        bgMusic.play().catch(e => {});
+    }
 }
 
 document.body.addEventListener('click', forceAudioStart, { once: true });
@@ -639,10 +639,17 @@ function loop(t) {
     let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
     let ptsScaling = speedMult; 
 
-    // UPDATE: Musik passt sich dynamisch an die Spielgeschwindigkeit an!
+    // UPDATE: Dynamische Musik-Geschwindigkeit (Sanfter Lerp)
+    let targetRate = 1.0;
+    if (capLvl <= 6) {
+        targetRate = 0.85 + ((capLvl - 1) * 0.03); // Level 1 (0.85) bis Level 6 (1.0)
+    } else {
+        targetRate = 1.0 + ((capLvl - 6) * 0.025); // Level 6 (1.0) bis Level 12 (1.15)
+    }
+    
     if (bgMusic && !bgMusic.paused) {
-        // Startet bei 1.0x Tempo, endet bei ca. 1.55x Tempo in Level 12
-        bgMusic.playbackRate = 1.0 + ((capLvl - 1) * 0.05); 
+        // Weicher Übergang zur neuen Ziel-Geschwindigkeit
+        bgMusic.playbackRate += (targetRate - bgMusic.playbackRate) * 2.0 * dt; 
     }
 
     if(invincibleTimer > 0) {
@@ -701,7 +708,6 @@ function loop(t) {
                     document.getElementById("game-wrap").style.pointerEvents = "none";
                     document.getElementById("game-wrap").style.visibility = "hidden";
                     document.getElementById("scr-end").style.display = "flex";
-                    // UPDATE: Nur noch der Agenten-Name, ohne das Wort "AGENT"
                     document.getElementById("end-agent-name").innerText = agent;
                     document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
                     
@@ -983,7 +989,6 @@ function loop(t) {
             ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
             
             document.getElementById("scr-end").style.display = "flex";
-            // UPDATE: Zeigt nur noch den puren Namen an!
             document.getElementById("end-agent-name").innerText = agent; 
             document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
             
