@@ -287,13 +287,20 @@
 <audio id="snd-action" src="music.mp3" loop></audio> 
 
 <script>
-// Die Audio-Lautstärke wird in iOS Safari über die Hardware-Tasten gesteuert,
-// weswegen wir für iOS einen extra GainNode in WebAudio unten im Code eingebaut haben!
-let bgMusic = document.getElementById("snd-action");
+// KUGELSICHER: Alle Audio-Einstellungen werden im Try-Block ausgeführt
+try {
+    document.querySelectorAll('audio').forEach(a => a.volume = 0.05);
+    let bgMusic = document.getElementById("snd-action");
+    if(bgMusic) bgMusic.volume = 0.05; 
+} catch(e) {}
 
 window.onload = function() {
-    let savedName = localStorage.getItem("doggycoAgent");
-    if(savedName) { document.getElementById("pName").value = savedName; }
+    try {
+        let savedName = localStorage.getItem("doggycoAgent");
+        if(savedName && document.getElementById("pName")) { 
+            document.getElementById("pName").value = savedName; 
+        }
+    } catch(e) {}
 
     setTimeout(() => {
         if (navigator.onLine) {
@@ -316,42 +323,64 @@ window.onload = function() {
 let systemActive = false;
 let musicRouted = false;
 
-// UPDATE: HIER WIRD DIE IPHONE-LAUTSTÄRKE GEZWUNGEN (GainNode WebAudio API)
+// KUGELSICHER: Audio Start-Routine für strenges iOS
 function forceAudioStart() {
     if(!systemActive) { systemActive = true; initSynth(); }
     
-    if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
+    try {
+        if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
+    } catch(e) {}
 
-    if(!musicRouted && audioCtx && bgMusic) {
-        try {
+    // IOS FIX: Wir erzwingen über WebAudio die Lautstärke
+    try {
+        let bgMusic = document.getElementById("snd-action");
+        if(!musicRouted && audioCtx && bgMusic) {
             let source = audioCtx.createMediaElementSource(bgMusic);
             let gainNode = audioCtx.createGain();
-            // ZWINGT DAS IPHONE AUF 5% LAUTSTÄRKE!
             gainNode.gain.value = 0.05; 
             source.connect(gainNode);
             gainNode.connect(audioCtx.destination);
             musicRouted = true;
-        } catch(e) {
-            // Falls das Handy lokale Dateien sperrt
-            musicRouted = true;
-            bgMusic.volume = 0.05;
         }
+    } catch(e) {
+        musicRouted = true;
     }
 
-    if(bgMusic.paused) {
-        bgMusic.playbackRate = 1.0; 
-        bgMusic.play().catch(e => {});
-    }
+    try {
+        let bgMusic = document.getElementById("snd-action");
+        if(bgMusic && bgMusic.paused) {
+            bgMusic.playbackRate = 1.0; 
+            bgMusic.play().catch(err => {});
+        }
+    } catch(e) {}
 }
 
 document.body.addEventListener('click', forceAudioStart, { once: true });
 document.body.addEventListener('touchstart', forceAudioStart, { once: true });
 
+// KUGELSICHER: Authentifizierung
+function authAgent() {
+    forceAudioStart(); 
+    let pNameElement = document.getElementById("pName");
+    if(pNameElement) {
+        let n = pNameElement.value.trim().toUpperCase();
+        if(n) {
+            agent = n;
+            try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
+            
+            document.getElementById("scr-name").style.display = "none";
+            document.getElementById("scr-start").style.display = "flex";
+            startMenuMusic(); 
+        }
+    }
+}
+
 function triggerMove(dir, btnId) {
     if(!active || missionComplete) return;
     
-    // IOS FIX: Hält Audio-Engine wach!
-    if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
+    try {
+        if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
+    } catch(e) {}
     
     hapticMove(); 
     move(dir);
@@ -380,11 +409,13 @@ let menuStep = 0;
 const menuNotes = [110, 110, 220, 110, 110, 146.83, 164.81, 146.83];
 
 function initSynth() {
-    if (!audioCtx) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if(AudioContext) audioCtx = new AudioContext();
-    }
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    try {
+        if (!audioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if(AudioContext) audioCtx = new AudioContext();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    } catch(e) {}
 }
 
 function playTone(freq, type, duration, vol=0.1) {
@@ -415,39 +446,28 @@ function sfxUfo() {
     } catch(e){}
 }
 
-// UPDATE: NEUER RAKETEN SOUND (Gewaltiges Start-Rauschen mit White Noise Simulation)
 function sfxRocket() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
         let t = audioCtx.currentTime;
-        let bufferSize = audioCtx.sampleRate * 2.0; 
-        let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        let data = buffer.getChannelData(0);
-        // Wir füllen einen Puffer mit zufälligem Rauschen (White Noise)
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-        }
-        
-        let noise = audioCtx.createBufferSource();
-        noise.buffer = buffer;
-        
+        let osc = audioCtx.createOscillator();
         let filter = audioCtx.createBiquadFilter();
-        filter.type = 'lowpass';
-        // Tiefer, satter Sound, der sich öffnet
-        filter.frequency.setValueAtTime(50, t);
-        filter.frequency.exponentialRampToValueAtTime(1500, t + 0.8); // Rakete zischt vorbei
-        filter.frequency.exponentialRampToValueAtTime(100, t + 2.0); // Verblasst in der Ferne
-        
         let gain = audioCtx.createGain();
+        
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(100, t);
+        osc.frequency.exponentialRampToValueAtTime(20, t + 1.0);
+        
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, t);
+        filter.frequency.exponentialRampToValueAtTime(100, t + 1.0);
+
         gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(0.4, t + 0.2); // Rauschen wird schnell laut
-        gain.gain.exponentialRampToValueAtTime(0.01, t + 2.0);
+        gain.gain.linearRampToValueAtTime(0.2, t + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 1.0);
         
-        noise.connect(filter); 
-        filter.connect(gain); 
-        gain.connect(audioCtx.destination);
-        
-        noise.start(t);
+        osc.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(t); osc.stop(t + 1.0);
     } catch(e){}
 }
 
@@ -563,15 +583,21 @@ function updateTheme(newMode) {
     document.documentElement.style.setProperty('--neon', col);
     
     let mTitle = document.getElementById("mission-title");
-    mTitle.innerText = titles[newMode];
-    mTitle.style.color = col;
-    mTitle.style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
+    if(mTitle) {
+        mTitle.innerText = titles[newMode];
+        mTitle.style.color = col;
+        mTitle.style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
+    }
     
     document.querySelectorAll('.app-title').forEach(el => { el.style.color = col; el.style.textShadow = `0 0 20px ${col}`; });
     document.querySelectorAll('.info-panel, .name-input, .btn-char').forEach(p => { p.style.borderColor = col; });
-    document.getElementById("phone-container").style.borderColor = col;
-    document.getElementById("phone-container").style.boxShadow = `0 0 50px ${col}60`;
-    document.getElementById("stats-bar").style.borderColor = col;
+    let pCont = document.getElementById("phone-container");
+    if(pCont) {
+        pCont.style.borderColor = col;
+        pCont.style.boxShadow = `0 0 50px ${col}60`;
+    }
+    let sBar = document.getElementById("stats-bar");
+    if(sBar) sBar.style.borderColor = col;
 }
 
 function start(m, startLvl) {
@@ -593,9 +619,14 @@ function start(m, startLvl) {
     initBackgroundGraphics(); 
     updateTheme(mode);
     
-    document.getElementById("scr-start").style.display = "none";
-    document.getElementById("game-wrap").style.visibility = "visible";
-    document.getElementById("game-wrap").style.pointerEvents = "auto";
+    let scrStart = document.getElementById("scr-start");
+    let gameWrap = document.getElementById("game-wrap");
+    
+    if(scrStart) scrStart.style.display = "none";
+    if(gameWrap) {
+        gameWrap.style.visibility = "visible";
+        gameWrap.style.pointerEvents = "auto";
+    }
     
     stopMenuMusic(); 
     
@@ -972,7 +1003,6 @@ function loop(t) {
         ctx.font = "50px Arial";
         ctx.textAlign = "center";
         
-        // IOS FIX: Sanftes Blinken per Sinuswelle (schont die CPU und flackert nicht)
         let shieldAlpha = 0.4 + 0.6 * Math.abs(Math.sin(t / 150)); 
         ctx.fillStyle = `rgba(173, 255, 47, ${shieldAlpha})`; 
         
@@ -1023,7 +1053,7 @@ function loop(t) {
             endT.innerText = "MISSION FAILED";
             endT.className = "end-status red-neon-text";
 
-            saveScoreAndRefresh(Math.floor(score));
+            try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
         }, 1500); 
         
         return; 
@@ -1041,9 +1071,11 @@ function copyBTC(btn) {
     btn.style.color = "#00ff88"; 
     btn.style.borderColor = "#00ff88";
     setTimeout(() => { 
-        btn.innerText = oldTxt; 
-        btn.style.color = "var(--gold)"; 
-        btn.style.borderColor = "var(--gold)"; 
+        if(btn) {
+            btn.innerText = oldTxt; 
+            btn.style.color = "var(--gold)"; 
+            btn.style.borderColor = "var(--gold)"; 
+        }
     }, 2000);
 }
 </script>
