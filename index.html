@@ -76,19 +76,27 @@
 
         header { width: 100%; flex-shrink: 0; text-align: center; display: flex; justify-content: center; margin-bottom: 20px;}
 
-        /* UPDATE: Titel-Box komplett ohne Rahmen, nur milchiges Glas */
-        .title-box {
-            background: rgba(255, 255, 255, 0.08); /* Sehr dezentes, milchiges Weiß */
+        /* BEIDE KÄSTEN HABEN JETZT EXAKT DEN GLEICHEN MILCHIGEN EFFEKT (Screenshot Wunsch) */
+        .title-box, #auth-panel {
+            background: rgba(255, 255, 255, 0.08); 
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            padding: 15px 30px;
             border-radius: 20px;
-            border: none; /* KOMPLETT OHNE RAHMEN */
-            box-shadow: none; /* KEIN SCHATTEN AUF DER BOX */
-            display: inline-block;
+            border: none; 
+            box-shadow: none; 
         }
+
+        .title-box { padding: 15px 30px; display: inline-block; }
         
-        /* UPDATE: Nur der Text pulsiert und leuchtet */
+        #auth-panel { 
+            width: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px;
+            flex-shrink: 0;
+        }
+
         .app-title { 
             font-size: clamp(24px, 8vw, 36px); 
             color: var(--gold); 
@@ -103,10 +111,7 @@
             100% { text-shadow: 0 0 25px var(--gold), 0 0 40px #fff; transform: scale(1.05); }
         }
 
-        .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; flex-shrink: 0; }
-        .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 20px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
-        
-        #auth-panel { background: transparent; border: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; margin-top: 10px; }
+        #auth-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 20px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
 
         .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; text-shadow: 1px 1px 5px #000; box-shadow: none; outline: none; }
         .name-input:focus { border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
@@ -119,7 +124,9 @@
         .btn-char:hover { background: rgba(255,255,255,0.2); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
-        .info-panel { width: 100%; background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); flex-shrink: 0; }
+        /* UPDATE: height: auto macht, dass alles komplett sichtbar ist, kein Box-Scrollen mehr! */
+        .info-panel { width: 100%; height: auto; background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); flex-shrink: 0; }
+        .info-panel h3 { border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
         
         .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; }
         .rank-gold { color: var(--gold); font-size: 18px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
@@ -127,17 +134,14 @@
         .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
-        .panel-standard { height: 240px; overflow-y: auto; padding-right: 10px; flex-shrink: 0; overscroll-behavior: contain; }
-        .panel-standard::-webkit-scrollbar { width: 6px; }
-        
         .panel-gold { border-color: var(--gold) !important; box-shadow: 0 0 15px rgba(255,215,0,0.2) !important; }
-        .panel-gold::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+        .panel-gold h3 { color: var(--gold); border-bottom-color: var(--gold); }
         
         .panel-neon { border-color: var(--neon) !important; box-shadow: 0 0 15px rgba(0,242,255,0.2) !important; }
-        .panel-neon::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
+        .panel-neon h3 { color: var(--neon); border-bottom-color: var(--neon); }
         
         .panel-unicorn { border-color: var(--unicorn) !important; box-shadow: 0 0 15px rgba(255,0,255,0.2) !important; }
-        .panel-unicorn::-webkit-scrollbar-thumb { background: var(--unicorn); border-radius: 3px; }
+        .panel-unicorn h3 { color: var(--unicorn); border-bottom-color: var(--unicorn); }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; flex-shrink: 0; }
         .btn-sup { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
@@ -222,7 +226,7 @@
                     <h1 class="app-title">DOGGYCO MISSION</h1>
                 </div>
             </header>
-            <div id="auth-panel" class="inner-panel">
+            <div id="auth-panel">
                 <div id="dog-head-icon">🐶</div> 
                 <h2>MISSION BRIEFING</h2> 
                 <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
@@ -239,7 +243,7 @@
                 </div>
             </header>
             
-            <div class="inner-panel info-panel">
+            <div class="info-panel" style="display: flex; flex-direction: column; align-items: center;">
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">CHOOSE START LEVEL</h3>
                 <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
@@ -257,13 +261,13 @@
                 </div>
             </div>
 
-            <div class="info-panel panel-standard panel-gold">
-                <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">🏆 GLOBAL HALL OF FAME</h3>
+            <div class="info-panel panel-gold">
+                <h3>🏆 GLOBAL HALL OF FAME</h3>
                 <div id="leaderboard" class="text-sm" style="text-align:center;">Checking Connection...</div>
             </div>
 
-            <div class="info-panel panel-standard panel-neon">
-                <h3 style="color:var(--neon); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">📖 MISSION DIRECTIVES</h3>
+            <div class="info-panel panel-neon">
+                <h3>📖 MISSION DIRECTIVES</h3>
                 <ul class="rules text-sm">
                     <li><b>Navigation:</b> Use <b>Arrows ◀ ▶</b> to evade hazards.</li>
                     <li><b>Environments:</b> Scenery adapts every 2 levels.</li>
@@ -277,9 +281,8 @@
                 </ul>
             </div>
 
-            <div class="info-panel panel-standard panel-unicorn">
-                <h3 style="color:var(--unicorn); border-bottom: 2px solid var(--unicorn); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">✨ PERSONALIZE & SUPPORT</h3>
-                
+            <div class="info-panel panel-unicorn">
+                <h3>✨ PERSONALIZE & SUPPORT</h3>
                 <p class="text-sm" style="text-align:justify; margin-bottom:10px;">
                     Want to be the star of the game? For a qualifying donation, you can personalize the final level (Unicorn Area)! 
                     We will replace the unicorn with <b>YOUR custom face or icon</b>. Pick your own favorite items to catch (like 🍔 Burgers, 🍟 Fries, or 💵 Dollars).
@@ -328,8 +331,10 @@
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
 
 <script>
-// Lautstärke für das gesamte Spiel (Effekte und MP3)
-let bgMusic = document.getElementById("snd-action");
+try {
+    let bgMusic = document.getElementById("snd-action");
+    if(bgMusic) bgMusic.volume = 0.05; 
+} catch(e) {}
 
 window.onload = function() {
     try {
@@ -338,6 +343,13 @@ window.onload = function() {
             document.getElementById("pName").value = savedName; 
         }
     } catch(e) {}
+
+    // FIX PC AUDIO: Tippen im Feld startet das Audio-System
+    let pNameField = document.getElementById("pName");
+    if(pNameField) {
+        pNameField.addEventListener('input', forceAudioStart, { once: true });
+        pNameField.addEventListener('click', forceAudioStart, { once: true });
+    }
 
     setTimeout(() => {
         if (navigator.onLine) {
@@ -358,35 +370,16 @@ window.onload = function() {
 }
 
 let systemActive = false;
-let mp3Unlocked = false;
 
-// WICHTIG: Startet nur die sanfte Menü-Melodie, schaltet iOS-Audio frei, spielt aber NOCH NICHT die Action-MP3!
 function forceAudioStart() {
     if(!systemActive) { 
         systemActive = true; 
         initSynth(); 
-        startMenuMusic(); // Startet den weichen, ambienten Menü-Sound
+        startMenuMusic(); 
     }
     
     try {
         if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
-    } catch(e) {}
-
-    // iOS/Browser-Sicherheit: Wir "entsperren" die MP3 beim ersten Klicken, pausieren sie aber sofort wieder
-    try {
-        if(bgMusic && !mp3Unlocked) {
-            bgMusic.volume = 0.05;
-            let playPromise = bgMusic.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    if (!active) { // Wenn das Spiel noch nicht gestartet wurde
-                        bgMusic.pause();
-                        bgMusic.currentTime = 0;
-                    }
-                    mp3Unlocked = true;
-                }).catch(error => {});
-            }
-        }
     } catch(e) {}
 }
 
@@ -443,7 +436,6 @@ function hapticGameOver() { triggerVibration([500, 100, 500]); }
 let audioCtx = null;
 let menuMusicTimer = null;
 let menuStep = 0;
-// Eine sehr sanfte, weiche und langsame Tonabfolge (Pentatonisch Ambient)
 const menuNotes = [261.63, 329.63, 392.00, 440.00, 392.00, 329.63]; 
 
 function initSynth() {
@@ -456,7 +448,8 @@ function initSynth() {
     } catch(e) {}
 }
 
-function playTone(freq, type, duration, vol=0.3) {
+// UPDATE: Original Game Sounds (nicht verfälscht)
+function playTone(freq, type, duration, vol=0.1) {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
         const osc = audioCtx.createOscillator();
@@ -464,12 +457,13 @@ function playTone(freq, type, duration, vol=0.3) {
         osc.type = type; 
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
         
-        // Weicher Ton-Einstieg für sanfte Menü-Musik (Sine-Wellen)
-        if (type === 'sine') {
+        if (type === 'sine' && duration > 1.0) {
+            // Sanfte Hüllkurve für Menü-Musik
             gain.gain.setValueAtTime(0, audioCtx.currentTime);
             gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.1);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
         } else {
+            // Harter Attack für Game-Sounds
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
         }
@@ -479,17 +473,15 @@ function playTone(freq, type, duration, vol=0.3) {
     } catch(e) {}
 }
 
-// Die sanfte Menü-Melodie
 function playMenuNote() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     let freq = menuNotes[menuStep % menuNotes.length];
     
-    // Spielt einen tiefen Basis-Ton und einen hellen Melodie-Ton (Sehr entspannend)
-    playTone(freq / 2, 'sine', 2.0, 0.02); 
-    playTone(freq, 'sine', 1.5, 0.03);     
+    playTone(freq / 2, 'sine', 2.0, 0.05); 
+    playTone(freq, 'sine', 1.5, 0.05);     
     
     menuStep++;
-    menuMusicTimer = setTimeout(playMenuNote, 1000); // Sehr langsames, ruhiges Tempo
+    menuMusicTimer = setTimeout(playMenuNote, 1000); 
 }
 
 function startMenuMusic() { if(!systemActive) return; initSynth(); if(!menuMusicTimer) { menuStep = 0; playMenuNote(); } }
@@ -503,7 +495,7 @@ function sfxUfo() {
         osc.type = 'sine'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 1);
         osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 2);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime); 
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime); 
         gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + 2);
@@ -566,7 +558,7 @@ function sfxShield() {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(200, audioCtx.currentTime);
         osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
         gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + 0.3);
@@ -582,17 +574,17 @@ function sfxAlarm() {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(600, t);
         osc.frequency.linearRampToValueAtTime(400, t + 0.4);
-        gain.gain.setValueAtTime(0.2, t); 
+        gain.gain.setValueAtTime(0.05, t); 
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(t); osc.stop(t + 0.4);
     } catch(e){}
 }
 
-function sfxCollect() { playTone(600, 'sine', 0.1, 0.3); setTimeout(() => playTone(1200, 'sine', 0.15, 0.3), 80); }
-function sfxStarCollect() { [800, 1000, 1200].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.1, 0.3), i*50)); } 
-function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.4); setTimeout(() => playTone(100, 'square', 0.4, 0.4), 100); }
-function sfxLevelUp() { [400, 500, 600, 800].forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.2, 0.3), i*100)); }
+function sfxCollect() { playTone(600, 'sine', 0.1, 0.1); setTimeout(() => playTone(1200, 'sine', 0.15, 0.1), 80); }
+function sfxStarCollect() { [800, 1000, 1200].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.1, 0.1), i*50)); } 
+function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.2); setTimeout(() => playTone(100, 'square', 0.4, 0.2), 100); }
+function sfxLevelUp() { [400, 500, 600, 800].forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.2, 0.1), i*100)); }
 
 const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
@@ -681,7 +673,6 @@ function updateTheme(newMode) {
 function start(m, startLvl) {
     forceAudioStart(); 
     
-    // UPDATE: Stoppt die softe Menü-Musik und SCHALTET JETZT ERST DIE ACTION-MP3 AN!
     stopMenuMusic();
     try {
         let bgMusic = document.getElementById("snd-action");
