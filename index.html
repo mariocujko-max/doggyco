@@ -17,21 +17,19 @@
             --glass: rgba(255, 255, 255, 0.15); 
         }
         
-        /* ANDROID OPTIMIERUNG: Verhindert Textmarkierung und Browser-Gesten beim schnellen Tippen */
         * { 
             margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; outline: none; 
             user-select: none; -webkit-user-select: none; 
         }
         
-        /* Das Input-Feld muss Textauswahl erlauben, sonst kann man nichts tippen */
         input[type="text"] { user-select: auto; -webkit-user-select: auto; }
 
         body { 
             background: #111; font-family: 'Orbitron', sans-serif; color: #fff; 
             width: 100vw; height: 100dvh; overflow: hidden; 
             display: flex; justify-content: center; align-items: center; 
-            touch-action: none; /* Blockiert Wischgesten auf Seitenebene */
+            touch-action: none; 
         }
 
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
@@ -296,10 +294,9 @@
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
 
 <script>
-// ANDROID APP FIX: Ganz normales HTML5 Audio verwenden. Keine Hacks.
 try {
     let bgMusic = document.getElementById("snd-action");
-    if(bgMusic) bgMusic.volume = 0.05; // 5% Lautstärke ist für Android WebView perfekt!
+    if(bgMusic) bgMusic.volume = 0.05; 
 } catch(e) {}
 
 window.onload = function() {
@@ -330,7 +327,6 @@ window.onload = function() {
 
 let systemActive = false;
 
-// Audio Start Funktion
 function forceAudioStart() {
     if(!systemActive) { systemActive = true; initSynth(); }
     
@@ -341,7 +337,7 @@ function forceAudioStart() {
     try {
         let bgMusic = document.getElementById("snd-action");
         if(bgMusic && bgMusic.paused) {
-            bgMusic.volume = 0.05; // Sicherheitshalber nochmal setzen
+            bgMusic.volume = 0.05; 
             bgMusic.playbackRate = 1.0; 
             bgMusic.play().catch(err => {});
         }
@@ -367,13 +363,20 @@ function authAgent() {
     }
 }
 
+// WICHTIG: Die Move-Funktion ist wieder da!
+function move(dir) {
+    if(!active) return;
+    currLane = Math.max(0, Math.min(4, currLane + dir));
+    targetX = lanes[currLane]; 
+}
+
 function triggerMove(dir, btnId) {
     if(!active || missionComplete) return;
     
     try { if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); } } catch(e) {}
     
     hapticMove(); 
-    move(dir);
+    move(dir); // Hier wurde sie aufgerufen
     let btn = document.getElementById(btnId);
     if(btn) { btn.classList.add("glow"); setTimeout(() => btn.classList.remove("glow"), 150); }
 }
@@ -384,7 +387,6 @@ window.addEventListener("keydown", function(e) {
     if(e.key === "ArrowRight") triggerMove(1, 'btn-right');
 });
 
-// Android Haptic Feedback
 function triggerVibration(pattern) {
     if (!("vibrate" in navigator)) return;
     try { navigator.vibrate(pattern); } catch(e) { try { navigator.vibrate(100); } catch(err) {} }
@@ -409,7 +411,6 @@ function initSynth() {
     } catch(e) {}
 }
 
-// Sound Effekte (SFX) bleiben schön laut, um die 5% Musik zu übertönen
 function playTone(freq, type, duration, vol=0.3) {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
