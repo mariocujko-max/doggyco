@@ -287,7 +287,6 @@
 <audio id="snd-action" src="music.mp3" loop></audio> 
 
 <script>
-// Lautstärke dauerhaft auf sehr leise (5%) stellen, damit Effekte besser hörbar sind
 document.querySelectorAll('audio').forEach(a => a.volume = 0.05);
 let bgMusic = document.getElementById("snd-action");
 bgMusic.volume = 0.05; 
@@ -319,17 +318,36 @@ let systemActive = false;
 function forceAudioStart() {
     if(!systemActive) { systemActive = true; initSynth(); }
     
-    // UPDATE: iOS Audio Fix - weckt das Audio-System beim Klicken auf
+    // UPDATE: WICHTIGER IOS FIX! (Weckt das Audiosystem sofort auf)
     if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
 
     if(bgMusic.paused) {
-        bgMusic.playbackRate = 0.95; // Startet bei -5% im Spiel
+        // UPDATE: Startet immer stabil bei 100%, keine Anpassungen mehr!
+        bgMusic.playbackRate = 1.0; 
         bgMusic.play().catch(e => {});
     }
 }
 
 document.body.addEventListener('click', forceAudioStart, { once: true });
 document.body.addEventListener('touchstart', forceAudioStart, { once: true });
+
+function triggerMove(dir, btnId) {
+    if(!active || missionComplete) return;
+    
+    // IOS FIX: Jedes Drücken stellt sicher, dass das Audiosystem wach bleibt!
+    if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
+    
+    hapticMove(); 
+    move(dir);
+    let btn = document.getElementById(btnId);
+    if(btn) { btn.classList.add("glow"); setTimeout(() => btn.classList.remove("glow"), 150); }
+}
+
+window.addEventListener("keydown", function(e) {
+    if(!active || missionComplete) return;
+    if(e.key === "ArrowLeft") triggerMove(-1, 'btn-left');
+    if(e.key === "ArrowRight") triggerMove(1, 'btn-right');
+});
 
 function triggerVibration(pattern) {
     if (!("vibrate" in navigator)) return;
@@ -420,7 +438,6 @@ function sfxShield() {
     } catch(e){}
 }
 
-// UPDATE: Perfekter AKW-Störfall Sirenen-Sound (Ruckelfrei optimiert)
 function sfxAlarm() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -492,7 +509,7 @@ let entities = [], floaters = [], permSpiders = [], fireworks = [], lastT = 0;
 let clouds = [], opponents = [], ufos = []; 
 
 let invincibleTimer = 0;
-let alarmTimer = 0; // Timer für AKW Sound
+let alarmTimer = 0; 
 let rocketSpawned = false;
 let ufoSpawned = false;
 let rocket = null;
@@ -510,20 +527,6 @@ function initBackgroundGraphics() {
     currentOpponentIcon = ops[Math.floor(Math.random()*ops.length)];
     opponents = []; ufos = [];
 }
-
-function triggerMove(dir, btnId) {
-    if(!active || missionComplete) return;
-    hapticMove(); 
-    move(dir);
-    let btn = document.getElementById(btnId);
-    if(btn) { btn.classList.add("glow"); setTimeout(() => btn.classList.remove("glow"), 150); }
-}
-
-window.addEventListener("keydown", function(e) {
-    if(!active || missionComplete) return;
-    if(e.key === "ArrowLeft") triggerMove(-1, 'btn-left');
-    if(e.key === "ArrowRight") triggerMove(1, 'btn-right');
-});
 
 function authAgent() {
     forceAudioStart(); 
@@ -640,7 +643,6 @@ function loop(t) {
     let dt = (t - lastT) / 1000; lastT = t;
     if(dt > 0.1) dt = 0.016;
 
-    // UPDATE: Schatten komplett ausschalten, bevor der Hintergrund gelöscht wird (Massiver Grafik-Boost!)
     ctx.shadowBlur = 0; 
     ctx.clearRect(0,0,W,H);
 
@@ -651,21 +653,12 @@ function loop(t) {
     let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
     let ptsScaling = speedMult; 
 
-    // UPDATE: Mathe für -5% bis +5% (0.95 bis 1.05) Musik-Tempo
-    let targetRate = 0.95 + ((capLvl - 1) / 11) * 0.10;
-    
-    // UPDATE: iOS Audio Stotter Fix (Bremst das ständige Senden von Geschwindigkeits-Updates an den Chip)
-    if (bgMusic && !bgMusic.paused) {
-        if (Math.abs(bgMusic.playbackRate - targetRate) > 0.01) {
-            bgMusic.playbackRate += (targetRate - bgMusic.playbackRate) * 2.0 * dt; 
-        }
-    }
+    // IOS FIX: Komplett deaktiviert - läuft stabil auf 100%!
 
     if(invincibleTimer > 0) {
         invincibleTimer -= dt;
         alarmTimer -= dt;
         
-        // AKW-Sirene wird präzise alle 0,8 Sekunden abgefeuert (verhindert Audio-Überlastung!)
         if (alarmTimer <= 0) {
             sfxAlarm();
             alarmTimer = 0.8;
@@ -820,7 +813,6 @@ function loop(t) {
         ctx.restore();
         
         if (Math.abs(fallingCore.x - playerX) < 40 && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
-            // UPDATE: 8 Sekunden Schutzschild
             invincibleTimer = 8.0; 
             charJump = 20;
             sfxShield();
@@ -966,6 +958,7 @@ function loop(t) {
         ctx.save();
         ctx.font = "50px Arial";
         ctx.textAlign = "center";
+        // IOS FIX: Blinken ist jetzt völlig flüssig
         ctx.fillStyle = (Math.floor(t / 100) % 2 === 0) ? "rgba(173, 255, 47, 1)" : "rgba(173, 255, 47, 0.4)"; 
         ctx.shadowColor = "#adff2f";
         ctx.shadowBlur = 20;
@@ -990,7 +983,7 @@ function loop(t) {
         if(p.life <= 0) fireworks.splice(i, 1);
     }
     ctx.globalAlpha = 1;
-    ctx.shadowBlur = 0; // WICHTIGER GRAFIK-FIX FÜR PERFORMANZ
+    ctx.shadowBlur = 0;
 
     if(hp <= 0 && !missionComplete) {
         active = false; 
