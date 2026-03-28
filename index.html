@@ -14,7 +14,7 @@
             --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff;
             --unicorn: #ff00ff;
             --rad: #adff2f;
-            --glass: rgba(255, 255, 255, 0.08); /* Milchiges Glas */
+            --glass: rgba(255, 255, 255, 0.05); /* Sehr dezentes inneres Glas */
         }
         
         * { 
@@ -35,14 +35,25 @@
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; }
 
-        #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; }
-
-        @media (min-width: 450px) {
-            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; background: rgba(0,0,0,0.1); border: none; box-shadow: none; }
-            #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%); }
+        /* UPDATE: Das gesamte "Handy" ist jetzt eine milchige Glasscheibe! */
+        #phone-container { 
+            position: relative; width: 100%; max-width: 420px; height: 100%; 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 10; overflow: hidden; 
         }
 
-        #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; }
+        @media (min-width: 450px) {
+            #phone-container { 
+                height: 90vh; max-height: 850px; border-radius: 35px; 
+                border: 1px solid rgba(255, 255, 255, 0.15); 
+                box-shadow: 0 15px 40px rgba(0,0,0,0.6); 
+            }
+            #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%); }
+        }
+
+        #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: transparent; touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
 
         canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; touch-action: none; }
 
@@ -61,7 +72,7 @@
         .arrow { width: 120px; height: 120px; background: transparent; border: none; color: rgba(255, 255, 255, 0.5); font-size: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none; }
         .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); }
 
-        #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(5px); border: 1px solid rgba(255, 215, 0, 0.4); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
+        #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255, 215, 0, 0.5); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
         #game-over-flash { position: absolute; inset: 0; z-index: 9999; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.85), rgba(0,0,0,0.85) 2px, rgba(255,0,0,0.15) 2px, rgba(255,0,0,0.15) 4px); background-color: rgba(40, 0, 0, 0.8); display: none; flex-direction: column; justify-content: center; align-items: center; animation: violentShake 0.1s infinite; }
@@ -69,31 +80,29 @@
         .go-sub { font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center; }
         @keyframes violentShake { 0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) } 40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) } 80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) } }
 
-        .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.2); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; padding-bottom: 50px;}
+        .screen { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; padding-bottom: 50px;}
         .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 15px 100px 15px; }
 
         #scr-name .screen-inner { justify-content: center; }
 
         header { width: 100%; flex-shrink: 0; text-align: center; display: flex; justify-content: center; margin-bottom: 20px;}
 
-        /* Titelbox und alle Container im milchigen Glas-Look, OHNE dicke bunte Rahmen */
+        /* Titelbox und alle Container passen sich dem milchigen Haupt-Hintergrund an */
         .title-box, #auth-panel, .info-panel, .legal-box {
             background: var(--glass); 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Nur ein haarfeiner, dezenter Glasrand */
+            border: 1px solid rgba(255, 255, 255, 0.15); /* Dezenter Rahmen zur Strukturierung */
             box-shadow: none; 
         }
 
-        .title-box { padding: 15px 30px; display: inline-block; }
+        .title-box { padding: 15px 30px; display: inline-block; border: none; background: transparent; }
         
         #auth-panel { 
             width: 100%; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 20px;
+            padding: 25px 20px;
             flex-shrink: 0;
             margin-top: 10px;
         }
@@ -115,19 +124,18 @@
         .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; flex-shrink: 0; }
         .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 20px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
         
-        /* Eingabefeld auch ohne Neon-Rahmen */
-        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; text-shadow: 1px 1px 5px #000; box-shadow: none; outline: none; }
-        .name-input:focus { border-color: var(--gold); box-shadow: 0 0 15px rgba(255,215,0,0.5); }
+        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; text-shadow: 1px 1px 5px #000; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); outline: none; }
+        .name-input:focus { border-color: var(--gold); box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px rgba(255,215,0,0.4); }
 
-        .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.4); transition: 0.1s; transform: translateY(0); }
+        .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.3); transition: 0.1s; transform: translateY(0); }
         .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
 
-        .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.5); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 12px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.3); transform: translateY(0); flex-shrink: 0; }
+        .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 12px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); transform: translateY(0); flex-shrink: 0; }
         .btn-char span { font-size: 36px; margin-bottom: 5px; }
-        .btn-char:hover { background: rgba(255,255,255,0.2); }
+        .btn-char:hover { background: rgba(255,255,255,0.1); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
-        .info-panel { padding: 20px; margin-bottom: 20px; flex-shrink: 0; height: auto; }
+        .info-panel { padding: 25px 20px; margin-bottom: 20px; flex-shrink: 0; height: auto; }
         .info-panel h3 { border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
         
         .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; }
@@ -136,29 +144,30 @@
         .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
-        /* Farbige Überschriften Linien, aber keine Box-Rahmen mehr */
         .panel-gold h3 { color: var(--gold); border-bottom-color: var(--gold); }
         .panel-neon h3 { color: var(--neon); border-bottom-color: var(--neon); }
         .panel-unicorn h3 { color: var(--unicorn); border-bottom-color: var(--unicorn); }
 
-        /* YOUTUBE, TIKTOK, PAYPAL, BTC Layout */
+        /* UPDATE: Neue Button-Struktur (Email, TikTok/YouTube, PayPal/BTC) */
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; flex-shrink: 0; width: 100%; }
-        .btn-sup { padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
-        .bg-tk { background: linear-gradient(45deg, #000, #ff0050); } 
-        .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); }
-        .bg-yt { background: linear-gradient(45deg, #c4302b, #ff0000); grid-column: span 2; font-size: 14px;}
         
-        .btn-btc { background: linear-gradient(45deg, #d97b0b, #F7931A); color: #fff; border: 1px solid rgba(255,255,255,0.3); width: 100%; margin-top: 10px; box-shadow: 0 4px 0 #b06205; font-size: 14px; }
+        .btn-sup { padding: 12px 8px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 13px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .btn-sup:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.5); }
+        
+        .bg-email { background: linear-gradient(45deg, #333, #555); grid-column: span 2; font-size: 15px; text-transform: lowercase; letter-spacing: 1px; }
+        .bg-tk { background: linear-gradient(45deg, #000, #ff0050); } 
+        .bg-yt { background: linear-gradient(45deg, #c4302b, #ff0000); }
+        .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); }
+        .bg-btc { background: linear-gradient(45deg, #d97b0b, #F7931A); font-size: 9px; line-height: 1.3; word-break: break-all; padding: 8px 5px; text-transform: none; font-family: monospace; }
         
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
 
-        .legal-box { padding: 25px 20px; margin-top: 10px; flex-shrink: 0; min-height: 145px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .legal-box { padding: 25px 20px; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         
         #dog-head-icon { font-size: 75px; margin-bottom: 15px; text-shadow: 0 0 15px var(--neon); }
 
-        #scr-end { background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+        #scr-end { background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 1000; }
         #scr-end .screen-inner { 
             justify-content: center; align-items: center; height: auto; min-height: unset; 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
@@ -276,22 +285,21 @@
 
             <div class="info-panel panel-unicorn">
                 <h3>✨ PERSONALIZE & SUPPORT</h3>
+                
                 <p class="text-sm" style="text-align:justify; margin-bottom:10px;">
                     Want to be the star of the game? For a qualifying donation, you can personalize the final level (Unicorn Area)! 
-                    We will replace the unicorn with <b>YOUR custom face or icon</b>. Pick your own favorite items to catch (like 🍔 Burgers, 🍟 Fries, or 💵 Dollars).
-                </p>
-                <p class="text-sm" style="text-align:center; font-weight:bold; color:var(--gold); margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 10px; border: 1px solid rgba(255,215,0,0.3);">
-                    Contact us with your donation note:
-                    <br><a href="mailto:give-me.org@gmx.net" style="color:var(--neon); text-decoration:none; display:inline-block; margin-top:8px; font-size:16px; letter-spacing:1px; text-shadow: 0 0 5px var(--neon);">📧 give-me.org@gmx.net</a>
+                    We will replace the unicorn with <b>YOUR custom face or icon</b>. Pick your own favorite items to catch.
                 </p>
 
                 <div class="sup-grid">
-                    <a href="https://www.tiktok.com/@doggyco0" target="_blank" class="btn-sup bg-tk">TIKTOK</a>
-                    <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=give-me.org@gmx.net&item_name=Support+Doggyco+Mission&currency_code=EUR" target="_blank" class="btn-sup bg-pp">PAYPAL</a>
+                    <button class="btn-sup bg-email" onclick="copyText(this, 'give-me.org@gmx.net')">📧 give-me.org@gmx.net</button>
+                    
+                    <a href="https://www.tiktok.com/@doggyco0" target="_blank" class="btn-sup bg-tk">🎵 TIKTOK</a>
                     <a href="https://www.youtube.com/@doggyco.de9" target="_blank" class="btn-sup bg-yt">▶ YOUTUBE</a>
+                    
+                    <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=give-me.org@gmx.net&item_name=Support+Doggyco+Mission&currency_code=EUR" target="_blank" class="btn-sup bg-pp">🅿️ PAYPAL</a>
+                    <button class="btn-sup bg-btc" onclick="copyText(this, 'bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed')">₿ bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</button>
                 </div>
-                
-                <button class="btn-sup btn-btc" onclick="copyBTC(this)">₿ COPY BTC ADDRESS</button>
             </div>
 
             <div class="legal-box"> 
@@ -320,12 +328,6 @@
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
 
 <script>
-// UPDATE: Die MP3 wird auf sanfte 8% gedrosselt, SFX werden extrem laut abgefeuert.
-try {
-    let bgMusic = document.getElementById("snd-action");
-    if(bgMusic) bgMusic.volume = 0.08; 
-} catch(e) {}
-
 window.onload = function() {
     try {
         let savedName = localStorage.getItem("doggycoAgent");
@@ -334,7 +336,7 @@ window.onload = function() {
         }
     } catch(e) {}
 
-    // PC AUDIO FIX: Jeder Tipp im Textfeld weckt das Audio-System
+    // PC AUDIO FIX: Tippen weckt das Audio auf
     let pNameField = document.getElementById("pName");
     if(pNameField) {
         pNameField.addEventListener('input', forceAudioStart, { once: true });
@@ -362,7 +364,7 @@ window.onload = function() {
 let systemActive = false;
 let mp3Started = false;
 
-// UPDATE: Diese Funktion spielt im Menü nur noch die reine MP3 ab! Keine synthetischen Noten mehr!
+// Startet sofort die Hintergrundmusik (und weckt das iOS-Audio)
 function forceAudioStart() {
     if(!systemActive) { 
         systemActive = true; 
@@ -376,7 +378,7 @@ function forceAudioStart() {
     try {
         let bgMusic = document.getElementById("snd-action");
         if(bgMusic && !mp3Started) {
-            bgMusic.volume = 0.08; 
+            bgMusic.volume = 0.08; // Sanfte 8% Lautstärke
             bgMusic.playbackRate = 1.0; 
             bgMusic.play().catch(err => {});
             mp3Started = true;
@@ -397,7 +399,10 @@ function authAgent() {
             try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
             
             document.getElementById("scr-name").style.display = "none";
-            document.getElementById("scr-start").style.display = "flex";
+            document.getElementById("scr-start").style.display = "block";
+            
+            // Scrollt nach der Namenseingabe sicher nach ganz oben
+            document.getElementById("scr-start").scrollTop = 0; 
         }
     }
 }
@@ -446,7 +451,6 @@ function initSynth() {
     } catch(e) {}
 }
 
-// UPDATE: Soundeffekte sind extrem laut (vol=0.6), damit sie klar hörbar sind
 function playTone(freq, type, duration, vol=0.6) {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -1117,19 +1121,21 @@ function loop(t) {
     requestAnimationFrame(loop);
 }
 
-function addFloat(x, y, txt, c, s) { floaters.push({ x, y, txt, c, s, o: 1 }); }
-
-function copyBTC(btn) { 
-    navigator.clipboard.writeText("bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed"); 
-    let oldTxt = btn.innerText; 
+// UPDATE: Neue Copy-Funktion, die für E-Mail und BTC gleichermaßen funktioniert
+function copyText(btn, text) { 
+    navigator.clipboard.writeText(text); 
+    let oldHtml = btn.innerHTML; 
+    let oldBg = btn.style.background;
+    
     btn.innerHTML = "✅ COPIED!";
-    btn.style.color = "#00ff88"; 
-    btn.style.borderColor = "#00ff88";
+    btn.style.background = "linear-gradient(45deg, #004d26, #00ff88)"; // Grünes Feedback
+    btn.style.color = "#000"; 
+    
     setTimeout(() => { 
         if(btn) {
-            btn.innerText = oldTxt; 
+            btn.innerHTML = oldHtml; 
+            btn.style.background = oldBg || ""; // Stellt den Ursprungs-Button wieder her
             btn.style.color = "#fff"; 
-            btn.style.borderColor = "rgba(255,255,255,0.3)"; 
         }
     }, 2000);
 }
