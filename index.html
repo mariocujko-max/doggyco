@@ -363,7 +363,6 @@ function authAgent() {
     }
 }
 
-// WICHTIG: Die Move-Funktion ist wieder da!
 function move(dir) {
     if(!active) return;
     currLane = Math.max(0, Math.min(4, currLane + dir));
@@ -376,7 +375,7 @@ function triggerMove(dir, btnId) {
     try { if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); } } catch(e) {}
     
     hapticMove(); 
-    move(dir); // Hier wurde sie aufgerufen
+    move(dir);
     let btn = document.getElementById(btnId);
     if(btn) { btn.classList.add("glow"); setTimeout(() => btn.classList.remove("glow"), 150); }
 }
@@ -704,6 +703,12 @@ function loop(t) {
     let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
     let ptsScaling = speedMult; 
 
+    let targetRate = 0.92 + ((capLvl - 1) / 11) * 0.16;
+    
+    if (bgMusic && !bgMusic.paused) {
+        bgMusic.playbackRate += (targetRate - bgMusic.playbackRate) * 2.0 * dt; 
+    }
+
     if(invincibleTimer > 0) {
         invincibleTimer -= dt;
         alarmTimer -= dt;
@@ -741,7 +746,8 @@ function loop(t) {
                 launchMassiveFireworks();
                 
                 setTimeout(() => {
-                    addFloat(W/2, H/2, "MISSION", "#FFD700", 45);
+                    // UPDATE: KOMPLETT IN GRÜN
+                    addFloat(W/2, H/2, "MISSION", "#00ff88", 45);
                     addFloat(W/2, H/2 + 60, "ACCOMPLISHED!", "#00ff88", 35);
                 }, 1000);
 
@@ -755,8 +761,9 @@ function loop(t) {
                         charJump = 20;
                         sfxStarCollect();
                         triggerVibration([50, 50, 100]);
-                        addFloat(W/2 + (Math.random()*40-20), H/2 + 140, "❤️ +1000", "#ff3131", 40);
-                        for(let k=0; k<15; k++) fireworks.push({ x: W/2, y: H/2+140, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.0, c: '#ff3131' });
+                        // UPDATE: ALLES POSITIVE IN GRÜN
+                        addFloat(W/2 + (Math.random()*40-20), H/2 + 140, "❤️ +1000", "#00ff88", 40);
+                        for(let k=0; k<15; k++) fireworks.push({ x: W/2, y: H/2+140, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.0, c: '#00ff88' });
                     }, 2500 + (i * 800));
                     burstDelay = 2500 + (i * 800);
                 }
@@ -811,6 +818,7 @@ function loop(t) {
             hp--;
             if(hp > 0) {
                 energy = 100; charShake = 20; sfxHit(); hapticDamage(); 
+                // UPDATE: ALLES NEGATIVE IN ROT
                 addFloat(playerX, H/2, "-1 ❤️", "#ff3131", 35); 
             }
         }
@@ -869,7 +877,8 @@ function loop(t) {
             let bonusPts = 100 + (level * 10); 
             score += bonusPts; 
             sfxStarCollect(); 
-            addFloat(fallingCore.x + 40, fallingCore.y, "SHIELD +" + bonusPts, "#adff2f", 25); 
+            // UPDATE: ALLES POSITIVE IN GRÜN
+            addFloat(fallingCore.x + 40, fallingCore.y, "SHIELD +" + bonusPts, "#00ff88", 25); 
             
             fallingCore = null;
         } else if (fallingCore.y > H + 50) {
@@ -920,8 +929,9 @@ function loop(t) {
         ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText('❤️', s.x, s.y);
         
         if(!missionComplete && Math.abs(s.x - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-            if (hp < 3) { hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+1 ❤️", "#ff3131", 35); } 
-            else { let bonusPts = 100 + (level * 10); score += bonusPts; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+" + bonusPts, "#FFD700", 30); }
+            // UPDATE: ALLES POSITIVE IN GRÜN
+            if (hp < 3) { hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35); } 
+            else { let bonusPts = 100 + (level * 10); score += bonusPts; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+" + bonusPts, "#00ff88", 30); }
             fallingHearts.splice(i, 1);
         } else if (s.y > H + 50) { fallingHearts.splice(i, 1); }
     }
@@ -953,6 +963,8 @@ function loop(t) {
     }
 
     ctx.fillStyle = "#ffffff"; 
+    // UPDATE: CANVAS FIX - Pinseldicke repariert, damit Spinnenseile immer dünn bleiben!
+    ctx.lineWidth = 2; 
     permSpiders.forEach(s => {
         if(!missionComplete) s.y += (180 * speedMult * s.dy) * dt;
         let sx = lanes[s.lane];
@@ -966,10 +978,11 @@ function loop(t) {
 
             if(!s.hit && Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
                 if (invincibleTimer > 0) {
-                    addFloat(sx + 40, s.y, "BLOCKED!", "#adff2f", 20);
+                    addFloat(sx + 40, s.y, "BLOCKED!", "#00ff88", 20);
                 } else {
                     let pLoss = Math.floor(30 * ptsScaling); score = Math.max(0, score - pLoss); 
                     energy -= 30; charShake = 20; sfxHit(); hapticSpiderHit(); 
+                    // UPDATE: ALLES NEGATIVE IN ROT
                     addFloat(sx + 40, s.y, "-⚡", "#ff3131", 35); 
                 }
                 s.hit = true; 
@@ -985,13 +998,17 @@ function loop(t) {
         if(!missionComplete && Math.abs(e.x - playerX) < 40 && e.y > hitTop && e.y < hitBottom) {
             if(e.bad) {
                 if (invincibleTimer > 0) {
-                    addFloat(e.x + 40, e.y, "BLOCKED!", "#adff2f", 20);
+                    addFloat(e.x + 40, e.y, "BLOCKED!", "#00ff88", 20);
                 } else {
-                    hp--; charShake = 20; sfxHit(); hapticDamage(); addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); 
+                    hp--; charShake = 20; sfxHit(); hapticDamage(); 
+                    // UPDATE: ALLES NEGATIVE IN ROT
+                    addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); 
                 }
             } else {
                 let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; 
-                sfxCollect(); addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); 
+                sfxCollect(); 
+                // UPDATE: ALLES POSITIVE IN GRÜN
+                addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); 
             }
             entities.splice(i, 1);
         } else if (e.y > H + 60) { entities.splice(i, 1); }
@@ -1023,9 +1040,15 @@ function loop(t) {
         let f = floaters[i]; 
         f.y -= 2.0; f.x += (200 - f.x) * 0.05; f.o -= 0.8 * dt; 
         ctx.globalAlpha = Math.max(0, f.o); ctx.font = `900 ${f.s}px 'Orbitron'`; ctx.textAlign = "center";
-        ctx.strokeStyle = "#000000"; ctx.lineWidth = 5; ctx.strokeText(f.txt, f.x, f.y); ctx.fillStyle = f.c; ctx.fillText(f.txt, f.x, f.y);
+        
+        // Pinsel temporär auf "dick" stellen, danach wieder auf "dünn" (siehe oben)
+        ctx.strokeStyle = "#000000"; ctx.lineWidth = 5; ctx.strokeText(f.txt, f.x, f.y); 
+        ctx.fillStyle = f.c; ctx.fillText(f.txt, f.x, f.y);
+        
         if(f.o <= 0) floaters.splice(i, 1);
     }
+    // Sicherheits-Reset nach den Float-Texten
+    ctx.lineWidth = 1;
     
     for(let i=fireworks.length-1; i>=0; i--) {
         let p = fireworks[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life -= dt;
