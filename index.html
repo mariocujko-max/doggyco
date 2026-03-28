@@ -69,28 +69,39 @@
         .go-sub { font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center; }
         @keyframes violentShake { 0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) } 40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) } 80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) } }
 
-        /* SCROLL-FIX: Der äußere Container darf weich scrollen */
         .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.2); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; padding-bottom: 50px;}
         .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 15px 100px 15px; }
 
         #scr-name .screen-inner { justify-content: center; }
 
-        /* UPDATE: Stark abgehobener, leuchtender Titel-Kasten */
+        header { width: 100%; flex-shrink: 0; text-align: center; display: flex; justify-content: center; margin-bottom: 20px;}
+
+        /* UPDATE: Titel-Box komplett ohne Rahmen, nur milchiges Glas */
         .title-box {
-            background: rgba(0, 0, 0, 0.85);
-            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.08); /* Sehr dezentes, milchiges Weiß */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 15px 30px;
             border-radius: 20px;
-            border: 2px solid var(--gold);
+            border: none; /* KOMPLETT OHNE RAHMEN */
+            box-shadow: none; /* KEIN SCHATTEN AUF DER BOX */
             display: inline-block;
-            margin-bottom: 30px;
-            animation: titlePulse 2s infinite alternate;
-        }
-        @keyframes titlePulse {
-            0% { box-shadow: 0 0 10px var(--gold); transform: scale(0.98); }
-            100% { box-shadow: 0 0 35px var(--gold), inset 0 0 15px rgba(255,215,0,0.5); transform: scale(1.02); }
         }
         
-        .app-title { font-size: clamp(24px, 8vw, 32px); color: var(--gold); text-shadow: 0 0 15px var(--gold); letter-spacing: 2px; margin: 0;}
+        /* UPDATE: Nur der Text pulsiert und leuchtet */
+        .app-title { 
+            font-size: clamp(24px, 8vw, 36px); 
+            color: var(--gold); 
+            letter-spacing: 2px; 
+            margin: 0;
+            text-align: center;
+            animation: textPulse 1.8s infinite alternate ease-in-out; 
+        }
+        
+        @keyframes textPulse {
+            0% { text-shadow: 0 0 10px var(--gold); transform: scale(0.98); }
+            100% { text-shadow: 0 0 25px var(--gold), 0 0 40px #fff; transform: scale(1.05); }
+        }
 
         .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; flex-shrink: 0; }
         .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 20px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
@@ -108,8 +119,7 @@
         .btn-char:hover { background: rgba(255,255,255,0.2); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
-        /* UPDATE: Panel hat KEINE feste Höhe mehr, passt sich dem Inhalt an. Kein nerviges Nested Scrolling! */
-        .info-panel { width: 100%; background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); flex-shrink: 0; height: auto; }
+        .info-panel { width: 100%; background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); flex-shrink: 0; }
         
         .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; }
         .rank-gold { color: var(--gold); font-size: 18px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
@@ -117,9 +127,17 @@
         .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
+        .panel-standard { height: 240px; overflow-y: auto; padding-right: 10px; flex-shrink: 0; overscroll-behavior: contain; }
+        .panel-standard::-webkit-scrollbar { width: 6px; }
+        
         .panel-gold { border-color: var(--gold) !important; box-shadow: 0 0 15px rgba(255,215,0,0.2) !important; }
+        .panel-gold::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+        
         .panel-neon { border-color: var(--neon) !important; box-shadow: 0 0 15px rgba(0,242,255,0.2) !important; }
+        .panel-neon::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
+        
         .panel-unicorn { border-color: var(--unicorn) !important; box-shadow: 0 0 15px rgba(255,0,255,0.2) !important; }
+        .panel-unicorn::-webkit-scrollbar-thumb { background: var(--unicorn); border-radius: 3px; }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; flex-shrink: 0; }
         .btn-sup { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
@@ -199,10 +217,11 @@
 
     <div id="scr-name" class="screen">
         <div class="screen-inner">
-            <div class="title-box">
-                <h1 class="app-title">DOGGYCO MISSION</h1>
-            </div>
-            
+            <header>
+                <div class="title-box">
+                    <h1 class="app-title">DOGGYCO MISSION</h1>
+                </div>
+            </header>
             <div id="auth-panel" class="inner-panel">
                 <div id="dog-head-icon">🐶</div> 
                 <h2>MISSION BRIEFING</h2> 
@@ -214,9 +233,11 @@
 
     <div id="scr-start" class="screen" style="display:none;">
         <div class="screen-inner">
-            <div class="title-box" style="margin-bottom: 10px;">
-                <h1 class="app-title">DOGGYCO MISSION</h1>
-            </div>
+            <header>
+                <div class="title-box" style="margin-bottom: 10px;">
+                    <h1 class="app-title">DOGGYCO MISSION</h1>
+                </div>
+            </header>
             
             <div class="inner-panel info-panel">
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">CHOOSE START LEVEL</h3>
@@ -236,12 +257,12 @@
                 </div>
             </div>
 
-            <div class="info-panel panel-gold">
+            <div class="info-panel panel-standard panel-gold">
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">🏆 GLOBAL HALL OF FAME</h3>
                 <div id="leaderboard" class="text-sm" style="text-align:center;">Checking Connection...</div>
             </div>
 
-            <div class="info-panel panel-neon">
+            <div class="info-panel panel-standard panel-neon">
                 <h3 style="color:var(--neon); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">📖 MISSION DIRECTIVES</h3>
                 <ul class="rules text-sm">
                     <li><b>Navigation:</b> Use <b>Arrows ◀ ▶</b> to evade hazards.</li>
@@ -256,7 +277,7 @@
                 </ul>
             </div>
 
-            <div class="info-panel panel-unicorn">
+            <div class="info-panel panel-standard panel-unicorn">
                 <h3 style="color:var(--unicorn); border-bottom: 2px solid var(--unicorn); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">✨ PERSONALIZE & SUPPORT</h3>
                 
                 <p class="text-sm" style="text-align:justify; margin-bottom:10px;">
@@ -307,10 +328,8 @@
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
 
 <script>
-try {
-    let bgMusic = document.getElementById("snd-action");
-    if(bgMusic) bgMusic.volume = 0.05; 
-} catch(e) {}
+// Lautstärke für das gesamte Spiel (Effekte und MP3)
+let bgMusic = document.getElementById("snd-action");
 
 window.onload = function() {
     try {
@@ -339,15 +358,36 @@ window.onload = function() {
 }
 
 let systemActive = false;
+let mp3Unlocked = false;
 
+// WICHTIG: Startet nur die sanfte Menü-Melodie, schaltet iOS-Audio frei, spielt aber NOCH NICHT die Action-MP3!
 function forceAudioStart() {
-    if(!systemActive) { systemActive = true; initSynth(); }
+    if(!systemActive) { 
+        systemActive = true; 
+        initSynth(); 
+        startMenuMusic(); // Startet den weichen, ambienten Menü-Sound
+    }
     
     try {
         if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
     } catch(e) {}
-    
-    // UPDATE: Audio-Start nur vorbereiten. Das Play() wird erst beim echten Level-Start aufgerufen!
+
+    // iOS/Browser-Sicherheit: Wir "entsperren" die MP3 beim ersten Klicken, pausieren sie aber sofort wieder
+    try {
+        if(bgMusic && !mp3Unlocked) {
+            bgMusic.volume = 0.05;
+            let playPromise = bgMusic.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    if (!active) { // Wenn das Spiel noch nicht gestartet wurde
+                        bgMusic.pause();
+                        bgMusic.currentTime = 0;
+                    }
+                    mp3Unlocked = true;
+                }).catch(error => {});
+            }
+        }
+    } catch(e) {}
 }
 
 document.body.addEventListener('click', forceAudioStart, { once: true });
@@ -401,6 +441,10 @@ function hapticDamage() { triggerVibration(300); }
 function hapticGameOver() { triggerVibration([500, 100, 500]); } 
 
 let audioCtx = null;
+let menuMusicTimer = null;
+let menuStep = 0;
+// Eine sehr sanfte, weiche und langsame Tonabfolge (Pentatonisch Ambient)
+const menuNotes = [261.63, 329.63, 392.00, 440.00, 392.00, 329.63]; 
 
 function initSynth() {
     try {
@@ -417,13 +461,39 @@ function playTone(freq, type, duration, vol=0.3) {
     try {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.type = type; 
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        
+        // Weicher Ton-Einstieg für sanfte Menü-Musik (Sine-Wellen)
+        if (type === 'sine') {
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        } else {
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        }
+        
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + duration);
     } catch(e) {}
 }
+
+// Die sanfte Menü-Melodie
+function playMenuNote() {
+    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
+    let freq = menuNotes[menuStep % menuNotes.length];
+    
+    // Spielt einen tiefen Basis-Ton und einen hellen Melodie-Ton (Sehr entspannend)
+    playTone(freq / 2, 'sine', 2.0, 0.02); 
+    playTone(freq, 'sine', 1.5, 0.03);     
+    
+    menuStep++;
+    menuMusicTimer = setTimeout(playMenuNote, 1000); // Sehr langsames, ruhiges Tempo
+}
+
+function startMenuMusic() { if(!systemActive) return; initSynth(); if(!menuMusicTimer) { menuStep = 0; playMenuNote(); } }
+function stopMenuMusic() { if(menuMusicTimer) { clearTimeout(menuMusicTimer); menuMusicTimer = null; } }
 
 function sfxUfo() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
@@ -611,10 +681,11 @@ function updateTheme(newMode) {
 function start(m, startLvl) {
     forceAudioStart(); 
     
-    // UPDATE: Startet die MP3-Musik JETZT erst, wenn das Spiel wirklich losgeht!
+    // UPDATE: Stoppt die softe Menü-Musik und SCHALTET JETZT ERST DIE ACTION-MP3 AN!
+    stopMenuMusic();
     try {
         let bgMusic = document.getElementById("snd-action");
-        if(bgMusic && bgMusic.paused) {
+        if(bgMusic) {
             bgMusic.volume = 0.05; 
             bgMusic.playbackRate = 1.0; 
             bgMusic.play().catch(err => {});
