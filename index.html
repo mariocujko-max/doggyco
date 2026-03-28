@@ -69,13 +69,28 @@
         .go-sub { font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center; }
         @keyframes violentShake { 0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) } 40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) } 80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) } }
 
+        /* SCROLL-FIX: Der äußere Container darf weich scrollen */
         .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0,0,0,0.2); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; padding-bottom: 50px;}
         .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 15px 100px 15px; }
 
         #scr-name .screen-inner { justify-content: center; }
 
-        header { padding: 0 0 20px 0; text-align: center; width: 100%; flex-shrink: 0; }
-        .app-title { font-size: clamp(24px, 8vw, 36px); color: var(--gold); text-shadow: 0 0 20px var(--gold); letter-spacing: 2px; animation: blinkGold 2s infinite ease-in-out; }
+        /* UPDATE: Stark abgehobener, leuchtender Titel-Kasten */
+        .title-box {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px 25px;
+            border-radius: 20px;
+            border: 2px solid var(--gold);
+            display: inline-block;
+            margin-bottom: 30px;
+            animation: titlePulse 2s infinite alternate;
+        }
+        @keyframes titlePulse {
+            0% { box-shadow: 0 0 10px var(--gold); transform: scale(0.98); }
+            100% { box-shadow: 0 0 35px var(--gold), inset 0 0 15px rgba(255,215,0,0.5); transform: scale(1.02); }
+        }
+        
+        .app-title { font-size: clamp(24px, 8vw, 32px); color: var(--gold); text-shadow: 0 0 15px var(--gold); letter-spacing: 2px; margin: 0;}
 
         .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; flex-shrink: 0; }
         .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 20px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
@@ -93,7 +108,8 @@
         .btn-char:hover { background: rgba(255,255,255,0.2); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
-        .info-panel { width: 100%; background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); flex-shrink: 0; }
+        /* UPDATE: Panel hat KEINE feste Höhe mehr, passt sich dem Inhalt an. Kein nerviges Nested Scrolling! */
+        .info-panel { width: 100%; background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 2px solid var(--neon); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(0,242,255,0.1); flex-shrink: 0; height: auto; }
         
         .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; }
         .rank-gold { color: var(--gold); font-size: 18px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
@@ -101,17 +117,9 @@
         .rank-bronze { color: var(--bronze); font-size: 15px; text-shadow: 0 0 5px var(--bronze); }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
-        .panel-standard { height: 240px; overflow-y: auto; padding-right: 10px; flex-shrink: 0; overscroll-behavior: contain; }
-        .panel-standard::-webkit-scrollbar { width: 6px; }
-        
         .panel-gold { border-color: var(--gold) !important; box-shadow: 0 0 15px rgba(255,215,0,0.2) !important; }
-        .panel-gold::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
-        
         .panel-neon { border-color: var(--neon) !important; box-shadow: 0 0 15px rgba(0,242,255,0.2) !important; }
-        .panel-neon::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
-        
         .panel-unicorn { border-color: var(--unicorn) !important; box-shadow: 0 0 15px rgba(255,0,255,0.2) !important; }
-        .panel-unicorn::-webkit-scrollbar-thumb { background: var(--unicorn); border-radius: 3px; }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; flex-shrink: 0; }
         .btn-sup { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.3); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; font-size: 12px; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: block; }
@@ -191,7 +199,10 @@
 
     <div id="scr-name" class="screen">
         <div class="screen-inner">
-            <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
+            <div class="title-box">
+                <h1 class="app-title">DOGGYCO MISSION</h1>
+            </div>
+            
             <div id="auth-panel" class="inner-panel">
                 <div id="dog-head-icon">🐶</div> 
                 <h2>MISSION BRIEFING</h2> 
@@ -203,7 +214,9 @@
 
     <div id="scr-start" class="screen" style="display:none;">
         <div class="screen-inner">
-            <header><h1 class="app-title">DOGGYCO MISSION</h1></header>
+            <div class="title-box" style="margin-bottom: 10px;">
+                <h1 class="app-title">DOGGYCO MISSION</h1>
+            </div>
             
             <div class="inner-panel info-panel">
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">CHOOSE START LEVEL</h3>
@@ -223,12 +236,12 @@
                 </div>
             </div>
 
-            <div class="info-panel panel-standard panel-gold">
+            <div class="info-panel panel-gold">
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">🏆 GLOBAL HALL OF FAME</h3>
                 <div id="leaderboard" class="text-sm" style="text-align:center;">Checking Connection...</div>
             </div>
 
-            <div class="info-panel panel-standard panel-neon">
+            <div class="info-panel panel-neon">
                 <h3 style="color:var(--neon); border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">📖 MISSION DIRECTIVES</h3>
                 <ul class="rules text-sm">
                     <li><b>Navigation:</b> Use <b>Arrows ◀ ▶</b> to evade hazards.</li>
@@ -243,7 +256,7 @@
                 </ul>
             </div>
 
-            <div class="info-panel panel-standard panel-unicorn">
+            <div class="info-panel panel-unicorn">
                 <h3 style="color:var(--unicorn); border-bottom: 2px solid var(--unicorn); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">✨ PERSONALIZE & SUPPORT</h3>
                 
                 <p class="text-sm" style="text-align:justify; margin-bottom:10px;">
@@ -294,7 +307,6 @@
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
 
 <script>
-// SICHERHEITS-PANZER FÜR AUDIO: Verhindert Abstürze, wenn der Browser die Lautstärke blockiert
 try {
     let bgMusic = document.getElementById("snd-action");
     if(bgMusic) bgMusic.volume = 0.05; 
@@ -334,15 +346,8 @@ function forceAudioStart() {
     try {
         if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
     } catch(e) {}
-
-    try {
-        let bgMusic = document.getElementById("snd-action");
-        if(bgMusic && bgMusic.paused) {
-            bgMusic.volume = 0.05; 
-            bgMusic.playbackRate = 1.0; 
-            bgMusic.play().catch(err => {});
-        }
-    } catch(e) {}
+    
+    // UPDATE: Audio-Start nur vorbereiten. Das Play() wird erst beim echten Level-Start aufgerufen!
 }
 
 document.body.addEventListener('click', forceAudioStart, { once: true });
@@ -359,7 +364,6 @@ function authAgent() {
             
             document.getElementById("scr-name").style.display = "none";
             document.getElementById("scr-start").style.display = "flex";
-            startMenuMusic(); 
         }
     }
 }
@@ -397,9 +401,6 @@ function hapticDamage() { triggerVibration(300); }
 function hapticGameOver() { triggerVibration([500, 100, 500]); } 
 
 let audioCtx = null;
-let menuMusicTimer = null;
-let menuStep = 0;
-const menuNotes = [110, 110, 220, 110, 110, 146.83, 164.81, 146.83];
 
 function initSynth() {
     try {
@@ -439,7 +440,6 @@ function sfxUfo() {
     } catch(e){}
 }
 
-// UPDATE: NEUER RAKETEN SOUND (Mit metallischem Rattern/Kette und Doppler Effekt)
 function sfxRocket() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -518,17 +518,6 @@ function sfxAlarm() {
         osc.start(t); osc.stop(t + 0.4);
     } catch(e){}
 }
-
-function playMenuNote() {
-    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
-    let freq = menuNotes[menuStep % menuNotes.length];
-    playTone(freq, 'sawtooth', 0.15, 0.05); 
-    menuStep++;
-    menuMusicTimer = setTimeout(playMenuNote, 250); 
-}
-
-function startMenuMusic() { if(!systemActive) return; initSynth(); if(!menuMusicTimer) { menuStep = 0; playMenuNote(); } }
-function stopMenuMusic() { if(menuMusicTimer) { clearTimeout(menuMusicTimer); menuMusicTimer = null; } }
 
 function sfxCollect() { playTone(600, 'sine', 0.1, 0.3); setTimeout(() => playTone(1200, 'sine', 0.15, 0.3), 80); }
 function sfxStarCollect() { [800, 1000, 1200].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.1, 0.3), i*50)); } 
@@ -621,6 +610,17 @@ function updateTheme(newMode) {
 
 function start(m, startLvl) {
     forceAudioStart(); 
+    
+    // UPDATE: Startet die MP3-Musik JETZT erst, wenn das Spiel wirklich losgeht!
+    try {
+        let bgMusic = document.getElementById("snd-action");
+        if(bgMusic && bgMusic.paused) {
+            bgMusic.volume = 0.05; 
+            bgMusic.playbackRate = 1.0; 
+            bgMusic.play().catch(err => {});
+        }
+    } catch(e) {}
+
     mode = m;
     level = startLvl;
     
@@ -646,8 +646,6 @@ function start(m, startLvl) {
         gameWrap.style.visibility = "visible";
         gameWrap.style.pointerEvents = "auto";
     }
-    
-    stopMenuMusic(); 
     
     permSpiders = [ { lane: 0, y: 60, dy: 1, hit: false }, { lane: 4, y: H-120, dy: -1, hit: false } ];
 
@@ -712,7 +710,6 @@ function loop(t) {
     let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
     let ptsScaling = speedMult; 
 
-    // UPDATE: PANZER - Das Musik-Tempo wird komplett sturzsicher hochgeregelt!
     let bgMusic = document.getElementById("snd-action");
     if (bgMusic && !bgMusic.paused) {
         try {
@@ -724,7 +721,7 @@ function loop(t) {
                     bgMusic.playbackRate = newRate; 
                 }
             }
-        } catch(e) {} // Fehler wird ignoriert, das Spiel läuft zu 100% weiter!
+        } catch(e) {} 
     }
 
     if(invincibleTimer > 0) {
