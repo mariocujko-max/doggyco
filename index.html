@@ -14,7 +14,7 @@
             --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff;
             --unicorn: #ff00ff;
             --rad: #adff2f;
-            --glass: rgba(255, 255, 255, 0.05);
+            --glass: rgba(255, 255, 255, 0.06);
         }
         
         * { 
@@ -70,44 +70,39 @@
         .screen { 
             position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; 
             overflow-y: auto; -webkit-overflow-scrolling: touch; pointer-events: auto; padding-bottom: 50px;
-            background: rgba(255, 255, 255, 0.05); 
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
         }
         
         .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 10px 100px 10px; }
 
         #scr-name .screen-inner { justify-content: center; }
 
-        header { width: 100%; flex-shrink: 0; text-align: center; display: flex; justify-content: center; margin-bottom: 10px;}
-
-        .title-box, #auth-panel, .info-panel, .legal-box {
+        /* EINE GROSSE MILCHIGE BOX FÜR DEN LOGIN */
+        .glass-panel {
             width: 100%; 
-            background: rgba(255,255,255,0.06); 
+            background: var(--glass); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.15); 
-            box-shadow: none; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .title-box { padding: 15px; border: none; background: transparent; display: flex; justify-content: center; }
-        
-        #auth-panel { display: flex; flex-direction: column; align-items: center; padding: 25px 20px; flex-shrink: 0; margin-top: 10px; }
-
-        .app-title { font-size: clamp(24px, 8vw, 36px); color: var(--gold); letter-spacing: 2px; margin: 0; text-align: center; animation: textPulse 1.8s infinite alternate ease-in-out; }
+        .app-title { font-size: clamp(24px, 8vw, 36px); color: var(--gold); letter-spacing: 2px; margin: 0; text-align: center; animation: textPulse 1.8s infinite alternate ease-in-out; margin-bottom: 10px; }
         @keyframes textPulse { 0% { text-shadow: 0 0 10px var(--gold); transform: scale(0.98); } 100% { text-shadow: 0 0 25px var(--gold), 0 0 40px #fff; transform: scale(1.05); } }
 
-        /* NEU: Transparenter Canvas für das Video */
+        /* Hund-Video exakt in der Mitte */
         .dog-video-canvas { 
-            width: 150px; height: 150px; 
+            width: 160px; height: 160px; 
             object-fit: contain; 
-            animation: floatDog 3s ease-in-out infinite; 
-            margin-bottom: 10px;
-            filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.4)); /* Hologramm Schatten */
+            margin-bottom: 5px;
+            filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.3)); /* Leichter Schatten, damit es abhebt */
         }
-        @keyframes floatDog { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
-        .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; flex-shrink: 0; }
-        .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 20px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
+        .glass-panel h2 { color: var(--gold); margin-top: 10px; margin-bottom: 20px; font-size: 18px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; letter-spacing: 1px; }
         
         .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; text-shadow: 1px 1px 5px #000; outline: none; }
         .name-input:focus { border-color: var(--gold); box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px rgba(255,215,0,0.4); }
@@ -120,7 +115,16 @@
         .btn-char:hover { background: rgba(255,255,255,0.1); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
-        .info-panel { padding: 25px 20px; margin-bottom: 20px; flex-shrink: 0; height: auto; }
+        /* Weitere Screens (Level Auswahl) bleiben auch in Panels */
+        .info-panel { 
+            width: 100%; 
+            background: var(--glass); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            padding: 25px 20px; margin-bottom: 20px; flex-shrink: 0; height: auto; 
+        }
         .info-panel h3 { border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
         
         .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; }
@@ -150,7 +154,10 @@
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
 
-        .legal-box { padding: 25px 20px; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .legal-box { 
+            width: 100%; background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); 
+            padding: 25px 20px; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; 
+        }
 
         #scr-end { background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 1000; }
         #scr-end .screen-inner { 
@@ -208,30 +215,26 @@
 
     <div id="scr-name" class="screen">
         <div class="screen-inner">
-            <header>
-                <div class="title-box">
-                    <h1 class="app-title">DOGGYCO MISSION</h1>
-                </div>
-            </header>
-            <div id="auth-panel" class="inner-panel">
+            
+            <div class="glass-panel">
+                <h1 class="app-title">DOGGYCO MISSION</h1>
                 
-                <canvas id="dog-video-canvas" width="150" height="150" class="dog-video-canvas"></canvas>
-                <video id="dog-video" src="Hundekopf_Video_für_Spiel_angepasst.mp4" playsinline style="display:none;"></video>
+                <canvas id="dog-video-canvas" width="160" height="160" class="dog-video-canvas"></canvas>
+                <video id="dog-video" src="Hundekopf_Video_für_Spiel_angepasst.mp4" playsinline preload="auto" style="display:none;"></video>
 
                 <h2>MISSION BRIEFING</h2> 
                 <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
                 <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
             </div>
+
         </div>
     </div>
 
     <div id="scr-start" class="screen" style="display:none;">
         <div class="screen-inner">
-            <header>
-                <div class="title-box" style="margin-bottom: 10px;">
-                    <h1 class="app-title">DOGGYCO MISSION</h1>
-                </div>
-            </header>
+            <div class="glass-panel" style="padding: 15px; margin-bottom: 20px;">
+                <h1 class="app-title">DOGGYCO MISSION</h1>
+            </div>
             
             <div class="info-panel" style="display: flex; flex-direction: column; align-items: center;">
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">CHOOSE START LEVEL</h3>
@@ -274,6 +277,7 @@
 
             <div class="info-panel panel-unicorn">
                 <h3>✨ PERSONALIZE & SUPPORT</h3>
+                
                 <p class="text-sm" style="text-align:justify; margin-bottom:15px;">
                     Want to be the star of the game? For a qualifying donation, you can personalize the final level (Unicorn Area)! 
                     We will replace the unicorn with <b>YOUR custom face or icon</b>. Pick your own favorite items to catch.
@@ -336,49 +340,41 @@
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
 
 <script>
-// ---------- VIDEO GREEN SCREEN LOGIC ----------
+// --- VIDEO GREEN SCREEN LOGIC ---
 let videoEl = document.getElementById('dog-video');
 let videoCanvas = document.getElementById('dog-video-canvas');
 let videoCtx = videoCanvas.getContext('2d', { willReadFrequently: true });
 let videoAnimationId = null;
 
+function drawAndFilterFrame() {
+    videoCtx.drawImage(videoEl, 0, 0, videoCanvas.width, videoCanvas.height);
+    let frame = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
+    let data = frame.data;
+    
+    // Filtert das Grün komplett heraus
+    for (let i = 0; i < data.length; i += 4) {
+        let r = data[i];
+        let g = data[i + 1];
+        let b = data[i + 2];
+        if (g > 90 && g > r * 1.1 && g > b * 1.1) {
+            data[i + 3] = 0; 
+        }
+    }
+    videoCtx.putImageData(frame, 0, 0);
+}
+
 function processVideoFrame() {
     if (!videoEl.paused && !videoEl.ended) {
-        // Zeichnet das aktuelle Video-Bild auf das Canvas
-        videoCtx.drawImage(videoEl, 0, 0, videoCanvas.width, videoCanvas.height);
-        
-        // Liest die Pixel aus
-        let frame = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
-        let data = frame.data;
-        
-        // Filtert das helle Grün aus dem Video heraus (Chroma Keying)
-        for (let i = 0; i < data.length; i += 4) {
-            let r = data[i];
-            let g = data[i + 1];
-            let b = data[i + 2];
-            
-            // Wenn der Pixel sehr grün ist, setze ihn auf durchsichtig (Alpha = 0)
-            if (g > 100 && g > r * 1.2 && g > b * 1.2) {
-                data[i + 3] = 0; 
-            }
-        }
-        
-        // Legt das transparente Bild zurück auf das Canvas
-        videoCtx.putImageData(frame, 0, 0);
+        drawAndFilterFrame();
     }
     videoAnimationId = requestAnimationFrame(processVideoFrame);
 }
 
-// Sobald das Video anfängt zu spielen, startet der Filter-Loop
-videoEl.addEventListener('play', () => {
-    processVideoFrame();
-});
-
-// Zeichnet das allererste Bild, wenn die Datei geladen ist
-videoEl.addEventListener('loadeddata', () => {
-    videoCtx.drawImage(videoEl, 0, 0, videoCanvas.width, videoCanvas.height);
-});
-// ----------------------------------------------
+// Stellt sicher, dass das erste Bild sofort gereinigt wird (kein grüner Hintergrund!)
+videoEl.addEventListener('loadeddata', drawAndFilterFrame);
+videoEl.addEventListener('seeked', drawAndFilterFrame);
+videoEl.addEventListener('play', processVideoFrame);
+// --------------------------------
 
 
 window.onload = function() {
@@ -389,7 +385,6 @@ window.onload = function() {
         }
     } catch(e) {}
 
-    // Wenn der Spieler tippt, wacht das Audio-System auf und das Video startet!
     let pNameField = document.getElementById("pName");
     if(pNameField) {
         pNameField.addEventListener('input', forceAudioStart, { once: true });
@@ -434,15 +429,15 @@ function initAudioContext() {
 function forceAudioStart() {
     initAudioContext();
     
-    // Startet das sprechende Hundevideo
+    // Video und Sprache starten
     try {
         if (videoEl && videoEl.paused) {
-            videoEl.volume = 1.0; // 100% Lautstärke für die Sprach-Begrüßung
+            videoEl.volume = 1.0; 
             videoEl.play().catch(e => {});
         }
     } catch(e) {}
 
-    // Startet leise Hintergrundmusik
+    // Leise Hintergrundmusik im Menü starten
     try {
         let bgMusic = document.getElementById("snd-action");
         if(bgMusic && !mp3Started) {
@@ -454,7 +449,6 @@ function forceAudioStart() {
     } catch(e) {}
 }
 
-// Auch bei Klick auf den Hintergrund
 document.body.addEventListener('click', forceAudioStart, { once: true });
 document.body.addEventListener('touchstart', forceAudioStart, { once: true });
 
@@ -467,7 +461,7 @@ function authAgent() {
             agent = n;
             try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
             
-            // Video anhalten, um Akku zu sparen
+            // Pausiert das Video für die Performance
             if (videoEl) {
                 videoEl.pause();
                 if (videoAnimationId) cancelAnimationFrame(videoAnimationId);
