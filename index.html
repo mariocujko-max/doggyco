@@ -74,7 +74,7 @@
         }
 
         /* ------------------------------------------------------------------------- */
-        /* 1. STARTBILDSCHIRM (Völlig transparent, sauberes Grid-Layout)             */
+        /* 1. STARTBILDSCHIRM (Völlig transparent, sauberes Flexbox-Layout)          */
         /* ------------------------------------------------------------------------- */
         #scr-name {
             background: transparent !important;
@@ -82,6 +82,7 @@
             -webkit-backdrop-filter: none !important;
         }
 
+        /* Nutzt 100% der Höhe und verteilt die Boxen gleichmäßig */
         #scr-name .screen-inner { 
             width: 100%; height: 100dvh; margin: 0 auto; max-width: 420px; 
             display: flex; flex-direction: column; justify-content: space-between; align-items: center; 
@@ -95,27 +96,29 @@
 
         /* Hund GANZ IN DER MITTE */
         .dog-video-wrapper {
-            flex-grow: 1; /* Zieht den Hund in die Mitte zwischen Titel und Input */
+            flex-grow: 1; /* Nimmt den gesamten freien Platz in der Mitte ein */
             display: flex; justify-content: center; align-items: center; width: 100%;
         }
         .dog-video-canvas { 
-            width: 250px; height: 250px; /* Richtig schön groß */
+            width: 250px; height: 250px; /* Schön groß */
             object-fit: contain; 
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)); /* Eleganter schwarzer Schatten, kein Glow */
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)); /* Leichter Schatten */
         }
 
         /* Eingabefeld GANZ UNTEN */
         #auth-panel { 
             width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px; flex-shrink: 0; 
+            background: transparent; border: none; box-shadow: none; padding: 0; /* Box komplett unsichtbar */
         }
-        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid var(--neon); background: rgba(0,0,0,0.7); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; text-shadow: 1px 1px 5px #000; outline: none; }
+        
+        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; text-shadow: 1px 1px 5px #000; outline: none; }
         .name-input:focus { border-color: var(--gold); box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px rgba(255,215,0,0.4); }
 
         .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.3); transition: 0.1s; transform: translateY(0); }
         .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
 
         /* ------------------------------------------------------------------------- */
-        /* 2. MENÜ BILDSCHIRME (Bekommen das Milchglas zurück, damit es lesbar ist)  */
+        /* 2. MENÜ BILDSCHIRME (Behalten das Milchglas für Lesbarkeit)               */
         /* ------------------------------------------------------------------------- */
         #scr-start {
             background: rgba(255, 255, 255, 0.05); 
@@ -124,7 +127,7 @@
         }
         #scr-start .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 10px 100px 10px; }
         
-        .title-box { width: 100%; background: var(--glass); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: none; padding: 15px; border: none; background: transparent; display: flex; justify-content: center; margin-bottom: 20px;}
+        .title-box { width: 100%; background: var(--glass); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: none; padding: 15px; background: transparent; display: flex; justify-content: center; margin-bottom: 20px;}
 
         .info-panel { width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); padding: 25px 20px; margin-bottom: 20px; flex-shrink: 0; height: auto; }
         .info-panel h3 { border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
@@ -425,7 +428,7 @@ function initAudioContext() {
     }
 }
 
-// UPDATE: Spielt NUR das Hunde-Video, aber noch NICHT die Hintergrundmusik!
+// Startet NUR den Hund beim ersten Klick! Keine Musik!
 function forceAudioStart() {
     initAudioContext();
     
@@ -448,13 +451,12 @@ function authAgent() {
             agent = n;
             try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
             
-            // Video anhalten
             if (videoEl) {
                 videoEl.pause();
                 if (videoAnimationId) cancelAnimationFrame(videoAnimationId);
             }
 
-            // UPDATE: JETZT startet die Musik (music.mp3)
+            // HIER startet erst die Hintergrundmusik (MP3)
             try {
                 let bgMusic = document.getElementById("snd-action");
                 if(bgMusic) {
@@ -699,15 +701,6 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
-    try {
-        let bgMusic = document.getElementById("snd-action");
-        if(bgMusic) {
-            bgMusic.volume = 0.15; 
-            bgMusic.playbackRate = 1.0; 
-            if(bgMusic.paused) bgMusic.play().catch(err => {});
-        }
-    } catch(e) {}
-
     mode = m;
     level = startLvl;
     
