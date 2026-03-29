@@ -355,7 +355,7 @@ function drawAndFilterFrame() {
         let r = data[i];
         let g = data[i + 1];
         let b = data[i + 2];
-        if (g > 100 && g > r * 1.2 && g > b * 1.2) {
+        if (g > 80 && g > r * 1.05 && g > b * 1.05) {
             data[i + 3] = 0; 
         }
     }
