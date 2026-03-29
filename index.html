@@ -29,7 +29,6 @@
             background: #111; font-family: 'Orbitron', sans-serif; color: #fff; 
             width: 100vw; height: 100dvh; overflow: hidden; 
             display: flex; justify-content: center; align-items: center; 
-            /* WICHTIG: touch-action: none WURDE HIER ENTFERNT, DAMIT SCROLLEN AUF ANDROID KLAPPT! */
         }
 
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
@@ -97,37 +96,15 @@
         .app-title { font-size: clamp(24px, 8vw, 36px); color: var(--gold); letter-spacing: 2px; margin: 0; text-align: center; animation: textPulse 1.8s infinite alternate ease-in-out; }
         @keyframes textPulse { 0% { text-shadow: 0 0 10px var(--gold); transform: scale(0.98); } 100% { text-shadow: 0 0 25px var(--gold), 0 0 40px #fff; transform: scale(1.05); } }
 
-        /* NEU: Styles für den animierten Hund und die Sprechblase */
-        .dog-avatar { 
-            width: 110px; height: 110px; 
-            border-radius: 20px; 
-            object-fit: cover; 
+        /* NEU: Transparenter Canvas für das Video */
+        .dog-video-canvas { 
+            width: 150px; height: 150px; 
+            object-fit: contain; 
             animation: floatDog 3s ease-in-out infinite; 
-            border: 2px solid var(--neon); 
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); 
-            margin-bottom: 5px;
-            background: #222;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.4)); /* Hologramm Schatten */
         }
         @keyframes floatDog { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-
-        .speech-bubble { 
-            background: rgba(255,255,255,0.95); 
-            color: #000; 
-            padding: 10px 15px; 
-            border-radius: 15px; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            font-size: 14px; 
-            font-weight: 800; 
-            margin-bottom: 25px; 
-            position: relative; 
-            text-align: center; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-        .speech-bubble::after { 
-            content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); 
-            border-width: 10px 10px 0; border-style: solid; 
-            border-color: rgba(255,255,255,0.95) transparent transparent transparent; 
-        }
 
         .inner-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; flex-shrink: 0; }
         .inner-panel h3, .inner-panel h2 { color: var(--gold); margin-bottom: 15px; font-size: 20px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; }
@@ -170,14 +147,11 @@
         .btc-title { font-size: 14px; display: flex; align-items: center; gap: 6px; }
         .btc-address { font-size: 10px; font-family: monospace; font-weight: 400; word-break: break-all; opacity: 0.9; }
         
-        .wallet-box { background: rgba(255,255,255,0.95); padding: 10px; border-radius: 15px; text-align: center; margin: 15px auto; width: 140px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .wallet-box img { width: 120px !important; height: 120px !important; object-fit: contain; margin: 0 auto; display: block; }
-        
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
 
         .legal-box { padding: 25px 20px; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        
+
         #scr-end { background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 1000; }
         #scr-end .screen-inner { 
             justify-content: center; align-items: center; height: auto; min-height: unset; 
@@ -241,8 +215,8 @@
             </header>
             <div id="auth-panel" class="inner-panel">
                 
-                <img src="dog.jpg" alt="Doggy" class="dog-avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐶</text></svg>'">
-                <div class="speech-bubble">Warm welcome to the doggyco game!</div>
+                <canvas id="dog-video-canvas" width="150" height="150" class="dog-video-canvas"></canvas>
+                <video id="dog-video" src="Hundekopf_Video_für_Spiel_angepasst.mp4" playsinline style="display:none;"></video>
 
                 <h2>MISSION BRIEFING</h2> 
                 <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
@@ -300,7 +274,6 @@
 
             <div class="info-panel panel-unicorn">
                 <h3>✨ PERSONALIZE & SUPPORT</h3>
-                
                 <p class="text-sm" style="text-align:justify; margin-bottom:15px;">
                     Want to be the star of the game? For a qualifying donation, you can personalize the final level (Unicorn Area)! 
                     We will replace the unicorn with <b>YOUR custom face or icon</b>. Pick your own favorite items to catch.
@@ -326,19 +299,15 @@
                         <svg viewBox="0 0 384 512" fill="white" width="14" height="16"><path d="M111.4 295.9l-35.4 0c-5.8 0-10.9-4.3-11.8-10L14.4 34.6C13.2 21.6 23.4 10.7 36.5 10.7l126.4 0c42.5 0 74.6 13.9 88.6 44.8 11.3 25.1 7.6 57.6-11.5 86.8-17.2 26.5-46.6 42.7-80.4 42.7l-26.6 0c-7.3 0-13.6 5.4-14.7 12.8L111.4 295.9zM362.4 158.2c-15.1-34.6-54.8-49.8-105-49.8l-37 0c-4.7 0-8.8 3.5-9.6 8.2l-47.8 300.9c-.9 5.8 3.6 11 9.5 11l49.3 0c4.7 0 8.8-3.5 9.6-8.2l15.1-95.2c.9-5.8 5.9-10 11.8-10l20.4 0c45.4 0 79.5-20.9 94-61.9 10.2-28.5 7.1-61.3-10.3-95z"/></svg>
                         PAYPAL
                     </a>
+                    
+                    <button class="btn-sup bg-btc" onclick="copyText(this, 'bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed')">
+                        <div class="btc-title">
+                            <svg viewBox="0 0 512 512" fill="white" width="14" height="14"><path d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zm-141.651-35.33c4.937-32.999-20.196-50.739-54.55-62.573l11.146-44.702-27.213-6.781-10.851 43.524c-7.154-1.783-14.502-3.464-21.803-5.13l10.929-43.81-27.198-6.781-11.153 44.686c-5.884-1.332-11.666-2.65-17.27-4.041l0-1.074-37.643-9.383-7.255 29.095s20.218 4.603 19.8 4.933c11.066 2.756 13.067 10.054 12.723 15.83l-12.836 51.464c.783.196 1.787.495 2.923.953l-2.946-.732-17.986 72.107c-1.127 2.846-3.953 7.098-12.443 4.919.349.444-19.8-4.933-19.8-4.933l-13.431 31.06 35.539 8.859c6.643 1.656 13.167 3.376 19.645 5.03l-11.233 45.069 27.206 6.781 11.153-44.734c7.348 1.942 14.542 3.754 21.579 5.485l-11.093 44.502 27.206 6.781 11.192-44.896c46.126 8.887 80.855 5.305 95.531-37.387 11.838-34.42-3.447-54.218-25.753-67.147 18.256-4.217 31.989-13.565 35.793-34.331zm-68.966 73.111c-9.308 37.327-72.133 17.151-92.427 12.094l16.44-65.922c20.287 5.056 85.666 15.021 75.987 53.828zm10.231-96.175c-8.435 33.844-59.508 16.59-76.241 12.433l14.957-59.972c16.732 4.168 70.088 12.33 61.284 47.539z"/></svg>
+                            COPY BTC
+                        </div>
+                        <div class="btc-address">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</div>
+                    </button>
                 </div>
-
-                <div class="wallet-box">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" alt="QR Code">
-                </div>
-
-                <button class="btn-sup bg-btc" style="width: 100%; margin-top: 5px;" onclick="copyText(this, 'bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed')">
-                    <div class="btc-title">
-                        <svg viewBox="0 0 512 512" fill="white" width="14" height="14"><path d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zm-141.651-35.33c4.937-32.999-20.196-50.739-54.55-62.573l11.146-44.702-27.213-6.781-10.851 43.524c-7.154-1.783-14.502-3.464-21.803-5.13l10.929-43.81-27.198-6.781-11.153 44.686c-5.884-1.332-11.666-2.65-17.27-4.041l0-1.074-37.643-9.383-7.255 29.095s20.218 4.603 19.8 4.933c11.066 2.756 13.067 10.054 12.723 15.83l-12.836 51.464c.783.196 1.787.495 2.923.953l-2.946-.732-17.986 72.107c-1.127 2.846-3.953 7.098-12.443 4.919.349.444-19.8-4.933-19.8-4.933l-13.431 31.06 35.539 8.859c6.643 1.656 13.167 3.376 19.645 5.03l-11.233 45.069 27.206 6.781 11.153-44.734c7.348 1.942 14.542 3.754 21.579 5.485l-11.093 44.502 27.206 6.781 11.192-44.896c46.126 8.887 80.855 5.305 95.531-37.387 11.838-34.42-3.447-54.218-25.753-67.147 18.256-4.217 31.989-13.565 35.793-34.331zm-68.966 73.111c-9.308 37.327-72.133 17.151-92.427 12.094l16.44-65.922c20.287 5.056 85.666 15.021 75.987 53.828zm10.231-96.175c-8.435 33.844-59.508 16.59-76.241 12.433l14.957-59.972c16.732 4.168 70.088 12.33 61.284 47.539z"/></svg>
-                        COPY BTC
-                    </div>
-                    <div class="btc-address">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</div>
-                </button>
             </div>
 
             <div class="legal-box"> 
@@ -367,6 +336,51 @@
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
 
 <script>
+// ---------- VIDEO GREEN SCREEN LOGIC ----------
+let videoEl = document.getElementById('dog-video');
+let videoCanvas = document.getElementById('dog-video-canvas');
+let videoCtx = videoCanvas.getContext('2d', { willReadFrequently: true });
+let videoAnimationId = null;
+
+function processVideoFrame() {
+    if (!videoEl.paused && !videoEl.ended) {
+        // Zeichnet das aktuelle Video-Bild auf das Canvas
+        videoCtx.drawImage(videoEl, 0, 0, videoCanvas.width, videoCanvas.height);
+        
+        // Liest die Pixel aus
+        let frame = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
+        let data = frame.data;
+        
+        // Filtert das helle Grün aus dem Video heraus (Chroma Keying)
+        for (let i = 0; i < data.length; i += 4) {
+            let r = data[i];
+            let g = data[i + 1];
+            let b = data[i + 2];
+            
+            // Wenn der Pixel sehr grün ist, setze ihn auf durchsichtig (Alpha = 0)
+            if (g > 100 && g > r * 1.2 && g > b * 1.2) {
+                data[i + 3] = 0; 
+            }
+        }
+        
+        // Legt das transparente Bild zurück auf das Canvas
+        videoCtx.putImageData(frame, 0, 0);
+    }
+    videoAnimationId = requestAnimationFrame(processVideoFrame);
+}
+
+// Sobald das Video anfängt zu spielen, startet der Filter-Loop
+videoEl.addEventListener('play', () => {
+    processVideoFrame();
+});
+
+// Zeichnet das allererste Bild, wenn die Datei geladen ist
+videoEl.addEventListener('loadeddata', () => {
+    videoCtx.drawImage(videoEl, 0, 0, videoCanvas.width, videoCanvas.height);
+});
+// ----------------------------------------------
+
+
 window.onload = function() {
     try {
         let savedName = localStorage.getItem("doggycoAgent");
@@ -375,10 +389,11 @@ window.onload = function() {
         }
     } catch(e) {}
 
+    // Wenn der Spieler tippt, wacht das Audio-System auf und das Video startet!
     let pNameField = document.getElementById("pName");
     if(pNameField) {
-        pNameField.addEventListener('input', initAudioContext, { once: true });
-        pNameField.addEventListener('click', initAudioContext, { once: true });
+        pNameField.addEventListener('input', forceAudioStart, { once: true });
+        pNameField.addEventListener('click', forceAudioStart, { once: true });
     }
 
     setTimeout(() => {
@@ -400,6 +415,7 @@ window.onload = function() {
 }
 
 let systemActive = false;
+let mp3Started = false;
 let audioCtx = null;
 
 function initAudioContext() {
@@ -411,13 +427,36 @@ function initAudioContext() {
                 if(AudioContext) audioCtx = new AudioContext();
             }
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-            startMenuMusic(); // Startet sanfte Menü-Töne
         } catch(e) {}
     }
 }
 
-document.body.addEventListener('click', initAudioContext, { once: true });
-document.body.addEventListener('touchstart', initAudioContext, { once: true });
+function forceAudioStart() {
+    initAudioContext();
+    
+    // Startet das sprechende Hundevideo
+    try {
+        if (videoEl && videoEl.paused) {
+            videoEl.volume = 1.0; // 100% Lautstärke für die Sprach-Begrüßung
+            videoEl.play().catch(e => {});
+        }
+    } catch(e) {}
+
+    // Startet leise Hintergrundmusik
+    try {
+        let bgMusic = document.getElementById("snd-action");
+        if(bgMusic && !mp3Started) {
+            bgMusic.volume = 0.08; 
+            bgMusic.playbackRate = 1.0; 
+            bgMusic.play().catch(err => {});
+            mp3Started = true;
+        }
+    } catch(e) {}
+}
+
+// Auch bei Klick auf den Hintergrund
+document.body.addEventListener('click', forceAudioStart, { once: true });
+document.body.addEventListener('touchstart', forceAudioStart, { once: true });
 
 function authAgent() {
     initAudioContext(); 
@@ -428,6 +467,12 @@ function authAgent() {
             agent = n;
             try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
             
+            // Video anhalten, um Akku zu sparen
+            if (videoEl) {
+                videoEl.pause();
+                if (videoAnimationId) cancelAnimationFrame(videoAnimationId);
+            }
+
             document.getElementById("scr-name").style.display = "none";
             document.getElementById("scr-start").style.display = "block";
             document.getElementById("scr-start").scrollTop = 0; 
@@ -467,11 +512,7 @@ function hapticSpiderHit() { triggerVibration(150); }
 function hapticDamage() { triggerVibration(300); } 
 function hapticGameOver() { triggerVibration([500, 100, 500]); } 
 
-let menuMusicTimer = null;
-let menuStep = 0;
-const menuNotes = [261.63, 329.63, 392.00, 440.00, 392.00, 329.63]; 
-
-function playTone(freq, type, duration, vol=0.4) {
+function playTone(freq, type, duration, vol=0.6) {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
         const osc = audioCtx.createOscillator();
@@ -484,18 +525,6 @@ function playTone(freq, type, duration, vol=0.4) {
     } catch(e) {}
 }
 
-function playMenuNote() {
-    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
-    let freq = menuNotes[menuStep % menuNotes.length];
-    playTone(freq / 2, 'sine', 2.0, 0.05); 
-    playTone(freq, 'sine', 1.5, 0.05);     
-    menuStep++;
-    menuMusicTimer = setTimeout(playMenuNote, 1000); 
-}
-
-function startMenuMusic() { if(!menuMusicTimer) { menuStep = 0; playMenuNote(); } }
-function stopMenuMusic() { if(menuMusicTimer) { clearTimeout(menuMusicTimer); menuMusicTimer = null; } }
-
 function sfxUfo() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -504,7 +533,7 @@ function sfxUfo() {
         osc.type = 'sine'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 1);
         osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 2);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime); 
+        gain.gain.setValueAtTime(0.4, audioCtx.currentTime); 
         gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + 2);
@@ -541,7 +570,7 @@ function sfxRocket() {
 
         let gain = audioCtx.createGain();
         gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(0.8, t + 0.5); 
+        gain.gain.linearRampToValueAtTime(1.0, t + 0.5); 
         gain.gain.exponentialRampToValueAtTime(0.01, t + 1.5); 
         
         noise.connect(filter);
@@ -566,7 +595,7 @@ function sfxShield() {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(200, audioCtx.currentTime);
         osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+        gain.gain.setValueAtTime(0.6, audioCtx.currentTime); 
         gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + 0.3);
@@ -582,7 +611,7 @@ function sfxAlarm() {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(600, t);
         osc.frequency.linearRampToValueAtTime(400, t + 0.4);
-        gain.gain.setValueAtTime(0.3, t); 
+        gain.gain.setValueAtTime(0.4, t); 
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(t); osc.stop(t + 0.4);
@@ -679,13 +708,12 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
-    stopMenuMusic();
     try {
         let bgMusic = document.getElementById("snd-action");
         if(bgMusic) {
             bgMusic.volume = 0.15; 
             bgMusic.playbackRate = 1.0; 
-            bgMusic.play().catch(err => {});
+            if(bgMusic.paused) bgMusic.play().catch(err => {});
         }
     } catch(e) {}
 
