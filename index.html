@@ -42,7 +42,9 @@
         }
 
         #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
-        canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; touch-action: none; }
+        
+        /* FIX: NUR der Spiel-Canvas wird groß gemacht, nicht der Video-Hund! */
+        #canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; touch-action: none; }
 
         #hud { position: absolute; top: env(safe-area-inset-top, 10px); width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; }
         
@@ -67,26 +69,20 @@
         .go-sub { font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center; }
         @keyframes violentShake { 0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) } 40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) } 80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) } }
 
-        /* ALLGEMEINES SCREEN LAYOUT */
+        /* FIX: Die generelle .screen Klasse bekommt KEIN Milchglas mehr! */
         .screen { 
             position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; 
             overflow-y: auto; -webkit-overflow-scrolling: touch; pointer-events: auto; padding-bottom: 50px;
         }
 
         /* ------------------------------------------------------------------------- */
-        /* 1. STARTBILDSCHIRM (Völlig transparent, sauberes Flexbox-Layout)          */
+        /* 1. STARTBILDSCHIRM (Perfektes Layout, KEIN Milchglas)                     */
         /* ------------------------------------------------------------------------- */
-        #scr-name {
-            background: transparent !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-        }
-
-        /* Nutzt 100% der Höhe und verteilt die Boxen gleichmäßig */
+        
         #scr-name .screen-inner { 
             width: 100%; height: 100dvh; margin: 0 auto; max-width: 420px; 
             display: flex; flex-direction: column; justify-content: space-between; align-items: center; 
-            padding: 8vh 20px 6vh 20px; 
+            padding: 10vh 20px 8vh 20px; /* Abstand oben und unten */
         }
 
         /* Titel GANZ OBEN */
@@ -94,31 +90,32 @@
         .app-title { font-size: clamp(30px, 9vw, 42px); color: var(--gold); letter-spacing: 2px; margin: 0; text-align: center; animation: textPulse 1.8s infinite alternate ease-in-out; }
         @keyframes textPulse { 0% { text-shadow: 0 0 10px var(--gold); transform: scale(0.98); } 100% { text-shadow: 0 0 25px var(--gold), 0 0 40px #fff; transform: scale(1.05); } }
 
-        /* Hund GANZ IN DER MITTE */
+        /* Hund GANZ IN DER MITTE (Unter dem Titel) */
         .dog-video-wrapper {
-            flex-grow: 1; /* Nimmt den gesamten freien Platz in der Mitte ein */
+            flex-grow: 1; /* Nutzt den ganzen freien Platz in der Mitte */
             display: flex; justify-content: center; align-items: center; width: 100%;
         }
         .dog-video-canvas { 
-            width: 250px; height: 250px; /* Schön groß */
+            position: relative; /* WICHTIG: Überschreibt das fiese 'absolute' */
+            width: 250px; height: 250px; 
             object-fit: contain; 
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)); /* Leichter Schatten */
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)); 
         }
 
         /* Eingabefeld GANZ UNTEN */
         #auth-panel { 
             width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px; flex-shrink: 0; 
-            background: transparent; border: none; box-shadow: none; padding: 0; /* Box komplett unsichtbar */
+            background: transparent; border: none; box-shadow: none; padding: 0; 
         }
         
-        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; text-shadow: 1px 1px 5px #000; outline: none; }
+        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid var(--neon); background: rgba(0,0,0,0.7); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; text-shadow: 1px 1px 5px #000; outline: none; }
         .name-input:focus { border-color: var(--gold); box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px rgba(255,215,0,0.4); }
 
         .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.3); transition: 0.1s; transform: translateY(0); }
         .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
 
         /* ------------------------------------------------------------------------- */
-        /* 2. MENÜ BILDSCHIRME (Behalten das Milchglas für Lesbarkeit)               */
+        /* 2. MENÜ BILDSCHIRME (Hier kommt das Milchglas hin, damit Text lesbar ist) */
         /* ------------------------------------------------------------------------- */
         #scr-start {
             background: rgba(255, 255, 255, 0.05); 
@@ -234,7 +231,7 @@
     <div id="scr-start" class="screen" style="display:none;">
         <div class="screen-inner">
             <header>
-                <div class="title-box">
+                <div class="title-box" style="margin-bottom: 10px;">
                     <h1 class="app-title">DOGGYCO MISSION</h1>
                 </div>
             </header>
@@ -372,6 +369,7 @@ function processVideoFrame() {
     videoAnimationId = requestAnimationFrame(processVideoFrame);
 }
 
+// FIX: Filtert das erste Bild sofort, damit es nicht grün startet!
 videoEl.addEventListener('loadeddata', drawAndFilterFrame);
 videoEl.addEventListener('seeked', drawAndFilterFrame);
 videoEl.addEventListener('play', processVideoFrame);
@@ -428,7 +426,6 @@ function initAudioContext() {
     }
 }
 
-// Startet NUR den Hund beim ersten Klick! Keine Musik!
 function forceAudioStart() {
     initAudioContext();
     
@@ -456,7 +453,6 @@ function authAgent() {
                 if (videoAnimationId) cancelAnimationFrame(videoAnimationId);
             }
 
-            // HIER startet erst die Hintergrundmusik (MP3)
             try {
                 let bgMusic = document.getElementById("snd-action");
                 if(bgMusic) {
@@ -701,6 +697,15 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
+    try {
+        let bgMusic = document.getElementById("snd-action");
+        if(bgMusic) {
+            bgMusic.volume = 0.15; 
+            bgMusic.playbackRate = 1.0; 
+            if(bgMusic.paused) bgMusic.play().catch(err => {});
+        }
+    } catch(e) {}
+
     mode = m;
     level = startLvl;
     
