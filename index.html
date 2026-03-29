@@ -14,7 +14,7 @@
             --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff;
             --unicorn: #ff00ff;
             --rad: #adff2f;
-            --glass: rgba(255, 255, 255, 0.06);
+            --glass: rgba(255, 255, 255, 0.05);
         }
         
         * { 
@@ -74,37 +74,48 @@
         
         .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 10px 100px 10px; }
 
-        #scr-name .screen-inner { justify-content: center; }
+        /* UPDATE: Startbildschirm-Layout komplett überarbeitet! */
+        #scr-name .screen-inner { 
+            justify-content: space-between; /* Verteilt Oben, Mitte, Unten perfekt */
+            height: 100dvh; /* Nutzt die volle Bildschirmhöhe */
+            padding-top: 12vh;
+            padding-bottom: 8vh;
+        }
 
-        /* EINE GROSSE MILCHIGE BOX FÜR DEN LOGIN */
-        .glass-panel {
+        header { width: 100%; flex-shrink: 0; text-align: center; display: flex; justify-content: center; }
+
+        .app-title { font-size: clamp(30px, 10vw, 42px); color: var(--gold); letter-spacing: 2px; margin: 0; text-align: center; animation: textPulse 1.8s infinite alternate ease-in-out; }
+        @keyframes textPulse { 0% { text-shadow: 0 0 10px var(--gold); transform: scale(0.98); } 100% { text-shadow: 0 0 25px var(--gold), 0 0 40px #fff; transform: scale(1.05); } }
+
+        /* UPDATE: Der Hund ist jetzt größer und genau in der Mitte zentriert */
+        .dog-video-wrapper {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .dog-video-canvas { 
+            width: 220px; height: 220px; 
+            object-fit: contain; 
+            filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.4)); 
+        }
+
+        /* UPDATE: Panel komplett ohne Hintergrund / milchiges Bild */
+        #auth-panel { 
             width: 100%; 
-            background: var(--glass); 
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.15); 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 30px 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 0 20px;
+            flex-shrink: 0; 
+            background: transparent;
+            border: none;
+            box-shadow: none;
         }
 
-        .app-title { font-size: clamp(24px, 8vw, 36px); color: var(--gold); letter-spacing: 2px; margin: 0; text-align: center; animation: textPulse 1.8s infinite alternate ease-in-out; margin-bottom: 10px; }
-        @keyframes textPulse { 0% { text-shadow: 0 0 10px var(--gold); transform: scale(0.98); } 100% { text-shadow: 0 0 25px var(--gold), 0 0 40px #fff; transform: scale(1.05); } }
-
-        /* Hund-Video exakt in der Mitte */
-        .dog-video-canvas { 
-            width: 160px; height: 160px; 
-            object-fit: contain; 
-            margin-bottom: 5px;
-            filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.3)); /* Leichter Schatten, damit es abhebt */
-        }
-
-        .glass-panel h2 { color: var(--gold); margin-top: 10px; margin-bottom: 20px; font-size: 18px; text-transform: uppercase; text-shadow: 2px 2px 5px #000; text-align: center; letter-spacing: 1px; }
-        
-        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 20px; text-shadow: 1px 1px 5px #000; outline: none; }
+        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.6); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 15px; text-shadow: 1px 1px 5px #000; outline: none; }
         .name-input:focus { border-color: var(--gold); box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px rgba(255,215,0,0.4); }
 
         .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.3); transition: 0.1s; transform: translateY(0); }
@@ -115,12 +126,25 @@
         .btn-char:hover { background: rgba(255,255,255,0.1); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
-        /* Weitere Screens (Level Auswahl) bleiben auch in Panels */
-        .info-panel { 
-            width: 100%; 
-            background: var(--glass); 
+        /* Die weiteren Screens behalten ihr milchiges Glas, damit man den Text lesen kann */
+        #scr-start {
+            background: rgba(255, 255, 255, 0.05); 
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
+        }
+
+        .title-box {
+            width: 100%; 
+            background: rgba(255,255,255,0.06); 
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            box-shadow: none; 
+            padding: 15px; border: none; background: transparent; display: flex; justify-content: center;
+        }
+
+        .info-panel { 
+            width: 100%; 
+            background: rgba(255,255,255,0.06); 
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.15); 
             padding: 25px 20px; margin-bottom: 20px; flex-shrink: 0; height: auto; 
@@ -154,10 +178,7 @@
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
 
-        .legal-box { 
-            width: 100%; background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); 
-            padding: 25px 20px; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; 
-        }
+        .legal-box { padding: 25px 20px; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); width: 100%;}
 
         #scr-end { background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 1000; }
         #scr-end .screen-inner { 
@@ -216,13 +237,16 @@
     <div id="scr-name" class="screen">
         <div class="screen-inner">
             
-            <div class="glass-panel">
+            <header style="margin-bottom: 0;">
                 <h1 class="app-title">DOGGYCO MISSION</h1>
-                
-                <canvas id="dog-video-canvas" width="160" height="160" class="dog-video-canvas"></canvas>
+            </header>
+            
+            <div class="dog-video-wrapper">
+                <canvas id="dog-video-canvas" width="220" height="220" class="dog-video-canvas"></canvas>
                 <video id="dog-video" src="Hundekopf_Video_für_Spiel_angepasst.mp4" playsinline preload="auto" style="display:none;"></video>
+            </div>
 
-                <h2>MISSION BRIEFING</h2> 
+            <div id="auth-panel">
                 <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
                 <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
             </div>
@@ -232,9 +256,11 @@
 
     <div id="scr-start" class="screen" style="display:none;">
         <div class="screen-inner">
-            <div class="glass-panel" style="padding: 15px; margin-bottom: 20px;">
-                <h1 class="app-title">DOGGYCO MISSION</h1>
-            </div>
+            <header>
+                <div class="title-box" style="margin-bottom: 10px;">
+                    <h1 class="app-title">DOGGYCO MISSION</h1>
+                </div>
+            </header>
             
             <div class="info-panel" style="display: flex; flex-direction: column; align-items: center;">
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">CHOOSE START LEVEL</h3>
@@ -351,7 +377,6 @@ function drawAndFilterFrame() {
     let frame = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
     let data = frame.data;
     
-    // Filtert das Grün komplett heraus
     for (let i = 0; i < data.length; i += 4) {
         let r = data[i];
         let g = data[i + 1];
@@ -370,12 +395,10 @@ function processVideoFrame() {
     videoAnimationId = requestAnimationFrame(processVideoFrame);
 }
 
-// Stellt sicher, dass das erste Bild sofort gereinigt wird (kein grüner Hintergrund!)
 videoEl.addEventListener('loadeddata', drawAndFilterFrame);
 videoEl.addEventListener('seeked', drawAndFilterFrame);
 videoEl.addEventListener('play', processVideoFrame);
 // --------------------------------
-
 
 window.onload = function() {
     try {
@@ -429,7 +452,6 @@ function initAudioContext() {
 function forceAudioStart() {
     initAudioContext();
     
-    // Video und Sprache starten
     try {
         if (videoEl && videoEl.paused) {
             videoEl.volume = 1.0; 
@@ -437,7 +459,6 @@ function forceAudioStart() {
         }
     } catch(e) {}
 
-    // Leise Hintergrundmusik im Menü starten
     try {
         let bgMusic = document.getElementById("snd-action");
         if(bgMusic && !mp3Started) {
@@ -461,7 +482,6 @@ function authAgent() {
             agent = n;
             try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
             
-            // Pausiert das Video für die Performance
             if (videoEl) {
                 videoEl.pause();
                 if (videoAnimationId) cancelAnimationFrame(videoAnimationId);
