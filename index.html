@@ -20,7 +20,6 @@
         * { 
             margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; outline: none; 
-            /* ANDROID FIX: user-select blockieren, ABER touch-action freigeben für Scrollen */
             user-select: none; -webkit-user-select: none; 
         }
         
@@ -42,7 +41,7 @@
             #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%); }
         }
 
-        /* NUR das Spielfeld blockiert Wischgesten (damit man steuern kann) */
+        /* Spielfeld fängt Berührungen ab, damit das Wischen nicht scrollt */
         #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
         canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; touch-action: none; }
 
@@ -69,7 +68,7 @@
         .go-sub { font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center; }
         @keyframes violentShake { 0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) } 40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) } 80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) } }
 
-        /* ANDROID FIX: Kein touch-action:none mehr! Dadurch funktioniert Scrollen rauf & runter */
+        /* ANDROID SCROLL-FIX: Menüs können fehlerfrei gewischt werden */
         .screen { 
             position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; 
             overflow-y: auto; -webkit-overflow-scrolling: touch; pointer-events: auto; padding-bottom: 50px;
@@ -126,6 +125,7 @@
         .panel-neon h3 { color: var(--neon); border-bottom-color: var(--neon); }
         .panel-unicorn h3 { color: var(--unicorn); border-bottom-color: var(--unicorn); }
 
+        /* UMGEDREHTE PYRAMIDE & SUPPORT GRID */
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; flex-shrink: 0; width: 100%; }
         
         .btn-sup { padding: 12px 5px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -134,15 +134,13 @@
         .bg-email { background: linear-gradient(45deg, #333, #555); grid-column: span 2; font-size: 14px; text-transform: lowercase; letter-spacing: 1px; }
         .bg-tk { background: linear-gradient(45deg, #000, #ff0050); font-size: 12px; } 
         .bg-yt { background: linear-gradient(45deg, #c4302b, #ff0000); font-size: 12px;}
-        .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); font-size: 12px;}
         
-        .bg-btc { background: linear-gradient(45deg, #d97b0b, #F7931A); flex-direction: column; gap: 3px; padding: 8px 5px; }
-        .btc-title { font-size: 12px; display: flex; align-items: center; gap: 6px; }
-        .btc-address { font-size: 9px; font-family: monospace; font-weight: 400; word-break: break-all; opacity: 0.9; }
+        /* PayPal & BTC nutzen jetzt die volle Breite (span 2) */
+        .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); font-size: 14px; grid-column: span 2;}
+        .bg-btc { background: linear-gradient(45deg, #d97b0b, #F7931A); flex-direction: column; gap: 3px; padding: 10px 5px; grid-column: span 2;}
         
-        /* QR-Code Box perfekt zentriert */
-        .wallet-box { background: rgba(255,255,255,0.95); padding: 10px; border-radius: 15px; text-align: center; margin: 15px auto; width: 140px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .wallet-box img { width: 120px !important; height: 120px !important; object-fit: contain; margin: 0 auto; display: block; }
+        .btc-title { font-size: 14px; display: flex; align-items: center; gap: 6px; }
+        .btc-address { font-size: 10px; font-family: monospace; font-weight: 400; word-break: break-all; opacity: 0.9; }
         
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
@@ -216,7 +214,7 @@
                 <div id="dog-head-icon">🐶</div> 
                 <h2>MISSION BRIEFING</h2> 
                 <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
-                <button class="btn-main" id="btn-auth" onclick="authAgent()">AUTHENTICATE</button>
+                <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
             </div>
         </div>
     </div>
@@ -231,18 +229,19 @@
             
             <div class="info-panel" style="display: flex; flex-direction: column; align-items: center;">
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">CHOOSE START LEVEL</h3>
-                <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+                
+                <div style="display:flex; flex-direction:column; gap:10px; width:100%; align-items: center;">
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
                         <button class="btn-char" style="border-color:var(--neon); flex:1;" onclick="start('dog', 1)"><span>🐶</span>DOG</button>
                         <button class="btn-char" style="border-color:var(--cat); flex:1;" onclick="start('cat', 3)"><span>🐱</span>CAT</button>
                         <button class="btn-char" style="border-color:var(--rabbit); flex:1;" onclick="start('rabbit', 5)"><span>🐰</span>RABBIT</button>
                     </div>
-                    <div style="display:flex; justify-content:center; gap:8px; width:100%;">
-                        <button class="btn-char" style="border-color:var(--fox); flex:1; max-width:48%;" onclick="start('fox', 7)"><span>🦊</span>FOX</button>
-                        <button class="btn-char" style="border-color:var(--panda); flex:1; max-width:48%;" onclick="start('panda', 9)"><span>🐼</span>PANDA</button>
+                    <div style="display:flex; justify-content:center; gap:8px; width:75%;">
+                        <button class="btn-char" style="border-color:var(--fox); flex:1;" onclick="start('fox', 7)"><span>🦊</span>FOX</button>
+                        <button class="btn-char" style="border-color:var(--panda); flex:1;" onclick="start('panda', 9)"><span>🐼</span>PANDA</button>
                     </div>
-                    <div style="display:flex; justify-content:center; gap:8px; width:100%;">
-                        <button class="btn-char" style="border-color:var(--unicorn); flex:1; max-width:48%;" onclick="start('unicorn', 11)"><span>🦄</span>UNICORN</button>
+                    <div style="display:flex; justify-content:center; gap:8px; width:45%;">
+                        <button class="btn-char" style="border-color:var(--unicorn); flex:1;" onclick="start('unicorn', 11)"><span>🦄</span>UNICORN</button>
                     </div>
                 </div>
             </div>
@@ -295,19 +294,15 @@
                         <svg viewBox="0 0 384 512" fill="white" width="14" height="16"><path d="M111.4 295.9l-35.4 0c-5.8 0-10.9-4.3-11.8-10L14.4 34.6C13.2 21.6 23.4 10.7 36.5 10.7l126.4 0c42.5 0 74.6 13.9 88.6 44.8 11.3 25.1 7.6 57.6-11.5 86.8-17.2 26.5-46.6 42.7-80.4 42.7l-26.6 0c-7.3 0-13.6 5.4-14.7 12.8L111.4 295.9zM362.4 158.2c-15.1-34.6-54.8-49.8-105-49.8l-37 0c-4.7 0-8.8 3.5-9.6 8.2l-47.8 300.9c-.9 5.8 3.6 11 9.5 11l49.3 0c4.7 0 8.8-3.5 9.6-8.2l15.1-95.2c.9-5.8 5.9-10 11.8-10l20.4 0c45.4 0 79.5-20.9 94-61.9 10.2-28.5 7.1-61.3-10.3-95z"/></svg>
                         PAYPAL
                     </a>
+                    
+                    <button class="btn-sup bg-btc" onclick="copyText(this, 'bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed')">
+                        <div class="btc-title">
+                            <svg viewBox="0 0 512 512" fill="white" width="14" height="14"><path d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zm-141.651-35.33c4.937-32.999-20.196-50.739-54.55-62.573l11.146-44.702-27.213-6.781-10.851 43.524c-7.154-1.783-14.502-3.464-21.803-5.13l10.929-43.81-27.198-6.781-11.153 44.686c-5.884-1.332-11.666-2.65-17.27-4.041l0-1.074-37.643-9.383-7.255 29.095s20.218 4.603 19.8 4.933c11.066 2.756 13.067 10.054 12.723 15.83l-12.836 51.464c.783.196 1.787.495 2.923.953l-2.946-.732-17.986 72.107c-1.127 2.846-3.953 7.098-12.443 4.919.349.444-19.8-4.933-19.8-4.933l-13.431 31.06 35.539 8.859c6.643 1.656 13.167 3.376 19.645 5.03l-11.233 45.069 27.206 6.781 11.153-44.734c7.348 1.942 14.542 3.754 21.579 5.485l-11.093 44.502 27.206 6.781 11.192-44.896c46.126 8.887 80.855 5.305 95.531-37.387 11.838-34.42-3.447-54.218-25.753-67.147 18.256-4.217 31.989-13.565 35.793-34.331zm-68.966 73.111c-9.308 37.327-72.133 17.151-92.427 12.094l16.44-65.922c20.287 5.056 85.666 15.021 75.987 53.828zm10.231-96.175c-8.435 33.844-59.508 16.59-76.241 12.433l14.957-59.972c16.732 4.168 70.088 12.33 61.284 47.539z"/></svg>
+                            COPY BTC
+                        </div>
+                        <div class="btc-address">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</div>
+                    </button>
                 </div>
-
-                <div class="wallet-box">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" alt="QR Code">
-                </div>
-
-                <button class="btn-sup bg-btc" style="width: 100%; margin-top: 5px;" onclick="copyText(this, 'bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed')">
-                    <div class="btc-title">
-                        <svg viewBox="0 0 512 512" fill="white" width="14" height="14"><path d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zm-141.651-35.33c4.937-32.999-20.196-50.739-54.55-62.573l11.146-44.702-27.213-6.781-10.851 43.524c-7.154-1.783-14.502-3.464-21.803-5.13l10.929-43.81-27.198-6.781-11.153 44.686c-5.884-1.332-11.666-2.65-17.27-4.041l0-1.074-37.643-9.383-7.255 29.095s20.218 4.603 19.8 4.933c11.066 2.756 13.067 10.054 12.723 15.83l-12.836 51.464c.783.196 1.787.495 2.923.953l-2.946-.732-17.986 72.107c-1.127 2.846-3.953 7.098-12.443 4.919.349.444-19.8-4.933-19.8-4.933l-13.431 31.06 35.539 8.859c6.643 1.656 13.167 3.376 19.645 5.03l-11.233 45.069 27.206 6.781 11.153-44.734c7.348 1.942 14.542 3.754 21.579 5.485l-11.093 44.502 27.206 6.781 11.192-44.896c46.126 8.887 80.855 5.305 95.531-37.387 11.838-34.42-3.447-54.218-25.753-67.147 18.256-4.217 31.989-13.565 35.793-34.331zm-68.966 73.111c-9.308 37.327-72.133 17.151-92.427 12.094l16.44-65.922c20.287 5.056 85.666 15.021 75.987 53.828zm10.231-96.175c-8.435 33.844-59.508 16.59-76.241 12.433l14.957-59.972c16.732 4.168 70.088 12.33 61.284 47.539z"/></svg>
-                        COPY BTC
-                    </div>
-                    <div class="btc-address">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</div>
-                </button>
             </div>
 
             <div class="legal-box"> 
@@ -344,6 +339,13 @@ window.onload = function() {
         }
     } catch(e) {}
 
+    // Android weckt das Audiosystem, wenn man in das Feld klickt oder tippt!
+    let pNameField = document.getElementById("pName");
+    if(pNameField) {
+        pNameField.addEventListener('input', initAudioContext, { once: true });
+        pNameField.addEventListener('click', initAudioContext, { once: true });
+    }
+
     setTimeout(() => {
         if (navigator.onLine) {
             let script = document.createElement('script');
@@ -363,21 +365,38 @@ window.onload = function() {
 }
 
 let systemActive = false;
+let audioCtx = null;
 
-// Löst Audio-Blockade auf Android sauber
-function unlockAudio() {
-    if(!systemActive) { 
-        systemActive = true; 
-        initSynth(); 
-        startMenuMusic(); 
+// Initialisiert nur die Audio-Ressourcen (Startet noch KEINE MP3)
+function initAudioContext() {
+    if(!systemActive) {
+        systemActive = true;
+        try {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if(AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        } catch(e) {}
     }
 }
 
-document.body.addEventListener('click', unlockAudio, { once: true });
-document.body.addEventListener('touchstart', unlockAudio, { once: true });
+document.body.addEventListener('click', initAudioContext, { once: true });
+document.body.addEventListener('touchstart', initAudioContext, { once: true });
 
 function authAgent() {
-    unlockAudio();
+    initAudioContext(); 
+    
+    // MP3 startet leise im Menü
+    try {
+        let bgMusic = document.getElementById("snd-action");
+        if(bgMusic && bgMusic.paused) {
+            bgMusic.volume = 0.05; 
+            bgMusic.playbackRate = 1.0; 
+            bgMusic.play().catch(err => {});
+        }
+    } catch(e) {}
+
     let pNameElement = document.getElementById("pName");
     if(pNameElement) {
         let n = pNameElement.value.trim().toUpperCase();
@@ -400,6 +419,9 @@ function move(dir) {
 
 function triggerMove(dir, btnId) {
     if(!active || missionComplete) return;
+    
+    try { if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); } } catch(e) {}
+    
     hapticMove(); 
     move(dir);
     let btn = document.getElementById(btnId);
@@ -421,22 +443,7 @@ function hapticSpiderHit() { triggerVibration(150); }
 function hapticDamage() { triggerVibration(300); } 
 function hapticGameOver() { triggerVibration([500, 100, 500]); } 
 
-let audioCtx = null;
-let menuMusicTimer = null;
-let menuStep = 0;
-const menuNotes = [261.63, 329.63, 392.00, 440.00, 392.00, 329.63]; 
-
-function initSynth() {
-    try {
-        if (!audioCtx) {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if(AudioContext) audioCtx = new AudioContext();
-        }
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    } catch(e) {}
-}
-
-function playTone(freq, type, duration, vol=0.6) {
+function playTone(freq, type, duration, vol=0.4) {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
         const osc = audioCtx.createOscillator();
@@ -449,20 +456,6 @@ function playTone(freq, type, duration, vol=0.6) {
     } catch(e) {}
 }
 
-function playMenuNote() {
-    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
-    let freq = menuNotes[menuStep % menuNotes.length];
-    
-    playTone(freq / 2, 'sine', 2.0, 0.05); 
-    playTone(freq, 'sine', 1.5, 0.05);     
-    
-    menuStep++;
-    menuMusicTimer = setTimeout(playMenuNote, 1000); 
-}
-
-function startMenuMusic() { if(!systemActive) return; initSynth(); if(!menuMusicTimer) { menuStep = 0; playMenuNote(); } }
-function stopMenuMusic() { if(menuMusicTimer) { clearTimeout(menuMusicTimer); menuMusicTimer = null; } }
-
 function sfxUfo() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -471,7 +464,7 @@ function sfxUfo() {
         osc.type = 'sine'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 1);
         osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 2);
-        gain.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime); 
         gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + 2);
@@ -482,6 +475,7 @@ function sfxRocket() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
         let t = audioCtx.currentTime;
+        
         let bufferSize = Math.floor(audioCtx.sampleRate * 2.0); 
         let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         let data = buffer.getChannelData(0);
@@ -508,7 +502,7 @@ function sfxRocket() {
 
         let gain = audioCtx.createGain();
         gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(1.0, t + 0.5); 
+        gain.gain.linearRampToValueAtTime(0.8, t + 0.5); 
         gain.gain.exponentialRampToValueAtTime(0.01, t + 1.5); 
         
         noise.connect(filter);
@@ -533,7 +527,7 @@ function sfxShield() {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(200, audioCtx.currentTime);
         osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.6, audioCtx.currentTime); 
+        gain.gain.setValueAtTime(0.4, audioCtx.currentTime); 
         gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + 0.3);
@@ -549,7 +543,7 @@ function sfxAlarm() {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(600, t);
         osc.frequency.linearRampToValueAtTime(400, t + 0.4);
-        gain.gain.setValueAtTime(0.4, t); 
+        gain.gain.setValueAtTime(0.3, t); 
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(t); osc.stop(t + 0.4);
@@ -646,14 +640,15 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
-    // Menü-Musik stoppen, Spiele-MP3 abfeuern
-    stopMenuMusic();
+    initAudioContext();
+    
+    // MP3 wird im Spiel etwas lauter für die Action (15%)
     try {
         let bgMusic = document.getElementById("snd-action");
         if(bgMusic) {
-            bgMusic.volume = 0.15; // 15% für Android
+            bgMusic.volume = 0.15; 
             bgMusic.playbackRate = 1.0; 
-            bgMusic.play().catch(err => {});
+            if(bgMusic.paused) bgMusic.play().catch(err => {});
         }
     } catch(e) {}
 
@@ -686,7 +681,22 @@ function start(m, startLvl) {
     permSpiders = [ { lane: 0, y: 60, dy: 1, hit: false }, { lane: 4, y: H-120, dy: -1, hit: false } ];
 
     active = true; lastT = 0; 
+    
+    // KUGELSICHER: Startet den Loop!
     requestAnimationFrame(loop);
+}
+
+function getSafeSpiderLane(currentSpider) {
+    let otherL = permSpiders.find(sp => sp !== currentSpider).lane;
+    let avail = [0,1,2,3,4].filter(l => l !== otherL);
+    return avail[Math.floor(Math.random() * avail.length)];
+}
+
+function getSafeLaneForItems() {
+    let blockedLanes = permSpiders.map(s => s.lane);
+    let safeLanes = [0,1,2,3,4].filter(l => !blockedLanes.includes(l));
+    if (safeLanes.length === 0) return -1;
+    return safeLanes[Math.floor(Math.random() * safeLanes.length)];
 }
 
 function launchMassiveFireworks() {
@@ -716,416 +726,405 @@ async function saveScoreAndRefresh(newScore) {
     } catch(e) {}
 }
 
+// KUGELSICHER: Die Spielschleife fängt alle Fehler ab, damit der Canvas nie einfriert!
 function loop(t) {
     if(!active) return;
+    requestAnimationFrame(loop); // Immer sofort das nächste Frame anfordern
     
-    if(lastT === 0) lastT = t; 
-    let dt = (t - lastT) / 1000; lastT = t;
-    if(dt > 0.1) dt = 0.016;
+    try {
+        if(lastT === 0) lastT = t; 
+        let dt = (t - lastT) / 1000; lastT = t;
+        if(dt > 0.1) dt = 0.016;
 
-    ctx.shadowBlur = 0; 
-    ctx.clearRect(0,0,W,H);
+        ctx.shadowBlur = 0; 
+        ctx.clearRect(0,0,W,H);
 
-    const hitTop = H - 150; 
-    const hitBottom = H - 50;
+        const hitTop = H - 150; 
+        const hitBottom = H - 50;
 
-    let capLvl = Math.min(level, 12);
-    let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
-    let ptsScaling = speedMult; 
+        let capLvl = Math.min(level, 12);
+        let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
+        let ptsScaling = speedMult; 
 
-    let bgMusic = document.getElementById("snd-action");
-    if (bgMusic && !bgMusic.paused) {
-        try {
-            let targetRate = 0.92 + ((capLvl - 1) / 11) * 0.16;
-            let step = (targetRate - bgMusic.playbackRate) * 2.0 * dt;
-            if(Math.abs(step) > 0.001) {
-                let newRate = bgMusic.playbackRate + step;
-                if(newRate >= 0.5 && newRate <= 2.0) {
-                    bgMusic.playbackRate = newRate; 
-                }
+        if(invincibleTimer > 0) {
+            invincibleTimer -= dt;
+            alarmTimer -= dt;
+            
+            if (alarmTimer <= 0) {
+                sfxAlarm();
+                alarmTimer = 0.8;
             }
-        } catch(e) {} 
-    }
-
-    if(invincibleTimer > 0) {
-        invincibleTimer -= dt;
-        alarmTimer -= dt;
-        
-        if (alarmTimer <= 0) {
-            sfxAlarm();
-            alarmTimer = 0.8;
-        }
-        
-        if(invincibleTimer < 0) invincibleTimer = 0;
-    }
-
-    if (!missionComplete) {
-        timeLeft -= dt; energy -= (4 * speedMult) * dt;
-
-        if(timeLeft <= 24 && !rocketSpawned) {
-            rocketSpawned = true;
-            let safeL = getSafeLaneForItems();
-            if(safeL === -1) safeL = 2; 
-            rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL };
-            sfxRocket();
+            
+            if(invincibleTimer < 0) invincibleTimer = 0;
         }
 
-        if(timeLeft <= 12 && !ufoSpawned) {
-            ufoSpawned = true;
-            let safeL = getSafeLaneForItems();
-            if(safeL === -1) safeL = 2; 
-            ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false });
-            sfxUfo(); 
-        }
+        if (!missionComplete) {
+            timeLeft -= dt; energy -= (4 * speedMult) * dt;
 
-        if(timeLeft <= 0) {
-            if(level === 12) {
-                missionComplete = true; 
-                launchMassiveFireworks();
-                
-                setTimeout(() => {
-                    addFloat(W/2, H/2, "MISSION", "#00ff88", 45);
-                    addFloat(W/2, H/2 + 60, "ACCOMPLISHED!", "#00ff88", 35);
-                }, 1000);
+            if(timeLeft <= 24 && !rocketSpawned) {
+                rocketSpawned = true;
+                let safeL = getSafeLaneForItems();
+                if(safeL === -1) safeL = 2; 
+                rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL };
+                sfxRocket();
+            }
 
-                let heartsToPop = hp;
-                let burstDelay = 2500;
-                
-                for(let i=0; i < heartsToPop; i++) {
+            if(timeLeft <= 12 && !ufoSpawned) {
+                ufoSpawned = true;
+                let safeL = getSafeLaneForItems();
+                if(safeL === -1) safeL = 2; 
+                ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false });
+                sfxUfo(); 
+            }
+
+            if(timeLeft <= 0) {
+                if(level === 12) {
+                    missionComplete = true; 
+                    launchMassiveFireworks();
+                    
                     setTimeout(() => {
-                        hp--; 
-                        score += 1000;
-                        charJump = 20;
-                        sfxStarCollect();
-                        triggerVibration([50, 50, 100]);
-                        addFloat(W/2 + (Math.random()*40-20), H/2 + 140, "❤️ +1000", "#00ff88", 40);
-                        for(let k=0; k<15; k++) fireworks.push({ x: W/2, y: H/2+140, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.0, c: '#00ff88' });
-                    }, 2500 + (i * 800));
-                    burstDelay = 2500 + (i * 800);
+                        addFloat(W/2, H/2, "MISSION", "#00ff88", 45);
+                        addFloat(W/2, H/2 + 60, "ACCOMPLISHED!", "#00ff88", 35);
+                    }, 1000);
+
+                    let heartsToPop = hp;
+                    let burstDelay = 2500;
+                    
+                    for(let i=0; i < heartsToPop; i++) {
+                        setTimeout(() => {
+                            hp--; 
+                            score += 1000;
+                            charJump = 20;
+                            sfxStarCollect();
+                            triggerVibration([50, 50, 100]);
+                            addFloat(W/2 + (Math.random()*40-20), H/2 + 140, "❤️ +1000", "#00ff88", 40);
+                            for(let k=0; k<15; k++) fireworks.push({ x: W/2, y: H/2+140, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.0, c: '#00ff88' });
+                        }, 2500 + (i * 800));
+                        burstDelay = 2500 + (i * 800);
+                    }
+
+                    setTimeout(() => {
+                        active = false;
+                        document.getElementById("game-wrap").style.pointerEvents = "none";
+                        document.getElementById("game-wrap").style.visibility = "hidden";
+                        document.getElementById("scr-end").style.display = "flex";
+                        document.getElementById("end-agent-name").innerText = agent;
+                        document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
+                        
+                        let endT = document.getElementById("end-title");
+                        endT.innerText = "MISSION ACCOMPLISHED";
+                        endT.className = "end-status green-neon-text";
+                        
+                        try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
+                    }, burstDelay + 3000); 
+
+                } else {
+                    level++; 
+                    timeLeft = 30; 
+                    energy = Math.min(100, energy + (25 * speedMult));
+                    
+                    rocketSpawned = false; 
+                    ufoSpawned = false;
+                    rocket = null;
+                    fallingCore = null;
+                    fallingHearts = [];
+                    
+                    const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'unicorn'];
+                    let expectedModeIndex = Math.floor((level - 1) / 2) % 6;
+                    let expectedMode = modeOrder[expectedModeIndex];
+                    
+                    let pop = document.getElementById("lvl-up-popup");
+
+                    if(mode !== expectedMode) {
+                        mode = expectedMode; updateTheme(mode); 
+                        for(let j=0; j<4; j++) { setTimeout(() => { let x = Math.random() * W; let y = Math.random() * (H/2) + 50; for(let i=0; i<30; i++) fireworks.push({ x: x, y: y, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.5, c: '#00f2ff' }); }, j * 300); }
+                        pop.innerHTML = "LEVEL " + level + "<br><span style='font-size:20px; color:#fff'>" + mode.toUpperCase() + " UNLOCKED!</span>";
+                    } else {
+                        pop.innerHTML = "NEXT LEVEL " + level;
+                    }
+
+                    pop.classList.add("show");
+                    sfxLevelUp(); 
+                    setTimeout(() => pop.classList.remove("show"), 2000);
                 }
+            }
 
-                setTimeout(() => {
-                    active = false;
-                    document.getElementById("game-wrap").style.pointerEvents = "none";
-                    document.getElementById("game-wrap").style.visibility = "hidden";
-                    document.getElementById("scr-end").style.display = "flex";
-                    document.getElementById("end-agent-name").innerText = agent;
-                    document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
-                    
-                    let endT = document.getElementById("end-title");
-                    endT.innerText = "MISSION ACCOMPLISHED";
-                    endT.className = "end-status green-neon-text";
-                    
-                    try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
-                }, burstDelay + 3000); 
+            if(energy <= 0 && !missionComplete) {
+                hp--;
+                if(hp > 0) {
+                    energy = 100; charShake = 20; sfxHit(); hapticDamage(); 
+                    addFloat(playerX, H/2, "-1 ❤️", "#ff3131", 35); 
+                }
+            }
+        } 
 
-            } else {
-                level++; 
-                timeLeft = 30; 
-                energy = Math.min(100, energy + (25 * speedMult));
+        document.getElementById("hp-txt").innerText = "❤️".repeat(Math.max(0, hp));
+        document.getElementById("score-txt").innerText = Math.floor(score) + " PTS";
+        document.getElementById("time-txt").innerText = missionComplete ? "WIN" : Math.ceil(timeLeft) + "s";
+        document.getElementById("lvl-txt").innerText = level;
+        document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
+
+        ctx.globalAlpha = 0.3; 
+        clouds.forEach(c => {
+            if(!missionComplete) c.x += (10 + speedMult*5) * dt; 
+            if(c.x > W + 50) c.x = -50; 
+            ctx.font = c.s + "px Arial"; ctx.textAlign = "center"; ctx.fillText('☁️', c.x, c.y);
+        });
+        ctx.globalAlpha = 1.0; 
+
+        if (rocket && !missionComplete) {
+            rocket.x -= rocket.s * dt;
+            
+            ctx.save();
+            ctx.translate(rocket.x, rocket.y + Math.sin(t/100)*5);
+            ctx.rotate(-Math.PI / 1.5);
+            ctx.font = "50px Arial"; 
+            ctx.textAlign = "center"; 
+            ctx.textBaseline = "middle";
+            ctx.fillText('🚀', 0, 0);
+            ctx.restore();
+            
+            if(rocket.x <= lanes[rocket.targetLane] && !rocket.laid) {
+                rocket.laid = true;
+                fallingCore = { x: lanes[rocket.targetLane], y: rocket.y, s: 200 * speedMult };
+            }
+            if(rocket.x < -100) rocket = null;
+        }
+
+        if (fallingCore && !missionComplete) {
+            fallingCore.y += fallingCore.s * dt;
+            
+            ctx.save();
+            ctx.shadowColor = "#adff2f";
+            ctx.shadowBlur = 15;
+            ctx.font = "40px Arial"; 
+            ctx.textAlign = "center"; 
+            ctx.fillStyle = "#adff2f";
+            ctx.fillText('☢️', fallingCore.x, fallingCore.y);
+            ctx.restore();
+            
+            if (Math.abs(fallingCore.x - playerX) < 40 && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
+                invincibleTimer = 8.0; 
+                charJump = 20;
+                sfxShield();
                 
-                rocketSpawned = false; 
-                ufoSpawned = false;
-                rocket = null;
+                let bonusPts = 100 + (level * 10); 
+                score += bonusPts; 
+                sfxStarCollect(); 
+                addFloat(fallingCore.x + 40, fallingCore.y, "SHIELD +" + bonusPts, "#00ff88", 25); 
+                
                 fallingCore = null;
-                fallingHearts = [];
-                
-                const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'unicorn'];
-                let expectedModeIndex = Math.floor((level - 1) / 2) % 6;
-                let expectedMode = modeOrder[expectedModeIndex];
-                
-                let pop = document.getElementById("lvl-up-popup");
-
-                if(mode !== expectedMode) {
-                    mode = expectedMode; updateTheme(mode); 
-                    for(let j=0; j<4; j++) { setTimeout(() => { let x = Math.random() * W; let y = Math.random() * (H/2) + 50; for(let i=0; i<30; i++) fireworks.push({ x: x, y: y, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.5, c: '#00f2ff' }); }, j * 300); }
-                    pop.innerHTML = "LEVEL " + level + "<br><span style='font-size:20px; color:#fff'>" + mode.toUpperCase() + " UNLOCKED!</span>";
-                } else {
-                    pop.innerHTML = "NEXT LEVEL " + level;
-                }
-
-                pop.classList.add("show");
-                sfxLevelUp(); 
-                setTimeout(() => pop.classList.remove("show"), 2000);
+            } else if (fallingCore.y > H + 50) {
+                fallingCore = null;
             }
         }
-
-        if(energy <= 0 && !missionComplete) {
-            hp--;
-            if(hp > 0) {
-                energy = 100; charShake = 20; sfxHit(); hapticDamage(); 
-                addFloat(playerX, H/2, "-1 ❤️", "#ff3131", 35); 
-            }
-        }
-    } 
-
-    document.getElementById("hp-txt").innerText = "❤️".repeat(Math.max(0, hp));
-    document.getElementById("score-txt").innerText = Math.floor(score) + " PTS";
-    document.getElementById("time-txt").innerText = missionComplete ? "WIN" : Math.ceil(timeLeft) + "s";
-    document.getElementById("lvl-txt").innerText = level;
-    document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
-
-    ctx.globalAlpha = 0.3; 
-    clouds.forEach(c => {
-        if(!missionComplete) c.x += (10 + speedMult*5) * dt; 
-        if(c.x > W + 50) c.x = -50; 
-        ctx.font = c.s + "px Arial"; ctx.textAlign = "center"; ctx.fillText('☁️', c.x, c.y);
-    });
-    ctx.globalAlpha = 1.0; 
-
-    if (rocket && !missionComplete) {
-        rocket.x -= rocket.s * dt;
-        
-        ctx.save();
-        ctx.translate(rocket.x, rocket.y + Math.sin(t/100)*5);
-        ctx.rotate(-Math.PI / 1.5);
-        ctx.font = "50px Arial"; 
-        ctx.textAlign = "center"; 
-        ctx.textBaseline = "middle";
-        ctx.fillText('🚀', 0, 0);
-        ctx.restore();
-        
-        if(rocket.x <= lanes[rocket.targetLane] && !rocket.laid) {
-            rocket.laid = true;
-            fallingCore = { x: lanes[rocket.targetLane], y: rocket.y, s: 200 * speedMult };
-        }
-        if(rocket.x < -100) rocket = null;
-    }
-
-    if (fallingCore && !missionComplete) {
-        fallingCore.y += fallingCore.s * dt;
-        
-        ctx.save();
-        ctx.shadowColor = "#adff2f";
-        ctx.shadowBlur = 15;
-        ctx.font = "40px Arial"; 
-        ctx.textAlign = "center"; 
-        ctx.fillStyle = "#adff2f";
-        ctx.fillText('☢️', fallingCore.x, fallingCore.y);
-        ctx.restore();
-        
-        if (Math.abs(fallingCore.x - playerX) < 40 && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
-            invincibleTimer = 8.0; 
-            charJump = 20;
-            sfxShield();
-            
-            let bonusPts = 100 + (level * 10); 
-            score += bonusPts; 
-            sfxStarCollect(); 
-            addFloat(fallingCore.x + 40, fallingCore.y, "SHIELD +" + bonusPts, "#00ff88", 25); 
-            
-            fallingCore = null;
-        } else if (fallingCore.y > H + 50) {
-            fallingCore = null;
-        }
-    }
-
-    if(!missionComplete) {
-        if(Math.random() < 0.015 && opponents.length < 3) { opponents.push({ x: W + 50, y: Math.random()*H/2 + 50, s: (100 + Math.random()*50) * speedMult }); }
-    }
-    opponents.forEach((o, i) => {
-        if(!missionComplete) o.x -= o.s * dt;
-        ctx.font = "25px Arial"; ctx.textAlign = "center"; ctx.fillText(currentOpponentIcon, o.x, o.y);
-        if(o.x < -50) opponents.splice(i, 1);
-    });
-
-    for(let i = ufos.length - 1; i >= 0; i--) {
-        let u = ufos[i];
-        if(!missionComplete) u.x -= u.s * dt;
-        
-        let ufoY = u.y + Math.sin(t / 150) * 10;
-        
-        ctx.save();
-        ctx.fillStyle = "rgba(0, 255, 136, 0.4)"; 
-        ctx.beginPath();
-        ctx.moveTo(u.x - 15, ufoY + 10);
-        ctx.lineTo(u.x + 15, ufoY + 10);
-        ctx.lineTo(u.x + 45, u.y + H);
-        ctx.lineTo(u.x - 45, u.y + H);
-        ctx.fill();
-        ctx.restore(); 
-
-        ctx.font = "45px Arial"; ctx.textAlign = "center";
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText('🛸', u.x, ufoY);
-
-        let dropX = lanes[u.targetLane];
-        if(u.x <= dropX && !u.dropped && !missionComplete) {
-            fallingHearts.push({ x: dropX, y: u.y, s: 280 * speedMult });
-            u.dropped = true;
-        }
-        if(u.x < -50) ufos.splice(i, 1);
-    }
-
-    for(let i = fallingHearts.length - 1; i >= 0; i--) {
-        let s = fallingHearts[i]; 
-        if(!missionComplete) s.y += s.s * dt;
-        ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText('❤️', s.x, s.y);
-        
-        if(!missionComplete && Math.abs(s.x - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-            if (hp < 3) { hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35); } 
-            else { let bonusPts = 100 + (level * 10); score += bonusPts; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+" + bonusPts, "#00ff88", 30); }
-            fallingHearts.splice(i, 1);
-        } else if (s.y > H + 50) { fallingHearts.splice(i, 1); }
-    }
-
-    const items = { 
-        'dog': [{i:'🦴',p:10}, {i:'🍪',p:20}, {i:'🥩',p:30}],
-        'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
-        'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}],
-        'fox': [{i:'🥚',p:10}, {i:'🍗',p:20}, {i:'🍖',p:30}],
-        'panda': [{i:'🎋',p:10}, {i:'🍃',p:20}, {i:'🍉',p:30}],
-        'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'🍦',p:30}]
-    };
-    const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'unicorn':'🦄' }[mode];
-
-    if(entities.length < 2 && !missionComplete) {
-        spawnDelay -= dt;
-        if(spawnDelay <= 0) {
-            let safeL = getSafeLaneForItems();
-            if(safeL !== -1) {
-                if(Math.random() < 0.85) { 
-                    let r = Math.random(); let tier = r < 0.5 ? 0 : (r < 0.8 ? 1 : 2);
-                    entities.push({ l: safeL, x: lanes[safeL], y: -50, t: items[mode][tier].i, pts: items[mode][tier].p, bad: false, s: 230 * speedMult });
-                } else {
-                    entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '🥷', pts: 0, bad: true, s: 260 * speedMult }); 
-                }
-            }
-            spawnDelay = 0.35; 
-        }
-    }
-
-    ctx.fillStyle = "#ffffff"; 
-    ctx.lineWidth = 2; 
-    permSpiders.forEach(s => {
-        if(!missionComplete) s.y += (180 * speedMult * s.dy) * dt;
-        let sx = lanes[s.lane];
-        
-        ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
-        ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🕷️', sx, s.y);
 
         if(!missionComplete) {
-            if(s.y >= H - 120) { s.dy = -1; s.y = H - 120; s.hit = false; }
-            if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; s.hit = false; }
+            if(Math.random() < 0.015 && opponents.length < 3) { opponents.push({ x: W + 50, y: Math.random()*H/2 + 50, s: (100 + Math.random()*50) * speedMult }); }
+        }
+        opponents.forEach((o, i) => {
+            if(!missionComplete) o.x -= o.s * dt;
+            ctx.font = "25px Arial"; ctx.textAlign = "center"; ctx.fillText(currentOpponentIcon, o.x, o.y);
+            if(o.x < -50) opponents.splice(i, 1);
+        });
 
-            if(!s.hit && Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-                if (invincibleTimer > 0) {
-                    addFloat(sx + 40, s.y, "BLOCKED!", "#00ff88", 20);
-                } else {
-                    let pLoss = Math.floor(30 * ptsScaling); score = Math.max(0, score - pLoss); 
-                    energy -= 30; charShake = 20; sfxHit(); hapticSpiderHit(); 
-                    addFloat(sx + 40, s.y, "-⚡", "#ff3131", 35); 
+        for(let i = ufos.length - 1; i >= 0; i--) {
+            let u = ufos[i];
+            if(!missionComplete) u.x -= u.s * dt;
+            
+            let ufoY = u.y + Math.sin(t / 150) * 10;
+            
+            ctx.save();
+            ctx.fillStyle = "rgba(0, 255, 136, 0.4)"; 
+            ctx.beginPath();
+            ctx.moveTo(u.x - 15, ufoY + 10);
+            ctx.lineTo(u.x + 15, ufoY + 10);
+            ctx.lineTo(u.x + 45, u.y + H);
+            ctx.lineTo(u.x - 45, u.y + H);
+            ctx.fill();
+            ctx.restore(); 
+
+            ctx.font = "45px Arial"; ctx.textAlign = "center";
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText('🛸', u.x, ufoY);
+
+            let dropX = lanes[u.targetLane];
+            if(u.x <= dropX && !u.dropped && !missionComplete) {
+                fallingHearts.push({ x: dropX, y: u.y, s: 280 * speedMult });
+                u.dropped = true;
+            }
+            if(u.x < -50) ufos.splice(i, 1);
+        }
+
+        for(let i = fallingHearts.length - 1; i >= 0; i--) {
+            let s = fallingHearts[i]; 
+            if(!missionComplete) s.y += s.s * dt;
+            ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText('❤️', s.x, s.y);
+            
+            if(!missionComplete && Math.abs(s.x - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
+                if (hp < 3) { hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35); } 
+                else { let bonusPts = 100 + (level * 10); score += bonusPts; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+" + bonusPts, "#00ff88", 30); }
+                fallingHearts.splice(i, 1);
+            } else if (s.y > H + 50) { fallingHearts.splice(i, 1); }
+        }
+
+        const items = { 
+            'dog': [{i:'🦴',p:10}, {i:'🍪',p:20}, {i:'🥩',p:30}],
+            'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
+            'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}],
+            'fox': [{i:'🥚',p:10}, {i:'🍗',p:20}, {i:'🍖',p:30}],
+            'panda': [{i:'🎋',p:10}, {i:'🍃',p:20}, {i:'🍉',p:30}],
+            'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'🍦',p:30}]
+        };
+        const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'unicorn':'🦄' }[mode];
+
+        if(entities.length < 2 && !missionComplete) {
+            spawnDelay -= dt;
+            if(spawnDelay <= 0) {
+                let safeL = getSafeLaneForItems();
+                if(safeL !== -1) {
+                    if(Math.random() < 0.85) { 
+                        let r = Math.random(); let tier = r < 0.5 ? 0 : (r < 0.8 ? 1 : 2);
+                        entities.push({ l: safeL, x: lanes[safeL], y: -50, t: items[mode][tier].i, pts: items[mode][tier].p, bad: false, s: 230 * speedMult });
+                    } else {
+                        entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '🥷', pts: 0, bad: true, s: 260 * speedMult }); 
+                    }
                 }
-                s.hit = true; 
+                spawnDelay = 0.35; 
             }
         }
-    });
 
-    for(let i = entities.length - 1; i >= 0; i--) {
-        let e = entities[i]; 
-        if(!missionComplete) e.y += e.s * dt;
-        ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e.t, e.x, e.y);
+        ctx.fillStyle = "#ffffff"; 
+        ctx.lineWidth = 2; 
+        permSpiders.forEach(s => {
+            if(!missionComplete) s.y += (180 * speedMult * s.dy) * dt;
+            let sx = lanes[s.lane];
+            
+            ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
+            ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🕷️', sx, s.y);
 
-        if(!missionComplete && Math.abs(e.x - playerX) < 40 && e.y > hitTop && e.y < hitBottom) {
-            if(e.bad) {
-                if (invincibleTimer > 0) {
-                    addFloat(e.x + 40, e.y, "BLOCKED!", "#00ff88", 20);
-                } else {
-                    hp--; charShake = 20; sfxHit(); hapticDamage(); addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); 
+            if(!missionComplete) {
+                if(s.y >= H - 120) { s.dy = -1; s.y = H - 120; s.hit = false; }
+                if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; s.hit = false; }
+
+                if(!s.hit && Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
+                    if (invincibleTimer > 0) {
+                        addFloat(sx + 40, s.y, "BLOCKED!", "#00ff88", 20);
+                    } else {
+                        let pLoss = Math.floor(30 * ptsScaling); score = Math.max(0, score - pLoss); 
+                        energy -= 30; charShake = 20; sfxHit(); hapticSpiderHit(); 
+                        addFloat(sx + 40, s.y, "-⚡", "#ff3131", 35); 
+                    }
+                    s.hit = true; 
                 }
-            } else {
-                let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; 
-                sfxCollect(); addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); 
             }
-            entities.splice(i, 1);
-        } else if (e.y > H + 60) { entities.splice(i, 1); }
-    }
+        });
 
-    if(!missionComplete) playerX += (targetX - playerX) * 0.15;
-    
-    let drawX = playerX; let drawY = H - 80;
-    if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
-    if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
-    
-    if (invincibleTimer > 0) {
-        ctx.save();
-        ctx.font = "50px Arial";
-        ctx.textAlign = "center";
-        
-        let shieldAlpha = 0.4 + 0.6 * Math.abs(Math.sin(t / 150)); 
-        ctx.fillStyle = `rgba(173, 255, 47, ${shieldAlpha})`; 
-        
-        ctx.shadowColor = "#adff2f";
-        ctx.shadowBlur = 20;
-        ctx.fillText('☢️', drawX, drawY - 80); 
-        ctx.restore();
-    }
+        for(let i = entities.length - 1; i >= 0; i--) {
+            let e = entities[i]; 
+            if(!missionComplete) e.y += e.s * dt;
+            ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e.t, e.x, e.y);
 
-    ctx.font = "70px Arial"; ctx.fillText(charIcon, drawX, drawY);
+            if(!missionComplete && Math.abs(e.x - playerX) < 40 && e.y > hitTop && e.y < hitBottom) {
+                if(e.bad) {
+                    if (invincibleTimer > 0) {
+                        addFloat(e.x + 40, e.y, "BLOCKED!", "#00ff88", 20);
+                    } else {
+                        hp--; charShake = 20; sfxHit(); hapticDamage(); addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); 
+                    }
+                } else {
+                    let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; 
+                    sfxCollect(); addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); 
+                }
+                entities.splice(i, 1);
+            } else if (e.y > H + 60) { entities.splice(i, 1); }
+        }
 
-    for(let i = floaters.length - 1; i >= 0; i--) {
-        let f = floaters[i]; 
-        f.y -= 2.0; f.x += (200 - f.x) * 0.05; f.o -= 0.8 * dt; 
-        ctx.globalAlpha = Math.max(0, f.o); ctx.font = `900 ${f.s}px 'Orbitron'`; ctx.textAlign = "center";
+        if(!missionComplete) playerX += (targetX - playerX) * 0.15;
         
-        ctx.strokeStyle = "#000000"; ctx.lineWidth = 5; ctx.strokeText(f.txt, f.x, f.y); 
-        ctx.fillStyle = f.c; ctx.fillText(f.txt, f.x, f.y);
+        let drawX = playerX; let drawY = H - 80;
+        if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
+        if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
         
-        if(f.o <= 0) floaters.splice(i, 1);
-    }
-    ctx.lineWidth = 1;
-    
-    for(let i=fireworks.length-1; i>=0; i--) {
-        let p = fireworks[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life -= dt;
-        ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.c;
-        ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill();
-        if(p.life <= 0) fireworks.splice(i, 1);
-    }
-    ctx.globalAlpha = 1;
-    ctx.shadowBlur = 0;
-
-    if(hp <= 0 && !missionComplete) {
-        active = false; 
-        sfxHit(); hapticGameOver(); 
-        
-        let goFlash = document.getElementById("game-over-flash");
-        goFlash.style.display = "flex"; 
-        
-        setTimeout(() => {
-            goFlash.style.display = "none";
-            document.getElementById("game-wrap").style.pointerEvents = "none";
-            document.getElementById("game-wrap").style.visibility = "hidden";
+        if (invincibleTimer > 0) {
+            ctx.save();
+            ctx.font = "50px Arial";
+            ctx.textAlign = "center";
             
-            ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
+            let shieldAlpha = 0.4 + 0.6 * Math.abs(Math.sin(t / 150)); 
+            ctx.fillStyle = `rgba(173, 255, 47, ${shieldAlpha})`; 
             
-            document.getElementById("scr-end").style.display = "flex";
-            document.getElementById("end-agent-name").innerText = agent; 
-            document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
-            
-            let endT = document.getElementById("end-title");
-            endT.innerText = "MISSION FAILED";
-            endT.className = "end-status red-neon-text";
+            ctx.shadowColor = "#adff2f";
+            ctx.shadowBlur = 20;
+            ctx.fillText('☢️', drawX, drawY - 80); 
+            ctx.restore();
+        }
 
-            try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
-        }, 1500); 
+        ctx.font = "70px Arial"; ctx.fillText(charIcon, drawX, drawY);
+
+        for(let i = floaters.length - 1; i >= 0; i--) {
+            let f = floaters[i]; 
+            f.y -= 2.0; f.x += (200 - f.x) * 0.05; f.o -= 0.8 * dt; 
+            ctx.globalAlpha = Math.max(0, f.o); ctx.font = `900 ${f.s}px 'Orbitron'`; ctx.textAlign = "center";
+            
+            ctx.strokeStyle = "#000000"; ctx.lineWidth = 5; ctx.strokeText(f.txt, f.x, f.y); 
+            ctx.fillStyle = f.c; ctx.fillText(f.txt, f.x, f.y);
+            
+            if(f.o <= 0) floaters.splice(i, 1);
+        }
+        ctx.lineWidth = 1;
         
-        return; 
-    }
-    
-    requestAnimationFrame(loop);
+        for(let i=fireworks.length-1; i>=0; i--) {
+            let p = fireworks[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life -= dt;
+            ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.c;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill();
+            if(p.life <= 0) fireworks.splice(i, 1);
+        }
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+
+        if(hp <= 0 && !missionComplete) {
+            active = false; 
+            sfxHit(); hapticGameOver(); 
+            
+            let goFlash = document.getElementById("game-over-flash");
+            goFlash.style.display = "flex"; 
+            
+            setTimeout(() => {
+                goFlash.style.display = "none";
+                document.getElementById("game-wrap").style.pointerEvents = "none";
+                document.getElementById("game-wrap").style.visibility = "hidden";
+                
+                ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
+                
+                document.getElementById("scr-end").style.display = "flex";
+                document.getElementById("end-agent-name").innerText = agent; 
+                document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
+                
+                let endT = document.getElementById("end-title");
+                endT.innerText = "MISSION FAILED";
+                endT.className = "end-status red-neon-text";
+
+                try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
+            }, 1500); 
+            
+            return; 
+        }
+
+    } catch(e) {} // KUGELSICHER! Fehler crashen den Loop nicht mehr
 }
 
 function addFloat(x, y, txt, c, s) { floaters.push({ x, y, txt, c, s, o: 1 }); }
 
-// UPDATE: Hält die Buttons beim Kopieren durch "offsetHeight" exakt in ihrer Ursprungsgröße!
+// UPDATE: Buttons "springen" nicht mehr, wenn sich der Text ändert
 function copyText(btn, text) { 
     navigator.clipboard.writeText(text).catch(e=>{}); 
     
     let oldHtml = btn.innerHTML; 
     let oldBg = btn.style.background;
     
-    // Fixiert die aktuelle Höhe, damit nichts springt
-    btn.style.height = btn.offsetHeight + 'px';
+    let rect = btn.getBoundingClientRect();
+    btn.style.height = rect.height + 'px'; 
     
     btn.innerHTML = "✅ COPIED!";
     btn.style.background = "linear-gradient(45deg, #004d26, #00ff88)"; 
@@ -1136,7 +1135,7 @@ function copyText(btn, text) {
             btn.innerHTML = oldHtml; 
             btn.style.background = oldBg || ""; 
             btn.style.color = "#fff"; 
-            btn.style.height = 'auto'; // Gibt die Höhe wieder frei
+            btn.style.height = 'auto'; 
         }
     }, 2000);
 }
