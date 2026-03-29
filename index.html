@@ -14,11 +14,13 @@
             --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff;
             --unicorn: #ff00ff;
             --rad: #adff2f;
+            --glass: rgba(255, 255, 255, 0.05);
         }
         
         * { 
             margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; outline: none; 
+            /* ANDROID FIX: user-select blockieren, ABER touch-action freigeben für Scrollen */
             user-select: none; -webkit-user-select: none; 
         }
         
@@ -28,13 +30,11 @@
             background: #111; font-family: 'Orbitron', sans-serif; color: #fff; 
             width: 100vw; height: 100dvh; overflow: hidden; 
             display: flex; justify-content: center; align-items: center; 
-            touch-action: none; 
         }
 
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; }
 
-        /* Spielfeld selbst bleibt transparent, um Abstürze zu verhindern */
         #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; }
 
         @media (min-width: 450px) {
@@ -42,8 +42,8 @@
             #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%); }
         }
 
+        /* NUR das Spielfeld blockiert Wischgesten (damit man steuern kann) */
         #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
-
         canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; touch-action: none; }
 
         #hud { position: absolute; top: env(safe-area-inset-top, 10px); width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; }
@@ -69,10 +69,10 @@
         .go-sub { font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 15px; letter-spacing: 3px; font-family: 'Orbitron', sans-serif; animation: blinkGold 0.3s infinite alternate; text-align: center; }
         @keyframes violentShake { 0% { transform: translate(2px, 1px) } 20% { transform: translate(-3px, 0px) } 40% { transform: translate(1px, -1px) } 60% { transform: translate(-3px, 1px) } 80% { transform: translate(-1px, -1px) } 100% { transform: translate(1px, -2px) } }
 
-        /* UPDATE: Milchglas ist NUR HIER auf den Menüs. So stürzt das Live-Spiel nicht ab! */
+        /* ANDROID FIX: Kein touch-action:none mehr! Dadurch funktioniert Scrollen rauf & runter */
         .screen { 
             position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; 
-            overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: none; pointer-events: auto; padding-bottom: 50px;
+            overflow-y: auto; -webkit-overflow-scrolling: touch; pointer-events: auto; padding-bottom: 50px;
             background: rgba(255, 255, 255, 0.05); 
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
@@ -84,9 +84,8 @@
 
         header { width: 100%; flex-shrink: 0; text-align: center; display: flex; justify-content: center; margin-bottom: 10px;}
 
-        /* Titelbox und Container nutzen jetzt 100% der Breite! */
         .title-box, #auth-panel, .info-panel, .legal-box {
-            width: 100%; /* VOLLER PLATZ WIRD GENUTZT */
+            width: 100%; 
             background: rgba(255,255,255,0.06); 
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.15); 
@@ -127,7 +126,6 @@
         .panel-neon h3 { color: var(--neon); border-bottom-color: var(--neon); }
         .panel-unicorn h3 { color: var(--unicorn); border-bottom-color: var(--unicorn); }
 
-        /* UPDATE: Neue Button-Struktur mit Echten SVGs und breitem Layout */
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; flex-shrink: 0; width: 100%; }
         
         .btn-sup { padding: 12px 5px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -141,6 +139,10 @@
         .bg-btc { background: linear-gradient(45deg, #d97b0b, #F7931A); flex-direction: column; gap: 3px; padding: 8px 5px; }
         .btc-title { font-size: 12px; display: flex; align-items: center; gap: 6px; }
         .btc-address { font-size: 9px; font-family: monospace; font-weight: 400; word-break: break-all; opacity: 0.9; }
+        
+        /* QR-Code Box perfekt zentriert */
+        .wallet-box { background: rgba(255,255,255,0.95); padding: 10px; border-radius: 15px; text-align: center; margin: 15px auto; width: 140px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .wallet-box img { width: 120px !important; height: 120px !important; object-fit: contain; margin: 0 auto; display: block; }
         
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
@@ -214,7 +216,7 @@
                 <div id="dog-head-icon">🐶</div> 
                 <h2>MISSION BRIEFING</h2> 
                 <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
-                <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
+                <button class="btn-main" id="btn-auth" onclick="authAgent()">AUTHENTICATE</button>
             </div>
         </div>
     </div>
@@ -293,15 +295,19 @@
                         <svg viewBox="0 0 384 512" fill="white" width="14" height="16"><path d="M111.4 295.9l-35.4 0c-5.8 0-10.9-4.3-11.8-10L14.4 34.6C13.2 21.6 23.4 10.7 36.5 10.7l126.4 0c42.5 0 74.6 13.9 88.6 44.8 11.3 25.1 7.6 57.6-11.5 86.8-17.2 26.5-46.6 42.7-80.4 42.7l-26.6 0c-7.3 0-13.6 5.4-14.7 12.8L111.4 295.9zM362.4 158.2c-15.1-34.6-54.8-49.8-105-49.8l-37 0c-4.7 0-8.8 3.5-9.6 8.2l-47.8 300.9c-.9 5.8 3.6 11 9.5 11l49.3 0c4.7 0 8.8-3.5 9.6-8.2l15.1-95.2c.9-5.8 5.9-10 11.8-10l20.4 0c45.4 0 79.5-20.9 94-61.9 10.2-28.5 7.1-61.3-10.3-95z"/></svg>
                         PAYPAL
                     </a>
-                    
-                    <button class="btn-sup bg-btc" onclick="copyText(this, 'bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed')">
-                        <div class="btc-title">
-                            <svg viewBox="0 0 512 512" fill="white" width="14" height="14"><path d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zm-141.651-35.33c4.937-32.999-20.196-50.739-54.55-62.573l11.146-44.702-27.213-6.781-10.851 43.524c-7.154-1.783-14.502-3.464-21.803-5.13l10.929-43.81-27.198-6.781-11.153 44.686c-5.884-1.332-11.666-2.65-17.27-4.041l0-1.074-37.643-9.383-7.255 29.095s20.218 4.603 19.8 4.933c11.066 2.756 13.067 10.054 12.723 15.83l-12.836 51.464c.783.196 1.787.495 2.923.953l-2.946-.732-17.986 72.107c-1.127 2.846-3.953 7.098-12.443 4.919.349.444-19.8-4.933-19.8-4.933l-13.431 31.06 35.539 8.859c6.643 1.656 13.167 3.376 19.645 5.03l-11.233 45.069 27.206 6.781 11.153-44.734c7.348 1.942 14.542 3.754 21.579 5.485l-11.093 44.502 27.206 6.781 11.192-44.896c46.126 8.887 80.855 5.305 95.531-37.387 11.838-34.42-3.447-54.218-25.753-67.147 18.256-4.217 31.989-13.565 35.793-34.331zm-68.966 73.111c-9.308 37.327-72.133 17.151-92.427 12.094l16.44-65.922c20.287 5.056 85.666 15.021 75.987 53.828zm10.231-96.175c-8.435 33.844-59.508 16.59-76.241 12.433l14.957-59.972c16.732 4.168 70.088 12.33 61.284 47.539z"/></svg>
-                            COPY BTC
-                        </div>
-                        <div class="btc-address">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</div>
-                    </button>
                 </div>
+
+                <div class="wallet-box">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed" alt="QR Code">
+                </div>
+
+                <button class="btn-sup bg-btc" style="width: 100%; margin-top: 5px;" onclick="copyText(this, 'bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed')">
+                    <div class="btc-title">
+                        <svg viewBox="0 0 512 512" fill="white" width="14" height="14"><path d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zm-141.651-35.33c4.937-32.999-20.196-50.739-54.55-62.573l11.146-44.702-27.213-6.781-10.851 43.524c-7.154-1.783-14.502-3.464-21.803-5.13l10.929-43.81-27.198-6.781-11.153 44.686c-5.884-1.332-11.666-2.65-17.27-4.041l0-1.074-37.643-9.383-7.255 29.095s20.218 4.603 19.8 4.933c11.066 2.756 13.067 10.054 12.723 15.83l-12.836 51.464c.783.196 1.787.495 2.923.953l-2.946-.732-17.986 72.107c-1.127 2.846-3.953 7.098-12.443 4.919.349.444-19.8-4.933-19.8-4.933l-13.431 31.06 35.539 8.859c6.643 1.656 13.167 3.376 19.645 5.03l-11.233 45.069 27.206 6.781 11.153-44.734c7.348 1.942 14.542 3.754 21.579 5.485l-11.093 44.502 27.206 6.781 11.192-44.896c46.126 8.887 80.855 5.305 95.531-37.387 11.838-34.42-3.447-54.218-25.753-67.147 18.256-4.217 31.989-13.565 35.793-34.331zm-68.966 73.111c-9.308 37.327-72.133 17.151-92.427 12.094l16.44-65.922c20.287 5.056 85.666 15.021 75.987 53.828zm10.231-96.175c-8.435 33.844-59.508 16.59-76.241 12.433l14.957-59.972c16.732 4.168 70.088 12.33 61.284 47.539z"/></svg>
+                        COPY BTC
+                    </div>
+                    <div class="btc-address">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</div>
+                </button>
             </div>
 
             <div class="legal-box"> 
@@ -330,11 +336,6 @@
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
 
 <script>
-try {
-    let bgMusic = document.getElementById("snd-action");
-    if(bgMusic) bgMusic.volume = 0.08; 
-} catch(e) {}
-
 window.onload = function() {
     try {
         let savedName = localStorage.getItem("doggycoAgent");
@@ -342,12 +343,6 @@ window.onload = function() {
             document.getElementById("pName").value = savedName; 
         }
     } catch(e) {}
-
-    let pNameField = document.getElementById("pName");
-    if(pNameField) {
-        pNameField.addEventListener('input', forceAudioStart, { once: true });
-        pNameField.addEventListener('click', forceAudioStart, { once: true });
-    }
 
     setTimeout(() => {
         if (navigator.onLine) {
@@ -368,34 +363,21 @@ window.onload = function() {
 }
 
 let systemActive = false;
-let mp3Started = false;
 
-function forceAudioStart() {
+// Löst Audio-Blockade auf Android sauber
+function unlockAudio() {
     if(!systemActive) { 
         systemActive = true; 
         initSynth(); 
+        startMenuMusic(); 
     }
-    
-    try {
-        if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
-    } catch(e) {}
-
-    try {
-        let bgMusic = document.getElementById("snd-action");
-        if(bgMusic && !mp3Started) {
-            bgMusic.volume = 0.08; 
-            bgMusic.playbackRate = 1.0; 
-            bgMusic.play().catch(err => {});
-            mp3Started = true;
-        }
-    } catch(e) {}
 }
 
-document.body.addEventListener('click', forceAudioStart, { once: true });
-document.body.addEventListener('touchstart', forceAudioStart, { once: true });
+document.body.addEventListener('click', unlockAudio, { once: true });
+document.body.addEventListener('touchstart', unlockAudio, { once: true });
 
 function authAgent() {
-    forceAudioStart(); 
+    unlockAudio();
     let pNameElement = document.getElementById("pName");
     if(pNameElement) {
         let n = pNameElement.value.trim().toUpperCase();
@@ -405,7 +387,6 @@ function authAgent() {
             
             document.getElementById("scr-name").style.display = "none";
             document.getElementById("scr-start").style.display = "block";
-            
             document.getElementById("scr-start").scrollTop = 0; 
         }
     }
@@ -419,9 +400,6 @@ function move(dir) {
 
 function triggerMove(dir, btnId) {
     if(!active || missionComplete) return;
-    
-    try { if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); } } catch(e) {}
-    
     hapticMove(); 
     move(dir);
     let btn = document.getElementById(btnId);
@@ -444,6 +422,9 @@ function hapticDamage() { triggerVibration(300); }
 function hapticGameOver() { triggerVibration([500, 100, 500]); } 
 
 let audioCtx = null;
+let menuMusicTimer = null;
+let menuStep = 0;
+const menuNotes = [261.63, 329.63, 392.00, 440.00, 392.00, 329.63]; 
 
 function initSynth() {
     try {
@@ -468,6 +449,20 @@ function playTone(freq, type, duration, vol=0.6) {
     } catch(e) {}
 }
 
+function playMenuNote() {
+    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
+    let freq = menuNotes[menuStep % menuNotes.length];
+    
+    playTone(freq / 2, 'sine', 2.0, 0.05); 
+    playTone(freq, 'sine', 1.5, 0.05);     
+    
+    menuStep++;
+    menuMusicTimer = setTimeout(playMenuNote, 1000); 
+}
+
+function startMenuMusic() { if(!systemActive) return; initSynth(); if(!menuMusicTimer) { menuStep = 0; playMenuNote(); } }
+function stopMenuMusic() { if(menuMusicTimer) { clearTimeout(menuMusicTimer); menuMusicTimer = null; } }
+
 function sfxUfo() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -487,7 +482,6 @@ function sfxRocket() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
         let t = audioCtx.currentTime;
-        
         let bufferSize = Math.floor(audioCtx.sampleRate * 2.0); 
         let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         let data = buffer.getChannelData(0);
@@ -652,7 +646,16 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
-    forceAudioStart(); 
+    // Menü-Musik stoppen, Spiele-MP3 abfeuern
+    stopMenuMusic();
+    try {
+        let bgMusic = document.getElementById("snd-action");
+        if(bgMusic) {
+            bgMusic.volume = 0.15; // 15% für Android
+            bgMusic.playbackRate = 1.0; 
+            bgMusic.play().catch(err => {});
+        }
+    } catch(e) {}
 
     mode = m;
     level = startLvl;
@@ -684,19 +687,6 @@ function start(m, startLvl) {
 
     active = true; lastT = 0; 
     requestAnimationFrame(loop);
-}
-
-function getSafeSpiderLane(currentSpider) {
-    let otherL = permSpiders.find(sp => sp !== currentSpider).lane;
-    let avail = [0,1,2,3,4].filter(l => l !== otherL);
-    return avail[Math.floor(Math.random() * avail.length)];
-}
-
-function getSafeLaneForItems() {
-    let blockedLanes = permSpiders.map(s => s.lane);
-    let safeLanes = [0,1,2,3,4].filter(l => !blockedLanes.includes(l));
-    if (safeLanes.length === 0) return -1;
-    return safeLanes[Math.floor(Math.random() * safeLanes.length)];
 }
 
 function launchMassiveFireworks() {
@@ -1127,10 +1117,15 @@ function loop(t) {
 
 function addFloat(x, y, txt, c, s) { floaters.push({ x, y, txt, c, s, o: 1 }); }
 
+// UPDATE: Hält die Buttons beim Kopieren durch "offsetHeight" exakt in ihrer Ursprungsgröße!
 function copyText(btn, text) { 
-    navigator.clipboard.writeText(text); 
+    navigator.clipboard.writeText(text).catch(e=>{}); 
+    
     let oldHtml = btn.innerHTML; 
     let oldBg = btn.style.background;
+    
+    // Fixiert die aktuelle Höhe, damit nichts springt
+    btn.style.height = btn.offsetHeight + 'px';
     
     btn.innerHTML = "✅ COPIED!";
     btn.style.background = "linear-gradient(45deg, #004d26, #00ff88)"; 
@@ -1141,6 +1136,7 @@ function copyText(btn, text) {
             btn.innerHTML = oldHtml; 
             btn.style.background = oldBg || ""; 
             btn.style.color = "#fff"; 
+            btn.style.height = 'auto'; // Gibt die Höhe wieder frei
         }
     }, 2000);
 }
