@@ -25,7 +25,6 @@
         
         input[type="text"] { user-select: auto; -webkit-user-select: auto; }
 
-        /* Verhindert das Neuladen beim Wischen auf Android */
         html, body {
             overscroll-behavior: none;
             width: 100vw; height: 100dvh; overflow: hidden; 
@@ -78,19 +77,15 @@
             overscroll-behavior: none;
         }
 
-        /* ------------------------------------------------------------------------- */
-        /* 1. STARTBILDSCHIRM (Perfektes Layout mit der großen Glas-Box)             */
-        /* ------------------------------------------------------------------------- */
         #scr-name .screen-inner { 
             width: 100%; min-height: 100dvh; margin: 0 auto; max-width: 420px; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
             padding: 20px; 
         }
 
-        /* Äußerer Rahmen (Milchglas Box) BLEIBT */
         .start-glass-panel {
             width: 100%;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.08); 
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-radius: 25px;
@@ -106,19 +101,15 @@
         .app-title { font-size: clamp(28px, 9vw, 38px); color: var(--gold); letter-spacing: 2px; margin: 0; text-align: center; animation: textPulse 1.8s infinite alternate ease-in-out; }
         @keyframes textPulse { 0% { text-shadow: 0 0 10px var(--gold); transform: scale(0.98); } 100% { text-shadow: 0 0 25px var(--gold), 0 0 40px #fff; transform: scale(1.05); } }
 
-        /* Hund IN DER MITTE, KEIN INNERER RAHMEN MEHR! */
         .dog-video-wrapper {
             display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 30px;
         }
         .dog-video-canvas { 
             width: 220px; height: 220px; 
             object-fit: contain; 
-            background: transparent; /* Verhindert schwarze Hintergründe */
-            border: none; /* Kein innerer Rahmen */
             filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)); 
         }
 
-        /* Eingabefeld und Button UNTEN */
         #auth-panel { 
             width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px; 
         }
@@ -129,9 +120,6 @@
         .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.3); transition: 0.1s; transform: translateY(0); }
         .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
 
-        /* ------------------------------------------------------------------------- */
-        /* 2. MENÜ BILDSCHIRME                                                       */
-        /* ------------------------------------------------------------------------- */
         #scr-start {
             background: rgba(255, 255, 255, 0.05); 
             backdrop-filter: blur(15px);
@@ -179,8 +167,11 @@
 
         #scr-end { background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 1000; }
         #scr-end .screen-inner { justify-content: center; align-items: center; height: auto; min-height: unset; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 380px; background: radial-gradient(circle, rgba(20,20,20,0.9) 0%, rgba(0,0,0,0.95) 100%); border: 2px solid var(--gold); border-radius: 25px; padding: 40px 20px; box-shadow: 0 0 40px rgba(255,215,0,0.2), inset 0 0 20px rgba(0,0,0,0.8); }
+        
+        /* FIX 1: Responsive Schrift und Zeilenumbruch, damit nichts mehr überlappt! */
         #end-game-title { font-size: 20px; color: #aaa; letter-spacing: 4px; margin-bottom: 15px; font-weight: 900; text-align: center; }
-        .end-status { font-size: 38px; margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; text-align: center; font-weight: 900;}
+        .end-status { font-size: clamp(26px, 8vw, 36px); margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; text-align: center; font-weight: 900; line-height: 1.3;}
+        
         #end-agent-name { font-size: 28px; color: #fff; margin-bottom: 25px; letter-spacing: 3px; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 12px; text-align: center;}
         #f-score { font-size: 60px; color: var(--gold); margin: 0 0 35px 0; text-shadow: 0 0 25px var(--gold), 2px 2px 5px #000; text-align: center; font-weight: 900; }
         
@@ -233,7 +224,7 @@
                 
                 <div class="dog-video-wrapper">
                     <canvas id="dog-video-canvas" width="250" height="250" class="dog-video-canvas"></canvas>
-                    <video id="dog-video" src="dog.video.mp4" playsinline preload="auto" muted style="display:none;"></video>
+                    <video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="auto" autoplay muted crossorigin="anonymous" style="display:none;"></video>
                 </div>
 
                 <div id="auth-panel">
@@ -345,7 +336,7 @@
     <div id="scr-end" class="screen" style="display:none">
         <div class="screen-inner"> 
             <div id="end-game-title">DOGGYCO MISSION</div>
-            <h2 id="end-title" class="end-status red-neon-text">MISSION FAILED</h2> 
+            <h2 id="end-title" class="end-status red-neon-text">MISSION<br>FAILED</h2> 
             <h3 id="end-agent-name">PLAYER</h3> 
             <h1 id="f-score">0 PTS</h1> 
             <button class="btn-main" onclick="location.reload()">MAIN MENU</button> 
@@ -369,25 +360,30 @@ function drawAndFilterFrame() {
     let vw = videoEl.videoWidth;
     let vh = videoEl.videoHeight;
     
-    // Auto-Crop
+    // Auto-Crop (Falls es Balken hat)
     let size = Math.min(vw, vh);
     let startX = (vw - size) / 2;
     let startY = (vh - size) / 2;
     
     videoCtx.drawImage(videoEl, startX, startY, size, size, 0, 0, videoCanvas.width, videoCanvas.height);
     
-    let frame = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
-    let data = frame.data;
-    
-    for (let i = 0; i < data.length; i += 4) {
-        let r = data[i];
-        let g = data[i + 1];
-        let b = data[i + 2];
-        if (g > 90 && g > r * 1.1 && g > b * 1.1) {
-            data[i + 3] = 0; 
+    // FIX 2: try-catch fängt WebView-Abstürze ab!
+    try {
+        let frame = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
+        let data = frame.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+            let r = data[i];
+            let g = data[i + 1];
+            let b = data[i + 2];
+            if (g > 90 && g > r * 1.1 && g > b * 1.1) {
+                data[i + 3] = 0; 
+            }
         }
+        videoCtx.putImageData(frame, 0, 0);
+    } catch(e) {
+        // Falls Android WebView den Canvas sperrt, läuft das Video trotzdem weiter (mit grünem Hintergrund)
     }
-    videoCtx.putImageData(frame, 0, 0);
 }
 
 function processVideoFrame() {
@@ -410,13 +406,9 @@ window.onload = function() {
         }
     } catch(e) {}
 
-    let pNameField = document.getElementById("pName");
-    if(pNameField) {
-        pNameField.addEventListener('focus', forceAudioStart, { once: true });
-        pNameField.addEventListener('click', forceAudioStart, { once: true });
-    }
-    document.body.addEventListener('click', forceAudioStart, { once: true });
-    document.body.addEventListener('touchstart', forceAudioStart, { once: true });
+    // FIX 2: Aggressive Klick-Erkennung für Handys
+    document.addEventListener('touchstart', forceAudioStart, { once: false });
+    document.addEventListener('click', forceAudioStart, { once: false });
 
     setTimeout(() => {
         if (navigator.onLine) {
@@ -460,9 +452,14 @@ function forceAudioStart() {
         try {
             videoEl.muted = false;
             videoEl.volume = 1.0; 
-            videoEl.currentTime = 0; 
             if (videoEl.paused) {
-                videoEl.play().catch(e => {});
+                let playPromise = videoEl.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => {
+                        // Falls das Handy es blockiert, probieren wir es beim nächsten Tippen nochmal
+                        dogHasSpoken = false; 
+                    });
+                }
             }
             dogHasSpoken = true;
         } catch(e) {}
@@ -907,7 +904,8 @@ function loop(t) {
                         document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
                         
                         let endT = document.getElementById("end-title");
-                        endT.innerText = "MISSION ACCOMPLISHED";
+                        // FIX 1: Zeilenumbruch für kleinen Kasten
+                        endT.innerHTML = "MISSION<br>ACCOMPLISHED";
                         endT.className = "end-status green-neon-text";
                         
                         try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
@@ -1197,7 +1195,8 @@ function loop(t) {
                 document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
                 
                 let endT = document.getElementById("end-title");
-                endT.innerText = "MISSION FAILED";
+                // FIX 1: Zeilenumbruch für den Fehler-Screen
+                endT.innerHTML = "MISSION<br>FAILED";
                 endT.className = "end-status red-neon-text";
 
                 try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
