@@ -167,11 +167,8 @@
 
         #scr-end { background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 1000; }
         #scr-end .screen-inner { justify-content: center; align-items: center; height: auto; min-height: unset; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 380px; background: radial-gradient(circle, rgba(20,20,20,0.9) 0%, rgba(0,0,0,0.95) 100%); border: 2px solid var(--gold); border-radius: 25px; padding: 40px 20px; box-shadow: 0 0 40px rgba(255,215,0,0.2), inset 0 0 20px rgba(0,0,0,0.8); }
-        
-        /* FIX 1: Responsive Schrift und Zeilenumbruch, damit nichts mehr überlappt! */
         #end-game-title { font-size: 20px; color: #aaa; letter-spacing: 4px; margin-bottom: 15px; font-weight: 900; text-align: center; }
         .end-status { font-size: clamp(26px, 8vw, 36px); margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; text-align: center; font-weight: 900; line-height: 1.3;}
-        
         #end-agent-name { font-size: 28px; color: #fff; margin-bottom: 25px; letter-spacing: 3px; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 12px; text-align: center;}
         #f-score { font-size: 60px; color: var(--gold); margin: 0 0 35px 0; text-shadow: 0 0 25px var(--gold), 2px 2px 5px #000; text-align: center; font-weight: 900; }
         
@@ -360,14 +357,12 @@ function drawAndFilterFrame() {
     let vw = videoEl.videoWidth;
     let vh = videoEl.videoHeight;
     
-    // Auto-Crop (Falls es Balken hat)
     let size = Math.min(vw, vh);
     let startX = (vw - size) / 2;
     let startY = (vh - size) / 2;
     
     videoCtx.drawImage(videoEl, startX, startY, size, size, 0, 0, videoCanvas.width, videoCanvas.height);
     
-    // FIX 2: try-catch fängt WebView-Abstürze ab!
     try {
         let frame = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
         let data = frame.data;
@@ -381,9 +376,7 @@ function drawAndFilterFrame() {
             }
         }
         videoCtx.putImageData(frame, 0, 0);
-    } catch(e) {
-        // Falls Android WebView den Canvas sperrt, läuft das Video trotzdem weiter (mit grünem Hintergrund)
-    }
+    } catch(e) {}
 }
 
 function processVideoFrame() {
@@ -406,7 +399,6 @@ window.onload = function() {
         }
     } catch(e) {}
 
-    // FIX 2: Aggressive Klick-Erkennung für Handys
     document.addEventListener('touchstart', forceAudioStart, { once: false });
     document.addEventListener('click', forceAudioStart, { once: false });
 
@@ -445,6 +437,7 @@ function initAudioContext() {
     }
 }
 
+// 1. NUR DER HUND STARTET HIER (KEINE MP3!)
 function forceAudioStart() {
     initAudioContext();
     
@@ -456,7 +449,6 @@ function forceAudioStart() {
                 let playPromise = videoEl.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(e => {
-                        // Falls das Handy es blockiert, probieren wir es beim nächsten Tippen nochmal
                         dogHasSpoken = false; 
                     });
                 }
@@ -475,20 +467,8 @@ function authAgent() {
             agent = n;
             try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
             
-            if (videoEl) {
-                videoEl.pause();
-                if (videoAnimationId) cancelAnimationFrame(videoAnimationId);
-            }
-
-            try {
-                let bgMusic = document.getElementById("snd-action");
-                if(bgMusic) {
-                    bgMusic.volume = 0.08; 
-                    bgMusic.playbackRate = 1.0; 
-                    bgMusic.play().catch(err => {});
-                }
-            } catch(e) {}
-
+            // HUND REDET EINFACH WEITER (Wird nicht pausiert!)
+            
             document.getElementById("scr-name").style.display = "none";
             document.getElementById("scr-start").style.display = "block";
             document.getElementById("scr-start").scrollTop = 0; 
@@ -723,13 +703,19 @@ function updateTheme(newMode) {
     if(sBar) sBar.style.borderColor = col;
 }
 
+// 2. SPIEL STARTET (Hund wird getötet, MP3 startet!)
 function start(m, startLvl) {
+    
+    if (videoEl) {
+        videoEl.pause();
+    }
+
     try {
         let bgMusic = document.getElementById("snd-action");
         if(bgMusic) {
             bgMusic.volume = 0.15; 
             bgMusic.playbackRate = 1.0; 
-            if(bgMusic.paused) bgMusic.play().catch(err => {});
+            bgMusic.play().catch(err => {});
         }
     } catch(e) {}
 
@@ -904,7 +890,6 @@ function loop(t) {
                         document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
                         
                         let endT = document.getElementById("end-title");
-                        // FIX 1: Zeilenumbruch für kleinen Kasten
                         endT.innerHTML = "MISSION<br>ACCOMPLISHED";
                         endT.className = "end-status green-neon-text";
                         
@@ -1195,7 +1180,6 @@ function loop(t) {
                 document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
                 
                 let endT = document.getElementById("end-title");
-                // FIX 1: Zeilenumbruch für den Fehler-Screen
                 endT.innerHTML = "MISSION<br>FAILED";
                 endT.className = "end-status red-neon-text";
 
