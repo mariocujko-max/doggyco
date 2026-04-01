@@ -77,15 +77,17 @@
             overscroll-behavior: none;
         }
 
-        #scr-name .screen-inner { 
-            width: 100%; min-height: 100dvh; margin: 0 auto; max-width: 420px; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            padding: 20px; 
+        /* Gemeinsame Layout-Klasse für Start- und End-Inhalt */
+        .main-menu-inner {
+            width: 100%; min-height: 100dvh; margin: 0 auto; max-width: 420px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px;
         }
 
+        /* Milchglas Box BLEIBT */
         .start-glass-panel {
             width: 100%;
-            background: rgba(255, 255, 255, 0.08); 
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-radius: 25px;
@@ -101,25 +103,32 @@
         .app-title { font-size: clamp(28px, 9vw, 38px); color: var(--gold); letter-spacing: 2px; margin: 0; text-align: center; animation: textPulse 1.8s infinite alternate ease-in-out; }
         @keyframes textPulse { 0% { text-shadow: 0 0 10px var(--gold); transform: scale(0.98); } 100% { text-shadow: 0 0 25px var(--gold), 0 0 40px #fff; transform: scale(1.05); } }
 
+        /* Hund-Video Wrapper ohne inneren Rahmen */
         .dog-video-wrapper {
             display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 30px;
         }
         .dog-video-canvas { 
             width: 220px; height: 220px; 
             object-fit: contain; 
+            background: transparent;
+            border: none;
             filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)); 
         }
 
-        #auth-panel { 
+        /* Styling für Eingabefeld und Ergebnisanzeige */
+        #auth-panel, #final-results-panel { 
             width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px; 
         }
         
-        .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid var(--neon); background: rgba(0,0,0,0.7); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; text-shadow: 1px 1px 5px #000; outline: none; }
+        .name-input, .final-result-display {
+            width: 100%; padding: 15px; border-radius: 15px; border: 1px solid var(--neon); background: rgba(0,0,0,0.7); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; text-shadow: 1px 1px 5px #000; outline: none;
+        }
         .name-input:focus { border-color: var(--gold); box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px rgba(255,215,0,0.4); }
 
         .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.3); transition: 0.1s; transform: translateY(0); }
         .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
 
+        /* Restliche Menü-Styling */
         #scr-start {
             background: rgba(255, 255, 255, 0.05); 
             backdrop-filter: blur(15px);
@@ -166,15 +175,9 @@
         .legal-box { width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); padding: 25px 20px; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 
         #scr-end { background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 1000; }
-        #scr-end .screen-inner { justify-content: center; align-items: center; height: auto; min-height: unset; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 380px; background: radial-gradient(circle, rgba(20,20,20,0.9) 0%, rgba(0,0,0,0.95) 100%); border: 2px solid var(--gold); border-radius: 25px; padding: 40px 20px; box-shadow: 0 0 40px rgba(255,215,0,0.2), inset 0 0 20px rgba(0,0,0,0.8); }
-        #end-game-title { font-size: 20px; color: #aaa; letter-spacing: 4px; margin-bottom: 15px; font-weight: 900; text-align: center; }
-        .end-status { font-size: clamp(26px, 8vw, 36px); margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; text-align: center; font-weight: 900; line-height: 1.3;}
-        #end-agent-name { font-size: 28px; color: #fff; margin-bottom: 25px; letter-spacing: 3px; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 12px; text-align: center;}
-        #f-score { font-size: 60px; color: var(--gold); margin: 0 0 35px 0; text-shadow: 0 0 25px var(--gold), 2px 2px 5px #000; text-align: center; font-weight: 900; }
         
-        .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
-        .red-neon-text { color: var(--red); text-shadow: 0 0 10px var(--red), 0 0 20px var(--red); }
-        .green-neon-text { color: var(--green); text-shadow: 0 0 10px var(--green), 0 0 20px var(--green); }
+        .final-result-display { color: #fff; text-shadow: 1px 1px 5px #000; font-weight: bold;}
+        
     </style>
 </head>
 <body>
@@ -212,16 +215,16 @@
     </div>
 
     <div id="scr-name" class="screen">
-        <div class="screen-inner">
+        <div class="main-menu-inner">
             
             <div class="start-glass-panel">
                 <header>
-                    <h1 class="app-title">DOGGYCO<br>MISSION</h1>
+                    <h1 class="app-title">DOGGYCO</h1>
                 </header>
                 
                 <div class="dog-video-wrapper">
                     <canvas id="dog-video-canvas" width="250" height="250" class="dog-video-canvas"></canvas>
-                    <video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="auto" autoplay muted crossorigin="anonymous" style="display:none;"></video>
+                    <video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="auto" muted style="display:none;"></video>
                 </div>
 
                 <div id="auth-panel">
@@ -331,12 +334,24 @@
     </div>
 
     <div id="scr-end" class="screen" style="display:none">
-        <div class="screen-inner"> 
-            <div id="end-game-title">DOGGYCO MISSION</div>
-            <h2 id="end-title" class="end-status red-neon-text">MISSION<br>FAILED</h2> 
-            <h3 id="end-agent-name">PLAYER</h3> 
-            <h1 id="f-score">0 PTS</h1> 
-            <button class="btn-main" onclick="location.reload()">MAIN MENU</button> 
+        <div class="main-menu-inner"> 
+            
+            <div class="start-glass-panel">
+                <header>
+                    <h1 class="app-title">DOGGYCO</h1>
+                </header>
+                
+                <div class="dog-video-wrapper">
+                    <canvas id="dog-video2-canvas" width="250" height="250" class="dog-video-canvas"></canvas>
+                    <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
+                </div>
+
+                <div id="final-results-panel">
+                    <div id="final-agent-display" class="final-result-display">PLAYER - 0 PTS</div>
+                    <button class="btn-main" onclick="location.reload()">RESTART</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -345,50 +360,77 @@
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
 
 <script>
-// --- VIDEO GREEN SCREEN & AUTO-CROP LOGIC ---
+// --- VIDEO GREEN SCREEN LOGIC ---
+// Video 1 (Startscreen) setup
 let videoEl = document.getElementById('dog-video');
 let videoCanvas = document.getElementById('dog-video-canvas');
 let videoCtx = videoCanvas.getContext('2d', { willReadFrequently: true });
 let videoAnimationId = null;
 
-function drawAndFilterFrame() {
-    if (!videoEl.videoWidth) return;
+// Video 2 (Endscreen) setup
+let videoEl2 = document.getElementById('dog-video2');
+let videoCanvas2 = document.getElementById('dog-video2-canvas');
+let videoCtx2 = videoCanvas2.getContext('2d', { willReadFrequently: true });
+let videoAnimationId2 = null;
 
-    let vw = videoEl.videoWidth;
-    let vh = videoEl.videoHeight;
+// Filtering function generic
+function filterFrame(ctx, video, canvas) {
+    if (!video.videoWidth) return;
+
+    let vw = video.videoWidth;
+    let vh = video.videoHeight;
     
+    // Auto-Crop
     let size = Math.min(vw, vh);
     let startX = (vw - size) / 2;
     let startY = (vh - size) / 2;
     
-    videoCtx.drawImage(videoEl, startX, startY, size, size, 0, 0, videoCanvas.width, videoCanvas.height);
+    ctx.drawImage(video, startX, startY, size, size, 0, 0, canvas.width, canvas.height);
     
     try {
-        let frame = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
+        let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
         let data = frame.data;
         
         for (let i = 0; i < data.length; i += 4) {
             let r = data[i];
             let g = data[i + 1];
             let b = data[i + 2];
+            // Green screen filter
             if (g > 90 && g > r * 1.1 && g > b * 1.1) {
                 data[i + 3] = 0; 
             }
         }
-        videoCtx.putImageData(frame, 0, 0);
+        ctx.putImageData(frame, 0, 0);
     } catch(e) {}
 }
 
+// Logic for Video 1
+function drawAndFilterFrame() {
+    filterFrame(videoCtx, videoEl, videoCanvas);
+}
 function processVideoFrame() {
     if (!videoEl.paused && !videoEl.ended) {
         drawAndFilterFrame();
     }
     videoAnimationId = requestAnimationFrame(processVideoFrame);
 }
-
 videoEl.addEventListener('loadeddata', drawAndFilterFrame);
 videoEl.addEventListener('seeked', drawAndFilterFrame);
 videoEl.addEventListener('play', processVideoFrame);
+
+// Logic for Video 2
+function drawAndFilterFrame2() {
+    filterFrame(videoCtx2, videoEl2, videoCanvas2);
+}
+function processVideoFrame2() {
+    if (!videoEl2.paused && !videoEl2.ended) {
+        drawAndFilterFrame2();
+    }
+    videoAnimationId2 = requestAnimationFrame(processVideoFrame2);
+}
+videoEl2.addEventListener('loadeddata', drawAndFilterFrame2);
+videoEl2.addEventListener('seeked', drawAndFilterFrame2);
+videoEl2.addEventListener('play', processVideoFrame2);
 // --------------------------------
 
 window.onload = function() {
@@ -437,25 +479,24 @@ function initAudioContext() {
     }
 }
 
-// 1. NUR DER HUND STARTET HIER (KEINE MP3!)
 function forceAudioStart() {
     initAudioContext();
     
-    if (!dogHasSpoken && videoEl) {
+    // Only start first video sound on interaction
+    if (!dogHasSpoken && scr_name_visible() && videoEl) {
         try {
             videoEl.muted = false;
             videoEl.volume = 1.0; 
             if (videoEl.paused) {
-                let playPromise = videoEl.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(e => {
-                        dogHasSpoken = false; 
-                    });
-                }
+                videoEl.play();
             }
             dogHasSpoken = true;
         } catch(e) {}
     }
+}
+
+function scr_name_visible() {
+    return document.getElementById("scr-name").style.display !== "none";
 }
 
 function authAgent() {
@@ -467,7 +508,7 @@ function authAgent() {
             agent = n;
             try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
             
-            // HUND REDET EINFACH WEITER (Wird nicht pausiert!)
+            // Dog voice in background
             
             document.getElementById("scr-name").style.display = "none";
             document.getElementById("scr-start").style.display = "block";
@@ -703,10 +744,11 @@ function updateTheme(newMode) {
     if(sBar) sBar.style.borderColor = col;
 }
 
-// 2. SPIEL STARTET (Hund wird getötet, MP3 startet!)
+// SPIEL STARTET (Hund voice muted, MP3 startet!)
 function start(m, startLvl) {
     
     if (videoEl) {
+        // Halt first video processing
         videoEl.pause();
     }
 
@@ -789,6 +831,27 @@ async function saveScoreAndRefresh(newScore) {
         }
         fetchRanks();
     } catch(e) {}
+}
+
+function showFinalScreen() {
+    active = false;
+    document.getElementById("game-wrap").style.pointerEvents = "none";
+    document.getElementById("game-wrap").style.visibility = "hidden";
+    
+    document.getElementById("scr-end").style.display = "flex";
+    
+    // Set text to PLAYER - 0 PTS format
+    document.getElementById("final-agent-display").innerText = agent + " - " + Math.floor(score) + " PTS";
+
+    // Handle end screen dog voice
+    if (videoEl2) {
+        videoEl2.muted = false;
+        videoEl2.volume = 1.0;
+        videoEl2.currentTime = 0;
+        videoEl2.play().catch(e => {});
+    }
+
+    try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
 }
 
 function loop(t) {
@@ -882,18 +945,7 @@ function loop(t) {
                     }
 
                     setTimeout(() => {
-                        active = false;
-                        document.getElementById("game-wrap").style.pointerEvents = "none";
-                        document.getElementById("game-wrap").style.visibility = "hidden";
-                        document.getElementById("scr-end").style.display = "flex";
-                        document.getElementById("end-agent-name").innerText = agent;
-                        document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
-                        
-                        let endT = document.getElementById("end-title");
-                        endT.innerHTML = "MISSION<br>ACCOMPLISHED";
-                        endT.className = "end-status green-neon-text";
-                        
-                        try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
+                        showFinalScreen();
                     }, burstDelay + 3000); 
 
                 } else {
@@ -1162,7 +1214,16 @@ function loop(t) {
         ctx.shadowBlur = 0;
 
         if(hp <= 0 && !missionComplete) {
-            active = false; 
+            
+            // Sound handling for failure
+            if (audioCtx) {
+                // We don't pause voice on failure page, but MP3 needs to stop eventually? 
+                // The prompt says "only voice in selection side, never in game". 
+                // Currently MP3 starts in start(). Let's stop it on failure.
+                // However, the final screen requested *must* look like start screen, implies voice.
+                // We keep the MP3 going through flash, then cut it for the voice on final screen.
+            }
+            
             sfxHit(); hapticGameOver(); 
             
             let goFlash = document.getElementById("game-over-flash");
@@ -1170,20 +1231,7 @@ function loop(t) {
             
             setTimeout(() => {
                 goFlash.style.display = "none";
-                document.getElementById("game-wrap").style.pointerEvents = "none";
-                document.getElementById("game-wrap").style.visibility = "hidden";
-                
-                ctx.fillStyle = "rgba(0,0,0,0.85)"; ctx.fillRect(0,0,W,H);
-                
-                document.getElementById("scr-end").style.display = "flex";
-                document.getElementById("end-agent-name").innerText = agent; 
-                document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
-                
-                let endT = document.getElementById("end-title");
-                endT.innerHTML = "MISSION<br>FAILED";
-                endT.className = "end-status red-neon-text";
-
-                try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
+                showFinalScreen();
             }, 1500); 
             
             return; 
