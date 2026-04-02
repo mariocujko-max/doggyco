@@ -23,7 +23,7 @@
             user-select: none; -webkit-user-select: none; 
         }
         
-        input[type="text"] { user-select: auto; -webkit-user-select: auto; }
+        input[type="text"] { user-select: auto; -webkit-user-select: auto; transition: 0.3s; }
 
         html, body {
             overscroll-behavior: none;
@@ -38,10 +38,11 @@
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; }
 
-        #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
+        /* Der Rahmen bleibt jetzt permanent neutral */
+        #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; }
 
         @media (min-width: 450px) {
-            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
+            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
             #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); }
         }
 
@@ -66,12 +67,11 @@
         #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255, 215, 0, 0.5); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        /* NEUE CINEMATIC GAME OVER ANIMATION */
+        /* NEUE CINEMATIC GAME OVER ANIMATION (Zeigt den gefrorenen Hintergrund!) */
         #game-over-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999;
+            position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             opacity: 0; pointer-events: none; transition: opacity 0.8s ease-in-out;
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
         #game-over-overlay.show { opacity: 1; pointer-events: auto; }
         .go-title {
@@ -82,19 +82,23 @@
         }
         #game-over-overlay.show .go-title { transform: scale(1); opacity: 1; }
 
+        /* Identische Hintergründe für Screen Start & Screen End */
         .screen { 
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; 
             overflow-y: auto; -webkit-overflow-scrolling: touch; pointer-events: auto; padding-bottom: 50px;
             overscroll-behavior: none;
+            background: rgba(0, 0, 0, 0.5); /* Milchiger, gleicher Hintergrund für beide Screens */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
         }
 
         .screen-inner { 
             width: 100%; min-height: 100dvh; margin: 0 auto; max-width: 420px; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            padding: 20px; 
+            display: flex; flex-direction: column; justify-content: flex-start; align-items: center; 
+            padding: 40px 10px 100px 10px; 
         }
 
-        /* Dieser Panel-Style wird jetzt strikt für Screen 1 UND Screen 3 genutzt! */
+        /* Dieser Panel-Style wird 1:1 für Screen Start UND Screen End genutzt! */
         .start-glass-panel {
             width: 100%;
             background: rgba(255, 255, 255, 0.08); 
@@ -107,6 +111,7 @@
             flex-direction: column;
             align-items: center;
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
         }
 
         .start-glass-panel header { width: 100%; text-align: center; margin-bottom: 30px; }
@@ -122,23 +127,13 @@
             filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)); 
         }
 
-        #auth-panel { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        #auth-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
         
         .name-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid var(--neon); background: rgba(0,0,0,0.7); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; text-shadow: 1px 1px 5px #000; outline: none; }
         .name-input:focus { border-color: var(--gold); box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px rgba(255,215,0,0.4); }
 
         .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.3); transition: 0.1s; transform: translateY(0); }
         .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
-
-        /* Screen 2 spezifisch */
-        #scr-start {
-            background: rgba(255, 255, 255, 0.05); 
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-        }
-        #scr-start .screen-inner { justify-content: flex-start; padding: 40px 10px 100px 10px; }
-        
-        .title-box { width: 100%; background: var(--glass); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: none; padding: 15px; background: transparent; display: flex; justify-content: center; margin-bottom: 20px;}
 
         .info-panel { width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); padding: 25px 20px; margin-bottom: 20px; flex-shrink: 0; height: auto; }
         .info-panel h3 { border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
@@ -176,15 +171,9 @@
 
         .legal-box { width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); padding: 25px 20px; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 
-        /* End Screen (kein eigener Hintergrund mehr, nutzt start-glass-panel) */
+        /* End Screen Style */
         #scr-end { z-index: 1000; }
-        
-        #end-agent-name { font-size: 28px; color: #fff; margin-bottom: 15px; letter-spacing: 3px; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 12px; text-align: center; width: 100%;}
-        #f-score { font-size: 50px; color: var(--gold); margin: 0 0 25px 0; text-shadow: 0 0 25px var(--gold), 2px 2px 5px #000; text-align: center; font-weight: 900; }
-        
-        .neon-text { color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
-        .red-neon-text { color: var(--red); text-shadow: 0 0 10px var(--red), 0 0 20px var(--red); }
-        .green-neon-text { color: var(--green); text-shadow: 0 0 10px var(--green), 0 0 20px var(--green); }
+        #scr-end .screen-inner { justify-content: center; } /* Endscreen zentriert */
     </style>
 </head>
 <body>
@@ -220,7 +209,7 @@
         </div>
     </div>
 
-    <div id="scr-name" class="screen">
+    <div id="scr-start" class="screen">
         <div class="screen-inner">
             <div class="start-glass-panel">
                 <header>
@@ -235,23 +224,10 @@
                 </div>
 
                 <div id="auth-panel">
-                    <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
-                    <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
+                    <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off">
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <div id="scr-start" class="screen" style="display:none;">
-        <div class="screen-inner">
-            <header>
-                <div class="title-box" style="margin-bottom: 10px;">
-                    <h1 class="app-title">DOGGYCO MISSION</h1>
-                </div>
-            </header>
-
-            <div class="info-panel" style="display: flex; flex-direction: column; align-items: center;">
-                <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">CHOOSE START LEVEL</h3>
+                <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; width: 100%;">CHOOSE START LEVEL</h3>
                 
                 <div style="display:flex; flex-direction:column; gap:10px; width:100%; align-items: center;">
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
@@ -343,7 +319,7 @@
         <div class="screen-inner"> 
             <div class="start-glass-panel">
                 <header>
-                    <h1 id="end-title" class="app-title end-status red-neon-text" style="margin-bottom:0;">MISSION<br>FAILED</h1>
+                    <h1 id="end-agent-name" class="app-title" style="font-size: 38px; word-break: break-all; margin-bottom: 0;">PLAYER</h1>
                 </header>
 
                 <div class="dog-video-wrapper">
@@ -351,8 +327,7 @@
                     <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
                 </div>
 
-                <h3 id="end-agent-name">PLAYER</h3> 
-                <h1 id="f-score">0 PTS</h1> 
+                <h1 id="f-score" style="font-size: 50px; color: var(--gold); margin: 0 0 25px 0; text-shadow: 0 0 25px var(--gold), 2px 2px 5px #000; text-align: center; font-weight: 900;">0 PTS</h1> 
                 
                 <button class="btn-main" onclick="goToLevelSelect()">LEVEL AUSWAHL</button> 
             </div>
@@ -365,18 +340,15 @@
 
 <script>
 // --- MEDIA MANAGER ---
-// Pausiert alles rigoros und feuert das gewünschte Element gezielt neu ab
 function manageMedia(action) {
     let bgMusic = document.getElementById("snd-action");
     let vid1 = document.getElementById("dog-video");
     let vid2 = document.getElementById("dog-video2");
 
-    // Alles stoppen
     if(bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
     if(vid1) { vid1.pause(); }
     if(vid2) { vid2.pause(); }
 
-    // Ausgewähltes Element starten (bei Videos Time = 0 für Loop-Fix)
     if(action === 'vid1') {
         if(vid1) { vid1.currentTime = 0; vid1.muted = false; vid1.play().catch(e=>{}); processVideoFrame(); }
     } else if(action === 'vid2') {
@@ -384,11 +356,11 @@ function manageMedia(action) {
     } else if(action === 'game') {
         if(bgMusic) { bgMusic.volume = 0.15; bgMusic.playbackRate = 1.0; bgMusic.play().catch(e=>{}); }
     } else if(action === 'none') {
-        // Alles bleibt aus (Menü-Status)
+        // Nichts weiter machen
     }
 }
 
-// --- VIDEO GREEN SCREEN & AUTO-CROP LOGIC (VIDEO 1 & 2) ---
+// --- VIDEO GREEN SCREEN & AUTO-CROP LOGIC ---
 let videoEl = document.getElementById('dog-video');
 let videoCanvas = document.getElementById('dog-video-canvas');
 let videoCtx = videoCanvas.getContext('2d', { willReadFrequently: true });
@@ -488,58 +460,27 @@ function initAudioContext() {
 
 function forceAudioStart() {
     initAudioContext();
-    if (!dogHasSpoken && videoEl && document.getElementById("scr-name").style.display !== "none") {
+    if (!dogHasSpoken && videoEl && document.getElementById("scr-start").style.display !== "none") {
         dogHasSpoken = true;
         manageMedia('vid1');
     }
 }
 
-function authAgent() {
-    initAudioContext(); 
-    let pNameElement = document.getElementById("pName");
-    if(pNameElement) {
-        let n = pNameElement.value.trim().toUpperCase();
-        if(n) {
-            agent = n;
-            try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
-            
-            // Wechsel zu Screen 2 (Level Auswahl)
-            document.getElementById("scr-name").style.display = "none";
-            document.getElementById("scr-start").style.display = "block";
-            document.getElementById("scr-start").scrollTop = 0; 
-            
-            // Auf Seite 2 soll kein Video laufen
-            manageMedia('none');
-        }
-    }
-}
-
 function goToLevelSelect() {
-    // 1. Lösche Neon-Rahmen vom Handy (zurücksetzen auf neutrales Menü)
-    document.documentElement.style.setProperty('--neon', '#00f2ff');
-    let pCont = document.getElementById("phone-container");
-    if(pCont) {
-        pCont.style.borderColor = 'rgba(255,255,255,0.1)';
-        pCont.style.boxShadow = '0 15px 40px rgba(0,0,0,0.8)';
-    }
-
-    // 2. Verstecke den Endscreen
     document.getElementById("scr-end").style.display = "none";
     
-    // 3. Setze das Spiel optisch komplett zurück
+    // Spielgeschehen endgültig abbrechen und Canvas komplett löschen
     document.getElementById("game-wrap").style.visibility = "hidden";
     document.getElementById("game-wrap").style.pointerEvents = "none";
     ctx.clearRect(0, 0, W, H);
     
-    // 4. Timer für die Anzeige im Menü wieder auf 30s setzen (Sicherheitsmaßnahme)
-    document.getElementById("time-txt").innerText = "30s";
+    document.getElementById("time-txt").innerText = "30s"; // Timer optisch resetten
     
-    // 5. Zeige Screen 2 (Clean Levelauswahl)
+    // Startbildschirm zeigen und Video 1 wieder sauber hochfahren
     document.getElementById("scr-start").style.display = "block";
     document.getElementById("scr-start").scrollTop = 0;
     
-    // 6. Stoppe alle Medien, das Menü ist still
-    manageMedia('none');
+    manageMedia('vid1');
 }
 
 function move(dir) {
@@ -679,7 +620,7 @@ let currLane = 2, playerX = lanes[2], targetX = lanes[2];
 let active = false, missionComplete = false; 
 let mode = 'dog', agent = "UNKNOWN";
 let entities = [], floaters = [], permSpiders = [], fireworks = [], lastT = 0;
-let globalAnimationId = null; // ZENTRALER LOOP ID
+let globalAnimationId = null; // NOTBREMSE FÜR DEN LOOP
 
 let clouds = [], opponents = [], ufos = []; 
 
@@ -717,20 +658,30 @@ function updateTheme(newMode) {
         mTitle.style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
     }
     
+    // Die Theme-Farben aktualisieren weiterhin Panel-Ränder, ABER NICHT den Handy-Rahmen!
     document.querySelectorAll('.app-title').forEach(el => { el.style.color = col; el.style.textShadow = `0 0 20px ${col}`; });
     document.querySelectorAll('.info-panel, .name-input, .btn-char').forEach(p => { p.style.borderColor = col; });
-    let pCont = document.getElementById("phone-container");
-    if(pCont) {
-        pCont.style.borderColor = col;
-        pCont.style.boxShadow = `0 0 50px ${col}60`;
-    }
+    
     let sBar = document.getElementById("stats-bar");
     if(sBar) sBar.style.borderColor = col;
 }
 
-// SPIEL STARTET (Notbremse für alte Loops hinzugefügt)
+// SPIEL STARTET (Integrierte Namensabfrage)
 function start(m, startLvl) {
-    // Falls noch ein alter Loop hängt: Zerstören!
+    // 1. Zwingt zur Namenseingabe, bevor es losgeht!
+    let nameInput = document.getElementById("pName");
+    let pName = nameInput.value.trim().toUpperCase();
+    if(!pName) {
+        nameInput.focus();
+        nameInput.style.boxShadow = "0 0 15px red";
+        nameInput.style.borderColor = "red";
+        setTimeout(() => { nameInput.style.boxShadow = "none"; nameInput.style.borderColor = "var(--neon)"; }, 1000);
+        return; 
+    }
+    agent = pName;
+    try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
+
+    // Alte Loops endgültig zerstören
     if(globalAnimationId) cancelAnimationFrame(globalAnimationId);
     
     manageMedia('game');
@@ -806,27 +757,30 @@ async function saveScoreAndRefresh(newScore) {
 function showEndScreen(win) {
     manageMedia('vid2'); 
     
+    // Das Spielgeschehen wird gestoppt, aber das Canvas (game-wrap) bleibt komplett SICHTBAR im Hintergrund eingefroren!
     document.getElementById("game-wrap").style.pointerEvents = "none";
-    document.getElementById("game-wrap").style.visibility = "hidden";
     
     document.getElementById("scr-end").style.display = "flex";
-    document.getElementById("end-agent-name").innerText = agent;
-    document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
     
-    let endT = document.getElementById("end-title");
+    // Setze Spielername & Punkte als Haupt-Titel auf der Endseite
+    let nameEl = document.getElementById("end-agent-name");
+    nameEl.innerText = agent;
+    
     if(win) {
-        endT.innerHTML = "MISSION<br>ACCOMPLISHED";
-        endT.className = "app-title end-status green-neon-text";
+        nameEl.style.color = "var(--green)";
+        nameEl.style.textShadow = "0 0 10px var(--green), 0 0 25px var(--green)";
     } else {
-        endT.innerHTML = "MISSION<br>FAILED";
-        endT.className = "app-title end-status red-neon-text";
+        nameEl.style.color = "var(--red)";
+        nameEl.style.textShadow = "0 0 10px var(--red), 0 0 25px var(--red)";
     }
 
+    document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
+    
     try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
 }
 
 function loop(t) {
-    if(!active) return;
+    if(!active) return; // Wenn nicht active, springt der Loop sofort raus
     globalAnimationId = requestAnimationFrame(loop); 
     
     try {
@@ -875,7 +829,7 @@ function loop(t) {
 
             if(timeLeft <= 0) {
                 if(level === 12) {
-                    missionComplete = true; active = false; // Stop Game Loop
+                    missionComplete = true; active = false; 
                     launchMassiveFireworks();
                     setTimeout(() => { addFloat(W/2, H/2, "MISSION", "#00ff88", 45); addFloat(W/2, H/2 + 60, "ACCOMPLISHED!", "#00ff88", 35); }, 1000);
 
@@ -1052,18 +1006,18 @@ function loop(t) {
         ctx.globalAlpha = 1; ctx.shadowBlur = 0;
 
         if(hp <= 0 && !missionComplete) {
-            missionComplete = true; active = false; // Bugfix: Verhindert Zeit-Zählen
+            missionComplete = true; active = false; // Tötet den Loop ab, sodass die Zeit stoppt!
             sfxHit(); hapticGameOver(); 
             
-            // Aufruf der neuen Cinematischen-Animation
+            // Neues weiches Overlay: Zeigt "GAME OVER" aber das gefrorene Canvas im Hintergrund bleibt sichtbar!
             let goOverlay = document.getElementById("game-over-overlay");
             goOverlay.classList.add("show");
             
             setTimeout(() => {
                 goOverlay.classList.remove("show");
-                ctx.clearRect(0,0,W,H); // Leert das Spielfeld
+                // Wir verzichten auf ctx.clearRect! Das Spiel bleibt optisch eingefroren.
                 showEndScreen(false);
-            }, 2000); // 2 Sekunden langes dramatisches Fade-To-Black
+            }, 2500); 
             return; 
         }
 
