@@ -42,7 +42,7 @@
         #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; }
 
         @media (min-width: 450px) {
-            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
+            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
             #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); }
         }
 
@@ -67,7 +67,7 @@
         #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255, 215, 0, 0.5); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        /* NEUE CINEMATIC GAME OVER ANIMATION (Zeigt den gefrorenen Hintergrund!) */
+        /* NEUE CINEMATIC GAME OVER ANIMATION */
         #game-over-overlay {
             position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -82,14 +82,12 @@
         }
         #game-over-overlay.show .go-title { transform: scale(1); opacity: 1; }
 
-        /* Identische Hintergründe für Screen Start & Screen End */
+        /* Komplett durchsichtige Screens, damit das Hintergrundbild strahlt! */
         .screen { 
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; 
             overflow-y: auto; -webkit-overflow-scrolling: touch; pointer-events: auto; padding-bottom: 50px;
             overscroll-behavior: none;
-            background: rgba(0, 0, 0, 0.5); /* Milchiger, gleicher Hintergrund für beide Screens */
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            background: transparent; /* Verhindert die globale milchige Überlagerung */
         }
 
         .screen-inner { 
@@ -98,7 +96,7 @@
             padding: 40px 10px 100px 10px; 
         }
 
-        /* Dieser Panel-Style wird 1:1 für Screen Start UND Screen End genutzt! */
+        /* Glass-Panel Effekt, beschränkt auf die Inhaltsblöcke */
         .start-glass-panel {
             width: 100%;
             background: rgba(255, 255, 255, 0.08); 
@@ -135,7 +133,11 @@
         .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.3); transition: 0.1s; transform: translateY(0); }
         .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
 
-        .info-panel { width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); padding: 25px 20px; margin-bottom: 20px; flex-shrink: 0; height: auto; }
+        .info-panel { 
+            width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); 
+            padding: 25px 20px; margin-bottom: 20px; flex-shrink: 0; height: auto; 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
         .info-panel h3 { border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
         
         .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 12px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); transform: translateY(0); flex-shrink: 0; }
@@ -169,10 +171,10 @@
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
 
-        .legal-box { width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); padding: 25px 20px; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .legal-box { width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); padding: 25px 20px; margin-top: 10px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 
         /* End Screen Style */
-        #scr-end { z-index: 1000; }
+        #scr-end { background: transparent; z-index: 1000; }
         #scr-end .screen-inner { justify-content: center; } /* Endscreen zentriert */
     </style>
 </head>
@@ -285,7 +287,7 @@
                     </a>
                     
                     <a href="https://www.youtube.com/@doggyco.de9" target="_blank" class="btn-sup bg-yt">
-                        <svg viewBox="0 0 576 512" fill="white" width="16" height="14"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438-11.412-132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
+                        <svg viewBox="0 0 576 512" fill="white" width="16" height="14"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
                         YOUTUBE
                     </a>
                     
@@ -467,19 +469,25 @@ function forceAudioStart() {
 }
 
 function goToLevelSelect() {
+    // 1. Spielfarben vom HUD und Main Title sauber zurücksetzen
+    document.documentElement.style.setProperty('--neon', '#00f2ff');
+
+    // 2. Verstecke den Endscreen
     document.getElementById("scr-end").style.display = "none";
     
-    // Spielgeschehen endgültig abbrechen und Canvas komplett löschen
+    // 3. Setze das Spiel optisch komplett zurück (Game Wrap leeren und Canvas bereinigen)
     document.getElementById("game-wrap").style.visibility = "hidden";
     document.getElementById("game-wrap").style.pointerEvents = "none";
     ctx.clearRect(0, 0, W, H);
     
-    document.getElementById("time-txt").innerText = "30s"; // Timer optisch resetten
+    // 4. Timer für die Anzeige im Menü wieder auf 30s setzen (Sicherheitsmaßnahme)
+    document.getElementById("time-txt").innerText = "30s";
     
-    // Startbildschirm zeigen und Video 1 wieder sauber hochfahren
+    // 5. Zeige Screen 1 (Startseite mit Levelauswahl)
     document.getElementById("scr-start").style.display = "block";
     document.getElementById("scr-start").scrollTop = 0;
     
+    // 6. Video 1 wieder abspielen
     manageMedia('vid1');
 }
 
@@ -658,9 +666,8 @@ function updateTheme(newMode) {
         mTitle.style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
     }
     
-    // Die Theme-Farben aktualisieren weiterhin Panel-Ränder, ABER NICHT den Handy-Rahmen!
-    document.querySelectorAll('.app-title').forEach(el => { el.style.color = col; el.style.textShadow = `0 0 20px ${col}`; });
-    document.querySelectorAll('.info-panel, .name-input, .btn-char').forEach(p => { p.style.borderColor = col; });
+    // Die Menü-Elemente wie Panels, Buttons etc. werden HIER NICHT MEHR angefasst!
+    // Dadurch bleiben sie beim Restart schön neutral, anstatt die Tier-Farben des letzten Spiels anzunehmen.
     
     let sBar = document.getElementById("stats-bar");
     if(sBar) sBar.style.borderColor = col;
