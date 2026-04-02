@@ -38,11 +38,13 @@
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; }
 
-        /* Der Rahmen bleibt jetzt permanent neutral */
-        #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; }
+        /* Der Rahmen bleibt neutral und wird nur im Spiel sichtbar */
+        #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
 
         @media (min-width: 450px) {
-            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
+            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; }
+            /* Rahmen erscheint nur, wenn das Spiel aktiv ist */
+            #phone-container.is-playing { border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
             #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); }
         }
 
@@ -87,7 +89,7 @@
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; 
             overflow-y: auto; -webkit-overflow-scrolling: touch; pointer-events: auto; padding-bottom: 50px;
             overscroll-behavior: none;
-            background: transparent; /* Verhindert die globale milchige Überlagerung */
+            background: transparent; 
         }
 
         .screen-inner { 
@@ -175,7 +177,7 @@
 
         /* End Screen Style */
         #scr-end { background: transparent; z-index: 1000; }
-        #scr-end .screen-inner { justify-content: center; } /* Endscreen zentriert */
+        #scr-end .screen-inner { justify-content: center; }
     </style>
 </head>
 <body>
@@ -287,7 +289,7 @@
                     </a>
                     
                     <a href="https://www.youtube.com/@doggyco.de9" target="_blank" class="btn-sup bg-yt">
-                        <svg viewBox="0 0 576 512" fill="white" width="16" height="14"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
+                        <svg viewBox="0 0 576 512" fill="white" width="16" height="14"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438-11.412-132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
                         YOUTUBE
                     </a>
                     
@@ -472,22 +474,25 @@ function goToLevelSelect() {
     // 1. Spielfarben vom HUD und Main Title sauber zurücksetzen
     document.documentElement.style.setProperty('--neon', '#00f2ff');
 
-    // 2. Verstecke den Endscreen
+    // 2. Verstecke den Endscreen und blende Game komplett aus
     document.getElementById("scr-end").style.display = "none";
-    
-    // 3. Setze das Spiel optisch komplett zurück (Game Wrap leeren und Canvas bereinigen)
     document.getElementById("game-wrap").style.visibility = "hidden";
     document.getElementById("game-wrap").style.pointerEvents = "none";
+    
+    // 3. Optionaler Rahmen für Desktop wieder deaktivieren
+    document.getElementById("phone-container").classList.remove("is-playing");
+    
+    // 4. Canvas komplett löschen (nichts bleibt hängen)
     ctx.clearRect(0, 0, W, H);
     
-    // 4. Timer für die Anzeige im Menü wieder auf 30s setzen (Sicherheitsmaßnahme)
+    // 5. Timer für die Anzeige im Menü wieder auf 30s setzen (Sicherheitsmaßnahme)
     document.getElementById("time-txt").innerText = "30s";
     
-    // 5. Zeige Screen 1 (Startseite mit Levelauswahl)
+    // 6. Zeige Screen 1 (Startseite mit Levelauswahl)
     document.getElementById("scr-start").style.display = "block";
     document.getElementById("scr-start").scrollTop = 0;
     
-    // 6. Video 1 wieder abspielen
+    // 7. Video 1 wieder abspielen
     manageMedia('vid1');
 }
 
@@ -666,16 +671,12 @@ function updateTheme(newMode) {
         mTitle.style.textShadow = `0 0 10px ${col}, 0 0 20px ${col}`;
     }
     
-    // Die Menü-Elemente wie Panels, Buttons etc. werden HIER NICHT MEHR angefasst!
-    // Dadurch bleiben sie beim Restart schön neutral, anstatt die Tier-Farben des letzten Spiels anzunehmen.
-    
     let sBar = document.getElementById("stats-bar");
     if(sBar) sBar.style.borderColor = col;
 }
 
-// SPIEL STARTET (Integrierte Namensabfrage)
+// SPIEL STARTET
 function start(m, startLvl) {
-    // 1. Zwingt zur Namenseingabe, bevor es losgeht!
     let nameInput = document.getElementById("pName");
     let pName = nameInput.value.trim().toUpperCase();
     if(!pName) {
@@ -688,9 +689,7 @@ function start(m, startLvl) {
     agent = pName;
     try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
 
-    // Alte Loops endgültig zerstören
     if(globalAnimationId) cancelAnimationFrame(globalAnimationId);
-    
     manageMedia('game');
 
     mode = m;
@@ -714,6 +713,9 @@ function start(m, startLvl) {
         gameWrap.style.visibility = "visible";
         gameWrap.style.pointerEvents = "auto";
     }
+    
+    // Rahmen für Desktop während dem Spielen einblenden
+    document.getElementById("phone-container").classList.add("is-playing");
     
     permSpiders = [ { lane: 0, y: 60, dy: 1, hit: false }, { lane: 4, y: H-120, dy: -1, hit: false } ];
 
@@ -764,12 +766,16 @@ async function saveScoreAndRefresh(newScore) {
 function showEndScreen(win) {
     manageMedia('vid2'); 
     
-    // Das Spielgeschehen wird gestoppt, aber das Canvas (game-wrap) bleibt komplett SICHTBAR im Hintergrund eingefroren!
+    // Verstecke HUD, Controls und Canvas komplett! (Nichts bleibt eingefroren)
     document.getElementById("game-wrap").style.pointerEvents = "none";
+    document.getElementById("game-wrap").style.visibility = "hidden";
+    ctx.clearRect(0,0,W,H);
+    
+    // Rahmen wieder entfernen, da wir uns im Menü befinden
+    document.getElementById("phone-container").classList.remove("is-playing");
     
     document.getElementById("scr-end").style.display = "flex";
     
-    // Setze Spielername & Punkte als Haupt-Titel auf der Endseite
     let nameEl = document.getElementById("end-agent-name");
     nameEl.innerText = agent;
     
@@ -787,7 +793,7 @@ function showEndScreen(win) {
 }
 
 function loop(t) {
-    if(!active) return; // Wenn nicht active, springt der Loop sofort raus
+    if(!active) return; 
     globalAnimationId = requestAnimationFrame(loop); 
     
     try {
@@ -1013,16 +1019,17 @@ function loop(t) {
         ctx.globalAlpha = 1; ctx.shadowBlur = 0;
 
         if(hp <= 0 && !missionComplete) {
-            missionComplete = true; active = false; // Tötet den Loop ab, sodass die Zeit stoppt!
+            active = false; 
             sfxHit(); hapticGameOver(); 
             
-            // Neues weiches Overlay: Zeigt "GAME OVER" aber das gefrorene Canvas im Hintergrund bleibt sichtbar!
             let goOverlay = document.getElementById("game-over-overlay");
             goOverlay.classList.add("show");
             
             setTimeout(() => {
                 goOverlay.classList.remove("show");
-                // Wir verzichten auf ctx.clearRect! Das Spiel bleibt optisch eingefroren.
+                // Löscht das Spiel-Feld und blendet die Elemente aus
+                ctx.clearRect(0,0,W,H);
+                document.getElementById("game-wrap").style.visibility = "hidden";
                 showEndScreen(false);
             }, 2500); 
             return; 
