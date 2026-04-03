@@ -299,7 +299,7 @@
                     </a>
                     
                     <a href="https://www.youtube.com/@doggyco.de9" target="_blank" class="btn-sup bg-yt">
-                        <svg viewBox="0 0 576 512" fill="white" width="16" height="14"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438-11.412-132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
+                        <svg viewBox="0 0 576 512" fill="white" width="16" height="14"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
                         YOUTUBE
                     </a>
                     
@@ -333,9 +333,9 @@
         <div class="screen-inner"> 
             <div class="start-glass-panel">
                 <header>
-                    <div style="background: rgba(0,0,0,0.3); border-radius: 20px; border: 1px solid var(--neon); padding: 15px; margin-bottom: 25px; box-shadow: inset 0 0 15px rgba(0,242,255,0.1); width: 100%;">
-                        <h1 id="end-agent-name" class="app-title" style="font-size: 26px; word-break: break-all; margin-bottom: 5px; color: #fff; text-shadow: 1px 1px 3px #000;">PLAYER</h1>
-                        <h1 id="f-score" style="font-size: 42px; color: var(--gold); margin: 0; text-shadow: 0 0 20px var(--gold), 2px 2px 5px #000; text-align: center; font-weight: 900;">0 PTS</h1> 
+                    <div style="background: rgba(0,0,0,0.4); border-radius: 20px; border: 1px solid var(--neon); padding: 20px; margin-bottom: 25px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); width: 100%; display: flex; flex-direction: column; gap: 5px; align-items: center;">
+                        <h1 id="end-agent-name" style="font-family: 'Orbitron'; margin: 0; line-height: 1; word-break: break-all; text-align: center;">PLAYER</h1>
+                        <h1 id="f-score" style="font-family: 'Orbitron'; margin: 0; line-height: 1; text-align: center;">0 PTS</h1> 
                     </div>
                 </header>
 
@@ -444,7 +444,7 @@ function initAudioContext() {
     }
 }
 
-// 1. Video startet mit allererster Berührung (wenn noch kein Name gespeichert ist)
+// Video startet mit allererster Berührung (wenn noch kein Name gespeichert ist)
 function handleFirstTouch() {
     initAudioContext();
     if (document.getElementById("scr-name").style.display !== "none") {
@@ -467,13 +467,12 @@ window.onload = function() {
             pNameEl.value = savedName; 
         }
 
-        // 2. Video startet beim Neustart NUR, wenn der Name geändert wird
+        // Video startet beim Neustart NUR, wenn der Name im Feld geändert wird
         if(pNameEl) {
             pNameEl.addEventListener('input', function() {
                 let saved = localStorage.getItem("doggycoAgent") || "";
                 let current = this.value.trim().toUpperCase();
                 
-                // Wenn schon mal gespielt wurde und der Name im Input vom gespeicherten abweicht:
                 if (saved && current !== saved) {
                     if (!dogHasSpoken && videoEl) {
                         dogHasSpoken = true;
@@ -528,7 +527,7 @@ function authAgent() {
     }
 }
 
-// 3. Restart-Button auf letzter Seite geht wieder zurück zur Name-Eingabe (Startseite 1)
+// Restart-Button geht wieder exakt zurück zur Namenseingabe, ohne dass der Browser neu lädt
 function goToStart() {
     document.documentElement.style.setProperty('--neon', '#00f2ff');
 
@@ -541,12 +540,13 @@ function goToStart() {
     ctx.clearRect(0, 0, W, H);
     document.getElementById("time-txt").innerText = "30s";
     
-    // Level Auswahl sicherheitshalber verstecken, Startseite (Namenseingabe) aufrufen
+    // Level Auswahl verstecken, Startseite (Namenseingabe) aufrufen
     document.getElementById("scr-start").style.display = "none";
     document.getElementById("scr-name").style.display = "block";
     
+    // Video stoppen. Es läuft erst an, wenn der Name oben im Textfeld geändert wird.
     manageMedia('none');
-    dogHasSpoken = false; // Reset, damit das Video wieder spielen kann, wenn Name geändert wird
+    dogHasSpoken = false; 
 }
 
 function move(dir) {
@@ -728,7 +728,6 @@ function updateTheme(newMode) {
     if(sBar) sBar.style.borderColor = col;
 }
 
-// SPIEL STARTET 
 function start(m, startLvl) {
     if(globalAnimationId) cancelAnimationFrame(globalAnimationId);
     manageMedia('game');
@@ -815,18 +814,21 @@ function showEndScreen(win) {
     document.getElementById("scr-end").style.display = "flex";
     
     let nameEl = document.getElementById("end-agent-name");
+    let scoreEl = document.getElementById("f-score");
+    
     nameEl.innerText = agent;
+    scoreEl.innerText = Math.floor(score) + " PTS";
     
-    if(win) {
-        nameEl.style.color = "var(--green)";
-        nameEl.style.textShadow = "0 0 10px var(--green), 0 0 25px var(--green)";
-    } else {
-        nameEl.style.color = "var(--red)";
-        nameEl.style.textShadow = "0 0 10px var(--red), 0 0 25px var(--red)";
-    }
+    let color = win ? "var(--green)" : "var(--red)";
+    
+    // Name und Punkte auf exakt die gleiche Größe, Farbe und Leuchteffekt setzen
+    [nameEl, scoreEl].forEach(el => {
+        el.style.color = color;
+        el.style.textShadow = `0 0 15px ${color}, 0 0 30px ${color}`;
+        el.style.fontSize = "38px";
+        el.style.fontWeight = "900";
+    });
 
-    document.getElementById("f-score").innerText = Math.floor(score) + " PTS";
-    
     try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
 }
 
@@ -955,11 +957,35 @@ function loop(t) {
             if(o.x < -50) opponents.splice(i, 1);
         });
 
+        // 3. UFO UND NEUER SCHÖNER TRAKTORSTRAHL
         for(let i = ufos.length - 1; i >= 0; i--) {
             let u = ufos[i]; if(!missionComplete) u.x -= u.s * dt;
             let ufoY = u.y + Math.sin(t / 150) * 10;
-            ctx.save(); ctx.fillStyle = "rgba(0, 255, 136, 0.4)"; ctx.beginPath(); ctx.moveTo(u.x - 15, ufoY + 10); ctx.lineTo(u.x + 15, ufoY + 10); ctx.lineTo(u.x + 45, u.y + H); ctx.lineTo(u.x - 45, u.y + H); ctx.fill(); ctx.restore(); 
-            ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#ffffff"; ctx.fillText('🛸', u.x, ufoY);
+            
+            ctx.save(); 
+            // Wunderschöner, weich auslaufender Gradient-Strahl
+            let beamGrad = ctx.createLinearGradient(0, ufoY + 10, 0, u.y + H);
+            beamGrad.addColorStop(0, "rgba(0, 255, 136, 0.8)"); // Oben strahlend
+            beamGrad.addColorStop(0.5, "rgba(0, 255, 136, 0.4)"); // Mitte halbtransparent
+            beamGrad.addColorStop(1, "rgba(0, 255, 136, 0)"); // Unten komplett unsichtbar
+            
+            ctx.fillStyle = beamGrad; 
+            ctx.shadowColor = "#00ff88"; // Leucht-Effekt
+            ctx.shadowBlur = 15;
+            
+            ctx.beginPath(); 
+            ctx.moveTo(u.x - 15, ufoY + 10); // Strahl oben am UFO
+            ctx.lineTo(u.x + 15, ufoY + 10); 
+            ctx.lineTo(u.x + 55, u.y + H); // Strahl wird nach unten breiter
+            ctx.lineTo(u.x - 55, u.y + H); 
+            ctx.fill(); 
+            ctx.restore(); 
+            
+            ctx.font = "45px Arial"; ctx.textAlign = "center"; 
+            ctx.fillStyle = "#ffffff"; 
+            ctx.shadowBlur = 0; // Shadow reset für das UFO selbst
+            ctx.fillText('🛸', u.x, ufoY);
+            
             let dropX = lanes[u.targetLane];
             if(u.x <= dropX && !u.dropped && !missionComplete) { fallingHearts.push({ x: dropX, y: u.y, s: 280 * speedMult }); u.dropped = true; }
             if(u.x < -50) ufos.splice(i, 1);
@@ -1065,7 +1091,6 @@ function loop(t) {
             
             setTimeout(() => {
                 goOverlay.classList.remove("show");
-                // Leere Screen aus optischen Gründen komplett
                 ctx.clearRect(0,0,W,H);
                 document.getElementById("game-wrap").style.visibility = "hidden";
                 showEndScreen(false);
