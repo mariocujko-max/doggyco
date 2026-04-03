@@ -38,12 +38,11 @@
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; }
 
-        /* Der Rahmen bleibt neutral und wird nur im Spiel sichtbar */
+        /* Der Rahmen bleibt neutral und wird nur im aktiven Spiel eingeblendet */
         #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
 
         @media (min-width: 450px) {
             #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; }
-            /* Rahmen erscheint nur, wenn das Spiel aktiv ist */
             #phone-container.is-playing { border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
             #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); }
         }
@@ -84,7 +83,6 @@
         }
         #game-over-overlay.show .go-title { transform: scale(1); opacity: 1; }
 
-        /* Komplett durchsichtige Screens, damit das Hintergrundbild strahlt! */
         .screen { 
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; 
             overflow-y: auto; -webkit-overflow-scrolling: touch; pointer-events: auto; padding-bottom: 50px;
@@ -98,7 +96,6 @@
             padding: 40px 10px 100px 10px; 
         }
 
-        /* Glass-Panel Effekt, beschränkt auf die Inhaltsblöcke */
         .start-glass-panel {
             width: 100%;
             background: rgba(255, 255, 255, 0.08); 
@@ -213,7 +210,7 @@
         </div>
     </div>
 
-    <div id="scr-start" class="screen">
+    <div id="scr-name" class="screen">
         <div class="screen-inner">
             <div class="start-glass-panel">
                 <header>
@@ -228,10 +225,23 @@
                 </div>
 
                 <div id="auth-panel">
-                    <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off">
+                    <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
+                    <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; width: 100%;">CHOOSE START LEVEL</h3>
+    <div id="scr-start" class="screen" style="display:none;">
+        <div class="screen-inner">
+            <header>
+                <div class="title-box" style="margin-bottom: 10px;">
+                    <h1 class="app-title">DOGGYCO MISSION</h1>
+                </div>
+            </header>
+
+            <div class="info-panel" style="display: flex; flex-direction: column; align-items: center;">
+                <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">CHOOSE START LEVEL</h3>
                 
                 <div style="display:flex; flex-direction:column; gap:10px; width:100%; align-items: center;">
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
@@ -323,17 +333,18 @@
         <div class="screen-inner"> 
             <div class="start-glass-panel">
                 <header>
-                    <h1 id="end-agent-name" class="app-title" style="font-size: 38px; word-break: break-all; margin-bottom: 0;">PLAYER</h1>
+                    <div style="background: rgba(0,0,0,0.3); border-radius: 20px; border: 1px solid var(--neon); padding: 15px; margin-bottom: 25px; box-shadow: inset 0 0 15px rgba(0,242,255,0.1); width: 100%;">
+                        <h1 id="end-agent-name" class="app-title" style="font-size: 26px; word-break: break-all; margin-bottom: 5px; color: #fff; text-shadow: 1px 1px 3px #000;">PLAYER</h1>
+                        <h1 id="f-score" style="font-size: 42px; color: var(--gold); margin: 0; text-shadow: 0 0 20px var(--gold), 2px 2px 5px #000; text-align: center; font-weight: 900;">0 PTS</h1> 
+                    </div>
                 </header>
 
                 <div class="dog-video-wrapper">
                     <canvas id="dog-video-canvas2" width="250" height="250" class="dog-video-canvas"></canvas>
                     <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
                 </div>
-
-                <h1 id="f-score" style="font-size: 50px; color: var(--gold); margin: 0 0 25px 0; text-shadow: 0 0 25px var(--gold), 2px 2px 5px #000; text-align: center; font-weight: 900;">0 PTS</h1> 
                 
-                <button class="btn-main" onclick="goToLevelSelect()">LEVEL AUSWAHL</button> 
+                <button class="btn-main" onclick="goToStart()">RESTART</button> 
             </div>
         </div>
     </div>
@@ -416,16 +427,65 @@ videoEl2.addEventListener('seeked', () => processGreenScreen(videoEl2, videoCanv
 videoEl2.addEventListener('play', processVideoFrame2);
 // --------------------------------
 
+let systemActive = false;
+let dogHasSpoken = false;
+let audioCtx = null;
+
+function initAudioContext() {
+    if(!systemActive) {
+        systemActive = true;
+        try {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if(AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        } catch(e) {}
+    }
+}
+
+// 1. Video startet mit allererster Berührung (wenn noch kein Name gespeichert ist)
+function handleFirstTouch() {
+    initAudioContext();
+    if (document.getElementById("scr-name").style.display !== "none") {
+        let saved = localStorage.getItem("doggycoAgent") || "";
+        if (!saved) { 
+            if (!dogHasSpoken && videoEl) {
+                dogHasSpoken = true;
+                manageMedia('vid1');
+            }
+        }
+    }
+}
+
 window.onload = function() {
     try {
         let savedName = localStorage.getItem("doggycoAgent");
-        if(savedName && document.getElementById("pName")) { 
-            document.getElementById("pName").value = savedName; 
+        let pNameEl = document.getElementById("pName");
+        
+        if(savedName && pNameEl) { 
+            pNameEl.value = savedName; 
+        }
+
+        // 2. Video startet beim Neustart NUR, wenn der Name geändert wird
+        if(pNameEl) {
+            pNameEl.addEventListener('input', function() {
+                let saved = localStorage.getItem("doggycoAgent") || "";
+                let current = this.value.trim().toUpperCase();
+                
+                // Wenn schon mal gespielt wurde und der Name im Input vom gespeicherten abweicht:
+                if (saved && current !== saved) {
+                    if (!dogHasSpoken && videoEl) {
+                        dogHasSpoken = true;
+                        manageMedia('vid1');
+                    }
+                }
+            });
         }
     } catch(e) {}
 
-    document.addEventListener('touchstart', forceAudioStart, { once: false });
-    document.addEventListener('click', forceAudioStart, { once: false });
+    document.addEventListener('touchstart', handleFirstTouch, { once: false });
+    document.addEventListener('click', handleFirstTouch, { once: false });
 
     setTimeout(() => {
         if (navigator.onLine) {
@@ -445,55 +505,48 @@ window.onload = function() {
     }, 1000);
 }
 
-let systemActive = false;
-let dogHasSpoken = false;
-let audioCtx = null;
-
-function initAudioContext() {
-    if(!systemActive) {
-        systemActive = true;
-        try {
-            if (!audioCtx) {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if(AudioContext) audioCtx = new AudioContext();
-            }
-            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        } catch(e) {}
+function authAgent() {
+    initAudioContext(); 
+    let pNameElement = document.getElementById("pName");
+    if(pNameElement) {
+        let n = pNameElement.value.trim().toUpperCase();
+        if(!n) {
+            pNameElement.focus();
+            pNameElement.style.boxShadow = "0 0 15px red";
+            pNameElement.style.borderColor = "red";
+            setTimeout(() => { pNameElement.style.boxShadow = "none"; pNameElement.style.borderColor = "var(--neon)"; }, 1000);
+            return; 
+        }
+        agent = n;
+        try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
+        
+        document.getElementById("scr-name").style.display = "none";
+        document.getElementById("scr-start").style.display = "block";
+        document.getElementById("scr-start").scrollTop = 0; 
+        
+        manageMedia('none');
     }
 }
 
-function forceAudioStart() {
-    initAudioContext();
-    if (!dogHasSpoken && videoEl && document.getElementById("scr-start").style.display !== "none") {
-        dogHasSpoken = true;
-        manageMedia('vid1');
-    }
-}
-
-function goToLevelSelect() {
-    // 1. Spielfarben vom HUD und Main Title sauber zurücksetzen
+// 3. Restart-Button auf letzter Seite geht wieder zurück zur Name-Eingabe (Startseite 1)
+function goToStart() {
     document.documentElement.style.setProperty('--neon', '#00f2ff');
 
-    // 2. Verstecke den Endscreen und blende Game komplett aus
     document.getElementById("scr-end").style.display = "none";
     document.getElementById("game-wrap").style.visibility = "hidden";
     document.getElementById("game-wrap").style.pointerEvents = "none";
     
-    // 3. Optionaler Rahmen für Desktop wieder deaktivieren
     document.getElementById("phone-container").classList.remove("is-playing");
     
-    // 4. Canvas komplett löschen (nichts bleibt hängen)
     ctx.clearRect(0, 0, W, H);
-    
-    // 5. Timer für die Anzeige im Menü wieder auf 30s setzen (Sicherheitsmaßnahme)
     document.getElementById("time-txt").innerText = "30s";
     
-    // 6. Zeige Screen 1 (Startseite mit Levelauswahl)
-    document.getElementById("scr-start").style.display = "block";
-    document.getElementById("scr-start").scrollTop = 0;
+    // Level Auswahl sicherheitshalber verstecken, Startseite (Namenseingabe) aufrufen
+    document.getElementById("scr-start").style.display = "none";
+    document.getElementById("scr-name").style.display = "block";
     
-    // 7. Video 1 wieder abspielen
-    manageMedia('vid1');
+    manageMedia('none');
+    dogHasSpoken = false; // Reset, damit das Video wieder spielen kann, wenn Name geändert wird
 }
 
 function move(dir) {
@@ -633,7 +686,7 @@ let currLane = 2, playerX = lanes[2], targetX = lanes[2];
 let active = false, missionComplete = false; 
 let mode = 'dog', agent = "UNKNOWN";
 let entities = [], floaters = [], permSpiders = [], fireworks = [], lastT = 0;
-let globalAnimationId = null; // NOTBREMSE FÜR DEN LOOP
+let globalAnimationId = null; 
 
 let clouds = [], opponents = [], ufos = []; 
 
@@ -675,20 +728,8 @@ function updateTheme(newMode) {
     if(sBar) sBar.style.borderColor = col;
 }
 
-// SPIEL STARTET
+// SPIEL STARTET 
 function start(m, startLvl) {
-    let nameInput = document.getElementById("pName");
-    let pName = nameInput.value.trim().toUpperCase();
-    if(!pName) {
-        nameInput.focus();
-        nameInput.style.boxShadow = "0 0 15px red";
-        nameInput.style.borderColor = "red";
-        setTimeout(() => { nameInput.style.boxShadow = "none"; nameInput.style.borderColor = "var(--neon)"; }, 1000);
-        return; 
-    }
-    agent = pName;
-    try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
-
     if(globalAnimationId) cancelAnimationFrame(globalAnimationId);
     manageMedia('game');
 
@@ -714,7 +755,6 @@ function start(m, startLvl) {
         gameWrap.style.pointerEvents = "auto";
     }
     
-    // Rahmen für Desktop während dem Spielen einblenden
     document.getElementById("phone-container").classList.add("is-playing");
     
     permSpiders = [ { lane: 0, y: 60, dy: 1, hit: false }, { lane: 4, y: H-120, dy: -1, hit: false } ];
@@ -766,12 +806,10 @@ async function saveScoreAndRefresh(newScore) {
 function showEndScreen(win) {
     manageMedia('vid2'); 
     
-    // Verstecke HUD, Controls und Canvas komplett! (Nichts bleibt eingefroren)
     document.getElementById("game-wrap").style.pointerEvents = "none";
     document.getElementById("game-wrap").style.visibility = "hidden";
     ctx.clearRect(0,0,W,H);
     
-    // Rahmen wieder entfernen, da wir uns im Menü befinden
     document.getElementById("phone-container").classList.remove("is-playing");
     
     document.getElementById("scr-end").style.display = "flex";
@@ -1027,7 +1065,7 @@ function loop(t) {
             
             setTimeout(() => {
                 goOverlay.classList.remove("show");
-                // Löscht das Spiel-Feld und blendet die Elemente aus
+                // Leere Screen aus optischen Gründen komplett
                 ctx.clearRect(0,0,W,H);
                 document.getElementById("game-wrap").style.visibility = "hidden";
                 showEndScreen(false);
