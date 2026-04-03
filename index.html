@@ -132,12 +132,27 @@
         .btn-main { padding: 15px; border-radius: 15px; border: none; background: var(--green); color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 18px; width: 100%; cursor: pointer; box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.3); transition: 0.1s; transform: translateY(0); }
         .btn-main:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4); }
 
+        /* ALLGEMEINES INFO PANEL */
         .info-panel { 
-            width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); 
+            width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; 
             padding: 25px 20px; margin-bottom: 20px; flex-shrink: 0; height: auto; 
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            transition: 0.3s ease;
         }
         .info-panel h3 { border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
+
+        /* INDIVIDUELLE FARB-THEMES FÜR JEDES PANEL (Ränder + Glow) */
+        .panel-gold { border: 1px solid var(--gold); box-shadow: 0 5px 15px rgba(255,215,0,0.1), inset 0 0 20px rgba(255,215,0,0.05); }
+        .panel-gold h3 { color: var(--gold); border-bottom-color: var(--gold); }
+        
+        .panel-neon { border: 1px solid var(--neon); box-shadow: 0 5px 15px rgba(0,242,255,0.1), inset 0 0 20px rgba(0,242,255,0.05); }
+        .panel-neon h3 { color: var(--neon); border-bottom-color: var(--neon); }
+        
+        .panel-unicorn { border: 1px solid var(--unicorn); box-shadow: 0 5px 15px rgba(255,0,255,0.1), inset 0 0 20px rgba(255,0,255,0.05); }
+        .panel-unicorn h3 { color: var(--unicorn); border-bottom-color: var(--unicorn); }
+
+        .panel-green { border: 1px solid var(--green); box-shadow: 0 5px 15px rgba(0,255,136,0.1), inset 0 0 20px rgba(0,255,136,0.05); }
+        .panel-green h3 { color: var(--green); border-bottom-color: var(--green); }
         
         .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 12px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); transform: translateY(0); flex-shrink: 0; }
         .btn-char span { font-size: 36px; margin-bottom: 5px; }
@@ -147,10 +162,6 @@
         .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; }
         .rank-gold { color: var(--gold); font-size: 18px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
-
-        .panel-gold h3 { color: var(--gold); border-bottom-color: var(--gold); }
-        .panel-neon h3 { color: var(--neon); border-bottom-color: var(--neon); }
-        .panel-unicorn h3 { color: var(--unicorn); border-bottom-color: var(--unicorn); }
 
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; flex-shrink: 0; width: 100%; }
         .btn-sup { padding: 12px 5px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; text-align: center; text-decoration: none; color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -299,7 +310,7 @@
                     </a>
                     
                     <a href="https://www.youtube.com/@doggyco.de9" target="_blank" class="btn-sup bg-yt">
-                        <svg viewBox="0 0 576 512" fill="white" width="16" height="14"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
+                        <svg viewBox="0 0 576 512" fill="white" width="16" height="14"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438-11.412-132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
                         YOUTUBE
                     </a>
                     
@@ -318,11 +329,11 @@
                 </div>
             </div>
             
-            <div class="info-panel" style="border-color: var(--green); text-align: center; padding: 20px;">
-                <h3 style="color: var(--green); border-bottom-color: var(--green); margin-bottom: 10px;">📱 HOL DIR DIE APP</h3>
-                <p class="text-sm" style="margin-bottom: 15px;">Spiele DOGGYCO MISSION jederzeit flüssig als echte App auf deinem Android-Handy!</p>
+            <div class="info-panel panel-green" style="text-align: center;">
+                <h3>📱 GET THE APP</h3>
+                <p class="text-sm" style="margin-bottom: 15px;">Play DOGGYCO MISSION smoothly anytime as a real app on your Android phone!</p>
                 <a href="https://play.google.com/store/apps/details?id=com.doggycogames.doggyco" target="_blank" class="play-store-btn" rel="noopener noreferrer">
-                    <img alt="Jetzt bei Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/de_badge_web_generic.png" />
+                    <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" />
                 </a>
             </div>
 
@@ -355,9 +366,9 @@
                 <button class="btn-main" onclick="goToLevelSelect()">RESTART</button> 
                 
                 <div style="margin-top: 25px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; width: 100%;">
-                    <p class="text-sm" style="margin-bottom: 10px; color: #aaa;">Lade dir die Vollversion herunter:</p>
+                    <p class="text-sm" style="margin-bottom: 10px; color: #aaa;">Download the full version:</p>
                     <a href="https://play.google.com/store/apps/details?id=com.doggycogames.doggyco" target="_blank" class="play-store-btn" rel="noopener noreferrer">
-                        <img alt="Jetzt bei Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/de_badge_web_generic.png" />
+                        <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" />
                     </a>
                 </div>
             </div>
@@ -459,7 +470,6 @@ function initAudioContext() {
     }
 }
 
-// Video startet mit allererster Berührung (wenn noch kein Name gespeichert ist)
 function handleFirstTouch() {
     initAudioContext();
     if (document.getElementById("scr-start").style.display !== "none") {
@@ -482,7 +492,6 @@ window.onload = function() {
             pNameEl.value = savedName; 
         }
 
-        // Video startet beim Neustart NUR, wenn der Name im Feld geändert wird
         if(pNameEl) {
             pNameEl.addEventListener('input', function() {
                 let saved = localStorage.getItem("doggycoAgent") || "";
@@ -519,7 +528,6 @@ window.onload = function() {
     }, 1000);
 }
 
-// Restart-Button geht nahtlos zurück zur gemeinsamen Startseite/Levelauswahl
 function goToLevelSelect() {
     document.documentElement.style.setProperty('--neon', '#00f2ff');
 
@@ -532,11 +540,9 @@ function goToLevelSelect() {
     ctx.clearRect(0, 0, W, H);
     document.getElementById("time-txt").innerText = "30s";
     
-    // Die gemeinsame Startseite wieder einblenden
     document.getElementById("scr-start").style.display = "block";
     document.getElementById("scr-start").scrollTop = 0;
     
-    // Medien stumm schalten (Video startet erst, wenn Spieler in Name-Feld tippt)
     manageMedia('none');
     dogHasSpoken = false; 
 }
