@@ -68,7 +68,7 @@
         #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255, 215, 0, 0.5); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
-        /* NEUE CINEMATIC GAME OVER ANIMATION */
+        /* CINEMATIC GAME OVER ANIMATION */
         #game-over-overlay {
             position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -210,13 +210,13 @@
         </div>
     </div>
 
-    <div id="scr-name" class="screen">
+    <div id="scr-start" class="screen">
         <div class="screen-inner">
             <div class="start-glass-panel">
                 <header>
                     <h1 class="app-title">DOGGYCO<br>MISSION</h1>
                 </header>
-                
+
                 <div id="video-host-1" style="width: 100%;">
                     <div class="dog-video-wrapper" id="main-vid-wrapper">
                         <canvas id="dog-video-canvas" width="250" height="250" class="dog-video-canvas"></canvas>
@@ -225,23 +225,10 @@
                 </div>
 
                 <div id="auth-panel">
-                    <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') authAgent()">
-                    <button class="btn-main" onclick="authAgent()">AUTHENTICATE</button>
+                    <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') this.blur();">
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <div id="scr-start" class="screen" style="display:none;">
-        <div class="screen-inner">
-            <header>
-                <div class="title-box" style="margin-bottom: 10px;">
-                    <h1 class="app-title">DOGGYCO MISSION</h1>
-                </div>
-            </header>
-
-            <div class="info-panel" style="display: flex; flex-direction: column; align-items: center;">
-                <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase;">CHOOSE START LEVEL</h3>
+                <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; width: 100%;">CHOOSE START LEVEL</h3>
                 
                 <div style="display:flex; flex-direction:column; gap:10px; width:100%; align-items: center;">
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
@@ -344,7 +331,7 @@
                     <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
                 </div>
                 
-                <button class="btn-main" onclick="goToStart()">RESTART</button> 
+                <button class="btn-main" onclick="goToLevelSelect()">RESTART</button> 
             </div>
         </div>
     </div>
@@ -447,7 +434,7 @@ function initAudioContext() {
 // Video startet mit allererster Berührung (wenn noch kein Name gespeichert ist)
 function handleFirstTouch() {
     initAudioContext();
-    if (document.getElementById("scr-name").style.display !== "none") {
+    if (document.getElementById("scr-start").style.display !== "none") {
         let saved = localStorage.getItem("doggycoAgent") || "";
         if (!saved) { 
             if (!dogHasSpoken && videoEl) {
@@ -504,31 +491,8 @@ window.onload = function() {
     }, 1000);
 }
 
-function authAgent() {
-    initAudioContext(); 
-    let pNameElement = document.getElementById("pName");
-    if(pNameElement) {
-        let n = pNameElement.value.trim().toUpperCase();
-        if(!n) {
-            pNameElement.focus();
-            pNameElement.style.boxShadow = "0 0 15px red";
-            pNameElement.style.borderColor = "red";
-            setTimeout(() => { pNameElement.style.boxShadow = "none"; pNameElement.style.borderColor = "var(--neon)"; }, 1000);
-            return; 
-        }
-        agent = n;
-        try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
-        
-        document.getElementById("scr-name").style.display = "none";
-        document.getElementById("scr-start").style.display = "block";
-        document.getElementById("scr-start").scrollTop = 0; 
-        
-        manageMedia('none');
-    }
-}
-
-// Restart-Button geht wieder exakt zurück zur Namenseingabe, ohne dass der Browser neu lädt
-function goToStart() {
+// Restart-Button geht nahtlos zurück zur gemeinsamen Startseite/Levelauswahl
+function goToLevelSelect() {
     document.documentElement.style.setProperty('--neon', '#00f2ff');
 
     document.getElementById("scr-end").style.display = "none";
@@ -540,11 +504,11 @@ function goToStart() {
     ctx.clearRect(0, 0, W, H);
     document.getElementById("time-txt").innerText = "30s";
     
-    // Level Auswahl verstecken, Startseite (Namenseingabe) aufrufen
-    document.getElementById("scr-start").style.display = "none";
-    document.getElementById("scr-name").style.display = "block";
+    // Die gemeinsame Startseite wieder einblenden
+    document.getElementById("scr-start").style.display = "block";
+    document.getElementById("scr-start").scrollTop = 0;
     
-    // Video stoppen. Es läuft erst an, wenn der Name oben im Textfeld geändert wird.
+    // Medien stumm schalten (Video startet erst, wenn Spieler in Name-Feld tippt)
     manageMedia('none');
     dogHasSpoken = false; 
 }
@@ -729,6 +693,18 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
+    let nameInput = document.getElementById("pName");
+    let pName = nameInput.value.trim().toUpperCase();
+    if(!pName) {
+        nameInput.focus();
+        nameInput.style.boxShadow = "0 0 15px red";
+        nameInput.style.borderColor = "red";
+        setTimeout(() => { nameInput.style.boxShadow = "none"; nameInput.style.borderColor = "var(--neon)"; }, 1000);
+        return; 
+    }
+    agent = pName;
+    try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
+
     if(globalAnimationId) cancelAnimationFrame(globalAnimationId);
     manageMedia('game');
 
@@ -957,33 +933,34 @@ function loop(t) {
             if(o.x < -50) opponents.splice(i, 1);
         });
 
-        // 3. UFO UND NEUER SCHÖNER TRAKTORSTRAHL
+        // NEUER, KÜRZERER UND HELLERER TRAKTORSTRAHL
         for(let i = ufos.length - 1; i >= 0; i--) {
             let u = ufos[i]; if(!missionComplete) u.x -= u.s * dt;
             let ufoY = u.y + Math.sin(t / 150) * 10;
+            let beamLength = 220; // Strahl ist jetzt kürzer
             
             ctx.save(); 
-            // Wunderschöner, weich auslaufender Gradient-Strahl
-            let beamGrad = ctx.createLinearGradient(0, ufoY + 10, 0, u.y + H);
-            beamGrad.addColorStop(0, "rgba(0, 255, 136, 0.8)"); // Oben strahlend
-            beamGrad.addColorStop(0.5, "rgba(0, 255, 136, 0.4)"); // Mitte halbtransparent
-            beamGrad.addColorStop(1, "rgba(0, 255, 136, 0)"); // Unten komplett unsichtbar
+            // Sehr heller, weiß-grüner Gradient
+            let beamGrad = ctx.createLinearGradient(0, ufoY + 10, 0, ufoY + beamLength);
+            beamGrad.addColorStop(0, "rgba(150, 255, 200, 1.0)"); 
+            beamGrad.addColorStop(0.4, "rgba(0, 255, 136, 0.8)"); 
+            beamGrad.addColorStop(1, "rgba(0, 255, 136, 0)"); 
             
             ctx.fillStyle = beamGrad; 
-            ctx.shadowColor = "#00ff88"; // Leucht-Effekt
-            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#00ff88"; 
+            ctx.shadowBlur = 25; 
             
             ctx.beginPath(); 
-            ctx.moveTo(u.x - 15, ufoY + 10); // Strahl oben am UFO
+            ctx.moveTo(u.x - 15, ufoY + 10); 
             ctx.lineTo(u.x + 15, ufoY + 10); 
-            ctx.lineTo(u.x + 55, u.y + H); // Strahl wird nach unten breiter
-            ctx.lineTo(u.x - 55, u.y + H); 
+            ctx.lineTo(u.x + 45, ufoY + beamLength); 
+            ctx.lineTo(u.x - 45, ufoY + beamLength); 
             ctx.fill(); 
             ctx.restore(); 
             
             ctx.font = "45px Arial"; ctx.textAlign = "center"; 
             ctx.fillStyle = "#ffffff"; 
-            ctx.shadowBlur = 0; // Shadow reset für das UFO selbst
+            ctx.shadowBlur = 0; 
             ctx.fillText('🛸', u.x, ufoY);
             
             let dropX = lanes[u.targetLane];
