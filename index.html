@@ -280,7 +280,7 @@
                     <li><b>Power-Ups:</b> <br>
                         <b>🚀 Rocket Core = <span style="color:var(--rad)">8s Shield (☢️) & Bonus PTS!</span></b><br>
                         <b>🛸 UFO = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS)</span></b><br>
-                        <b>👽 Alien = <span style="color:var(--cat)">5s Magnet (🧲)</span></b>
+                        <b>👽 Alien = <span style="color:var(--cat)">7s Magnet (🧲) & Bonus PTS!</span></b>
                     </li>
                     <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & drain).</li>
                     <li><b>Objective:</b> Survive 12 Levels to WIN!</li>
@@ -777,6 +777,7 @@ let charShake = 0, charJump = 0, spawnDelay = 0;
 let currentOpponentIcon = '🐦'; 
 
 // GLOBALE VARIABLEN
+let alienSpawnTime = 0; // Speichert den zufälligen Spawn-Moment des Aliens
 let magnetDropped = false;
 let alienDropper = null;
 let fallingMagnet = null;
@@ -846,12 +847,15 @@ function start(m, startLvl) {
     rocketSpawned = false; ufoSpawned = false;
     rocket = null; fallingCore = null; fallingHearts = [];
 
-    // RESETS
+    // RESETS & NEUER ALIEN SPAWN
     magnetDropped = false;
     alienDropper = null;
     fallingMagnet = null;
     magnetTimer = 0;
     globalShake = 0;
+    
+    // Berechne zufälligen Zeitpunkt zwischen Sekunde 3 und 6 des Levels (24 bis 27 Sekunden Restzeit)
+    alienSpawnTime = 24 + Math.random() * 3; 
     
     initBackgroundGraphics(); 
     updateTheme(mode);
@@ -998,17 +1002,18 @@ function loop(t) {
                 rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL }; sfxRocket();
             }
 
+            // Das UFO taucht immer nach dem Magneten auf (Sekunde 18 im Level)
             if(timeLeft <= 12 && !ufoSpawned) {
                 ufoSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
                 ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false }); sfxUfo(); 
             }
 
-            // Alien fliegt vorbei um Magnet abzuwerfen
-            if (timeLeft <= 28 && !magnetDropped) {
+            // Alien fliegt mit zufälligem Timing vorbei um Magnet abzuwerfen
+            if (timeLeft <= alienSpawnTime && !magnetDropped) {
                 magnetDropped = true;
                 let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2;
-                // baseY speichert die durchschnittliche Flughöhe
-                alienDropper = { x: W + 50, baseY: 80, y: 80, s: 150 * speedMult, targetLane: safeL, dropped: false };
+                // baseY speichert die durchschnittliche Flughöhe (Eine Ebene tiefer als vorher -> 160 statt 80)
+                alienDropper = { x: W + 50, baseY: 160, y: 160, s: 150 * speedMult, targetLane: safeL, dropped: false };
                 sfxAlienSpawn(); // Eigener Sound beim Erscheinen
             }
 
@@ -1033,6 +1038,7 @@ function loop(t) {
                     level++; timeLeft = 30; energy = Math.min(100, energy + (25 * speedMult));
                     rocketSpawned = false; ufoSpawned = false; rocket = null; fallingCore = null; fallingHearts = [];
                     magnetDropped = false; alienDropper = null; fallingMagnet = null; magnetTimer = 0; 
+                    alienSpawnTime = 24 + Math.random() * 3; // Nächster Alien-Spawn wieder zufällig berechnen
                     
                     const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'unicorn'];
                     let expectedModeIndex = Math.floor((level - 1) / 2) % 6;
@@ -1174,9 +1180,11 @@ function loop(t) {
             ctx.fillText('🧲', fallingMagnet.x, fallingMagnet.y);
             
             if (Math.abs(fallingMagnet.x - playerX) < 40 && fallingMagnet.y > hitTop && fallingMagnet.y < hitBottom) {
-                magnetTimer = 5.0; 
+                magnetTimer = 7.0; // 7 Sekunden Dauer
+                let magnetBonus = 200 + (level * 20); // Extra Punkte
+                score += magnetBonus;
                 sfxCollect(); 
-                addFloat(fallingMagnet.x + 40, fallingMagnet.y, "MAGNET ACTIVE!", "#bc13fe", 25);
+                addFloat(fallingMagnet.x + 40, fallingMagnet.y, "MAGNET +" + magnetBonus, "#bc13fe", 25);
                 fallingMagnet = null;
             } else if (fallingMagnet.y > H + 50) {
                 fallingMagnet = null;
