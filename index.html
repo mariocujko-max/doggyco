@@ -159,10 +159,9 @@
         .rank-gold { color: var(--gold); font-size: 18px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
         .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
-        /* PERFEKTES 2-2-2 BUTTON GRID (ALLE GLEICH GROSS) */
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; flex-shrink: 0; width: 100%; }
         .btn-sup { 
-            height: 55px; /* FESTE HÖHE FÜR ALLE BUTTONS */
+            height: 55px;
             padding: 5px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); 
             font-weight: 900; font-family: 'Orbitron'; cursor: pointer; text-align: center; text-decoration: none; 
             color: #fff; transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 6px 10px rgba(0,0,0,0.3); 
@@ -557,6 +556,21 @@ function triggerMove(dir, btnId) {
     if(!active || missionComplete) return;
     try { if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); } } catch(e) {}
     hapticMove(); 
+    
+    // NEU: STAUBWOLKE BEI JEDER BEWEGUNG
+    for(let i=0; i<8; i++) {
+        fxParticles.push({
+            x: playerX + (Math.random()-0.5)*30,
+            y: H - 70 + (Math.random()-0.5)*10, // Füße
+            vx: -dir * 30 + (Math.random()-0.5)*40,
+            vy: -10 - Math.random()*20,
+            life: 0.4 + Math.random()*0.2,
+            maxLife: 0.6,
+            r: 4 + Math.random()*5,
+            c: 'rgba(200, 200, 200, 0.6)'
+        });
+    }
+
     move(dir);
     let btn = document.getElementById(btnId);
     if(btn) { btn.classList.add("glow"); setTimeout(() => btn.classList.remove("glow"), 150); }
@@ -682,7 +696,9 @@ let currLane = 2, playerX = lanes[2], targetX = lanes[2];
 
 let active = false, missionComplete = false; 
 let mode = 'dog', agent = "UNKNOWN";
-let entities = [], floaters = [], permSpiders = [], fireworks = [], lastT = 0;
+
+// NEU: fxParticles FÜR FEUER UND STAUB HINZUGEFÜGT
+let entities = [], floaters = [], permSpiders = [], fireworks = [], fxParticles = [], lastT = 0;
 let globalAnimationId = null; 
 
 let clouds = [], opponents = [], ufos = []; 
@@ -755,7 +771,9 @@ function start(m, startLvl) {
     level = startLvl;
     
     hp = 3; energy = 100; score = 0; timeLeft = 30;
-    entities = []; floaters = []; missionComplete = false;
+    
+    // PARTIKEL-ARRAY ZURÜCKSETZEN
+    entities = []; floaters = []; fireworks = []; fxParticles = []; missionComplete = false;
     
     invincibleTimer = 0; alarmTimer = 0;
     rocketSpawned = false; ufoSpawned = false;
@@ -956,6 +974,21 @@ function loop(t) {
         if (rocket && !missionComplete) {
             rocket.x -= rocket.s * dt;
             ctx.save(); ctx.translate(rocket.x, rocket.y + Math.sin(t/100)*5); ctx.rotate(-Math.PI / 1.5); ctx.font = "50px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🚀', 0, 0); ctx.restore();
+            
+            // NEU: RAKETEN FEUER-STRAHL
+            for(let p=0; p<2; p++) {
+                fxParticles.push({
+                    x: rocket.x + 30 + Math.random()*15, 
+                    y: rocket.y + Math.sin(t/100)*5 + (Math.random()-0.5)*15, 
+                    vx: 100 + Math.random()*50, 
+                    vy: (Math.random()-0.5)*20, 
+                    life: 0.2 + Math.random()*0.2, 
+                    maxLife: 0.4, 
+                    r: 3 + Math.random()*5, 
+                    c: Math.random() > 0.5 ? '#FFD700' : '#ff3131' 
+                });
+            }
+            
             if(rocket.x <= lanes[rocket.targetLane] && !rocket.laid) { rocket.laid = true; fallingCore = { x: lanes[rocket.targetLane], y: rocket.y, s: 200 * speedMult }; }
             if(rocket.x < -100) rocket = null;
         }
@@ -1083,6 +1116,21 @@ function loop(t) {
         }
 
         ctx.font = "70px Arial"; ctx.fillText(charIcon, drawX, drawY);
+
+        // NEU: RENDERE PARTIKEL-EFFEKTE (Staub + Feuer)
+        for(let i = fxParticles.length - 1; i >= 0; i--) {
+            let p = fxParticles[i]; 
+            p.x += p.vx * dt; 
+            p.y += p.vy * dt; 
+            p.life -= dt; 
+            ctx.globalAlpha = Math.max(0, p.life / p.maxLife); 
+            ctx.fillStyle = p.c; 
+            ctx.beginPath(); 
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); 
+            ctx.fill();
+            if(p.life <= 0) fxParticles.splice(i, 1);
+        }
+        ctx.globalAlpha = 1;
 
         for(let i = floaters.length - 1; i >= 0; i--) {
             let f = floaters[i]; f.y -= 2.0; f.x += (200 - f.x) * 0.05; f.o -= 0.8 * dt; 
