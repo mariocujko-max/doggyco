@@ -640,6 +640,7 @@ function playTone(freq, type, duration, vol=0.6) {
     } catch(e) {}
 }
 
+// Sound für das UFO (Gibt Leben/Bonus)
 function sfxUfo() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -650,6 +651,31 @@ function sfxUfo() {
         gain.gain.setValueAtTime(0.4, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + 2);
+    } catch(e){}
+}
+
+// Sound für das Alien, wenn es auftaucht
+function sfxAlienSpawn() {
+    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
+    try {
+        let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(500, audioCtx.currentTime + 1);
+        osc.frequency.linearRampToValueAtTime(300, audioCtx.currentTime + 2);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
+        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 2);
+    } catch(e){}
+}
+
+// Eigener Sound für den Magnet-Abwurf des Aliens
+function sfxAlienDrop() {
+    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
+    try {
+        let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.4);
+        gain.gain.setValueAtTime(0.4, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.4);
     } catch(e){}
 }
 
@@ -680,17 +706,6 @@ function sfxShield() {
         osc.type = 'sine'; osc.frequency.setValueAtTime(200, audioCtx.currentTime); osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.3);
         gain.gain.setValueAtTime(0.6, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
         osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-    } catch(e){}
-}
-
-function sfxBeam() {
-    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
-    try {
-        let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
-        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.5);
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.5);
     } catch(e){}
 }
 
@@ -761,12 +776,11 @@ let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
 let charShake = 0, charJump = 0, spawnDelay = 0;
 let currentOpponentIcon = '🐦'; 
 
-// NEUE GLOBALE VARIABLEN
+// GLOBALE VARIABLEN
 let magnetDropped = false;
 let alienDropper = null;
 let fallingMagnet = null;
 let magnetTimer = 0;
-let currentSkin = 0; 
 let globalShake = 0;
 
 function initBackgroundGraphics() {
@@ -832,14 +846,12 @@ function start(m, startLvl) {
     rocketSpawned = false; ufoSpawned = false;
     rocket = null; fallingCore = null; fallingHearts = [];
 
-    // NEUE FEATURE RESETS
+    // RESETS
     magnetDropped = false;
     alienDropper = null;
     fallingMagnet = null;
     magnetTimer = 0;
     globalShake = 0;
-    currentSkin = parseInt(sessionStorage.getItem('nextGameSkin') || '0');
-    sessionStorage.removeItem('nextGameSkin');
     
     initBackgroundGraphics(); 
     updateTheme(mode);
@@ -927,13 +939,6 @@ function showEndScreen(win) {
         el.style.fontWeight = "900";
     });
 
-    // Skin für nächstes Spiel speichern
-    let nextSkin = 0;
-    if(score >= 7000) nextSkin = 3;
-    else if(score >= 6000) nextSkin = 2;
-    else if(score >= 5000) nextSkin = 1;
-    sessionStorage.setItem('nextGameSkin', nextSkin);
-
     try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
 }
 
@@ -946,9 +951,9 @@ function loop(t) {
         let dt = (t - lastT) / 1000; lastT = t;
         if(dt > 0.1) dt = 0.016;
 
-        // Parallax Scrolling - NUR links und rechts
-        let bgX = ((W / 2) - playerX) * 0.1; 
-        document.getElementById("bg-fx").style.backgroundPosition = `${bgX}px center`;
+        // Parallax Scrolling - Dezent und immer zentriert!
+        let bgX = ((W / 2) - playerX) * 0.02; // Faktor deutlich verkleinert auf 0.02
+        document.getElementById("bg-fx").style.backgroundPosition = `calc(50% + ${bgX}px) center`;
 
         ctx.shadowBlur = 0; 
         ctx.clearRect(0,0,W,H);
@@ -998,12 +1003,13 @@ function loop(t) {
                 ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false }); sfxUfo(); 
             }
 
-            // NEU: Alien fliegt vorbei um Magnet abzuwerfen
+            // Alien fliegt vorbei um Magnet abzuwerfen
             if (timeLeft <= 28 && !magnetDropped) {
                 magnetDropped = true;
                 let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2;
-                alienDropper = { x: W + 50, y: 80, s: 150 * speedMult, targetLane: safeL, dropped: false };
-                sfxUfo(); // Sound beim Erscheinen
+                // baseY speichert die durchschnittliche Flughöhe
+                alienDropper = { x: W + 50, baseY: 80, y: 80, s: 150 * speedMult, targetLane: safeL, dropped: false };
+                sfxAlienSpawn(); // Eigener Sound beim Erscheinen
             }
 
             if(timeLeft <= 0) {
@@ -1131,34 +1137,31 @@ function loop(t) {
             if(u.x < -50) ufos.splice(i, 1);
         }
 
-        // Alien vorbeiflug & Magnet abwurf rendern
+        // Alien vorbeiflug & kreisrunder Strahl
         if (alienDropper && !missionComplete) {
             alienDropper.x -= alienDropper.s * dt;
-            let alienY = alienDropper.y + Math.sin(t / 150) * 10;
+            // Alien schwingt in der Höhe hin und her
+            alienDropper.y = alienDropper.baseY + Math.sin(t / 250) * 35; 
             
-            // Lila Strahl
-            let beamLength = 250;
+            // Pulsierender kreisrunder Strahl
+            let beamRadius = 30 + Math.sin(t / 100) * 10;
             ctx.save(); 
-            let beamGrad = ctx.createLinearGradient(0, alienY + 10, 0, alienY + beamLength);
-            beamGrad.addColorStop(0, "rgba(188, 19, 254, 0.8)"); 
-            beamGrad.addColorStop(1, "rgba(188, 19, 254, 0)"); 
-            ctx.fillStyle = beamGrad; 
-            ctx.beginPath(); 
-            ctx.moveTo(alienDropper.x - 15, alienY + 10); 
-            ctx.lineTo(alienDropper.x + 15, alienY + 10); 
-            ctx.lineTo(alienDropper.x + 40, alienY + beamLength); 
-            ctx.lineTo(alienDropper.x - 40, alienY + beamLength); 
+            ctx.beginPath();
+            ctx.arc(alienDropper.x, alienDropper.y + 15, beamRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(188, 19, 254, 0.4)"; 
+            ctx.shadowColor = "#bc13fe";
+            ctx.shadowBlur = 15;
             ctx.fill(); 
             ctx.restore();
 
             ctx.font = "45px Arial"; ctx.textAlign = "center";
-            ctx.fillText('👽', alienDropper.x, alienY);
+            ctx.fillText('👽', alienDropper.x, alienDropper.y);
             
             let dropX = lanes[alienDropper.targetLane];
             if (alienDropper.x <= dropX && !alienDropper.dropped && !missionComplete) {
                 fallingMagnet = { x: dropX, y: alienDropper.y, s: 250 * speedMult };
                 alienDropper.dropped = true;
-                sfxBeam(); // Sound für den Magnet-Abwurf
+                sfxAlienDrop(); // Eigener Abwurf-Sound
             }
 
             if (alienDropper.x < -50) alienDropper = null;
@@ -1235,13 +1238,13 @@ function loop(t) {
         if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
         if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
 
-        // Magnet-Effekt anwenden (Schwächer als zuvor)
+        // Magnet-Effekt anwenden
         if (magnetTimer > 0 && !missionComplete) {
             magnetTimer -= dt;
             entities.forEach(e => {
                 if (!e.bad && e.y > 0) { 
-                    e.x += (playerX - e.x) * 1.5 * dt; // Schwächere Anziehung (vorher 4)
-                    if (e.y > H / 3) e.y += (drawY - e.y) * 1.0 * dt; // Vorher 2
+                    e.x += (playerX - e.x) * 1.5 * dt; 
+                    if (e.y > H / 3) e.y += (drawY - e.y) * 1.0 * dt; 
                 }
             });
             
@@ -1271,11 +1274,6 @@ function loop(t) {
         }
 
         ctx.font = "70px Arial"; ctx.fillText(charIcon, drawX, drawY);
-
-        // Skins zeichnen
-        if(currentSkin === 1) { ctx.font = "40px Arial"; ctx.fillText('🕶️', drawX, drawY - 25); }
-        if(currentSkin === 2) { ctx.font = "50px Arial"; ctx.fillText('🧢', drawX + 5, drawY - 55); }
-        if(currentSkin === 3) { ctx.font = "40px Arial"; ctx.fillText('⛓️', drawX, drawY + 15); }
 
         for(let i = fxParticles.length - 1; i >= 0; i--) {
             let p = fxParticles[i]; 
