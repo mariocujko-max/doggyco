@@ -278,7 +278,7 @@
                     <li><b>Environments:</b> Scenery adapts every 2 levels.</li>
                     <li><b>Provisions:</b> Collect food for <span style="color:var(--green)">+10 to +30 PTS</span>.</li>
                     <li><b>Power-Ups:</b> <br>
-                        <b>🚀 Rocket Core = <span style="color:var(--rad)">8s Shield (☢️) & Bonus PTS!</span></b><br>
+                        <b>🚀 Rocket Core = <span style="color:var(--rad)">7s Shield (☢️) & Bonus PTS!</span></b><br>
                         <b>🛸 UFO = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS)</span></b><br>
                         <b>👽 Alien = <span style="color:var(--cat)">7s Magnet (🧲) & Bonus PTS!</span></b>
                     </li>
@@ -464,6 +464,16 @@ let systemActive = false;
 let dogHasSpoken = false;
 let audioCtx = null;
 
+let shieldOsc = null;
+let magnetOsc = null;
+
+// Stoppt die langen 7-Sekunden-Sounds sauber bei Levelende/Tod
+function stopLongSounds() {
+    try { if(shieldOsc) shieldOsc.stop(); } catch(e){}
+    try { if(magnetOsc) magnetOsc.stop(); } catch(e){}
+    shieldOsc = null; magnetOsc = null;
+}
+
 function initAudioContext() {
     if(!systemActive) {
         systemActive = true;
@@ -579,6 +589,7 @@ function goToLevelSelect() {
     document.getElementById("scr-start").style.display = "block";
     document.getElementById("scr-start").scrollTop = 0;
     
+    stopLongSounds();
     manageMedia('none');
     dogHasSpoken = false; 
 }
@@ -692,17 +703,26 @@ function sfxMagnetPickup() {
     } catch(e){}
 }
 
-// NEU: Eigener Sound der während der aktiven Magnetphase loopt/pulsiert
-function sfxMagnetActive() {
+// 7 Sekunden Dauer-Sound für den Magneten
+function sfxMagnetActive7s() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
+        stopLongSounds();
         let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
-        osc.type = 'sine'; osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-        osc.frequency.linearRampToValueAtTime(150, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime); 
-        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+        
+        let lfo = audioCtx.createOscillator(); lfo.type = 'square'; lfo.frequency.value = 8;
+        let lfoGain = audioCtx.createGain(); lfoGain.gain.value = 20;
+        lfo.connect(lfoGain); lfoGain.connect(osc.frequency); lfo.start(); lfo.stop(audioCtx.currentTime + 7.0);
+
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime + 6.5);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 7.0);
+
         osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        osc.start(); osc.stop(audioCtx.currentTime + 7.0);
+        magnetOsc = osc;
     } catch(e){}
 }
 
@@ -733,6 +753,29 @@ function sfxShield() {
         osc.type = 'sine'; osc.frequency.setValueAtTime(200, audioCtx.currentTime); osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.3);
         gain.gain.setValueAtTime(0.6, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
         osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    } catch(e){}
+}
+
+// 7 Sekunden Dauer-Sound für Radioaktivitäts-Schild
+function sfxShieldActive7s() {
+    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
+    try {
+        stopLongSounds();
+        let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(250, audioCtx.currentTime);
+        
+        let lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 4;
+        let lfoGain = audioCtx.createGain(); lfoGain.gain.value = 50;
+        lfo.connect(lfoGain); lfoGain.connect(osc.frequency); lfo.start(); lfo.stop(audioCtx.currentTime + 7.0);
+
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime + 6.5);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 7.0);
+
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 7.0);
+        shieldOsc = osc;
     } catch(e){}
 }
 
@@ -809,7 +852,6 @@ let magnetDropped = false;
 let alienDropper = null;
 let fallingMagnet = null;
 let magnetTimer = 0;
-let magnetSoundTimer = 0; // Neu: Timer für das Pulsieren des Magnet-Sounds
 let globalShake = 0;
 
 function initBackgroundGraphics() {
@@ -880,9 +922,10 @@ function start(m, startLvl) {
     alienDropper = null;
     fallingMagnet = null;
     magnetTimer = 0;
-    magnetSoundTimer = 0;
     globalShake = 0;
     
+    stopLongSounds();
+
     alienSpawnTime = 24 + Math.random() * 3; 
     
     initBackgroundGraphics(); 
@@ -947,7 +990,8 @@ async function saveScoreAndRefresh(newScore) {
 
 function showEndScreen(win) {
     manageMedia('vid2'); 
-    
+    stopLongSounds();
+
     document.getElementById("game-wrap").style.pointerEvents = "none";
     document.getElementById("game-wrap").style.visibility = "hidden";
     ctx.clearRect(0,0,W,H);
@@ -1016,9 +1060,11 @@ function loop(t) {
         }
 
         if(invincibleTimer > 0) {
-            invincibleTimer -= dt; alarmTimer -= dt;
+            invincibleTimer -= dt; 
+            alarmTimer -= dt;
+            
             if (alarmTimer <= 0) { sfxAlarm(); alarmTimer = 0.8; }
-            if(invincibleTimer < 0) invincibleTimer = 0;
+            if (invincibleTimer < 0) invincibleTimer = 0;
         }
 
         if (!missionComplete) {
@@ -1062,9 +1108,11 @@ function loop(t) {
                 } else {
                     level++; timeLeft = 30; energy = Math.min(100, energy + (25 * speedMult));
                     rocketSpawned = false; ufoSpawned = false; rocket = null; fallingCore = null; fallingHearts = [];
-                    magnetDropped = false; alienDropper = null; fallingMagnet = null; magnetTimer = 0; magnetSoundTimer = 0;
+                    magnetDropped = false; alienDropper = null; fallingMagnet = null; magnetTimer = 0; invincibleTimer = 0;
                     alienSpawnTime = 24 + Math.random() * 3; 
                     
+                    stopLongSounds();
+
                     const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'unicorn'];
                     let expectedModeIndex = Math.floor((level - 1) / 2) % 6;
                     let expectedMode = modeOrder[expectedModeIndex];
@@ -1124,7 +1172,16 @@ function loop(t) {
             fallingCore.y += fallingCore.s * dt;
             ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 15; ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#adff2f"; ctx.fillText('☢️', fallingCore.x, fallingCore.y); ctx.restore();
             if (Math.abs(fallingCore.x - playerX) < 40 && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
-                invincibleTimer = 8.0; charJump = 20; sfxShield(); let bonusPts = 100 + (level * 10); score += bonusPts; sfxStarCollect(); addFloat(fallingCore.x + 40, fallingCore.y, "SHIELD +" + bonusPts, "#00ff88", 25); fallingCore = null;
+                invincibleTimer = 7.0; 
+                charJump = 20; 
+                sfxShield(); 
+                sfxShieldActive7s(); // SCHILD SOUND STARTET FÜR 7 SEKUNDEN
+                
+                let bonusPts = 100 + (level * 10); 
+                score += bonusPts; 
+                sfxStarCollect(); 
+                addFloat(fallingCore.x + 40, fallingCore.y, "SHIELD +" + bonusPts, "#00ff88", 25); 
+                fallingCore = null;
             } else if (fallingCore.y > H + 50) { fallingCore = null; }
         }
 
@@ -1202,9 +1259,11 @@ function loop(t) {
             
             if (Math.abs(fallingMagnet.x - playerX) < 40 && fallingMagnet.y > hitTop && fallingMagnet.y < hitBottom) {
                 magnetTimer = 7.0; 
-                let bonusPts = 100 + (level * 10); // BONUS PUNKTE IDENTISCH WIE SCHILD
+                let bonusPts = 100 + (level * 10); 
                 score += bonusPts;
                 sfxMagnetPickup(); 
+                sfxMagnetActive7s(); // MAGNET SOUND STARTET FÜR 7 SEKUNDEN
+                
                 addFloat(fallingMagnet.x + 40, fallingMagnet.y, "MAGNET +" + bonusPts, "#bc13fe", 25);
                 fallingMagnet = null;
             } else if (fallingMagnet.y > H + 50) {
@@ -1272,13 +1331,6 @@ function loop(t) {
 
         if (magnetTimer > 0 && !missionComplete) {
             magnetTimer -= dt;
-            magnetSoundTimer -= dt;
-            
-            // Loop den aktiven Magnet-Sound
-            if(magnetSoundTimer <= 0) {
-                sfxMagnetActive();
-                magnetSoundTimer = 0.4;
-            }
             
             entities.forEach(e => {
                 if (!e.bad && e.y > 0) { 
@@ -1347,6 +1399,7 @@ function loop(t) {
 
         if(hp <= 0 && !missionComplete) {
             active = false; 
+            stopLongSounds(); // SOUNDS STOPPEN WENN MAN STIRBT
             sfxHit(); hapticGameOver(); 
             
             let goOverlay = document.getElementById("game-over-overlay");
