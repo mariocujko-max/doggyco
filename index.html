@@ -363,7 +363,6 @@
                 </div>
                 
                 <button class="btn-main" onclick="goToLevelSelect()">RESTART</button> 
-                <button class="btn-main" style="background:var(--neon); margin-top:10px; box-shadow: 0 6px 0 #0099aa;" onclick="shareScore()">TEILEN</button>
                 
                 <div style="margin-top: 25px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; width: 100%;">
                     <p class="text-sm" style="margin-bottom: 10px; color: #aaa;">Download the full version:</p>
@@ -684,6 +683,17 @@ function sfxShield() {
     } catch(e){}
 }
 
+function sfxBeam() {
+    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
+    try {
+        let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.5);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+    } catch(e){}
+}
+
 function sfxAlarm() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -754,6 +764,7 @@ let currentOpponentIcon = '🐦';
 // NEUE GLOBALE VARIABLEN
 let magnetDropped = false;
 let alienDropper = null;
+let fallingMagnet = null;
 let magnetTimer = 0;
 let currentSkin = 0; 
 let globalShake = 0;
@@ -824,6 +835,7 @@ function start(m, startLvl) {
     // NEUE FEATURE RESETS
     magnetDropped = false;
     alienDropper = null;
+    fallingMagnet = null;
     magnetTimer = 0;
     globalShake = 0;
     currentSkin = parseInt(sessionStorage.getItem('nextGameSkin') || '0');
@@ -925,24 +937,6 @@ function showEndScreen(win) {
     try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
 }
 
-function shareScore() {
-    let shareText = `Ich habe ${Math.floor(score)} PTS in DOGGYCO MISSION erreicht! Kannst du mich schlagen?`;
-    
-    if (navigator.share) {
-        navigator.share({
-            title: 'DOGGYCO MISSION',
-            text: shareText,
-            url: window.location.href
-        }).catch(console.error);
-    } else {
-        navigator.clipboard.writeText(shareText + " " + window.location.href);
-        let btn = event.target;
-        let oldHtml = btn.innerHTML;
-        btn.innerHTML = "KOPIERT!";
-        setTimeout(() => { btn.innerHTML = oldHtml; }, 2000);
-    }
-}
-
 function loop(t) {
     if(!active) return; 
     globalAnimationId = requestAnimationFrame(loop); 
@@ -952,10 +946,9 @@ function loop(t) {
         let dt = (t - lastT) / 1000; lastT = t;
         if(dt > 0.1) dt = 0.016;
 
-        // Parallax Scrolling
-        let bgY = (t / 20) % 1000; 
+        // Parallax Scrolling - NUR links und rechts
         let bgX = ((W / 2) - playerX) * 0.1; 
-        document.getElementById("bg-fx").style.backgroundPosition = `${bgX}px ${bgY}px`;
+        document.getElementById("bg-fx").style.backgroundPosition = `${bgX}px center`;
 
         ctx.shadowBlur = 0; 
         ctx.clearRect(0,0,W,H);
@@ -1005,11 +998,12 @@ function loop(t) {
                 ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false }); sfxUfo(); 
             }
 
-            // NEU: Alien wirft Magnet ab
+            // NEU: Alien fliegt vorbei um Magnet abzuwerfen
             if (timeLeft <= 28 && !magnetDropped) {
                 magnetDropped = true;
                 let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2;
-                alienDropper = { x: lanes[safeL], y: -50, s: 200 * speedMult };
+                alienDropper = { x: W + 50, y: 80, s: 150 * speedMult, targetLane: safeL, dropped: false };
+                sfxUfo(); // Sound beim Erscheinen
             }
 
             if(timeLeft <= 0) {
@@ -1032,7 +1026,7 @@ function loop(t) {
                 } else {
                     level++; timeLeft = 30; energy = Math.min(100, energy + (25 * speedMult));
                     rocketSpawned = false; ufoSpawned = false; rocket = null; fallingCore = null; fallingHearts = [];
-                    magnetDropped = false; alienDropper = null; magnetTimer = 0; 
+                    magnetDropped = false; alienDropper = null; fallingMagnet = null; magnetTimer = 0; 
                     
                     const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'unicorn'];
                     let expectedModeIndex = Math.floor((level - 1) / 2) % 6;
@@ -1137,20 +1131,52 @@ function loop(t) {
             if(u.x < -50) ufos.splice(i, 1);
         }
 
-        // Alien & Magnet rendern & verarbeiten
+        // Alien vorbeiflug & Magnet abwurf rendern
         if (alienDropper && !missionComplete) {
-            alienDropper.y += alienDropper.s * dt;
-            ctx.font = "40px Arial"; ctx.textAlign = "center";
-            ctx.fillText('👽', alienDropper.x, alienDropper.y - 40);
-            ctx.fillText('🧲', alienDropper.x, alienDropper.y);
+            alienDropper.x -= alienDropper.s * dt;
+            let alienY = alienDropper.y + Math.sin(t / 150) * 10;
             
-            if (Math.abs(alienDropper.x - playerX) < 40 && alienDropper.y > hitTop && alienDropper.y < hitBottom) {
+            // Lila Strahl
+            let beamLength = 250;
+            ctx.save(); 
+            let beamGrad = ctx.createLinearGradient(0, alienY + 10, 0, alienY + beamLength);
+            beamGrad.addColorStop(0, "rgba(188, 19, 254, 0.8)"); 
+            beamGrad.addColorStop(1, "rgba(188, 19, 254, 0)"); 
+            ctx.fillStyle = beamGrad; 
+            ctx.beginPath(); 
+            ctx.moveTo(alienDropper.x - 15, alienY + 10); 
+            ctx.lineTo(alienDropper.x + 15, alienY + 10); 
+            ctx.lineTo(alienDropper.x + 40, alienY + beamLength); 
+            ctx.lineTo(alienDropper.x - 40, alienY + beamLength); 
+            ctx.fill(); 
+            ctx.restore();
+
+            ctx.font = "45px Arial"; ctx.textAlign = "center";
+            ctx.fillText('👽', alienDropper.x, alienY);
+            
+            let dropX = lanes[alienDropper.targetLane];
+            if (alienDropper.x <= dropX && !alienDropper.dropped && !missionComplete) {
+                fallingMagnet = { x: dropX, y: alienDropper.y, s: 250 * speedMult };
+                alienDropper.dropped = true;
+                sfxBeam(); // Sound für den Magnet-Abwurf
+            }
+
+            if (alienDropper.x < -50) alienDropper = null;
+        }
+
+        // Magnet fällt nach unten
+        if (fallingMagnet && !missionComplete) {
+            fallingMagnet.y += fallingMagnet.s * dt;
+            ctx.font = "40px Arial"; ctx.textAlign = "center";
+            ctx.fillText('🧲', fallingMagnet.x, fallingMagnet.y);
+            
+            if (Math.abs(fallingMagnet.x - playerX) < 40 && fallingMagnet.y > hitTop && fallingMagnet.y < hitBottom) {
                 magnetTimer = 5.0; 
-                sfxShield(); 
-                addFloat(alienDropper.x + 40, alienDropper.y, "MAGNET ACTIVE!", "#bc13fe", 25);
-                alienDropper = null;
-            } else if (alienDropper.y > H + 50) {
-                alienDropper = null;
+                sfxCollect(); 
+                addFloat(fallingMagnet.x + 40, fallingMagnet.y, "MAGNET ACTIVE!", "#bc13fe", 25);
+                fallingMagnet = null;
+            } else if (fallingMagnet.y > H + 50) {
+                fallingMagnet = null;
             }
         }
 
@@ -1209,13 +1235,13 @@ function loop(t) {
         if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
         if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
 
-        // Magnet-Effekt anwenden
+        // Magnet-Effekt anwenden (Schwächer als zuvor)
         if (magnetTimer > 0 && !missionComplete) {
             magnetTimer -= dt;
             entities.forEach(e => {
                 if (!e.bad && e.y > 0) { 
-                    e.x += (playerX - e.x) * 4 * dt; 
-                    if (e.y > H / 3) e.y += (drawY - e.y) * 2 * dt; 
+                    e.x += (playerX - e.x) * 1.5 * dt; // Schwächere Anziehung (vorher 4)
+                    if (e.y > H / 3) e.y += (drawY - e.y) * 1.0 * dt; // Vorher 2
                 }
             });
             
