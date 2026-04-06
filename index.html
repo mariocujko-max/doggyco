@@ -803,8 +803,29 @@ async function fetchRanks() {
 
         if(data && data.length > 0) {
             document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
-                let rC = (i === 0) ? "rank-gold" : "rank-white";
-                return `<div class="rank-row ${rC}"><span>#${i+1} ${x.n}</span><span>${x.s} PTS</span></div>`;
+                let style = "";
+                let medal = "";
+                let crown = "";
+
+                if (i === 0) { 
+                    style = "font-size: 24px; color: var(--gold); text-shadow: 0 0 15px var(--gold); margin-bottom: 10px; border-bottom: 2px solid var(--gold); padding-bottom: 5px;";
+                    medal = "🥇 ";
+                    crown = " 👑";
+                } else if (i === 1) { 
+                    style = "font-size: 20px; color: var(--silver); text-shadow: 0 0 10px var(--silver); margin-bottom: 8px;";
+                    medal = "🥈 ";
+                } else if (i === 2) { 
+                    style = "font-size: 18px; color: var(--bronze); text-shadow: 0 0 8px var(--bronze); margin-bottom: 5px;";
+                    medal = "🥉 ";
+                } else { 
+                    style = "font-size: 15px; color: #ffffff; opacity: 0.8;";
+                }
+
+                return `
+                    <div class="rank-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: 'Orbitron', sans-serif; font-weight: 900; ${style}">
+                        <span>${medal}#${i+1} ${x.n}${crown}</span>
+                        <span>${x.s.toLocaleString()} PTS</span>
+                    </div>`;
             }).join('');
         } else {
             document.getElementById("leaderboard").innerHTML = "No agents yet! Be the first.";
@@ -1091,7 +1112,6 @@ function loop(t) {
             }
 
             if(timeLeft <= 0) {
-                // MISSION COMPLETE WIRD JETZT NICHT MEHR AUTOMATISCH NACH LVL 12 GETRIGGERT
                 level++; timeLeft = 30; energy = Math.min(100, energy + (25 * speedMult));
                 rocketSpawned = false; ufoSpawned = false; rocket = null; fallingCore = null; fallingHearts = [];
                 magnetDropped = false; alienDropper = null; fallingMagnet = null; magnetTimer = 0; invincibleTimer = 0;
@@ -1099,7 +1119,7 @@ function loop(t) {
                 stopLongSounds();
 
                 const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'unicorn'];
-                // Loop durch die Modi alle 2 Level (Modulo 6 der Paare)
+                // Loop durch die Modi alle 2 Level
                 let expectedModeIndex = Math.floor((level - 1) / 2) % 6;
                 let expectedMode = modeOrder[expectedModeIndex];
                 let pop = document.getElementById("lvl-up-popup");
