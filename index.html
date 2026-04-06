@@ -156,9 +156,7 @@
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
         .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; }
-        .rank-gold { color: var(--gold); font-size: 18px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
-        .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
-
+        
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; flex-shrink: 0; width: 100%; }
         .btn-sup { 
             height: 55px;
@@ -805,25 +803,27 @@ async function fetchRanks() {
             document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
                 let style = "";
                 let medal = "";
-                let crown = "";
 
                 if (i === 0) { 
-                    style = "font-size: 24px; color: var(--gold); text-shadow: 0 0 15px var(--gold); margin-bottom: 10px; border-bottom: 2px solid var(--gold); padding-bottom: 5px;";
+                    // Erster Platz: Gold, aber ohne Krone, ohne dicken Unterstrich, alles eine saubere Zeile
+                    style = "font-size: 22px; color: var(--gold); text-shadow: 0 0 15px var(--gold);";
                     medal = "🥇 ";
-                    crown = " 👑";
                 } else if (i === 1) { 
-                    style = "font-size: 20px; color: var(--silver); text-shadow: 0 0 10px var(--silver); margin-bottom: 8px;";
+                    // Zweiter Platz: Komplett in Weiß
+                    style = "font-size: 16px; color: #ffffff; text-shadow: 1px 1px 3px #000;";
                     medal = "🥈 ";
                 } else if (i === 2) { 
-                    style = "font-size: 18px; color: var(--bronze); text-shadow: 0 0 8px var(--bronze); margin-bottom: 5px;";
+                    // Dritter Platz: Komplett in Weiß
+                    style = "font-size: 16px; color: #ffffff; text-shadow: 1px 1px 3px #000;";
                     medal = "🥉 ";
                 } else { 
+                    // Rest: Weiß
                     style = "font-size: 15px; color: #ffffff; opacity: 0.8;";
                 }
 
                 return `
                     <div class="rank-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: 'Orbitron', sans-serif; font-weight: 900; ${style}">
-                        <span>${medal}#${i+1} ${x.n}${crown}</span>
+                        <span>${medal}#${i+1} ${x.n}</span>
                         <span>${x.s.toLocaleString()} PTS</span>
                     </div>`;
             }).join('');
@@ -1092,13 +1092,11 @@ function loop(t) {
         if (!missionComplete) {
             timeLeft -= dt; energy -= (4 * speedMult) * dt;
 
-            // RAKETE KOMMT ERST NACHDEM MAGNET-EFFEKT KOMPLETT VORBEI IST!
             if(timeLeft <= 18 && !rocketSpawned && magnetTimer <= 0 && !fallingMagnet && !alienDropper) {
                 rocketSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
                 rocket = { x: W + 50, y: 150, s: 75 + (25 * speedMult), laid: false, targetLane: safeL }; sfxRocket();
             }
 
-            // UFO KOMMT ERST WENN SCHILD ABGELAUFEN IST!
             if(timeLeft <= 9 && !ufoSpawned && invincibleTimer <= 0 && !fallingCore) {
                 ufoSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
                 ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false }); sfxUfo(); 
@@ -1225,7 +1223,8 @@ function loop(t) {
 
         if (fallingMagnet && !missionComplete) {
             fallingMagnet.y += fallingMagnet.s * dt;
-            ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText('🧲', fallingMagnet.x, fallingMagnet.y);
+            ctx.font = "40px Arial"; ctx.textAlign = "center";
+            ctx.fillText('🧲', fallingMagnet.x, fallingMagnet.y);
             if (Math.abs(fallingMagnet.x - playerX) < 40 && fallingMagnet.y > hitTop && fallingMagnet.y < hitBottom) {
                 magnetTimer = 7.0; let bonusPts = 100 + (level * 10); score += bonusPts;
                 sfxMagnetPickup(); sfxMagnetActive7s(); 
