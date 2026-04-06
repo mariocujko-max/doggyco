@@ -147,7 +147,7 @@
         .panel-unicorn { border: 1px solid var(--unicorn); box-shadow: 0 5px 15px rgba(255,0,255,0.1), inset 0 0 20px rgba(255,0,255,0.05); }
         .panel-unicorn h3 { color: var(--unicorn); border-bottom-color: var(--unicorn); }
 
-        .panel-green { border: 1px solid var(--green); box-shadow: 0 5px 15px rgba(0,255,136,0.1), inset 0 0 20px rgba(0,255,136,0.05); }
+        .panel-green { border: 1px solid var(--green); box-shadow: 0 5px 15px rgba(0,255,136,0.1), inset 0 0 20px rgba(0,242,255,0.05); }
         .panel-green h3 { color: var(--green); border-bottom-color: var(--green); }
         
         .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 12px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); transform: translateY(0); flex-shrink: 0; }
@@ -867,7 +867,6 @@ let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
 let charShake = 0, charJump = 0, spawnDelay = 0;
 let currentOpponentIcon = '🐦'; 
 
-// GLOBALE VARIABLEN
 let alienSpawnTime = 0; 
 let magnetDropped = false;
 let alienDropper = null;
@@ -1066,7 +1065,6 @@ function loop(t) {
 
         const hitTop = H - 150; const hitBottom = H - 50;
         
-        // GERECHTE FORMEL: 1.0 (L1) -> 2.2 (L12)
         let ptsScaling = 1 + (level - 1) * (1.2 / 11);
         let speedMult = ptsScaling; 
 
@@ -1109,6 +1107,11 @@ function loop(t) {
             }
 
             if(timeLeft <= 0) {
+                // BONUS FÜR JEDES LEVEL
+                let lvlBonus = Math.floor(100 * ptsScaling);
+                score += lvlBonus;
+                addFloat(W/2, H/2 - 50, "+" + lvlBonus + " BONUS", "#FFD700", 35);
+
                 level++; timeLeft = 30; energy = Math.min(100, energy + (25 * speedMult));
                 rocketSpawned = false; ufoSpawned = false; rocket = null; fallingCore = null; fallingHearts = [];
                 magnetDropped = false; alienDropper = null; fallingMagnet = null; magnetTimer = 0; invincibleTimer = 0;
@@ -1151,7 +1154,6 @@ function loop(t) {
         if (rocket && !missionComplete) {
             rocket.x -= rocket.s * dt;
             ctx.save(); ctx.translate(rocket.x, rocket.y + Math.sin(t/100)*5); ctx.rotate(-Math.PI / 1.5); ctx.font = "50px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🚀', 0, 0); ctx.restore();
-            
             for(let p=0; p<2; p++) {
                 fxParticles.push({
                     x: rocket.x + 30 + Math.random()*15, 
@@ -1164,7 +1166,6 @@ function loop(t) {
                     c: Math.random() > 0.5 ? '#FFD700' : '#ff3131' 
                 });
             }
-            
             if(rocket.x <= lanes[rocket.targetLane] && !rocket.laid) { rocket.laid = true; fallingCore = { x: lanes[rocket.targetLane], y: rocket.y, s: 200 * speedMult }; }
             if(rocket.x < -100) rocket = null;
         }
@@ -1190,7 +1191,6 @@ function loop(t) {
             let u = ufos[i]; if(!missionComplete) u.x -= u.s * dt;
             let ufoY = u.y + Math.sin(t / 150) * 10;
             let beamLength = 220; 
-            
             ctx.save(); 
             let beamGrad = ctx.createLinearGradient(0, ufoY + 10, 0, ufoY + beamLength);
             beamGrad.addColorStop(0, "rgba(150, 255, 200, 1.0)"); 
@@ -1339,20 +1339,14 @@ function loop(t) {
         ctx.globalAlpha = 1; ctx.shadowBlur = 0; ctx.restore(); 
 
         if(hp <= 0 && !missionComplete) {
-            
             if (score >= 5000) {
-                missionComplete = true; 
-                stopLongSounds();
-                launchMassiveFireworks(); 
-                
+                missionComplete = true; stopLongSounds(); launchMassiveFireworks(); 
                 let cOverlay = document.getElementById("club-overlay");
                 if(cOverlay) cOverlay.style.opacity = "1";
-                
                 setTimeout(() => {
                     if(cOverlay) cOverlay.style.opacity = "0";
                     setTimeout(() => { active = false; ctx.clearRect(0,0,W,H); document.getElementById("game-wrap").style.visibility = "hidden"; showEndScreen(true); }, 500); 
                 }, 4500); 
-                
             } else {
                 active = false; stopLongSounds(); sfxHit(); hapticGameOver(); 
                 let goOverlay = document.getElementById("game-over-overlay");
@@ -1361,7 +1355,6 @@ function loop(t) {
             }
             return; 
         }
-
     } catch(e) {}
 }
 
