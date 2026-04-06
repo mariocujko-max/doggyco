@@ -1073,7 +1073,7 @@ function loop(t) {
             // RAKETE KOMMT ERST NACHDEM MAGNET-EFFEKT KOMPLETT VORBEI IST!
             if(timeLeft <= 18 && !rocketSpawned && magnetTimer <= 0 && !fallingMagnet && !alienDropper) {
                 rocketSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
-                rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL }; sfxRocket();
+                rocket = { x: W + 50, y: 150, s: 75 + (25 * speedMult), laid: false, targetLane: safeL }; sfxRocket();
             }
 
             if(timeLeft <= 9 && !ufoSpawned) {
@@ -1084,7 +1084,7 @@ function loop(t) {
             if (timeLeft <= alienSpawnTime && !magnetDropped) {
                 magnetDropped = true;
                 let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2;
-                alienDropper = { x: W + 50, baseY: 160, y: 160, s: 150 * speedMult, targetLane: safeL, dropped: false };
+                alienDropper = { x: W + 50, baseY: 160, y: 160, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false };
                 sfxAlienSpawn(); 
             }
 
