@@ -223,7 +223,7 @@
         <div id="lvl-up-popup">NEXT LEVEL!</div>
 
         <div id="club-overlay" style="position:absolute; inset:0; z-index:9998; display:flex; flex-direction:column; justify-content:center; align-items:center; opacity:0; pointer-events:none; transition: opacity 0.5s ease-in-out;">
-            <h2 style="color:var(--gold); text-align:center; padding: 20px; font-size:22px; text-shadow: 0 0 15px var(--gold), 0 0 30px #000; line-height: 1.5; font-family:'Orbitron', sans-serif;">
+            <h2 style="color:var(--gold); text-align:center; padding: 20px; font-size:20px; text-shadow: 0 0 15px var(--gold), 0 0 30px #000; line-height: 1.5; font-family:'Orbitron', sans-serif;">
                 WELCOME TO THE CLUB<br>OF THOSE WITH OVER<br><br>
                 <span style="font-size:32px; color:var(--neon); text-shadow: 0 0 20px var(--neon), 0 0 40px #000; font-variant-numeric: tabular-nums;">5000 POINTS</span>
             </h2>
@@ -825,9 +825,9 @@ async function fetchRanks() {
                 }
 
                 return `
-                    <div class="rank-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: 'Orbitron', sans-serif; font-weight: 900; font-variant-numeric: tabular-nums; ${style}">
+                    <div class="rank-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: 'Orbitron', sans-serif; font-weight: 900; ${style}">
                         <span>${medal}#${i+1} ${x.n}</span>
-                        <span style="font-variant-numeric: tabular-nums;">${x.s.toLocaleString()} PTS</span>
+                        <span style="font-family: 'Courier New', monospace; font-weight: 900; letter-spacing: 1px;">${x.s.toLocaleString()} PTS</span>
                     </div>`;
             }).join('');
         } else {
@@ -1026,7 +1026,7 @@ function showEndScreen(win) {
     let scoreEl = document.getElementById("f-score");
     
     nameEl.innerText = agent;
-    scoreEl.innerText = Math.floor(score) + " PTS";
+    scoreEl.innerText = Math.floor(score).toLocaleString() + " PTS";
     
     let color = win ? "var(--green)" : "var(--red)";
     
@@ -1135,7 +1135,7 @@ function loop(t) {
         } 
 
         document.getElementById("hp-txt").innerText = "❤️".repeat(Math.max(0, hp));
-        document.getElementById("score-txt").innerText = Math.floor(score) + " PTS";
+        document.getElementById("score-txt").innerText = Math.floor(score).toLocaleString() + " PTS";
         document.getElementById("time-txt").innerText = missionComplete ? "WIN" : Math.ceil(timeLeft) + "s";
         document.getElementById("lvl-txt").innerText = level;
         document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
@@ -1241,7 +1241,7 @@ function loop(t) {
 
         const items = { 
             'dog': [{i:'🦴',p:10}, {i:'🍪',p:20}, {i:'🥩',p:30}], 'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
-            'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}], 'fox': [{i:'🥚',p:10}, {i:'🍗',p:20}, {i:'🍖',p:30}],
+            'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}], 'fox': [{i:'🥚',p:10}, {i:'🍗',p:20}, {i:'🍒',p:20}],
             'panda': [{i:'🎋',p:10}, {i:'🍃',p:20}, {i:'🍉',p:30}], 'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'🍦',p:30}]
         };
         const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'unicorn':'🦄' }[mode];
@@ -1339,28 +1339,20 @@ function loop(t) {
 
         if(hp <= 0 && !missionComplete) {
             
-            // NEU: PRÜFE OB DER SPIELER DIE 5000 PUNKTE GEKNACKT HAT
             if (score >= 5000) {
-                missionComplete = true; // Spiel friert ein
+                missionComplete = true; 
                 stopLongSounds();
-                launchMassiveFireworks(); // FEUERWERK!
+                launchMassiveFireworks(); 
                 
                 let cOverlay = document.getElementById("club-overlay");
                 if(cOverlay) cOverlay.style.opacity = "1";
                 
-                // Nach 4.5 Sekunden das Spektakel beenden und den Win-Screen anzeigen
                 setTimeout(() => {
                     if(cOverlay) cOverlay.style.opacity = "0";
-                    setTimeout(() => {
-                        active = false;
-                        ctx.clearRect(0,0,W,H);
-                        document.getElementById("game-wrap").style.visibility = "hidden";
-                        showEndScreen(true); // true = Win Color (Grün)
-                    }, 500); 
+                    setTimeout(() => { active = false; ctx.clearRect(0,0,W,H); document.getElementById("game-wrap").style.visibility = "hidden"; showEndScreen(true); }, 500); 
                 }, 4500); 
                 
             } else {
-                // NORMALES GAME OVER UNTER 5000 PUNKTEN
                 active = false; stopLongSounds(); sfxHit(); hapticGameOver(); 
                 let goOverlay = document.getElementById("game-over-overlay");
                 goOverlay.classList.add("show");
