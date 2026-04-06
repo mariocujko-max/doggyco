@@ -223,9 +223,9 @@
         <div id="lvl-up-popup">NEXT LEVEL!</div>
 
         <div id="club-overlay" style="position:absolute; inset:0; z-index:9998; display:flex; flex-direction:column; justify-content:center; align-items:center; opacity:0; pointer-events:none; transition: opacity 0.5s ease-in-out;">
-            <h2 style="color:var(--gold); text-align:center; padding: 20px; font-size:20px; text-shadow: 0 0 15px var(--gold), 0 0 30px #000; line-height: 1.5; font-family:'Orbitron', sans-serif;">
+            <h2 style="color:var(--gold); text-align:center; padding: 20px; font-size:18px; text-shadow: 0 0 15px var(--gold), 0 0 30px #000; line-height: 1.5; font-family:'Orbitron', sans-serif;">
                 WELCOME TO THE CLUB<br>OF THOSE WITH OVER<br><br>
-                <span style="font-size:32px; color:var(--neon); text-shadow: 0 0 20px var(--neon), 0 0 40px #000; font-variant-numeric: tabular-nums;">5000 POINTS</span>
+                <span style="font-size:30px; color:var(--neon); text-shadow: 0 0 20px var(--neon), 0 0 40px #000; font-variant-numeric: tabular-nums;">5000 POINTS</span>
             </h2>
         </div>
 
@@ -505,35 +505,6 @@ function handleFirstTouch() {
 }
 
 window.onload = function() {
-    let loadedAssets = 0;
-    const totalAssets = 3; 
-    
-    function assetLoaded() {
-        loadedAssets++;
-        let loaderFill = document.getElementById("loader-fill");
-        if(loaderFill) loaderFill.style.width = (loadedAssets / totalAssets) * 100 + "%";
-        if (loadedAssets >= totalAssets) {
-            setTimeout(() => {
-                let preloader = document.getElementById("preloader");
-                if(preloader) preloader.style.display = "none";
-            }, 500); 
-        }
-    }
-
-    let vid1 = document.getElementById("dog-video");
-    let vid2 = document.getElementById("dog-video2");
-    let bgMusic = document.getElementById("snd-action");
-
-    if (vid1 && vid1.readyState >= 3) assetLoaded(); else if(vid1) vid1.addEventListener('canplaythrough', assetLoaded, {once:true});
-    if (vid2 && vid2.readyState >= 3) assetLoaded(); else if(vid2) vid2.addEventListener('canplaythrough', assetLoaded, {once:true});
-    if (bgMusic && bgMusic.readyState >= 3) assetLoaded(); else if(bgMusic) bgMusic.addEventListener('canplaythrough', assetLoaded, {once:true});
-
-    // Failsafe
-    setTimeout(() => {
-        let preloader = document.getElementById("preloader");
-        if(preloader && preloader.style.display !== "none") preloader.style.display = "none";
-    }, 4000);
-
     try {
         let savedName = localStorage.getItem("doggycoAgent");
         let pNameEl = document.getElementById("pName");
@@ -704,7 +675,7 @@ function sfxMagnetPickup() {
         lfo.connect(lfoGain); lfoGain.connect(osc.frequency); lfo.start(); lfo.stop(audioCtx.currentTime + 0.4);
         
         osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-    } catch(e){}
+    } catch(e) {}
 }
 
 function sfxMagnetActive7s() {
@@ -815,10 +786,10 @@ async function fetchRanks() {
                     style = "font-size: 18px; color: var(--gold); text-shadow: 0 0 10px var(--gold);";
                     medal = "🥇 ";
                 } else if (i === 1) { 
-                    style = "font-size: 18px; color: #ffffff; text-shadow: 1px 1px 3px #000;";
+                    style = "font-size: 18px; color: #ffffff;";
                     medal = "🥈 ";
                 } else if (i === 2) { 
-                    style = "font-size: 18px; color: #ffffff; text-shadow: 1px 1px 3px #000;";
+                    style = "font-size: 18px; color: #ffffff;";
                     medal = "🥉 ";
                 } else { 
                     style = "font-size: 15px; color: #ffffff; opacity: 0.8;";
@@ -1241,7 +1212,7 @@ function loop(t) {
 
         const items = { 
             'dog': [{i:'🦴',p:10}, {i:'🍪',p:20}, {i:'🥩',p:30}], 'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
-            'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}], 'fox': [{i:'🥚',p:10}, {i:'🍗',p:20}, {i:'🍒',p:20}],
+            'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}], 'fox': [{i:'🥚',p:10}, {i:'🍒',p:20}, {i:'🐛',p:30}],
             'panda': [{i:'🎋',p:10}, {i:'🍃',p:20}, {i:'🍉',p:30}], 'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'🍦',p:30}]
         };
         const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'unicorn':'🦄' }[mode];
