@@ -505,6 +505,35 @@ function handleFirstTouch() {
 }
 
 window.onload = function() {
+    let loadedAssets = 0;
+    const totalAssets = 3; 
+    
+    function assetLoaded() {
+        loadedAssets++;
+        let loaderFill = document.getElementById("loader-fill");
+        if(loaderFill) loaderFill.style.width = (loadedAssets / totalAssets) * 100 + "%";
+        if (loadedAssets >= totalAssets) {
+            setTimeout(() => {
+                let preloader = document.getElementById("preloader");
+                if(preloader) preloader.style.display = "none";
+            }, 500); 
+        }
+    }
+
+    let vid1 = document.getElementById("dog-video");
+    let vid2 = document.getElementById("dog-video2");
+    let bgMusic = document.getElementById("snd-action");
+
+    if (vid1 && vid1.readyState >= 3) assetLoaded(); else if(vid1) vid1.addEventListener('canplaythrough', assetLoaded, {once:true});
+    if (vid2 && vid2.readyState >= 3) assetLoaded(); else if(vid2) vid2.addEventListener('canplaythrough', assetLoaded, {once:true});
+    if (bgMusic && bgMusic.readyState >= 3) assetLoaded(); else if(bgMusic) bgMusic.addEventListener('canplaythrough', assetLoaded, {once:true});
+
+    // Failsafe
+    setTimeout(() => {
+        let preloader = document.getElementById("preloader");
+        if(preloader && preloader.style.display !== "none") preloader.style.display = "none";
+    }, 4000);
+
     try {
         let savedName = localStorage.getItem("doggycoAgent");
         let pNameEl = document.getElementById("pName");
@@ -675,7 +704,7 @@ function sfxMagnetPickup() {
         lfo.connect(lfoGain); lfoGain.connect(osc.frequency); lfo.start(); lfo.stop(audioCtx.currentTime + 0.4);
         
         osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-    } catch(e) {}
+    } catch(e){}
 }
 
 function sfxMagnetActive7s() {
@@ -782,6 +811,7 @@ async function fetchRanks() {
                 let style = "";
                 let medal = "";
 
+                // Rangliste: Platz 1-3 so groß wie der alte Platz 3
                 if (i === 0) { 
                     style = "font-size: 18px; color: var(--gold); text-shadow: 0 0 10px var(--gold);";
                     medal = "🥇 ";
@@ -795,6 +825,7 @@ async function fetchRanks() {
                     style = "font-size: 15px; color: #ffffff; opacity: 0.8;";
                 }
 
+                // Monospace für Punkte damit alles perfekt untereinander steht
                 return `
                     <div class="rank-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: 'Orbitron', sans-serif; font-weight: 900; ${style}">
                         <span>${medal}#${i+1} ${x.n}</span>
