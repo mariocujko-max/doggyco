@@ -811,7 +811,6 @@ async function fetchRanks() {
                 let style = "";
                 let medal = "";
 
-                // Rangliste: Platz 1-3 so groß wie der alte Platz 3
                 if (i === 0) { 
                     style = "font-size: 18px; color: var(--gold); text-shadow: 0 0 10px var(--gold);";
                     medal = "🥇 ";
@@ -825,7 +824,6 @@ async function fetchRanks() {
                     style = "font-size: 15px; color: #ffffff; opacity: 0.8;";
                 }
 
-                // Monospace für Punkte damit alles perfekt untereinander steht
                 return `
                     <div class="rank-row" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); font-family: 'Orbitron', sans-serif; font-weight: 900; ${style}">
                         <span>${medal}#${i+1} ${x.n}</span>
@@ -1068,8 +1066,9 @@ function loop(t) {
 
         const hitTop = H - 150; const hitBottom = H - 50;
         
-        let speedMult = 1.35 + ((level - 1) * (1.15 / 11)); 
-        let ptsScaling = speedMult; 
+        // GERECHTE FORMEL: 1.0 (L1) -> 2.2 (L12)
+        let ptsScaling = 1 + (level - 1) * (1.2 / 11);
+        let speedMult = ptsScaling; 
 
         let bgMusic = document.getElementById("snd-action");
         if (bgMusic && !bgMusic.paused) {
