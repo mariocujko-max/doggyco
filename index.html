@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DOGGYCO MISSION - INFINITE EDITION</title>
+    
+    <link rel="manifest" href="manifest.json">
+    
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐶</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     
@@ -405,6 +408,17 @@
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
 
 <script>
+// --- SERVICE WORKER REGISTRATION ---
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(registration => {
+      console.log('ServiceWorker registration successful');
+    }).catch(err => {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
+
 // --- MEDIA MANAGER ---
 function manageMedia(action) {
     let bgMusic = document.getElementById("snd-action");
