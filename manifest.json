@@ -1,4 +1,5 @@
 {
+  "id": "/doggyco",
   "name": "Doggyco Mission",
   "short_name": "Doggyco",
   "description": "Ein rasantes Ausweich-Spiel mit Doggyco und seinen Freunden.",
@@ -13,6 +14,13 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png"
     }
   ]
 }
