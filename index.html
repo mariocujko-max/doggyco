@@ -41,9 +41,10 @@
         #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
 
         @media (min-width: 450px) {
-            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; }
-            #phone-container.is-playing { border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
-            #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); }
+            #phone-container { height: 90vh; max-height: 800px; border-radius: 40px; border: 12px solid #333; box-shadow: 0 15px 50px rgba(0,0,0,0.9); }
+            #phone-container.is-playing { border: 12px solid var(--neon); }
+            #phone-container::after { content: ''; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 100px; height: 5px; background: #666; border-radius: 10px; }
+            #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.9) 100%); }
         }
 
         #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
@@ -51,17 +52,17 @@
 
         #hud { position: absolute; top: env(safe-area-inset-top, 10px); width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; }
         
-        #mission-title { text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); animation: pulseNeon 1.5s infinite alternate; }
+        #mission-title { text-align: center; font-size: 16px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); animation: pulseNeon 1.5s infinite alternate; }
         @keyframes pulseNeon { 0% { opacity: 0.7; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1.02); } }
 
-        #energy-box { width: 85%; height: 22px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 12px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        #energy-box { width: 85%; height: 16px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 12px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
         
         #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); }
-        .stat { font-weight: 900; font-size: 16px; text-shadow: 1px 1px 3px #000; font-variant-numeric: tabular-nums; }
+        .stat { font-weight: 900; font-size: 14px; text-shadow: 1px 1px 3px #000; font-variant-numeric: tabular-nums; }
 
         #controls { position: absolute; bottom: env(safe-area-inset-bottom, 15px); left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 10px; z-index: 300; pointer-events: none; }
-        .arrow { width: 120px; height: 120px; background: transparent; border: none; color: rgba(255, 255, 255, 0.5); font-size: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none; }
+        .arrow { width: 100px; height: 100px; background: transparent; border: none; color: rgba(255, 255, 255, 0.5); font-size: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none; }
         .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); }
 
         #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255, 215, 0, 0.5); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
@@ -81,18 +82,8 @@
         }
         #game-over-overlay.show .go-title { transform: scale(1); opacity: 1; }
 
-        .screen { 
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; 
-            overflow-y: auto; -webkit-overflow-scrolling: touch; pointer-events: auto; padding-bottom: 50px;
-            overscroll-behavior: none;
-            background: transparent; 
-        }
-
-        .screen-inner { 
-            width: 100%; min-height: 100dvh; margin: 0 auto; max-width: 420px; 
-            display: flex; flex-direction: column; justify-content: flex-start; align-items: center; 
-            padding: 40px 10px 100px 10px; 
-        }
+        .screen { position: absolute; inset: 0; z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; pointer-events: auto; padding-bottom: 50px; overscroll-behavior: none; background: transparent; }
+        .screen-inner { width: 100%; min-height: 100%; margin: 0 auto; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 40px 10px 100px 10px; }
 
         .start-glass-panel {
             width: 100%;
@@ -114,7 +105,7 @@
         @keyframes textPulse { 0% { text-shadow: 0 0 10px var(--gold); transform: scale(0.98); } 100% { text-shadow: 0 0 25px var(--gold), 0 0 40px #fff; transform: scale(1.05); } }
 
         .dog-video-wrapper {
-            display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 30px;
+            display: flex; justify(content: center; align-items: center; width: 100%; margin-bottom: 30px;
         }
         .dog-video-canvas { 
             width: 220px; height: 220px; 
@@ -171,6 +162,8 @@
         .bg-tk { background: linear-gradient(45deg, #000, #ff0050); font-size: 11px; } 
         .bg-yt { background: linear-gradient(45deg, #c4302b, #ff0000); font-size: 11px;}
         .bg-email { background: linear-gradient(45deg, #333, #555); font-size: 10px; }
+        .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); font-size: 11px; }
+        .bg-btc { background: linear-gradient(45deg, #d97b0b, #F7931A); font-size: 11px; }
         
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
@@ -183,7 +176,7 @@
         .play-store-btn:active { transform: scale(0.95); }
 
         #scr-end { background: transparent; z-index: 1000; }
-        #scr-end .screen-inner { justify-content: center; }
+        #scr-end .screen-inner { justify-content: center; max-width: 420px; }
     </style>
 </head>
 <body>
@@ -209,7 +202,7 @@
             <div id="mission-title">DOG MISSION</div>
             <div id="energy-box"><div id="energy-fill"></div></div>
             <div id="stats-bar">
-                <div class="stat" style="background:var(--neon); color:#000; padding:2px 8px; border-radius:5px; font-weight:900; font-size:16px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
+                <div class="stat" style="background:var(--neon); color:#000; padding:2px 8px; border-radius:5px; font-weight:900; font-size:12px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
                 <div id="hp-txt" class="stat">❤️❤️❤️</div>
                 <div id="score-txt" class="stat" style="color:var(--gold)">0 PTS</div>
                 <div id="time-txt" class="stat" style="color:var(--neon)">30s</div>
@@ -314,9 +307,19 @@
                         YOUTUBE
                     </a>
 
+                    <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=give-me.org@gmx.net&item_name=Support+Doggyco+Mission&currency_code=EUR" target="_blank" class="btn-sup bg-pp">
+                        <svg viewBox="0 0 384 512" fill="white" width="14" height="16"><path d="M111.4 295.9l-35.4 0c-5.8 0-10.9-4.3-11.8-10L14.4 34.6C13.2 21.6 23.4 10.7 36.5 10.7l126.4 0c42.5 0 74.6 13.9 88.6 44.8 11.3 25.1 7.6 57.6-11.5 86.8-17.2 26.5-46.6 42.7-80.4 42.7l-26.6 0c-7.3 0-13.6 5.4-14.7 12.8L111.4 295.9zM362.4 158.2c-15.1-34.6-54.8-49.8-105-49.8l-37 0c-4.7 0-8.8 3.5-9.6 8.2l-47.8 300.9c-.9 5.8 3.6 11 9.5 11l49.3 0c4.7 0 8.8-3.5 9.6-8.2l15.1-95.2c.9-5.8 5.9-10 11.8-10l20.4 0c45.4 0 79.5-20.9 94-61.9 10.2-28.5 7.1-61.3-10.3-95z"/></svg>
+                        PAYPAL
+                    </a>
+
                     <button class="btn-sup bg-email" onclick="copyText(this, 'give-me.org@gmx.net')">
                         <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> 
                         <span style="line-height:1.2; text-align:left;">GIVE-ME.ORG<br>@GMX.NET</span>
+                    </button>
+                    
+                    <button class="btn-sup bg-btc" onclick="copyText(this, 'bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed')">
+                        <svg viewBox="0 0 512 512" fill="white" width="16" height="16"><path d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zm-141.651-35.33c4.937-32.999-20.196-50.739-54.55-62.573l11.146-44.702-27.213-6.781-10.851 43.524c-7.154-1.783-14.502-3.464-21.803-5.13l10.929-43.81-27.198-6.781-11.153 44.686c-5.884-1.332-11.666-2.65-17.27-4.041l0-1.074-37.643-9.383-7.255 29.095s20.218 4.603 19.8 4.933c11.066 2.756 13.067 10.054 12.723 15.83l-12.836 51.464c.783.196 1.787.495 2.923.953l-2.946-.732-17.986 72.107c-1.127 2.846-3.953 7.098-12.443 4.919.349.444-19.8-4.933-19.8-4.933l-13.431 31.06 35.539 8.859c6.643 1.656 13.167 3.376 19.645 5.03l-11.233 45.069 27.206 6.781 11.153-44.734c7.348 1.942 14.542 3.754 21.579 5.485l-11.093 44.502 27.206 6.781 11.192-44.896c46.126 8.887 80.855 5.305 95.531-37.387 11.838-34.42-3.447-54.218-25.753-67.147 18.256-4.217 31.989-13.565 35.793-34.331zm-68.966 73.111c-9.308 37.327-72.133 17.151-92.427 12.094l16.44-65.922c20.287 5.056 85.666 15.021 75.987 53.828zm10.231-96.175c-8.435 33.844-59.508 16.59-76.241 12.433l14.957-59.972c16.732 4.168 70.088 12.33 61.284 47.539z"/></svg>
+                        COPY BTC
                     </button>
                 </div>
             </div>
@@ -599,9 +602,9 @@ function triggerMove(dir, btnId) {
     
     for(let i=0; i<8; i++) {
         fxParticles.push({
-            x: playerX + (Math.random()-0.5)*30,
+            x: playerX + (Math.random()-0.5)*15,
             y: H - 70 + (Math.random()-0.5)*10, 
-            vx: -dir * 30 + (Math.random()-0.5)*40,
+            vx: -dir * 15 + (Math.random()-0.5)*20,
             vy: -10 - Math.random()*20,
             life: 0.4 + Math.random()*0.2,
             maxLife: 0.6,
@@ -827,9 +830,9 @@ async function fetchRanks() {
     }
 }
 
+const W = 400; const H = 700;
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-const W = 400; const H = 700;
 canvas.width = W; canvas.height = H;
 
 const lanes = [40, 120, 200, 280, 360];
@@ -976,7 +979,7 @@ function launchMassiveFireworks() {
             let x = Math.random() * W; let y = Math.random() * H;
             let cList = ['#FFD700', '#00f2ff', '#00ff88', '#bc13fe', '#ff3131', '#ff00ff'];
             let col = cList[Math.floor(Math.random()*cList.length)];
-            for(let i=0; i<60; i++) fireworks.push({ x: x, y: y, vx: (Math.random()-0.5)*20, vy: (Math.random()-0.5)*20, life: 1.5 + Math.random(), c: col });
+            for(let i=0; i<60; i++) fireworks.push({ x: x, y: y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, life: 1.5 + Math.random(), c: col });
             sfxStarCollect(); 
         }, j * 250);
     }
@@ -1079,18 +1082,18 @@ function loop(t) {
 
             if(timeLeft <= 18 && !rocketSpawned && magnetTimer <= 0 && !fallingMagnet && !alienDropper) {
                 rocketSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
-                rocket = { x: W + 50, y: 150, s: 75 + (25 * speedMult), laid: false, targetLane: safeL }; sfxRocket();
+                rocket = { x: W + 50, y: 150, s: 75 + (20 * speedMult), laid: false, targetLane: safeL }; sfxRocket();
             }
 
             if(timeLeft <= 9 && !ufoSpawned && invincibleTimer <= 0 && !fallingCore) {
                 ufoSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
-                ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false }); sfxUfo(); 
+                ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (20 * speedMult), targetLane: safeL, dropped: false }); sfxUfo(); 
             }
 
             if (timeLeft <= alienSpawnTime && !magnetDropped) {
                 magnetDropped = true;
                 let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2;
-                alienDropper = { x: W + 50, baseY: 160, y: 160, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false };
+                alienDropper = { x: W + 50, baseY: 160, y: 160, s: 75 + (20 * speedMult), targetLane: safeL, dropped: false };
                 sfxAlienSpawn(); 
             }
 
@@ -1141,7 +1144,7 @@ function loop(t) {
 
         if (rocket && !missionComplete) {
             rocket.x -= rocket.s * dt;
-            ctx.save(); ctx.translate(rocket.x, rocket.y + Math.sin(t/100)*5); ctx.rotate(-Math.PI / 1.5); ctx.font = "50px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🚀', 0, 0); ctx.restore();
+            ctx.save(); ctx.translate(rocket.x, rocket.y + Math.sin(t/100)*5); ctx.rotate(-Math.PI / 1.5); ctx.font = "70px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🚀', 0, 0); ctx.restore();
             for(let p=0; p<2; p++) {
                 fxParticles.push({
                     x: rocket.x + 30 + Math.random()*15, 
@@ -1154,24 +1157,24 @@ function loop(t) {
                     c: Math.random() > 0.5 ? '#FFD700' : '#ff3131' 
                 });
             }
-            if(rocket.x <= lanes[rocket.targetLane] && !rocket.laid) { rocket.laid = true; fallingCore = { x: lanes[rocket.targetLane], y: rocket.y, s: 200 * speedMult }; }
+            if(rocket.x <= lanes[rocket.targetLane] && !rocket.laid) { rocket.laid = true; fallingCore = { x: lanes[rocket.targetLane], y: rocket.y, s: 150 * speedMult }; }
             if(rocket.x < -100) rocket = null;
         }
 
         if (fallingCore && !missionComplete) {
             fallingCore.y += fallingCore.s * dt;
-            ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 15; ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#adff2f"; ctx.fillText('☢️', fallingCore.x, fallingCore.y); ctx.restore();
+            ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 15; ctx.font = "60px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#adff2f"; ctx.fillText('☢️', fallingCore.x, fallingCore.y); ctx.restore();
             if (Math.abs(fallingCore.x - playerX) < 40 && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
                 invincibleTimer = 7.0; charJump = 20; sfxShield(); sfxShieldActive7s(); 
                 let bonusPts = 100 + (level * 10); 
-                score += bonusPts; sfxStarCollect(); addFloat(fallingCore.x + 40, fallingCore.y, "SHIELD +" + bonusPts, "#00ff88", 25); fallingCore = null;
+                score += bonusPts; sfxStarCollect(); addFloat(fallingCore.x + 80, fallingCore.y, "SHIELD +" + bonusPts, "#00ff88", 25); fallingCore = null;
             } else if (fallingCore.y > H + 50) { fallingCore = null; }
         }
 
-        if(!missionComplete) { if(Math.random() < 0.015 && opponents.length < 3) opponents.push({ x: W + 50, y: Math.random()*H/2 + 50, s: (100 + Math.random()*50) * speedMult }); }
+        if(!missionComplete) { if(Math.random() < 0.015 && opponents.length < 3) opponents.push({ x: W + 50, y: Math.random()*H/2 + 50, s: (150 + Math.random()*100) * speedMult }); }
         opponents.forEach((o, i) => {
             if(!missionComplete) o.x -= o.s * dt;
-            ctx.font = "25px Arial"; ctx.textAlign = "center"; ctx.fillText(currentOpponentIcon, o.x, o.y);
+            ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.fillText(currentOpponentIcon, o.x, o.y);
             if(o.x < -50) opponents.splice(i, 1);
         });
 
@@ -1187,9 +1190,9 @@ function loop(t) {
             ctx.fillStyle = beamGrad; ctx.shadowColor = "#00ff88"; ctx.shadowBlur = 25; 
             ctx.beginPath(); ctx.moveTo(u.x - 15, ufoY + 10); ctx.lineTo(u.x + 15, ufoY + 10); ctx.lineTo(u.x + 45, ufoY + beamLength); ctx.lineTo(u.x - 45, ufoY + beamLength); ctx.fill(); 
             ctx.restore(); 
-            ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#ffffff"; ctx.shadowBlur = 0; ctx.fillText('🛸', u.x, ufoY);
+            ctx.font = "70px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#ffffff"; ctx.shadowBlur = 0; ctx.fillText('🛸', u.x, ufoY);
             let dropX = lanes[u.targetLane];
-            if(u.x <= dropX && !u.dropped && !missionComplete) { fallingHearts.push({ x: dropX, y: u.y, s: 280 * speedMult }); u.dropped = true; }
+            if(u.x <= dropX && !u.dropped && !missionComplete) { fallingHearts.push({ x: dropX, y: u.y, s: 180 * speedMult }); u.dropped = true; }
             if(u.x < -50) ufos.splice(i, 1);
         }
 
@@ -1197,33 +1200,33 @@ function loop(t) {
             alienDropper.x -= alienDropper.s * dt;
             alienDropper.y = alienDropper.baseY + Math.sin(t / 250) * 35; 
             let beamRadius = 30 + Math.sin(t / 100) * 10;
-            ctx.save(); ctx.beginPath(); ctx.arc(alienDropper.x, alienDropper.y + 15, beamRadius, 0, Math.PI * 2); ctx.fillStyle = "rgba(188, 19, 254, 0.4)"; ctx.shadowColor = "#bc13fe"; ctx.shadowBlur = 15; ctx.fill(); ctx.restore();
-            ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.fillText('👽', alienDropper.x, alienDropper.y);
+            ctx.save(); ctx.beginPath(); ctx.arc(alienDropper.x, alienDropper.y + 20, beamRadius*1.5, 0, Math.PI * 2); ctx.fillStyle = "rgba(188, 19, 254, 0.4)"; ctx.shadowColor = "#bc13fe"; ctx.shadowBlur = 15; ctx.fill(); ctx.restore();
+            ctx.font = "70px Arial"; ctx.textAlign = "center"; ctx.fillText('👽', alienDropper.x, alienDropper.y);
             let dropX = lanes[alienDropper.targetLane];
             if (alienDropper.x <= dropX && !alienDropper.dropped && !missionComplete) {
-                fallingMagnet = { x: dropX, y: alienDropper.y, s: 250 * speedMult };
+                fallingMagnet = { x: dropX, y: alienDropper.y, s: 150 * speedMult };
                 alienDropper.dropped = true; sfxAlienDrop(); 
             }
-            if (alienDropper.x < -50) alienDropper = null;
+            if (alienDropper.x < -100) alienDropper = null;
         }
 
         if (fallingMagnet && !missionComplete) {
             fallingMagnet.y += fallingMagnet.s * dt;
-            ctx.font = "40px Arial"; ctx.textAlign = "center";
+            ctx.font = "60px Arial"; ctx.textAlign = "center";
             ctx.fillText('🧲', fallingMagnet.x, fallingMagnet.y);
             if (Math.abs(fallingMagnet.x - playerX) < 40 && fallingMagnet.y > hitTop && fallingMagnet.y < hitBottom) {
                 magnetTimer = 7.0; let bonusPts = 100 + (level * 10); score += bonusPts;
                 sfxMagnetPickup(); sfxMagnetActive7s(); 
-                addFloat(fallingMagnet.x + 40, fallingMagnet.y, "MAGNET +" + bonusPts, "#bc13fe", 25); fallingMagnet = null;
+                addFloat(fallingMagnet.x + 80, fallingMagnet.y, "MAGNET +" + bonusPts, "#bc13fe", 25); fallingMagnet = null;
             } else if (fallingMagnet.y > H + 50) { fallingMagnet = null; }
         }
 
         for(let i = fallingHearts.length - 1; i >= 0; i--) {
             let s = fallingHearts[i]; if(!missionComplete) s.y += s.s * dt;
-            ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText('❤️', s.x, s.y);
+            ctx.font = "60px Arial"; ctx.textAlign = "center"; ctx.fillText('❤️', s.x, s.y);
             if(!missionComplete && Math.abs(s.x - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-                if (hp < 3) { hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35); } 
-                else { let bonusPts = 100 + (level * 10); score += bonusPts; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+" + bonusPts, "#00ff88", 30); }
+                if (hp < 3) { hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 80, s.y, "+1 ❤️", "#00ff88", 35); } 
+                else { let bonusPts = 100 + (level * 10); score += bonusPts; charJump = 15; sfxStarCollect(); addFloat(s.x + 80, s.y, "+" + bonusPts, "#00ff88", 30); }
                 fallingHearts.splice(i, 1);
             } else if (s.y > H + 50) { fallingHearts.splice(i, 1); }
         }
@@ -1242,8 +1245,8 @@ function loop(t) {
                 if(safeL !== -1) {
                     if(Math.random() < 0.85) { 
                         let r = Math.random(); let tier = r < 0.5 ? 0 : (r < 0.8 ? 1 : 2);
-                        entities.push({ l: safeL, x: lanes[safeL], y: -50, t: items[mode][tier].i, pts: items[mode][tier].p, bad: false, s: 230 * speedMult });
-                    } else { entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '🥷', pts: 0, bad: true, s: 260 * speedMult }); }
+                        entities.push({ l: safeL, x: lanes[safeL], y: -50, t: items[mode][tier].i, pts: items[mode][tier].p, bad: false, s: (200 * speedMult) });
+                    } else { entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '🥷', pts: 0, bad: true, s: (200 * speedMult) * 1.3 }); }
                 }
                 spawnDelay = 0.35; 
             }
@@ -1251,16 +1254,16 @@ function loop(t) {
 
         ctx.fillStyle = "#ffffff"; ctx.lineWidth = 2; 
         permSpiders.forEach(s => {
-            if(!missionComplete) s.y += (180 * speedMult * s.dy) * dt;
+            if(!missionComplete) s.y += (120 * speedMult * s.dy) * dt;
             let sx = lanes[s.lane];
             ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, s.y); ctx.stroke();
-            ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🕷️', sx, s.y);
+            ctx.font = "60px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🕷️', sx, s.y);
             if(!missionComplete) {
                 if(s.y >= H - 120) { s.dy = -1; s.y = H - 120; s.hit = false; }
                 if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; s.hit = false; }
                 if(!s.hit && Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-                    if (invincibleTimer > 0) { addFloat(sx + 40, s.y, "BLOCKED!", "#00ff88", 20); } 
-                    else { let pLoss = Math.floor(30 * ptsScaling); score = Math.max(0, score - pLoss); energy -= 30; sfxHit(); hapticSpiderHit(); addFloat(sx + 40, s.y, "-⚡", "#ff3131", 35); }
+                    if (invincibleTimer > 0) { addFloat(sx + 80, s.y, "BLOCKED!", "#00ff88", 20); } 
+                    else { let pLoss = Math.floor(30 * ptsScaling); score = Math.max(0, score - pLoss); energy -= 30; sfxHit(); hapticSpiderHit(); addFloat(sx + 80, s.y, "-⚡", "#ff3131", 35); }
                     s.hit = true; 
                 }
             }
@@ -1279,29 +1282,29 @@ function loop(t) {
                 }
             });
             ctx.shadowColor = "#bc13fe"; ctx.shadowBlur = 20; ctx.strokeStyle = "#bc13fe"; ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.arc(drawX, drawY - 20, 60 + Math.sin(t/50)*10, 0, Math.PI*2); ctx.stroke();
+            ctx.beginPath(); ctx.arc(drawX, drawY - 30, 90 + Math.sin(t/50)*10, 0, Math.PI*2); ctx.stroke();
             ctx.shadowBlur = 0; ctx.lineWidth = 1;
         }
 
         for(let i = entities.length - 1; i >= 0; i--) {
             let e = entities[i]; if(!missionComplete) e.y += e.s * dt;
-            ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e.t, e.x, e.y);
+            ctx.font = "70px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e.t, e.x, e.y);
             if(!missionComplete && Math.abs(e.x - playerX) < 40 && e.y > hitTop && e.y < hitBottom) {
                 if(e.bad) {
-                    if (invincibleTimer > 0) { addFloat(e.x + 40, e.y, "BLOCKED!", "#00ff88", 20); } 
-                    else { hp--; charShake = 20; globalShake = 0.2; sfxHit(); hapticDamage(); addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); }
-                } else { let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; sfxCollect(); addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); }
+                    if (invincibleTimer > 0) { addFloat(e.x + 80, e.y, "BLOCKED!", "#00ff88", 20); } 
+                    else { hp--; charShake = 20; globalShake = 0.2; sfxHit(); hapticDamage(); addFloat(e.x + 80, e.y, "-1 ❤️", "#ff3131", 35); }
+                } else { let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; sfxCollect(); addFloat(e.x + 80, e.y, "+"+pG, "#00ff88", 28); }
                 entities.splice(i, 1);
             } else if (e.y > H + 60) { entities.splice(i, 1); }
         }
         
         if (invincibleTimer > 0) {
-            ctx.save(); ctx.font = "50px Arial"; ctx.textAlign = "center";
+            ctx.save(); ctx.font = "70px Arial"; ctx.textAlign = "center";
             let shieldAlpha = 0.4 + 0.6 * Math.abs(Math.sin(t / 150)); ctx.fillStyle = `rgba(173, 255, 47, ${shieldAlpha})`; 
-            ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 20; ctx.fillText('☢️', drawX, drawY - 80); ctx.restore();
+            ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 20; ctx.fillText('☢️', drawX, drawY - 100); ctx.restore();
         }
 
-        ctx.font = "70px Arial"; ctx.fillText(charIcon, drawX, drawY);
+        ctx.font = "100px Arial"; ctx.fillText(charIcon, drawX, drawY);
 
         for(let i = fxParticles.length - 1; i >= 0; i--) {
             let p = fxParticles[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; 
