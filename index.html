@@ -257,6 +257,57 @@
             transform: translateY(6px);
             box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4);
         }
+
+        /* =========================================================
+           RESPONSIVE DESIGN FÜR PC / QUERFORMAT (WINDOWS & MAC)
+           ========================================================= */
+        @media (min-width: 800px) and (orientation: landscape) {
+            
+            #phone-container {
+                max-width: 1000px; 
+                width: 95%;
+                border-radius: 20px;
+            }
+
+            .screen-inner {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 20px;
+                padding: 40px;
+            }
+
+            .start-glass-panel {
+                width: 100%;
+                max-width: 400px;
+                margin-bottom: 0;
+            }
+
+            .info-panel, .legal-box {
+                width: calc(50% - 15px); 
+                margin-bottom: 0;
+            }
+
+            #game-wrap {
+                width: 420px; 
+                left: 50%;
+                transform: translateX(-50%); 
+                border-radius: 20px;
+                box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); 
+            }
+
+            #controls {
+                width: 420px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .end-popup-box {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -544,8 +595,6 @@ function initAudioContext() {
 function handleFirstTouch() {
     initAudioContext();
     if (document.getElementById("scr-start").style.display !== "none") {
-        let saved = localStorage.getItem("doggycoAgent") || "";
-        
         if (!dogHasSpoken && videoEl) {
             dogHasSpoken = true;
             manageMedia('vid1');
@@ -1014,19 +1063,17 @@ function loop(t) {
         if (!missionComplete) {
             timeLeft -= dt; energy -= (4 * speedMult) * dt;
 
-            // RAKETE
+            // ABSOLUT FESTE ZEITEN (Keine Überschneidungen)
             if(timeLeft <= 23 && !rocketSpawned) {
                 rocketSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
                 rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL, type: 'shield' }; sfxRocket();
             }
             
-            // ALIEN 
             if(timeLeft <= 16 && !magnetSpawned) {
                 magnetSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
-                rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL, type: 'magnet' }; sfxAlienFly();
+                rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL, type: 'magnet' }; sfxAlienFly(); 
             }
 
-            // UFO
             if(timeLeft <= 9 && !ufoSpawned) {
                 ufoSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
                 ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false }); sfxUfo(); 
@@ -1087,7 +1134,7 @@ function loop(t) {
             ctx.font = c.s + "px Arial"; ctx.textAlign = "center"; ctx.fillText('☁️', c.x, c.y);
         }); ctx.globalAlpha = 1.0; 
 
-        // VORBEIFLIEGEN: Rakete oder Alien
+        // VORBEIFLIEGEN: RAKETE (Rotiert) oder ALIEN (Gerade)
         if (rocket && !missionComplete) {
             rocket.x -= rocket.s * dt;
             ctx.save(); 
