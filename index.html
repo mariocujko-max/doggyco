@@ -34,15 +34,13 @@
         * { 
             margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; outline: none; 
-            /* Strenges Verbot für Textmarkierung auf Handys */
             user-select: none; -webkit-user-select: none; 
         }
         
-        /* Unsichtbare Scrollbalken für echtes App-Feeling */
         ::-webkit-scrollbar { display: none; }
         html, body {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;  
+            scrollbar-width: none;  
             overscroll-behavior: none;
             width: 100vw; height: 100dvh; overflow: hidden; 
         }
@@ -144,13 +142,12 @@
 
         #auth-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
         
-        /* EINHEITLICHES CODENAME FELD (Wie die Buttons!) */
         .name-input { 
             width: 100%; padding: 15px; border-radius: 15px; 
-            border: 2px solid var(--neon); /* Neon Rand */
-            background: rgba(0,0,0,0.4); /* Leichte Transparenz */
+            border: 2px solid var(--neon); 
+            background: rgba(0,0,0,0.4); 
             color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; text-shadow: 1px 1px 5px #000; outline: none; 
-            box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); /* Gleicher 3D-Schatten */
+            box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); 
             transition: 0.2s;
         }
         .name-input:focus { 
@@ -182,7 +179,6 @@
         .panel-green { border: 1px solid var(--green); box-shadow: 0 5px 15px rgba(0,255,136,0.1), inset 0 0 20px rgba(0,255,136,0.05); }
         .panel-green h3 { color: var(--green); border-bottom-color: var(--green); }
         
-        /* LEGAL NOTICE PANEL (SILBER THEME) */
         .panel-silver { border: 1px solid var(--silver); box-shadow: 0 5px 15px rgba(192,192,192,0.1), inset 0 0 20px rgba(192,192,192,0.05); }
         .panel-silver h3 { color: var(--silver); border-bottom-color: var(--silver); }
 
@@ -209,21 +205,21 @@
         .bg-tk { background: linear-gradient(45deg, #000, #ff0050); font-size: 11px; } 
         .bg-yt { background: linear-gradient(45deg, #c4302b, #ff0000); font-size: 11px;}
         .bg-email { background: linear-gradient(45deg, #333, #555); font-size: 10px; }
-        .bg-pp { background: linear-gradient(45deg, #003087, #0070ba); font-size: 11px; }
-        .bg-btc { background: linear-gradient(45deg, #d97b0b, #F7931A); font-size: 11px; }
         
         .text-sm { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; line-height: 1.6; color: #fff; text-shadow: 1px 1px 2px #000; }
         ul.rules { padding-left: 20px; } ul.rules li { margin-bottom: 8px; }
 
-        /* NEUE STORE BADGE ANORDNUNG */
-        .store-badges { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 10px; }
-        .play-store-btn { display: inline-block; transition: transform 0.2s ease-in-out; }
-        .play-store-btn img { width: 180px; max-width: 100%; height: auto; border-radius: 8px; }
+        .store-badges { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 10px; width: 100%; }
+        .play-store-btn { display: block; width: 190px; height: 56px; transition: transform 0.2s ease-in-out; }
+        .play-store-btn img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; display: block; }
+        .google-btn img { transform: scale(1.15); } 
+        .apple-btn img { background: #000; padding: 6px; box-sizing: border-box; } 
+        
         .play-store-btn:hover { transform: scale(1.05); cursor: pointer; }
         .play-store-btn:active { transform: scale(0.95); }
 
         #scr-end { background: transparent; z-index: 1000; }
-        #scr-end .screen-inner { justify-content: center; }
+        #scr-end .screen-inner { justify-content: flex-start; padding-top: 30px; }
         
         .end-popup-box {
             background: rgba(20, 20, 20, 0.7);
@@ -237,6 +233,8 @@
             flex-direction: column;
             align-items: center;
             box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            max-height: 88vh;
+            overflow-y: auto;
         }
         
         .btn-restart-green {
@@ -253,6 +251,7 @@
             box-shadow: 0 6px 0 #00b362, 0 10px 20px rgba(0,255,136,0.3);
             transition: 0.1s;
             margin-top: 15px;
+            margin-bottom: 20px;
         }
         .btn-restart-green:active {
             transform: translateY(6px);
@@ -341,8 +340,10 @@
                     <li><b>Environments:</b> Scenery adapts every 2 levels.</li>
                     <li><b>Provisions:</b> Collect food for <span style="color:var(--green)">+10 to +30 PTS</span>.</li>
                     <li><b>Power-Ups:</b> <br>
-                        <b>🚀 Rocket Core = <span style="color:var(--rad)">8s Radioactive Shield (☢️) & Bonus PTS!</span></b><br>
-                        <b>❤️ Heart (UFO) = <span style="color:var(--gold)">+1 ❤️ (or Bonus PTS)</span></b>
+                        <b>🚀 Rocket Core = <span style="color:var(--rad)">7s Radioactive Shield (☢️)</span></b><br>
+                        <b>👽 Alien Core = <span style="color:var(--neon)">7s Magnet (🧲)</span></b><br>
+                        <b>❤️ UFO Drop = <span style="color:var(--gold)">+1 ❤️</span></b><br>
+                        <i>(If HP full, Catching Drops = +Bonus PTS)</i>
                     </li>
                     <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & drain).</li>
                     <li><b>Objective:</b> Survive 12 Levels to WIN!</li>
@@ -373,22 +374,9 @@
                         YOUTUBE
                     </a>
 
-                    <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=give-me.org@gmx.net&item_name=Support+Doggyco+Mission&currency_code=EUR" target="_blank" class="btn-sup bg-pp">
-                        <svg viewBox="0 0 384 512" fill="white" width="14" height="16"><path d="M111.4 295.9l-35.4 0c-5.8 0-10.9-4.3-11.8-10L14.4 34.6C13.2 21.6 23.4 10.7 36.5 10.7l126.4 0c42.5 0 74.6 13.9 88.6 44.8 11.3 25.1 7.6 57.6-11.5 86.8-17.2 26.5-46.6 42.7-80.4 42.7l-26.6 0c-7.3 0-13.6 5.4-14.7 12.8L111.4 295.9zM362.4 158.2c-15.1-34.6-54.8-49.8-105-49.8l-37 0c-4.7 0-8.8 3.5-9.6 8.2l-47.8 300.9c-.9 5.8 3.6 11 9.5 11l49.3 0c4.7 0 8.8-3.5 9.6-8.2l15.1-95.2c.9-5.8 5.9-10 11.8-10l20.4 0c45.4 0 79.5-20.9 94-61.9 10.2-28.5 7.1-61.3-10.3-95z"/></svg>
-                        PAYPAL
-                    </a>
-
                     <button class="btn-sup bg-email" onclick="copyText(this, 'give-me.org@gmx.net')">
                         <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> 
                         <span style="line-height:1.2; text-align:left;">GIVE-ME.ORG<br>@GMX.NET</span>
-                    </button>
-                    
-                    <button class="btn-sup bg-btc" onclick="copyText(this, 'bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed')">
-                        <div class="btc-title">
-                            <svg viewBox="0 0 512 512" fill="white" width="14" height="14"><path d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256 119.033 8 256 8s248 111.033 248 248zm-141.651-35.33c4.937-32.999-20.196-50.739-54.55-62.573l11.146-44.702-27.213-6.781-10.851 43.524c-7.154-1.783-14.502-3.464-21.803-5.13l10.929-43.81-27.198-6.781-11.153 44.686c-5.884-1.332-11.666-2.65-17.27-4.041l0-1.074-37.643-9.383-7.255 29.095s20.218 4.603 19.8 4.933c11.066 2.756 13.067 10.054 12.723 15.83l-12.836 51.464c.783.196 1.787.495 2.923.953l-2.946-.732-17.986 72.107c-1.127 2.846-3.953 7.098-12.443 4.919.349.444-19.8-4.933-19.8-4.933l-13.431 31.06 35.539 8.859c6.643 1.656 13.167 3.376 19.645 5.03l-11.233 45.069 27.206 6.781 11.153-44.734c7.348 1.942 14.542 3.754 21.579 5.485l-11.093 44.502 27.206 6.781 11.192-44.896c46.126 8.887 80.855 5.305 95.531-37.387 11.838-34.42-3.447-54.218-25.753-67.147 18.256-4.217 31.989-13.565 35.793-34.331zm-68.966 73.111c-9.308 37.327-72.133 17.151-92.427 12.094l16.44-65.922c20.287 5.056 85.666 15.021 75.987 53.828zm10.231-96.175c-8.435 33.844-59.508 16.59-76.241 12.433l14.957-59.972c16.732 4.168 70.088 12.33 61.284 47.539z"/></svg>
-                            COPY BTC
-                        </div>
-                        <div class="btc-address">bc1qkm22c6w896u9n9cxp8ld049maef4xs5xn060ed</div>
                     </button>
                 </div>
             </div>
@@ -397,13 +385,13 @@
                 <h3>📱 GET THE APP</h3>
                 <p class="text-sm" style="margin-bottom: 15px;">Play DOGGYCO MISSION smoothly anytime as a real app on your device!</p>
                 <div class="store-badges">
-                    <a href="https://play.google.com/store/apps/details?id=com.doggycogames.doggyco" target="_blank" class="play-store-btn" rel="noopener noreferrer">
+                    <a href="https://play.google.com/store/apps/details?id=com.doggycogames.doggyco" target="_blank" class="play-store-btn google-btn" rel="noopener noreferrer">
                         <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" />
                     </a>
-                    <a href="https://www.apple.com/app-store/" target="_blank" class="play-store-btn" rel="noopener noreferrer">
-                        <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" style="background:#000; border-radius: 8px; padding: 2px;" />
+                    <a href="https://www.apple.com/app-store/" target="_blank" class="play-store-btn apple-btn" rel="noopener noreferrer">
+                        <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" />
                     </a>
-                    <a href="https://apps.microsoft.com/" target="_blank" class="play-store-btn" rel="noopener noreferrer">
+                    <a href="https://apps.microsoft.com/detail/9ncrxpddd1rp?hl=de-DE&gl=DE" target="_blank" class="play-store-btn ms-btn" rel="noopener noreferrer">
                         <img alt="Get it from Microsoft" src="https://get.microsoft.com/images/en-us%20dark.svg" />
                     </a>
                 </div>
@@ -426,14 +414,29 @@
             <div class="end-popup-box">
                 <h1 id="end-agent-name" style="font-family: 'Orbitron'; font-size: 36px; margin: 0 0 15px 0; line-height: 1; word-break: break-all; text-align: center; text-transform: uppercase;">PLAYER</h1>
                 
-                <div style="margin-bottom: 10px;">
-                    <img src="sign.png" alt="Good Boy" style="width: 160px; display: block; margin: 0 auto 5px auto;">
-                    <img src="dog.png" alt="Dog Avatar" style="width: 130px; display: block; margin: 0 auto;">
+                <div class="dog-video-wrapper" style="margin-bottom: 10px;">
+                    <canvas id="dog-video-canvas2" width="220" height="220" class="dog-video-canvas"></canvas>
+                    <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
                 </div>
 
                 <h1 id="f-score" style="font-family: 'Orbitron'; font-size: 42px; margin: 10px 0 20px 0; line-height: 1; text-align: center; color: var(--gold); text-shadow: 0 0 15px var(--gold);">0 PTS</h1> 
                 
                 <button class="btn-restart-green" onclick="goToLevelSelect()">LEVEL AUSWAHL</button> 
+                
+                <div style="margin-top: 15px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; width: 100%;">
+                    <p class="text-sm" style="margin-bottom: 15px; color: #aaa;">Download the full version:</p>
+                    <div class="store-badges">
+                        <a href="https://play.google.com/store/apps/details?id=com.doggycogames.doggyco" target="_blank" class="play-store-btn google-btn" rel="noopener noreferrer">
+                            <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" />
+                        </a>
+                        <a href="https://www.apple.com/app-store/" target="_blank" class="play-store-btn apple-btn" rel="noopener noreferrer">
+                            <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" />
+                        </a>
+                        <a href="https://apps.microsoft.com/detail/9ncrxpddd1rp?hl=de-DE&gl=DE" target="_blank" class="play-store-btn ms-btn" rel="noopener noreferrer">
+                            <img alt="Get it from Microsoft" src="https://get.microsoft.com/images/en-us%20dark.svg" />
+                        </a>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -447,12 +450,16 @@
 function manageMedia(action) {
     let bgMusic = document.getElementById("snd-action");
     let vid1 = document.getElementById("dog-video");
+    let vid2 = document.getElementById("dog-video2");
 
     if(bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
     if(vid1) { vid1.pause(); }
+    if(vid2) { vid2.pause(); }
 
     if(action === 'vid1') {
         if(vid1) { vid1.currentTime = 0; vid1.muted = false; vid1.play().catch(e=>{}); processVideoFrame(); }
+    } else if(action === 'vid2') {
+        if(vid2) { vid2.currentTime = 0; vid2.muted = false; vid2.play().catch(e=>{}); processVideoFrame2(); }
     } else if(action === 'game') {
         if(bgMusic) { bgMusic.volume = 0.15; bgMusic.playbackRate = 1.0; bgMusic.play().catch(e=>{}); }
     } else if(action === 'none') {
@@ -463,6 +470,11 @@ let videoEl = document.getElementById('dog-video');
 let videoCanvas = document.getElementById('dog-video-canvas');
 let videoCtx = videoCanvas.getContext('2d', { willReadFrequently: true });
 let videoAnimationId = null;
+
+let videoEl2 = document.getElementById('dog-video2');
+let videoCanvas2 = document.getElementById('dog-video-canvas2');
+let videoCtx2 = videoCanvas2.getContext('2d', { willReadFrequently: true });
+let videoAnimationId2 = null;
 
 function processGreenScreen(vEl, vCanvas, vCtx) {
     if (!vEl.videoWidth) return;
@@ -489,6 +501,13 @@ function processVideoFrame() {
     }
 }
 
+function processVideoFrame2() {
+    if (!videoEl2.paused && !videoEl2.ended) {
+        processGreenScreen(videoEl2, videoCanvas2, videoCtx2);
+        videoAnimationId2 = requestAnimationFrame(processVideoFrame2);
+    }
+}
+
 function resetVideoToStart(vEl, vCanvas, vCtx) {
     vEl.pause();
     vEl.currentTime = 0;
@@ -499,6 +518,11 @@ videoEl.addEventListener('loadeddata', () => processGreenScreen(videoEl, videoCa
 videoEl.addEventListener('seeked', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
 videoEl.addEventListener('play', processVideoFrame);
 videoEl.addEventListener('ended', () => resetVideoToStart(videoEl, videoCanvas, videoCtx));
+
+videoEl2.addEventListener('loadeddata', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+videoEl2.addEventListener('seeked', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+videoEl2.addEventListener('play', processVideoFrame2);
+videoEl2.addEventListener('ended', () => resetVideoToStart(videoEl2, videoCanvas2, videoCtx2));
 
 let systemActive = false;
 let dogHasSpoken = false;
@@ -521,11 +545,10 @@ function handleFirstTouch() {
     initAudioContext();
     if (document.getElementById("scr-start").style.display !== "none") {
         let saved = localStorage.getItem("doggycoAgent") || "";
-        if (!saved) { 
-            if (!dogHasSpoken && videoEl) {
-                dogHasSpoken = true;
-                manageMedia('vid1');
-            }
+        
+        if (!dogHasSpoken && videoEl) {
+            dogHasSpoken = true;
+            manageMedia('vid1');
         }
     }
 }
@@ -585,6 +608,8 @@ function goToLevelSelect() {
     document.getElementById("canvas").style.display = "block";
     document.getElementById("game-wrap").style.visibility = "hidden";
     document.getElementById("game-wrap").style.pointerEvents = "none";
+    
+    document.getElementById("canvas").classList.remove("blur");
     
     document.getElementById("phone-container").classList.remove("is-playing");
     
@@ -688,6 +713,36 @@ function sfxRocket() {
     } catch(e){}
 }
 
+function sfxAlienFly() {
+    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
+    try {
+        let t = audioCtx.currentTime;
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        let lfo = audioCtx.createOscillator();
+        let lfoGain = audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(400, t);
+        osc.frequency.exponentialRampToValueAtTime(100, t + 1.5);
+
+        lfo.type = 'sine';
+        lfo.frequency.setValueAtTime(15, t); 
+        lfoGain.gain.setValueAtTime(50, t); 
+
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.3, t + 0.3);
+        gain.gain.linearRampToValueAtTime(0.01, t + 1.5);
+
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(t); lfo.start(t);
+        osc.stop(t + 1.5); lfo.stop(t + 1.5);
+    } catch(e){}
+}
+
 function sfxShield() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -757,8 +812,11 @@ let invincibleTimer = 0;
 let alarmTimer = 0; 
 let rocketSpawned = false;
 let ufoSpawned = false;
+let magnetSpawned = false;
+let magnetTimer = 0;
 let rocket = null;
 let fallingCore = null;
+let fallingAlien = null;
 let fallingHearts = [];
 
 let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
@@ -805,6 +863,16 @@ function start(m, startLvl) {
     try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
 
     if(globalAnimationId) cancelAnimationFrame(globalAnimationId);
+    
+    let v2 = document.getElementById('dog-video2');
+    if (v2) {
+        v2.muted = false; 
+        let p = v2.play();
+        if(p !== undefined) {
+            p.then(() => { v2.pause(); v2.currentTime = 0; }).catch(e => {});
+        }
+    }
+    
     manageMedia('game');
 
     mode = m;
@@ -813,9 +881,9 @@ function start(m, startLvl) {
     hp = 3; energy = 100; score = 0; timeLeft = 30;
     entities = []; floaters = []; fireworks = []; fxParticles = []; missionComplete = false;
     
-    invincibleTimer = 0; alarmTimer = 0;
-    rocketSpawned = false; ufoSpawned = false;
-    rocket = null; fallingCore = null; fallingHearts = [];
+    invincibleTimer = 0; alarmTimer = 0; magnetTimer = 0;
+    rocketSpawned = false; ufoSpawned = false; magnetSpawned = false;
+    rocket = null; fallingCore = null; fallingAlien = null; fallingHearts = [];
     
     initBackgroundGraphics(); 
     updateTheme(mode);
@@ -829,6 +897,7 @@ function start(m, startLvl) {
         gameWrap.style.pointerEvents = "auto";
     }
     
+    document.getElementById("canvas").classList.remove("blur");
     document.getElementById("phone-container").classList.add("is-playing");
     
     permSpiders = [ { lane: 0, y: 60, dy: 1, hit: false }, { lane: 4, y: H-120, dy: -1, hit: false } ];
@@ -901,6 +970,7 @@ function showEndScreen(win) {
         el.style.textShadow = `0 0 15px ${color}, 0 0 30px ${color}`;
     });
 
+    manageMedia('vid2'); 
     try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
 }
 
@@ -938,16 +1008,26 @@ function loop(t) {
             if (alarmTimer <= 0) { sfxAlarm(); alarmTimer = 0.8; }
             if(invincibleTimer < 0) invincibleTimer = 0;
         }
+        
+        if (magnetTimer > 0) magnetTimer -= dt;
 
         if (!missionComplete) {
             timeLeft -= dt; energy -= (4 * speedMult) * dt;
 
-            if(timeLeft <= 24 && !rocketSpawned) {
+            // RAKETE
+            if(timeLeft <= 23 && !rocketSpawned) {
                 rocketSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
-                rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL }; sfxRocket();
+                rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL, type: 'shield' }; sfxRocket();
+            }
+            
+            // ALIEN 
+            if(timeLeft <= 16 && !magnetSpawned) {
+                magnetSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
+                rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL, type: 'magnet' }; sfxAlienFly();
             }
 
-            if(timeLeft <= 12 && !ufoSpawned) {
+            // UFO
+            if(timeLeft <= 9 && !ufoSpawned) {
                 ufoSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
                 ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false }); sfxUfo(); 
             }
@@ -971,7 +1051,7 @@ function loop(t) {
 
                 } else {
                     level++; timeLeft = 30; energy = Math.min(100, energy + (25 * speedMult));
-                    rocketSpawned = false; ufoSpawned = false; rocket = null; fallingCore = null; fallingHearts = [];
+                    rocketSpawned = false; ufoSpawned = false; magnetSpawned = false; rocket = null; fallingCore = null; fallingAlien = null; fallingHearts = [];
                     
                     const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'unicorn'];
                     let expectedModeIndex = Math.floor((level - 1) / 2) % 6;
@@ -1007,28 +1087,54 @@ function loop(t) {
             ctx.font = c.s + "px Arial"; ctx.textAlign = "center"; ctx.fillText('☁️', c.x, c.y);
         }); ctx.globalAlpha = 1.0; 
 
+        // VORBEIFLIEGEN: Rakete oder Alien
         if (rocket && !missionComplete) {
             rocket.x -= rocket.s * dt;
-            ctx.save(); ctx.translate(rocket.x, rocket.y + Math.sin(t/100)*5); ctx.rotate(-Math.PI / 1.5); ctx.font = "50px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🚀', 0, 0); ctx.restore();
+            ctx.save(); 
+            ctx.translate(rocket.x, rocket.y + Math.sin(t/100)*5); 
+            ctx.font = "50px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; 
             
-            for(let p=0; p<2; p++) {
-                fxParticles.push({
-                    x: rocket.x + 30 + Math.random()*15, y: rocket.y + Math.sin(t/100)*5 + (Math.random()-0.5)*15, 
-                    vx: 100 + Math.random()*50, vy: (Math.random()-0.5)*20, life: 0.2 + Math.random()*0.2, maxLife: 0.4, 
-                    r: 3 + Math.random()*5, c: Math.random() > 0.5 ? '#FFD700' : '#ff3131' 
-                });
+            if(rocket.type === 'shield') {
+                ctx.rotate(-Math.PI / 1.5);
+                ctx.fillText('🚀', 0, 0); 
+                for(let p=0; p<2; p++) { fxParticles.push({ x: rocket.x + 30 + Math.random()*15, y: rocket.y + Math.sin(t/100)*5 + (Math.random()-0.5)*15, vx: 100 + Math.random()*50, vy: (Math.random()-0.5)*20, life: 0.2 + Math.random()*0.2, maxLife: 0.4, r: 3 + Math.random()*5, c: Math.random() > 0.5 ? '#FFD700' : '#ff3131' }); }
+            } else if (rocket.type === 'magnet') {
+                ctx.fillText('👽', 0, 0);  
+                for(let p=0; p<2; p++) { fxParticles.push({ x: rocket.x + 25 + Math.random()*15, y: rocket.y + Math.sin(t/100)*5 + (Math.random()-0.5)*10, vx: 80 + Math.random()*40, vy: (Math.random()-0.5)*10, life: 0.3 + Math.random()*0.2, maxLife: 0.5, r: 3 + Math.random()*4, c: Math.random() > 0.5 ? '#bc13fe' : '#00f2ff' }); }
             }
             
-            if(rocket.x <= lanes[rocket.targetLane] && !rocket.laid) { rocket.laid = true; fallingCore = { x: lanes[rocket.targetLane], y: rocket.y, s: 200 * speedMult }; }
+            ctx.restore();
+            
+            if(rocket.x <= lanes[rocket.targetLane] && !rocket.laid) { 
+                rocket.laid = true; 
+                if(rocket.type === 'shield') { fallingCore = { x: lanes[rocket.targetLane], y: rocket.y, s: 200 * speedMult }; }
+                else if (rocket.type === 'magnet') { fallingAlien = { x: lanes[rocket.targetLane], y: rocket.y, s: 200 * speedMult }; }
+            }
             if(rocket.x < -100) rocket = null;
         }
 
+        // FALLEN: SCHILD
         if (fallingCore && !missionComplete) {
             fallingCore.y += fallingCore.s * dt;
             ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 15; ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#adff2f"; ctx.fillText('☢️', fallingCore.x, fallingCore.y); ctx.restore();
             if (Math.abs(fallingCore.x - playerX) < 40 && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
-                invincibleTimer = 8.0; charJump = 20; sfxShield(); let bonusPts = 100 + (level * 10); score += bonusPts; sfxStarCollect(); addFloat(fallingCore.x + 40, fallingCore.y, "SHIELD +" + bonusPts, "#00ff88", 25); fallingCore = null;
+                invincibleTimer = 7.0; charJump = 20; sfxShield(); 
+                let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5); 
+                sfxStarCollect(); addFloat(fallingCore.x + 40, fallingCore.y, "SHIELD +" + pG, "#00ff88", 25); 
+                fallingCore = null;
             } else if (fallingCore.y > H + 50) { fallingCore = null; }
+        }
+        
+        // FALLEN: MAGNET
+        if (fallingAlien && !missionComplete) {
+            fallingAlien.y += fallingAlien.s * dt;
+            ctx.save(); ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 15; ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#00f2ff"; ctx.fillText('🧲', fallingAlien.x, fallingAlien.y); ctx.restore();
+            if (Math.abs(fallingAlien.x - playerX) < 40 && fallingAlien.y > hitTop && fallingAlien.y < hitBottom) {
+                magnetTimer = 7.0; charJump = 20; sfxStarCollect(); 
+                let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5); 
+                addFloat(fallingAlien.x + 40, fallingAlien.y, "MAGNET +" + pG, "#00f2ff", 25); 
+                fallingAlien = null;
+            } else if (fallingAlien.y > H + 50) { fallingAlien = null; }
         }
 
         if(!missionComplete) { if(Math.random() < 0.015 && opponents.length < 3) opponents.push({ x: W + 50, y: Math.random()*H/2 + 50, s: (100 + Math.random()*50) * speedMult }); }
@@ -1038,6 +1144,7 @@ function loop(t) {
             if(o.x < -50) opponents.splice(i, 1);
         });
 
+        // UFO FÜR DAS HERZ
         for(let i = ufos.length - 1; i >= 0; i--) {
             let u = ufos[i]; if(!missionComplete) u.x -= u.s * dt;
             let ufoY = u.y + Math.sin(t / 150) * 10;
@@ -1056,12 +1163,17 @@ function loop(t) {
             if(u.x < -50) ufos.splice(i, 1);
         }
 
+        // FALLEN: HERZ (+1 HP ODER Bonus Punkte)
         for(let i = fallingHearts.length - 1; i >= 0; i--) {
             let s = fallingHearts[i]; if(!missionComplete) s.y += s.s * dt;
             ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText('❤️', s.x, s.y);
             if(!missionComplete && Math.abs(s.x - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
-                if (hp < 3) { hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35); } 
-                else { let bonusPts = 100 + (level * 10); score += bonusPts; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+" + bonusPts, "#00ff88", 30); }
+                if (hp < 3) { 
+                    hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35); 
+                } else { 
+                    let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5); 
+                    charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+" + pG, "#00ff88", 30); 
+                }
                 fallingHearts.splice(i, 1);
             } else if (s.y > H + 50) { fallingHearts.splice(i, 1); }
         }
@@ -1107,14 +1219,31 @@ function loop(t) {
         });
 
         for(let i = entities.length - 1; i >= 0; i--) {
-            let e = entities[i]; if(!missionComplete) e.y += e.s * dt;
+            let e = entities[i]; 
+            
+            if (magnetTimer > 0 && !e.bad && !missionComplete && e.y > 50) {
+                let dx = playerX - e.x;
+                let dy = (H - 80) - e.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 350) { 
+                    e.x += (dx / dist) * 400 * dt; 
+                    e.y += (dy / dist) * 400 * dt; 
+                } else {
+                    e.y += e.s * dt; 
+                }
+            } else {
+                if(!missionComplete) e.y += e.s * dt;
+            }
+            
             ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e.t, e.x, e.y);
 
             if(!missionComplete && Math.abs(e.x - playerX) < 40 && e.y > hitTop && e.y < hitBottom) {
                 if(e.bad) {
                     if (invincibleTimer > 0) { addFloat(e.x + 40, e.y, "BLOCKED!", "#00ff88", 20); } 
                     else { hp--; charShake = 20; sfxHit(); hapticDamage(); addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); }
-                } else { let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; sfxCollect(); addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); }
+                } else { 
+                    let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; sfxCollect(); addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); 
+                }
                 entities.splice(i, 1);
             } else if (e.y > H + 60) { entities.splice(i, 1); }
         }
@@ -1124,6 +1253,11 @@ function loop(t) {
         if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
         if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
         
+        if (magnetTimer > 0) {
+            ctx.save(); ctx.beginPath(); ctx.arc(drawX, drawY, 45 + Math.sin(t/100)*5, 0, Math.PI*2);
+            ctx.strokeStyle = "rgba(0, 242, 255, 0.6)"; ctx.lineWidth = 4; ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 15; ctx.stroke(); ctx.restore();
+        }
+
         if (invincibleTimer > 0) {
             ctx.save(); ctx.font = "50px Arial"; ctx.textAlign = "center";
             let shieldAlpha = 0.4 + 0.6 * Math.abs(Math.sin(t / 150)); ctx.fillStyle = `rgba(173, 255, 47, ${shieldAlpha})`; 
@@ -1184,7 +1318,7 @@ function copyText(btn, text) {
     btn.style.color = "#000"; 
     
     setTimeout(() => { 
-        if(btn) { btn.innerHTML = oldHtml; btn.style.background = oldBg || ""; btn.style.color = "#fff"; btn.style.height = 'auto'; }
+        if(btn) { btn.innerHTML = oldHtml; btn.style.background = oldBg || ""; btn.style.color = "#fff"; }
     }, 2000);
 }
 </script>
