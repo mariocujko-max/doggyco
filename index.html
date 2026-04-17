@@ -55,8 +55,10 @@
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; }
 
+        /* Das ist der Hauptcontainer. Er ist auf max 420px (Handybreite) limitiert */
         #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
 
+        /* Wenn der Bildschirm breiter ist als ein Handy (z.B. PC), wird es wie ein Gerät in der Mitte angezeigt */
         @media (min-width: 450px) {
             #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; }
             #phone-container.is-playing { border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
@@ -257,57 +259,6 @@
             transform: translateY(6px);
             box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4);
         }
-
-        /* =========================================================
-           RESPONSIVE DESIGN FÜR PC / QUERFORMAT (WINDOWS & MAC)
-           ========================================================= */
-        @media (min-width: 800px) and (orientation: landscape) {
-            
-            #phone-container {
-                max-width: 1000px; 
-                width: 95%;
-                border-radius: 20px;
-            }
-
-            .screen-inner {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                align-items: flex-start;
-                gap: 20px;
-                padding: 40px;
-            }
-
-            .start-glass-panel {
-                width: 100%;
-                max-width: 400px;
-                margin-bottom: 0;
-            }
-
-            .info-panel, .legal-box {
-                width: calc(50% - 15px); 
-                margin-bottom: 0;
-            }
-
-            #game-wrap {
-                width: 420px; 
-                left: 50%;
-                transform: translateX(-50%); 
-                border-radius: 20px;
-                box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); 
-            }
-
-            #controls {
-                width: 420px;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-
-            .end-popup-box {
-                max-width: 500px;
-                margin: 0 auto;
-            }
-        }
     </style>
 </head>
 <body>
@@ -414,17 +365,14 @@
                         <svg viewBox="0 0 448 512" fill="white" width="16" height="16"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
                         INSTAGRAM
                     </a>
-
                     <a href="https://www.tiktok.com/@doggyco0" target="_blank" class="btn-sup bg-tk">
                         <svg viewBox="0 0 448 512" fill="white" width="16" height="16"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
                         TIKTOK
                     </a>
-
                     <a href="https://www.youtube.com/@doggyco.de9" target="_blank" class="btn-sup bg-yt">
                         <svg viewBox="0 0 576 512" fill="white" width="16" height="14"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438-11.412-132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
                         YOUTUBE
                     </a>
-
                     <button class="btn-sup bg-email" onclick="copyText(this, 'give-me.org@gmx.net')">
                         <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> 
                         <span style="line-height:1.2; text-align:left;">GIVE-ME.ORG<br>@GMX.NET</span>
@@ -1166,6 +1114,7 @@ function loop(t) {
             ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 15; ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#adff2f"; ctx.fillText('☢️', fallingCore.x, fallingCore.y); ctx.restore();
             if (Math.abs(fallingCore.x - playerX) < 40 && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
                 invincibleTimer = 7.0; charJump = 20; sfxShield(); 
+                // GLEICHE LOGIK WIE FUTTER (Basis 50 * Speed-Faktor)
                 let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5); 
                 sfxStarCollect(); addFloat(fallingCore.x + 40, fallingCore.y, "SHIELD +" + pG, "#00ff88", 25); 
                 fallingCore = null;
@@ -1178,6 +1127,7 @@ function loop(t) {
             ctx.save(); ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 15; ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#00f2ff"; ctx.fillText('🧲', fallingAlien.x, fallingAlien.y); ctx.restore();
             if (Math.abs(fallingAlien.x - playerX) < 40 && fallingAlien.y > hitTop && fallingAlien.y < hitBottom) {
                 magnetTimer = 7.0; charJump = 20; sfxStarCollect(); 
+                // GLEICHE LOGIK WIE FUTTER (Basis 50 * Speed-Faktor)
                 let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5); 
                 addFloat(fallingAlien.x + 40, fallingAlien.y, "MAGNET +" + pG, "#00f2ff", 25); 
                 fallingAlien = null;
@@ -1218,6 +1168,7 @@ function loop(t) {
                 if (hp < 3) { 
                     hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35); 
                 } else { 
+                    // GLEICHE LOGIK WIE FUTTER (Basis 50 * Speed-Faktor)
                     let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5); 
                     charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+" + pG, "#00ff88", 30); 
                 }
