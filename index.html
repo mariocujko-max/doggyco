@@ -55,15 +55,8 @@
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; }
 
-        /* Das ist der Hauptcontainer. Er ist auf max 420px (Handybreite) limitiert */
+        /* STANDARD HANDY-BREITE */
         #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
-
-        /* Wenn der Bildschirm breiter ist als ein Handy (z.B. PC), wird es wie ein Gerät in der Mitte angezeigt */
-        @media (min-width: 450px) {
-            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; }
-            #phone-container.is-playing { border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
-            #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); }
-        }
 
         #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
         #canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; touch-action: none; transition: filter 0.3s; }
@@ -258,6 +251,40 @@
         .btn-restart-green:active {
             transform: translateY(6px);
             box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4);
+        }
+
+        /* =========================================================
+           DOPPELTE BREITE FÜR PC UND HANDY IM QUERFORMAT
+           ========================================================= */
+        @media (orientation: landscape) and (min-height: 400px) {
+            
+            /* Der Container darf sich auf fette 900px ausbreiten */
+            #phone-container {
+                max-width: 900px; 
+            }
+
+            /* Boxen auf dem Startbildschirm nebeneinander anordnen */
+            .screen-inner {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 20px;
+                padding: 40px 20px;
+            }
+
+            .start-glass-panel { width: 100%; max-width: 400px; margin-bottom: 0; }
+            .info-panel, .legal-box { width: calc(50% - 15px); max-width: 400px; margin-bottom: 0; }
+
+            /* DAS SPIELFELD WIRD DOPPELT SO BREIT */
+            #game-wrap {
+                max-width: 900px; 
+                border-radius: 20px;
+                box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); 
+            }
+
+            #controls { max-width: 900px; }
+
+            .end-popup-box { max-width: 500px; margin: 0 auto; }
         }
     </style>
 </head>
@@ -576,6 +603,10 @@ window.onload = function() {
 
     document.addEventListener('touchstart', handleFirstTouch, { once: false });
     document.addEventListener('click', handleFirstTouch, { once: false });
+    
+    // START RESIZE LOGIK FÜR RESPONSIVE BREITE
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 
     setTimeout(() => {
         if (navigator.onLine) {
@@ -792,10 +823,29 @@ async function fetchRanks() {
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-const W = 400; const H = 700;
-canvas.width = W; canvas.height = H;
 
-const lanes = [40, 120, 200, 280, 360];
+// VARIABLEN FÜR DYNAMISCHE BREITE
+let W = 400; 
+let H = 700;
+let lanes = [40, 120, 200, 280, 360];
+
+// RESIZE FUNKTION MACHT DAS SPIEL RESPONSIVE
+function resizeCanvas() {
+    let gw = document.getElementById("game-wrap");
+    if(gw && gw.clientWidth > 0) {
+        W = gw.clientWidth;
+        H = gw.clientHeight;
+        canvas.width = W;
+        canvas.height = H;
+        
+        // Berechne die 5 Bahnen dynamisch basierend auf der Breite
+        let lw = W / 5;
+        lanes = [lw*0.5, lw*1.5, lw*2.5, lw*3.5, lw*4.5];
+        targetX = lanes[currLane];
+        if(!active) playerX = targetX;
+    }
+}
+
 let currLane = 2, playerX = lanes[2], targetX = lanes[2];
 
 let active = false, missionComplete = false; 
@@ -894,6 +944,9 @@ function start(m, startLvl) {
         gameWrap.style.pointerEvents = "auto";
     }
     
+    // SPIELFELD BERECHNEN BEVOR ES LOSGEHT
+    resizeCanvas();
+    
     document.getElementById("canvas").classList.remove("blur");
     document.getElementById("phone-container").classList.add("is-playing");
     
@@ -988,6 +1041,9 @@ function loop(t) {
         let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
         let ptsScaling = speedMult; 
 
+        // Kollisions-Distanz passt sich der Breite an
+        let colDist = W / 10; 
+
         let bgMusic = document.getElementById("snd-action");
         if (bgMusic && !bgMusic.paused) {
             try {
@@ -1011,20 +1067,20 @@ function loop(t) {
         if (!missionComplete) {
             timeLeft -= dt; energy -= (4 * speedMult) * dt;
 
-            // ABSOLUT FESTE ZEITEN (Keine Überschneidungen)
-            if(timeLeft <= 23 && !rocketSpawned) {
+            // ABSOLUT FESTE ZEITEN (Keine Überschneidungen, genau 8 Sekunden Abstand)
+            if(timeLeft <= 25 && !rocketSpawned) {
                 rocketSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
-                rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL, type: 'shield' }; sfxRocket();
+                rocket = { x: W + 50, y: 150, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'shield' }; sfxRocket();
             }
             
-            if(timeLeft <= 16 && !magnetSpawned) {
+            if(timeLeft <= 17 && !magnetSpawned) {
                 magnetSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
-                rocket = { x: W + 50, y: 150, s: 250, laid: false, targetLane: safeL, type: 'magnet' }; sfxAlienFly(); 
+                rocket = { x: W + 50, y: 150, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'magnet' }; sfxAlienFly(); 
             }
 
             if(timeLeft <= 9 && !ufoSpawned) {
                 ufoSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
-                ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 + (25 * speedMult), targetLane: safeL, dropped: false }); sfxUfo(); 
+                ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 * speedMult * (W/400), targetLane: safeL, dropped: false }); sfxUfo(); 
             }
 
             if(timeLeft <= 0) {
@@ -1082,7 +1138,6 @@ function loop(t) {
             ctx.font = c.s + "px Arial"; ctx.textAlign = "center"; ctx.fillText('☁️', c.x, c.y);
         }); ctx.globalAlpha = 1.0; 
 
-        // VORBEIFLIEGEN: RAKETE (Rotiert) oder ALIEN (Gerade)
         if (rocket && !missionComplete) {
             rocket.x -= rocket.s * dt;
             ctx.save(); 
@@ -1102,34 +1157,32 @@ function loop(t) {
             
             if(rocket.x <= lanes[rocket.targetLane] && !rocket.laid) { 
                 rocket.laid = true; 
-                if(rocket.type === 'shield') { fallingCore = { x: lanes[rocket.targetLane], y: rocket.y, s: 200 * speedMult }; }
-                else if (rocket.type === 'magnet') { fallingAlien = { x: lanes[rocket.targetLane], y: rocket.y, s: 200 * speedMult }; }
+                if(rocket.type === 'shield') { fallingCore = { lane: rocket.targetLane, y: rocket.y, s: 200 * speedMult }; }
+                else if (rocket.type === 'magnet') { fallingAlien = { lane: rocket.targetLane, y: rocket.y, s: 200 * speedMult }; }
             }
             if(rocket.x < -100) rocket = null;
         }
 
-        // FALLEN: SCHILD
         if (fallingCore && !missionComplete) {
             fallingCore.y += fallingCore.s * dt;
-            ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 15; ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#adff2f"; ctx.fillText('☢️', fallingCore.x, fallingCore.y); ctx.restore();
-            if (Math.abs(fallingCore.x - playerX) < 40 && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
+            let fx = lanes[fallingCore.lane];
+            ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 15; ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#adff2f"; ctx.fillText('☢️', fx, fallingCore.y); ctx.restore();
+            if (Math.abs(fx - playerX) < colDist && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
                 invincibleTimer = 7.0; charJump = 20; sfxShield(); 
-                // GLEICHE LOGIK WIE FUTTER (Basis 50 * Speed-Faktor)
                 let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5); 
-                sfxStarCollect(); addFloat(fallingCore.x + 40, fallingCore.y, "SHIELD +" + pG, "#00ff88", 25); 
+                sfxStarCollect(); addFloat(fx + 40, fallingCore.y, "SHIELD +" + pG, "#00ff88", 25); 
                 fallingCore = null;
             } else if (fallingCore.y > H + 50) { fallingCore = null; }
         }
         
-        // FALLEN: MAGNET
         if (fallingAlien && !missionComplete) {
             fallingAlien.y += fallingAlien.s * dt;
-            ctx.save(); ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 15; ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#00f2ff"; ctx.fillText('🧲', fallingAlien.x, fallingAlien.y); ctx.restore();
-            if (Math.abs(fallingAlien.x - playerX) < 40 && fallingAlien.y > hitTop && fallingAlien.y < hitBottom) {
+            let fx = lanes[fallingAlien.lane];
+            ctx.save(); ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 15; ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillStyle = "#00f2ff"; ctx.fillText('🧲', fx, fallingAlien.y); ctx.restore();
+            if (Math.abs(fx - playerX) < colDist && fallingAlien.y > hitTop && fallingAlien.y < hitBottom) {
                 magnetTimer = 7.0; charJump = 20; sfxStarCollect(); 
-                // GLEICHE LOGIK WIE FUTTER (Basis 50 * Speed-Faktor)
                 let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5); 
-                addFloat(fallingAlien.x + 40, fallingAlien.y, "MAGNET +" + pG, "#00f2ff", 25); 
+                addFloat(fx + 40, fallingAlien.y, "MAGNET +" + pG, "#00f2ff", 25); 
                 fallingAlien = null;
             } else if (fallingAlien.y > H + 50) { fallingAlien = null; }
         }
@@ -1141,7 +1194,6 @@ function loop(t) {
             if(o.x < -50) opponents.splice(i, 1);
         });
 
-        // UFO FÜR DAS HERZ
         for(let i = ufos.length - 1; i >= 0; i--) {
             let u = ufos[i]; if(!missionComplete) u.x -= u.s * dt;
             let ufoY = u.y + Math.sin(t / 150) * 10;
@@ -1160,15 +1212,13 @@ function loop(t) {
             if(u.x < -50) ufos.splice(i, 1);
         }
 
-        // FALLEN: HERZ (+1 HP ODER Bonus Punkte)
         for(let i = fallingHearts.length - 1; i >= 0; i--) {
             let s = fallingHearts[i]; if(!missionComplete) s.y += s.s * dt;
             ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.fillText('❤️', s.x, s.y);
-            if(!missionComplete && Math.abs(s.x - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
+            if(!missionComplete && Math.abs(s.x - playerX) < colDist && s.y > hitTop && s.y < hitBottom) {
                 if (hp < 3) { 
                     hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35); 
                 } else { 
-                    // GLEICHE LOGIK WIE FUTTER (Basis 50 * Speed-Faktor)
                     let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5); 
                     charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+" + pG, "#00ff88", 30); 
                 }
@@ -1208,7 +1258,7 @@ function loop(t) {
                 if(s.y >= H - 120) { s.dy = -1; s.y = H - 120; s.hit = false; }
                 if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; s.hit = false; }
 
-                if(!s.hit && Math.abs(sx - playerX) < 40 && s.y > hitTop && s.y < hitBottom) {
+                if(!s.hit && Math.abs(sx - playerX) < colDist && s.y > hitTop && s.y < hitBottom) {
                     if (invincibleTimer > 0) { addFloat(sx + 40, s.y, "BLOCKED!", "#00ff88", 20); } 
                     else { let pLoss = Math.floor(30 * ptsScaling); score = Math.max(0, score - pLoss); energy -= 30; charShake = 20; sfxHit(); hapticSpiderHit(); addFloat(sx + 40, s.y, "-⚡", "#ff3131", 35); }
                     s.hit = true; 
@@ -1223,19 +1273,21 @@ function loop(t) {
                 let dx = playerX - e.x;
                 let dy = (H - 80) - e.y;
                 let dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < 350) { 
-                    e.x += (dx / dist) * 400 * dt; 
-                    e.y += (dy / dist) * 400 * dt; 
+                if (dist < (W * 1.5)) { 
+                    e.x += (dx / dist) * W * 1.5 * dt; 
+                    e.y += (dy / dist) * H * 0.8 * dt; 
                 } else {
                     e.y += e.s * dt; 
+                    e.x = lanes[e.l];
                 }
             } else {
                 if(!missionComplete) e.y += e.s * dt;
+                e.x = lanes[e.l];
             }
             
             ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e.t, e.x, e.y);
 
-            if(!missionComplete && Math.abs(e.x - playerX) < 40 && e.y > hitTop && e.y < hitBottom) {
+            if(!missionComplete && Math.abs(e.x - playerX) < colDist && e.y > hitTop && e.y < hitBottom) {
                 if(e.bad) {
                     if (invincibleTimer > 0) { addFloat(e.x + 40, e.y, "BLOCKED!", "#00ff88", 20); } 
                     else { hp--; charShake = 20; sfxHit(); hapticDamage(); addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); }
