@@ -55,8 +55,13 @@
         #bg-fx { position: absolute; inset: 0; background-image: url('hintergrund.png'); background-size: cover; background-position: center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; }
 
-        /* STANDARD HANDY-BREITE */
         #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
+
+        @media (min-width: 450px) {
+            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; }
+            #phone-container.is-playing { border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
+            #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); }
+        }
 
         #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
         #canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; touch-action: none; transition: filter 0.3s; }
@@ -254,37 +259,19 @@
         }
 
         /* =========================================================
-           DOPPELTE BREITE FÜR PC UND HANDY IM QUERFORMAT
+           DOPPELTE BREITE FÜR PC, ABER MENÜ BLEIBT UNTEREINANDER
            ========================================================= */
         @media (orientation: landscape) and (min-height: 400px) {
             
-            /* Der Container darf sich auf fette 900px ausbreiten */
-            #phone-container {
-                max-width: 900px; 
-            }
+            /* Der Hauptcontainer (Spiel) darf sich auf 900px ausbreiten */
+            #phone-container { max-width: 900px; }
 
-            /* Boxen auf dem Startbildschirm nebeneinander anordnen */
-            .screen-inner {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 20px;
-                padding: 40px 20px;
-            }
-
-            .start-glass-panel { width: 100%; max-width: 400px; margin-bottom: 0; }
-            .info-panel, .legal-box { width: calc(50% - 15px); max-width: 400px; margin-bottom: 0; }
-
-            /* DAS SPIELFELD WIRD DOPPELT SO BREIT */
-            #game-wrap {
-                max-width: 900px; 
-                border-radius: 20px;
-                box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); 
-            }
-
+            /* Spielfeld, Steuerung und Endscreen breiter machen */
+            #game-wrap { max-width: 900px; border-radius: 20px; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); }
             #controls { max-width: 900px; }
-
             .end-popup-box { max-width: 500px; margin: 0 auto; }
+            
+            /* screen-inner bleibt standardmäßig schmal in der Mitte! (Kein Grid mehr) */
         }
     </style>
 </head>
@@ -570,6 +557,8 @@ function initAudioContext() {
 function handleFirstTouch() {
     initAudioContext();
     if (document.getElementById("scr-start").style.display !== "none") {
+        let saved = localStorage.getItem("doggycoAgent") || "";
+        
         if (!dogHasSpoken && videoEl) {
             dogHasSpoken = true;
             manageMedia('vid1');
@@ -824,12 +813,10 @@ async function fetchRanks() {
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-// VARIABLEN FÜR DYNAMISCHE BREITE
 let W = 400; 
 let H = 700;
 let lanes = [40, 120, 200, 280, 360];
 
-// RESIZE FUNKTION MACHT DAS SPIEL RESPONSIVE
 function resizeCanvas() {
     let gw = document.getElementById("game-wrap");
     if(gw && gw.clientWidth > 0) {
@@ -838,7 +825,6 @@ function resizeCanvas() {
         canvas.width = W;
         canvas.height = H;
         
-        // Berechne die 5 Bahnen dynamisch basierend auf der Breite
         let lw = W / 5;
         lanes = [lw*0.5, lw*1.5, lw*2.5, lw*3.5, lw*4.5];
         targetX = lanes[currLane];
@@ -944,7 +930,6 @@ function start(m, startLvl) {
         gameWrap.style.pointerEvents = "auto";
     }
     
-    // SPIELFELD BERECHNEN BEVOR ES LOSGEHT
     resizeCanvas();
     
     document.getElementById("canvas").classList.remove("blur");
@@ -1041,7 +1026,6 @@ function loop(t) {
         let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
         let ptsScaling = speedMult; 
 
-        // Kollisions-Distanz passt sich der Breite an
         let colDist = W / 10; 
 
         let bgMusic = document.getElementById("snd-action");
@@ -1067,7 +1051,6 @@ function loop(t) {
         if (!missionComplete) {
             timeLeft -= dt; energy -= (4 * speedMult) * dt;
 
-            // ABSOLUT FESTE ZEITEN (Keine Überschneidungen, genau 8 Sekunden Abstand)
             if(timeLeft <= 25 && !rocketSpawned) {
                 rocketSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
                 rocket = { x: W + 50, y: 150, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'shield' }; sfxRocket();
@@ -1325,8 +1308,12 @@ function loop(t) {
         }
         ctx.globalAlpha = 1;
 
+        // NEU: Floaters fliegen jetzt perfekt in die Mitte des Bildschirms!
         for(let i = floaters.length - 1; i >= 0; i--) {
-            let f = floaters[i]; f.y -= 2.0; f.x += (200 - f.x) * 0.05; f.o -= 0.8 * dt; 
+            let f = floaters[i]; 
+            f.y -= 2.0; 
+            f.x += ((W / 2) - f.x) * 0.05; // Berechnet dynamisch die Mitte (W/2)
+            f.o -= 0.8 * dt; 
             ctx.globalAlpha = Math.max(0, f.o); ctx.font = `900 ${f.s}px 'Orbitron'`; ctx.textAlign = "center";
             ctx.strokeStyle = "#000000"; ctx.lineWidth = 5; ctx.strokeText(f.txt, f.x, f.y); ctx.fillStyle = f.c; ctx.fillText(f.txt, f.x, f.y);
             if(f.o <= 0) floaters.splice(i, 1);
