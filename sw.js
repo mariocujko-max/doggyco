@@ -1,4 +1,4 @@
-const CACHE_NAME = 'doggyco-cache-v4';
+const CACHE_NAME = 'doggyco-cache-v5';
 
 // Installations-Event
 self.addEventListener('install', (event) => {
