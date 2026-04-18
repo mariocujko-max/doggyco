@@ -271,7 +271,6 @@
             #controls { max-width: 900px; }
             .end-popup-box { max-width: 500px; margin: 0 auto; }
             
-            /* screen-inner bleibt standardmäßig schmal in der Mitte! (Kein Grid mehr) */
         }
     </style>
 </head>
@@ -557,8 +556,6 @@ function initAudioContext() {
 function handleFirstTouch() {
     initAudioContext();
     if (document.getElementById("scr-start").style.display !== "none") {
-        let saved = localStorage.getItem("doggycoAgent") || "";
-        
         if (!dogHasSpoken && videoEl) {
             dogHasSpoken = true;
             manageMedia('vid1');
@@ -593,7 +590,6 @@ window.onload = function() {
     document.addEventListener('touchstart', handleFirstTouch, { once: false });
     document.addEventListener('click', handleFirstTouch, { once: false });
     
-    // START RESIZE LOGIK FÜR RESPONSIVE BREITE
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
@@ -1210,8 +1206,8 @@ function loop(t) {
         }
 
         const items = { 
-            'dog': [{i:'🦴',p:10}, {i:'🍪',p:20}, {i:'🥩',p:30}], 'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
-            'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}], 'fox': [{i:'🥚',p:10}, {i:'🍗',p:20}, {i:'🍖',p:30}],
+            'dog': [{i:'🦴',p:10}, {i:'🍊',p:20}, {i:'🥩',p:30}], 'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
+            'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}], 'fox': [{i:'🥚',p:10}, {i:'🪱',p:20}, {i:'🍖',p:30}],
             'panda': [{i:'🎋',p:10}, {i:'🍃',p:20}, {i:'🍉',p:30}], 'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'🍦',p:30}]
         };
         const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'unicorn':'🦄' }[mode];
@@ -1308,11 +1304,10 @@ function loop(t) {
         }
         ctx.globalAlpha = 1;
 
-        // NEU: Floaters fliegen jetzt perfekt in die Mitte des Bildschirms!
         for(let i = floaters.length - 1; i >= 0; i--) {
             let f = floaters[i]; 
             f.y -= 2.0; 
-            f.x += ((W / 2) - f.x) * 0.05; // Berechnet dynamisch die Mitte (W/2)
+            f.x += ((W / 2) - f.x) * 0.05; 
             f.o -= 0.8 * dt; 
             ctx.globalAlpha = Math.max(0, f.o); ctx.font = `900 ${f.s}px 'Orbitron'`; ctx.textAlign = "center";
             ctx.strokeStyle = "#000000"; ctx.lineWidth = 5; ctx.strokeText(f.txt, f.x, f.y); ctx.fillStyle = f.c; ctx.fillText(f.txt, f.x, f.y);
