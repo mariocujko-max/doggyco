@@ -99,6 +99,24 @@
         }
         #game-over-overlay.show .go-title { transform: scale(1); opacity: 1; }
 
+        /* NEU: TÜRSTEHER SCREEN FÜR VIDEO-AUTOPLAY */
+        #scr-gatekeeper {
+            position: absolute; inset: 0; z-index: 9999;
+            background: rgba(17, 17, 17, 0.95);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        .gate-btn {
+            background: var(--neon); color: #000; font-family: 'Orbitron'; font-weight: 900; font-size: 24px;
+            padding: 20px 40px; border-radius: 20px; border: none; cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5), 0 6px 0 #008b99;
+            animation: pulseGate 1.5s infinite alternate; transition: 0.1s;
+        }
+        .gate-btn:active { transform: translateY(6px); box-shadow: 0 0 10px rgba(0, 242, 255, 0.5), 0 0px 0 #008b99; }
+        @keyframes pulseGate { 0% { transform: scale(0.95); } 100% { transform: scale(1.05); } }
+
+
         .screen { 
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; 
             overflow-y: auto; -webkit-overflow-scrolling: touch; pointer-events: auto; padding-bottom: 50px;
@@ -262,15 +280,10 @@
            DOPPELTE BREITE FÜR PC, ABER MENÜ BLEIBT UNTEREINANDER
            ========================================================= */
         @media (orientation: landscape) and (min-height: 400px) {
-            
-            /* Der Hauptcontainer (Spiel) darf sich auf 900px ausbreiten */
             #phone-container { max-width: 900px; }
-
-            /* Spielfeld, Steuerung und Endscreen breiter machen */
             #game-wrap { max-width: 900px; border-radius: 20px; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); }
             #controls { max-width: 900px; }
             .end-popup-box { max-width: 500px; margin: 0 auto; }
-            
         }
     </style>
 </head>
@@ -281,6 +294,11 @@
 
 <div id="game-over-overlay">
     <div class="go-title">GAME OVER</div>
+</div>
+
+<div id="scr-gatekeeper">
+    <h1 style="font-family:'Orbitron'; font-size:40px; color:var(--gold); margin-bottom:40px; text-align:center; text-shadow:0 0 20px var(--gold);">DOGGYCO<br>MISSION</h1>
+    <button class="gate-btn" onclick="unlockSystem()">TAP TO START</button>
 </div>
 
 <div id="phone-container">
@@ -307,7 +325,7 @@
         </div>
     </div>
 
-    <div id="scr-start" class="screen">
+    <div id="scr-start" class="screen" style="display:none; opacity:0; transition: opacity 0.5s ease;">
         <div class="screen-inner">
             <div class="start-glass-panel">
                 <header>
@@ -553,43 +571,36 @@ function initAudioContext() {
     }
 }
 
-function handleFirstTouch() {
+// LOGIK FÜR DEN TÜRSTEHER (Entsperrt Audio und startet Video 1)
+function unlockSystem() {
     initAudioContext();
-    if (document.getElementById("scr-start").style.display !== "none") {
-        if (!dogHasSpoken && videoEl) {
-            dogHasSpoken = true;
-            manageMedia('vid1');
-        }
-    }
+    let gate = document.getElementById("scr-gatekeeper");
+    let startScr = document.getElementById("scr-start");
+    
+    gate.style.opacity = "0";
+    setTimeout(() => { 
+        gate.style.display = "none"; 
+        startScr.style.display = "block";
+        
+        // Timeout gibt dem Browser kurz Zeit, das Display=block zu rendern, bevor die Opacity hochgeht
+        setTimeout(() => {
+            startScr.style.opacity = "1";
+            if (!dogHasSpoken && videoEl) {
+                dogHasSpoken = true;
+                manageMedia('vid1');
+            }
+        }, 50);
+        
+    }, 500);
 }
 
 window.onload = function() {
     try {
         let savedName = localStorage.getItem("doggycoAgent");
         let pNameEl = document.getElementById("pName");
-        
-        if(savedName && pNameEl) { 
-            pNameEl.value = savedName; 
-        }
-
-        if(pNameEl) {
-            pNameEl.addEventListener('input', function() {
-                let saved = localStorage.getItem("doggycoAgent") || "";
-                let current = this.value.trim().toUpperCase();
-                
-                if (saved && current !== saved) {
-                    if (!dogHasSpoken && videoEl) {
-                        dogHasSpoken = true;
-                        manageMedia('vid1');
-                    }
-                }
-            });
-        }
+        if(savedName && pNameEl) { pNameEl.value = savedName; }
     } catch(e) {}
 
-    document.addEventListener('touchstart', handleFirstTouch, { once: false });
-    document.addEventListener('click', handleFirstTouch, { once: false });
-    
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
@@ -1047,19 +1058,22 @@ function loop(t) {
         if (!missionComplete) {
             timeLeft -= dt; energy -= (4 * speedMult) * dt;
 
+            // ANPASSUNG DER FLUGHÖHE: Rakete & Alien fliegen jetzt auf Höhe des UFOs
+            let flyHeight = (H / 4) + 20;
+
             if(timeLeft <= 25 && !rocketSpawned) {
                 rocketSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
-                rocket = { x: W + 50, y: 150, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'shield' }; sfxRocket();
+                rocket = { x: W + 50, y: flyHeight, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'shield' }; sfxRocket();
             }
             
-            if(timeLeft <= 17 && !magnetSpawned) {
+            if(timeLeft <= 16 && !magnetSpawned) {
                 magnetSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
-                rocket = { x: W + 50, y: 150, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'magnet' }; sfxAlienFly(); 
+                rocket = { x: W + 50, y: flyHeight, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'magnet' }; sfxAlienFly(); 
             }
 
-            if(timeLeft <= 9 && !ufoSpawned) {
+            if(timeLeft <= 7 && !ufoSpawned) {
                 ufoSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
-                ufos.push({ x: W + 50, y: H / 4 + Math.random() * H / 4, s: 75 * speedMult * (W/400), targetLane: safeL, dropped: false }); sfxUfo(); 
+                ufos.push({ x: W + 50, y: flyHeight, s: 75 * speedMult * (W/400), targetLane: safeL, dropped: false }); sfxUfo(); 
             }
 
             if(timeLeft <= 0) {
@@ -1208,7 +1222,7 @@ function loop(t) {
         const items = { 
             'dog': [{i:'🦴',p:10}, {i:'🍊',p:20}, {i:'🥩',p:30}], 'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
             'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}], 'fox': [{i:'🥚',p:10}, {i:'🪱',p:20}, {i:'🍖',p:30}],
-            'panda': [{i:'🎋',p:10}, {i:'🍊',p:20}, {i:'🍉',p:30}], 'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'🍦',p:30}]
+            'panda': [{i:'🎋',p:10}, {i:'🍃',p:20}, {i:'🍉',p:30}], 'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'🍦',p:30}]
         };
         const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'unicorn':'🦄' }[mode];
 
