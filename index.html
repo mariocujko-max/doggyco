@@ -99,11 +99,11 @@
         }
         #game-over-overlay.show .go-title { transform: scale(1); opacity: 1; }
 
-        /* NEU: TÜRSTEHER SCREEN FÜR VIDEO-AUTOPLAY */
+        /* TÜRSTEHER SCREEN FÜR VIDEO-AUTOPLAY (Jetzt transparent!) */
         #scr-gatekeeper {
             position: absolute; inset: 0; z-index: 9999;
-            background: rgba(17, 17, 17, 0.95);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.5); /* Halbtransparent, damit Hintergrundbild durchscheint */
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 0.5s ease;
         }
@@ -277,7 +277,7 @@
         }
 
         /* =========================================================
-           DOPPELTE BREITE FÜR PC, ABER MENÜ BLEIBT UNTEREINANDER
+           DOPPELTE BREITE FÜR PC
            ========================================================= */
         @media (orientation: landscape) and (min-height: 400px) {
             #phone-container { max-width: 900px; }
@@ -571,7 +571,6 @@ function initAudioContext() {
     }
 }
 
-// LOGIK FÜR DEN TÜRSTEHER (Entsperrt Audio und startet Video 1)
 function unlockSystem() {
     initAudioContext();
     let gate = document.getElementById("scr-gatekeeper");
@@ -582,7 +581,6 @@ function unlockSystem() {
         gate.style.display = "none"; 
         startScr.style.display = "block";
         
-        // Timeout gibt dem Browser kurz Zeit, das Display=block zu rendern, bevor die Opacity hochgeht
         setTimeout(() => {
             startScr.style.opacity = "1";
             if (!dogHasSpoken && videoEl) {
@@ -1058,7 +1056,6 @@ function loop(t) {
         if (!missionComplete) {
             timeLeft -= dt; energy -= (4 * speedMult) * dt;
 
-            // ANPASSUNG DER FLUGHÖHE: Rakete & Alien fliegen jetzt auf Höhe des UFOs
             let flyHeight = (H / 4) + 20;
 
             if(timeLeft <= 25 && !rocketSpawned) {
@@ -1222,7 +1219,7 @@ function loop(t) {
         const items = { 
             'dog': [{i:'🦴',p:10}, {i:'🍊',p:20}, {i:'🥩',p:30}], 'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
             'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}], 'fox': [{i:'🥚',p:10}, {i:'🪱',p:20}, {i:'🍖',p:30}],
-            'panda': [{i:'🎋',p:10}, {i:'🍃',p:20}, {i:'🍉',p:30}], 'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'🍦',p:30}]
+            'panda': [{i:'🎋',p:10}, {i:'🍊',p:20}, {i:'🍉',p:30}], 'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'🍦',p:30}]
         };
         const charIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'unicorn':'🦄' }[mode];
 
