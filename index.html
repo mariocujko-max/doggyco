@@ -99,10 +99,9 @@
         }
         #game-over-overlay.show .go-title { transform: scale(1); opacity: 1; }
 
-        /* TÜRSTEHER SCREEN FÜR VIDEO-AUTOPLAY (Jetzt transparent!) */
         #scr-gatekeeper {
             position: absolute; inset: 0; z-index: 9999;
-            background: rgba(0, 0, 0, 0.5); /* Halbtransparent, damit Hintergrundbild durchscheint */
+            background: rgba(0, 0, 0, 0.5); 
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 0.5s ease;
@@ -230,7 +229,6 @@
         .store-badges { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 10px; width: 100%; }
         .play-store-btn { display: block; width: 190px; height: 56px; transition: transform 0.2s ease-in-out; }
         .play-store-btn img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; display: block; }
-        .google-btn img { transform: scale(1.15); } 
         .apple-btn img { background: #000; padding: 6px; box-sizing: border-box; } 
         
         .play-store-btn:hover { transform: scale(1.05); cursor: pointer; }
@@ -276,9 +274,6 @@
             box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4);
         }
 
-        /* =========================================================
-           DOPPELTE BREITE FÜR PC
-           ========================================================= */
         @media (orientation: landscape) and (min-height: 400px) {
             #phone-container { max-width: 900px; }
             #game-wrap { max-width: 900px; border-radius: 20px; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); }
@@ -415,14 +410,8 @@
                 <h3>📱 GET THE APP</h3>
                 <p class="text-sm" style="margin-bottom: 15px;">Play DOGGYCO MISSION smoothly anytime as a real app on your device!</p>
                 <div class="store-badges">
-                    <a href="https://play.google.com/store/apps/details?id=com.doggycogames.doggyco" target="_blank" class="play-store-btn google-btn" rel="noopener noreferrer">
-                        <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" />
-                    </a>
                     <a href="https://www.apple.com/app-store/" target="_blank" class="play-store-btn apple-btn" rel="noopener noreferrer">
                         <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" />
-                    </a>
-                    <a href="https://apps.microsoft.com/detail/9ncrxpddd1rp?hl=de-DE&gl=DE" target="_blank" class="play-store-btn ms-btn" rel="noopener noreferrer">
-                        <img alt="Get it from Microsoft" src="https://get.microsoft.com/images/en-us%20dark.svg" />
                     </a>
                 </div>
             </div>
@@ -452,21 +441,6 @@
                 <h1 id="f-score" style="font-family: 'Orbitron'; font-size: 42px; margin: 10px 0 20px 0; line-height: 1; text-align: center; color: var(--gold); text-shadow: 0 0 15px var(--gold);">0 PTS</h1> 
                 
                 <button class="btn-restart-green" onclick="goToLevelSelect()">LEVEL AUSWAHL</button> 
-                
-                <div style="margin-top: 15px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; width: 100%;">
-                    <p class="text-sm" style="margin-bottom: 15px; color: #aaa;">Download the full version:</p>
-                    <div class="store-badges">
-                        <a href="https://play.google.com/store/apps/details?id=com.doggycogames.doggyco" target="_blank" class="play-store-btn google-btn" rel="noopener noreferrer">
-                            <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" />
-                        </a>
-                        <a href="https://www.apple.com/app-store/" target="_blank" class="play-store-btn apple-btn" rel="noopener noreferrer">
-                            <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" />
-                        </a>
-                        <a href="https://apps.microsoft.com/detail/9ncrxpddd1rp?hl=de-DE&gl=DE" target="_blank" class="play-store-btn ms-btn" rel="noopener noreferrer">
-                            <img alt="Get it from Microsoft" src="https://get.microsoft.com/images/en-us%20dark.svg" />
-                        </a>
-                    </div>
-                </div>
             </div>
 
         </div>
