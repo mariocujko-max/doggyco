@@ -99,9 +99,10 @@
         }
         #game-over-overlay.show .go-title { transform: scale(1); opacity: 1; }
 
+        /* TÜRSTEHER SCREEN */
         #scr-gatekeeper {
             position: absolute; inset: 0; z-index: 9999;
-            background: rgba(0, 0, 0, 0.5); 
+            background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 0.5s ease;
@@ -114,7 +115,6 @@
         }
         .gate-btn:active { transform: translateY(6px); box-shadow: 0 0 10px rgba(0, 242, 255, 0.5), 0 0px 0 #008b99; }
         @keyframes pulseGate { 0% { transform: scale(0.95); } 100% { transform: scale(1.05); } }
-
 
         .screen { 
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; 
@@ -229,13 +229,14 @@
         .store-badges { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 10px; width: 100%; }
         .play-store-btn { display: block; width: 190px; height: 56px; transition: transform 0.2s ease-in-out; }
         .play-store-btn img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; display: block; }
+        .google-btn img { transform: scale(1.15); } 
         .apple-btn img { background: #000; padding: 6px; box-sizing: border-box; } 
         
         .play-store-btn:hover { transform: scale(1.05); cursor: pointer; }
         .play-store-btn:active { transform: scale(0.95); }
 
         #scr-end { background: transparent; z-index: 1000; }
-        #scr-end .screen-inner { justify-content: center; padding: 20px; } /* ZENTRIERT */
+        #scr-end .screen-inner { justify-content: flex-start; padding-top: 30px; }
         
         .end-popup-box {
             background: rgba(20, 20, 20, 0.7);
@@ -249,7 +250,8 @@
             flex-direction: column;
             align-items: center;
             box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-            margin: auto; /* ZENTRIERT */
+            max-height: 88vh;
+            overflow-y: auto;
         }
         
         .btn-restart-green {
@@ -272,6 +274,21 @@
             transform: translateY(6px);
             box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4);
         }
+
+        /* ZODIAC MINI-GAME STYLES */
+        .z-slot {
+            width: 45px; height: 45px; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px;
+            display: flex; justify-content: center; align-items: center; font-size: 24px; color: #fff;
+            background: rgba(0,0,0,0.5); text-shadow: 0 0 10px var(--gold);
+        }
+        .z-key {
+            width: 60px; height: 60px; border: 2px solid var(--neon); border-radius: 12px;
+            display: flex; justify-content: center; align-items: center; font-size: 32px;
+            background: rgba(0,242,255,0.1); cursor: pointer; transition: 0.1s;
+            box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); 
+        }
+        .z-key:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon); }
+        .z-key.disabled { opacity: 0.2; pointer-events: none; border-color: #555; box-shadow: none; }
 
         @media (orientation: landscape) and (min-height: 400px) {
             #phone-container { max-width: 900px; }
@@ -309,7 +326,7 @@
             </div>
         </div>
 
-        <canvas id="canvas"></canvas>
+        <canvas id="canvas" style="transition: transform 0.1s linear;"></canvas>
 
         <div id="lvl-up-popup">NEXT LEVEL!</div>
 
@@ -319,6 +336,7 @@
         </div>
     </div>
 
+    <!-- STARTSEITE -->
     <div id="scr-start" class="screen" style="display:none; opacity:0; transition: opacity 0.5s ease;">
         <div class="screen-inner">
             <div class="start-glass-panel">
@@ -409,8 +427,14 @@
                 <h3>📱 GET THE APP</h3>
                 <p class="text-sm" style="margin-bottom: 15px;">Play DOGGYCO MISSION smoothly anytime as a real app on your device!</p>
                 <div class="store-badges">
+                    <a href="https://play.google.com/store/apps/details?id=com.doggycogames.doggyco" target="_blank" class="play-store-btn google-btn" rel="noopener noreferrer">
+                        <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" />
+                    </a>
                     <a href="https://www.apple.com/app-store/" target="_blank" class="play-store-btn apple-btn" rel="noopener noreferrer">
                         <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" />
+                    </a>
+                    <a href="https://apps.microsoft.com/detail/9ncrxpddd1rp?hl=de-DE&gl=DE" target="_blank" class="play-store-btn ms-btn" rel="noopener noreferrer">
+                        <img alt="Get it from Microsoft" src="https://get.microsoft.com/images/en-us%20dark.svg" />
                     </a>
                 </div>
             </div>
@@ -426,6 +450,25 @@
         </div>
     </div>
 
+    <!-- ZODIAC MEMORY MINI-GAME SCREEN -->
+    <div id="scr-zodiac" class="screen" style="display:none; background: rgba(0,0,0,0.85); z-index: 2000; backdrop-filter: blur(10px);">
+        <div class="screen-inner" style="justify-content: center; padding-top: 20px;">
+            <h2 style="color:var(--neon); font-family: 'Orbitron'; font-size: 28px; text-align:center; margin-bottom: 10px; text-shadow: 0 0 15px var(--neon);">MEMORY OVERRIDE</h2>
+            <p style="text-align:center; font-family:'Plus Jakarta Sans'; font-size:14px; margin-bottom: 20px; line-height:1.4;">Enter the 12 Zodiac signs in the exact order they appeared in the background to unlock LEVEL 13.<br><b>Need: 6 / 12 correct!</b></p>
+
+            <div id="zodiac-slots" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:30px; width: 100%; max-width: 350px;">
+                <!-- Slots dynamisch befüllt -->
+            </div>
+
+            <div id="zodiac-keys" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom: 30px; width: 100%; max-width: 350px;">
+                <!-- Keys dynamisch befüllt -->
+            </div>
+
+            <button class="btn-restart-green" style="background:var(--red); box-shadow: 0 6px 0 #990000; margin-top:0;" onclick="clearZodiac()">CLEAR INPUT</button>
+        </div>
+    </div>
+
+    <!-- SCROLLBARES END POPUP -->
     <div id="scr-end" class="screen" style="display:none">
         <div class="screen-inner"> 
             
@@ -440,6 +483,21 @@
                 <h1 id="f-score" style="font-family: 'Orbitron'; font-size: 42px; margin: 10px 0 20px 0; line-height: 1; text-align: center; color: var(--gold); text-shadow: 0 0 15px var(--gold);">0 PTS</h1> 
                 
                 <button class="btn-restart-green" onclick="goToLevelSelect()">LEVEL AUSWAHL</button> 
+                
+                <div style="margin-top: 15px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; width: 100%;">
+                    <p class="text-sm" style="margin-bottom: 15px; color: #aaa;">Download the full version:</p>
+                    <div class="store-badges">
+                        <a href="https://play.google.com/store/apps/details?id=com.doggycogames.doggyco" target="_blank" class="play-store-btn google-btn" rel="noopener noreferrer">
+                            <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" />
+                        </a>
+                        <a href="https://www.apple.com/app-store/" target="_blank" class="play-store-btn apple-btn" rel="noopener noreferrer">
+                            <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" />
+                        </a>
+                        <a href="https://apps.microsoft.com/detail/9ncrxpddd1rp?hl=de-DE&gl=DE" target="_blank" class="play-store-btn ms-btn" rel="noopener noreferrer">
+                            <img alt="Get it from Microsoft" src="https://get.microsoft.com/images/en-us%20dark.svg" />
+                        </a>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -464,7 +522,7 @@ function manageMedia(action) {
     } else if(action === 'vid2') {
         if(vid2) { vid2.currentTime = 0; vid2.muted = false; vid2.play().catch(e=>{}); processVideoFrame2(); }
     } else if(action === 'game') {
-        if(bgMusic) { bgMusic.volume = 0.05; bgMusic.playbackRate = 1.0; bgMusic.play().catch(e=>{}); }
+        if(bgMusic) { bgMusic.volume = 0.15; bgMusic.playbackRate = 1.0; bgMusic.play().catch(e=>{}); }
     } else if(action === 'none') {
     }
 }
@@ -597,6 +655,7 @@ function goToLevelSelect() {
     document.documentElement.style.setProperty('--neon', '#00f2ff');
 
     document.getElementById("scr-end").style.display = "none";
+    document.getElementById("scr-zodiac").style.display = "none";
     
     document.getElementById("controls").style.display = "flex";
     document.getElementById("hud").style.display = "block";
@@ -605,6 +664,7 @@ function goToLevelSelect() {
     document.getElementById("game-wrap").style.pointerEvents = "none";
     
     document.getElementById("canvas").classList.remove("blur");
+    document.getElementById("canvas").style.transform = "none"; // Parallax Reset
     
     document.getElementById("phone-container").classList.remove("is-playing");
     
@@ -624,21 +684,15 @@ function move(dir) {
     targetX = lanes[currLane]; 
 }
 
-function sfxMove() {
-    if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
-    try { playTone(400, 'sine', 0.05, 0.1); } catch(e) {}
-}
-
 function triggerMove(dir, btnId) {
     if(!active || missionComplete) return;
     try { if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); } } catch(e) {}
     hapticMove(); 
-    sfxMove(); 
     
     for(let i=0; i<8; i++) {
         fxParticles.push({
             x: playerX + (Math.random()-0.5)*30,
-            y: H - 140 + (Math.random()-0.5)*10,
+            y: H - 70 + (Math.random()-0.5)*10,
             vx: -dir * 30 + (Math.random()-0.5)*40,
             vy: -10 - Math.random()*20,
             life: 0.4 + Math.random()*0.2,
@@ -825,6 +879,13 @@ let globalAnimationId = null;
 
 let clouds = [], opponents = [], ufos = []; 
 
+// ZODIAC GAME VARIABLES
+const allZodiacs = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+let zSeq = [];
+let zGuessed = [];
+let droppingZodiac = null;
+let zodiacSpawned = false;
+
 let invincibleTimer = 0;
 let alarmTimer = 0; 
 let rocketSpawned = false;
@@ -895,6 +956,11 @@ function start(m, startLvl) {
     mode = m;
     level = startLvl;
     
+    // ZUFÄLLIGE STERNZEICHEN-REIHENFOLGE GENERIEREN
+    zSeq = [...allZodiacs].sort(() => Math.random() - 0.5);
+    zGuessed = [];
+    zodiacSpawned = false; droppingZodiac = null;
+    
     hp = 3; energy = 100; score = 0; timeLeft = 30;
     entities = []; floaters = []; fireworks = []; fxParticles = []; missionComplete = false;
     
@@ -919,7 +985,7 @@ function start(m, startLvl) {
     document.getElementById("canvas").classList.remove("blur");
     document.getElementById("phone-container").classList.add("is-playing");
     
-    permSpiders = [ { lane: 0, y: 60, dy: 1, hit: false }, { lane: 4, y: H-190, dy: -1, hit: false } ];
+    permSpiders = [ { lane: 0, y: 60, dy: 1, hit: false }, { lane: 4, y: H-120, dy: -1, hit: false } ];
 
     active = true; lastT = 0; 
     globalAnimationId = requestAnimationFrame(loop);
@@ -950,6 +1016,97 @@ function launchMassiveFireworks() {
     }
 }
 
+// NEUE MEMORY FUNKTIONEN FÜR DAS STERNZEICHEN-SPIEL
+function showZodiacBoard() {
+    document.getElementById("scr-zodiac").style.display = "flex";
+    document.getElementById("canvas").style.transform = "none";
+    zGuessed = [];
+    renderZodiacBoard();
+}
+
+function renderZodiacBoard() {
+    let slotsHtml = "";
+    for(let i=0; i<12; i++) {
+        let sign = zGuessed[i] || "";
+        slotsHtml += `<div class="z-slot">${sign}</div>`;
+    }
+    document.getElementById("zodiac-slots").innerHTML = slotsHtml;
+
+    let keysHtml = "";
+    allZodiacs.forEach(sign => {
+        let disabled = zGuessed.includes(sign) ? "disabled" : "";
+        keysHtml += `<div class="z-key ${disabled}" onclick="pickZodiac('${sign}')">${sign}</div>`;
+    });
+    document.getElementById("zodiac-keys").innerHTML = keysHtml;
+}
+
+function pickZodiac(sign) {
+    if(zGuessed.includes(sign)) return;
+    if(zGuessed.length < 12) {
+        zGuessed.push(sign);
+        sfxCollect(); 
+        renderZodiacBoard();
+        if(zGuessed.length === 12) {
+            setTimeout(evaluateZodiac, 600);
+        }
+    }
+}
+
+function clearZodiac() {
+    zGuessed = [];
+    sfxHit(); 
+    renderZodiacBoard();
+}
+
+function evaluateZodiac() {
+    let correct = 0;
+    for(let i=0; i<12; i++) {
+        if(zGuessed[i] === zSeq[i]) correct++;
+    }
+    document.getElementById("scr-zodiac").style.display = "none";
+
+    if(correct >= 6) {
+        // GEWONNEN - AB INS LEVEL 13
+        level = 13;
+        timeLeft = 30; 
+        let bonus = correct * 100 * 13; // Fette Bonuspunkte!
+        score += bonus;
+        
+        sfxLevelUp();
+        launchMassiveFireworks(); 
+        
+        let pop = document.getElementById("lvl-up-popup");
+        pop.innerHTML = `SYSTEM OVERRIDE!<br><span style='font-size:18px; color:#fff'>${correct}/12 CORRECT!</span><br><span style='font-size:24px; color:var(--neon)'>+${bonus} PTS</span><br><span style='font-size:20px; color:var(--gold)'>LEVEL 13 UNLOCKED</span>`;
+        pop.classList.add("show");
+        setTimeout(() => pop.classList.remove("show"), 3000);
+        
+        active = true;
+        lastT = 0;
+        requestAnimationFrame(loop);
+    } else {
+        // VERLOREN - Normales Spielende
+        triggerVictory();
+    }
+}
+
+function triggerVictory() {
+    missionComplete = true; 
+    active = true; 
+    launchMassiveFireworks();
+    setTimeout(() => { addFloat(W/2, H/2, "MISSION", "#00ff88", 45); addFloat(W/2, H/2 + 60, "ACCOMPLISHED!", "#00ff88", 35); }, 1000);
+
+    let heartsToPop = hp; let burstDelay = 2500;
+    for(let i=0; i < heartsToPop; i++) {
+        setTimeout(() => {
+            hp--; score += 1000; charJump = 20; sfxStarCollect(); triggerVibration([50, 50, 100]);
+            addFloat(W/2 + (Math.random()*40-20), H/2 + 140, "❤️ +1000", "#00ff88", 40);
+            for(let k=0; k<15; k++) fireworks.push({ x: W/2, y: H/2+140, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.0, c: '#00ff88' });
+        }, 2500 + (i * 800));
+        burstDelay = 2500 + (i * 800);
+    }
+    setTimeout(() => { active = false; showEndScreen(true); }, burstDelay + 3000); 
+}
+
 async function saveScoreAndRefresh(newScore) {
     if(!supabaseClient || typeof supabase === 'undefined') return;
     try {
@@ -969,6 +1126,7 @@ function showEndScreen(win) {
     document.getElementById("controls").style.display = "none";
     document.getElementById("hud").style.display = "none";
     document.getElementById("canvas").style.display = "none"; 
+    document.getElementById("canvas").style.transform = "none"; 
     ctx.clearRect(0,0,W,H);
     
     document.getElementById("game-wrap").style.pointerEvents = "none";
@@ -1005,7 +1163,7 @@ function loop(t) {
         ctx.shadowBlur = 0; 
         ctx.clearRect(0,0,W,H);
 
-        const hitTop = H - 210; const hitBottom = H - 90;
+        const hitTop = H - 150; const hitBottom = H - 50;
         let capLvl = Math.min(level, 12);
         let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
         let ptsScaling = speedMult; 
@@ -1046,32 +1204,32 @@ function loop(t) {
                 magnetSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
                 rocket = { x: W + 50, y: flyHeight, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'magnet' }; sfxAlienFly(); 
             }
+            
+            // STERNZEICHEN-DROP BEI 12 SEKUNDEN
+            if(timeLeft <= 13 && !zodiacSpawned && level <= 12) {
+                zodiacSpawned = true;
+                droppingZodiac = { x: W/2, y: -50, s: 120 * speedMult, txt: zSeq[level-1] };
+            }
 
             if(timeLeft <= 7 && !ufoSpawned) {
                 ufoSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2; 
                 ufos.push({ x: W + 50, y: flyHeight, s: 75 * speedMult * (W/400), targetLane: safeL, dropped: false }); sfxUfo(); 
             }
 
+            // LEVEL ENDE LOGIK!
             if(timeLeft <= 0) {
                 if(level === 12) {
-                    missionComplete = true; 
-                    launchMassiveFireworks();
-                    setTimeout(() => { addFloat(W/2, H/2, "MISSION", "#00ff88", 45); addFloat(W/2, H/2 + 60, "ACCOMPLISHED!", "#00ff88", 35); }, 1000);
-
-                    let heartsToPop = hp; let burstDelay = 2500;
-                    for(let i=0; i < heartsToPop; i++) {
-                        setTimeout(() => {
-                            hp--; score += 1000; charJump = 20; sfxStarCollect(); triggerVibration([50, 50, 100]);
-                            addFloat(W/2 + (Math.random()*40-20), H/2 + 140, "❤️ +1000", "#00ff88", 40);
-                            for(let k=0; k<15; k++) fireworks.push({ x: W/2, y: H/2+140, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.0, c: '#00ff88' });
-                        }, 2500 + (i * 800));
-                        burstDelay = 2500 + (i * 800);
-                    }
-                    setTimeout(() => { active = false; showEndScreen(true); }, burstDelay + 3000); 
-
+                    // STERNZEICHEN MINI-GAME STARTET HIER
+                    active = false;
+                    showZodiacBoard();
+                } else if (level === 13) {
+                    // ECHTES ENDE NACH DEM BONUS LEVEL
+                    triggerVictory();
                 } else {
+                    // NORMALES LEVEL UP
                     level++; timeLeft = 30; energy = Math.min(100, energy + (25 * speedMult));
-                    rocketSpawned = false; ufoSpawned = false; magnetSpawned = false; rocket = null; fallingCore = null; fallingAlien = null; fallingHearts = [];
+                    rocketSpawned = false; ufoSpawned = false; magnetSpawned = false; zodiacSpawned = false; 
+                    rocket = null; fallingCore = null; fallingAlien = null; fallingHearts = []; droppingZodiac = null;
                     
                     const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'unicorn'];
                     let expectedModeIndex = Math.floor((level - 1) / 2) % 6;
@@ -1100,12 +1258,35 @@ function loop(t) {
         document.getElementById("lvl-txt").innerText = level;
         document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
 
+        // ==========================================
+        // NEUER PARALLAX EFFEKT FÜR DEN CANVAS
+        // ==========================================
+        if(!missionComplete) {
+            let tiltX = (playerX - W/2) * 0.03; // Neigung in Grad
+            let shiftX = (W/2 - playerX) * 0.08; // Verschiebung in Pixel
+            canvas.style.transform = `perspective(800px) rotateY(${tiltX}deg) translateX(${shiftX}px)`;
+        }
+
         ctx.globalAlpha = 0.3; 
         clouds.forEach(c => {
             if(!missionComplete) c.x += (10 + speedMult*5) * dt; 
             if(c.x > W + 50) c.x = -50; 
             ctx.font = c.s + "px Arial"; ctx.textAlign = "center"; ctx.fillText('☁️', c.x, c.y);
         }); ctx.globalAlpha = 1.0; 
+
+        // STERNZEICHEN FALLEN IM HINTERGRUND
+        if(droppingZodiac) {
+            droppingZodiac.y += droppingZodiac.s * dt;
+            ctx.save();
+            ctx.font = "80px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "rgba(255, 215, 0, 0.4)"; 
+            ctx.shadowBlur = 30; ctx.shadowColor = "#FFD700";
+            ctx.fillText(droppingZodiac.txt, droppingZodiac.x, droppingZodiac.y);
+            ctx.restore();
+            if(droppingZodiac.y > H + 100) droppingZodiac = null;
+        }
 
         if (rocket && !missionComplete) {
             rocket.x -= rocket.s * dt;
@@ -1196,7 +1377,7 @@ function loop(t) {
         }
 
         const items = { 
-            'dog': [{i:'🦴',p:10}, {i:'🍪',p:20}, {i:'🥩',p:30}], 'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
+            'dog': [{i:'🦴',p:10}, {i:'🍊',p:20}, {i:'🥩',p:30}], 'cat': [{i:'🐟',p:10}, {i:'🥛',p:20}, {i:'🐁',p:30}],
             'rabbit': [{i:'🥕',p:10}, {i:'🥬',p:20}, {i:'🍎',p:30}], 'fox': [{i:'🥚',p:10}, {i:'🪱',p:20}, {i:'🍖',p:30}],
             'panda': [{i:'🎋',p:10}, {i:'🍊',p:20}, {i:'🍉',p:30}], 'unicorn': [{i:'🍬',p:10}, {i:'🧁',p:20}, {i:'🍦',p:30}]
         };
@@ -1224,7 +1405,7 @@ function loop(t) {
             ctx.font = "40px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText('🕷️', sx, s.y);
 
             if(!missionComplete) {
-                if(s.y >= H - 190) { s.dy = -1; s.y = H - 190; s.hit = false; }
+                if(s.y >= H - 120) { s.dy = -1; s.y = H - 120; s.hit = false; }
                 if(s.y <= 60) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = 60; s.hit = false; }
 
                 if(!s.hit && Math.abs(sx - playerX) < colDist && s.y > hitTop && s.y < hitBottom) {
@@ -1240,16 +1421,18 @@ function loop(t) {
             
             if (magnetTimer > 0 && !e.bad && !missionComplete && e.y > 50) {
                 let dx = playerX - e.x;
-                let dy = (H - 150) - e.y;
+                let dy = (H - 80) - e.y;
                 let dist = Math.sqrt(dx*dx + dy*dy);
                 if (dist < (W * 1.5)) { 
                     e.x += (dx / dist) * W * 1.5 * dt; 
                     e.y += (dy / dist) * H * 0.8 * dt; 
                 } else {
                     e.y += e.s * dt; 
+                    e.x = lanes[e.l];
                 }
             } else {
                 if(!missionComplete) e.y += e.s * dt;
+                e.x = lanes[e.l];
             }
             
             ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e.t, e.x, e.y);
@@ -1266,7 +1449,7 @@ function loop(t) {
         }
 
         if(!missionComplete) playerX += (targetX - playerX) * 0.15;
-        let drawX = playerX; let drawY = H - 150;
+        let drawX = playerX; let drawY = H - 80;
         if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
         if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
         
@@ -1292,6 +1475,7 @@ function loop(t) {
         }
         ctx.globalAlpha = 1;
 
+        // PUNKTE FLIEGEN IMMER IN DIE MITTE, EGAL WIE BREIT DER BILDSCHIRM IST!
         for(let i = floaters.length - 1; i >= 0; i--) {
             let f = floaters[i]; 
             f.y -= 2.0; 
