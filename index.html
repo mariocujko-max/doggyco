@@ -324,49 +324,7 @@
         </div>
     </div>
 
-    <!-- EBENE 1: Startknopf -->
-    <div id="scr-step1" class="screen" style="display:none; opacity:0; transition: opacity 0.5s ease;">
-        <div class="screen-inner" style="justify-content:center; align-items:center;">
-            <div class="start-glass-panel" style="text-align:center;">
-                <header>
-                    <h1 class="app-title">DOGGYCO<br>MISSION</h1>
-                </header>
-                <div id="video-host-1" style="width: 100%;">
-                    <div class="dog-video-wrapper" id="main-vid-wrapper">
-                        <canvas id="dog-video-canvas" width="250" height="250" class="dog-video-canvas"></canvas>
-                        <video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
-                    </div>
-                </div>
-                <button class="btn-char" style="border-color:var(--neon); width:80%; margin-top:20px; font-size:22px; padding:18px;" onclick="goToStep2()">▶ START</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- EBENE 2: Namenseingabe + Video -->
-    <div id="scr-step2" class="screen" style="display:none; opacity:0; transition: opacity 0.5s ease;">
-        <div class="screen-inner" style="justify-content:center; align-items:center;">
-            <div class="start-glass-panel" style="text-align:center;">
-                <h2 style="color:var(--neon); margin-bottom:20px; font-size:20px;">ENTER YOUR CODENAME</h2>
-                <div id="video-host-2" style="width: 100%;">
-                    <div class="dog-video-wrapper">
-                        <canvas id="dog-video-canvas2" width="250" height="250" class="dog-video-canvas"></canvas>
-                        <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
-                    </div>
-                </div>
-                <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key==='Enter'){this.blur();goToStep3();}">
-                <div class="privacy-consent" style="margin:10px 0;">
-                    By playing, you consent to submitting your Codename &amp; Score to our global leaderboard.<br>
-                    <a href="https://github.com/mariocujko-max/doggyco/blob/main/PRIVACY.md" target="_blank">Privacy Policy</a>
-                </div>
-                <div style="display:flex; gap:12px; width:100%; margin-top:10px;">
-                    <button class="btn-char" style="border-color:#666; flex:1; font-size:16px;" onclick="goToStep1()">◀ BACK</button>
-                    <button class="btn-char" style="border-color:var(--neon); flex:2; font-size:18px;" onclick="goToStep3()">NEXT ▶</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- EBENE 3: Spielauswahl + Leaderboard + Info (Musik startet erst beim Spielstart) -->
+    <!-- EBENE 3: Spielauswahl -->
     <div id="scr-start" class="screen" style="display:none; opacity:0; transition: opacity 0.5s ease;">
         <div class="screen-inner">
             <div class="start-glass-panel">
@@ -475,9 +433,55 @@
         </div>
     </div>
 
+</div><!-- end phone-container -->
+
+<!-- EBENE 1 und 2 außerhalb phone-container damit position:fixed korrekt funktioniert -->
+
+<!-- EBENE 1: Startknopf (video läuft) -->
+<div id="scr-step1" class="screen" style="display:none; opacity:0;">
+    <div class="screen-inner" style="justify-content:center; align-items:center;">
+        <div class="start-glass-panel" style="text-align:center;">
+            <header>
+                <h1 class="app-title">DOGGYCO<br>MISSION</h1>
+            </header>
+            <div id="video-host-1b" style="width:100%;">
+                <div class="dog-video-wrapper">
+                    <canvas id="dog-video-canvas-s1" width="250" height="250" class="dog-video-canvas"></canvas>
+                </div>
+            </div>
+            <button class="btn-char" style="border-color:var(--neon); width:80%; margin-top:20px; font-size:22px; padding:18px;" onclick="goToStep2()">▶ START</button>
+        </div>
+    </div>
+</div>
+
+<!-- EBENE 2: Namenseingabe -->
+<div id="scr-step2" class="screen" style="display:none; opacity:0;">
+    <div class="screen-inner" style="justify-content:center; align-items:center;">
+        <div class="start-glass-panel" style="text-align:center;">
+            <h2 style="color:var(--neon); margin-bottom:20px; font-size:20px;">ENTER YOUR CODENAME</h2>
+            <div id="video-host-2b" style="width:100%;">
+                <div class="dog-video-wrapper">
+                    <canvas id="dog-video-canvas-s2" width="250" height="250" class="dog-video-canvas"></canvas>
+                </div>
+            </div>
+            <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key==='Enter'){this.blur();goToStep3();}">
+            <div class="privacy-consent" style="margin:10px 0;">
+                By playing, you consent to submitting your Codename &amp; Score to our global leaderboard.<br>
+                <a href="https://github.com/mariocujko-max/doggyco/blob/main/PRIVACY.md" target="_blank">Privacy Policy</a>
+            </div>
+            <div style="display:flex; gap:12px; width:100%; margin-top:10px;">
+                <button class="btn-char" style="border-color:#666; flex:1; font-size:16px;" onclick="goToStep1()">◀ BACK</button>
+                <button class="btn-char" style="border-color:var(--neon); flex:2; font-size:18px;" onclick="goToStep3()">WEITER ▶</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio>
+
+<!-- Video-Elemente versteckt im DOM -->
+<video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
+<video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
 
 <script>
 function manageMedia(action) {
@@ -505,13 +509,13 @@ function manageMedia(action) {
 }
 
 let videoEl = document.getElementById('dog-video');
-let videoCanvas = document.getElementById('dog-video-canvas');
-let videoCtx = videoCanvas.getContext('2d', { willReadFrequently: true });
+let videoCanvas = document.getElementById('dog-video-canvas-s1');
+let videoCtx = videoCanvas ? videoCanvas.getContext('2d', { willReadFrequently: true }) : null;
 let videoAnimationId = null;
 
 let videoEl2 = document.getElementById('dog-video2');
-let videoCanvas2 = document.getElementById('dog-video-canvas2');
-let videoCtx2 = videoCanvas2.getContext('2d', { willReadFrequently: true });
+let videoCanvas2 = document.getElementById('dog-video-canvas-s2');
+let videoCtx2 = videoCanvas2 ? videoCanvas2.getContext('2d', { willReadFrequently: true }) : null;
 let videoAnimationId2 = null;
 
 // End-Screen Video
@@ -540,7 +544,7 @@ function processEndVideoFrame() {
 }
 
 function processGreenScreen(vEl, vCanvas, vCtx) {
-    if (!vEl.videoWidth) return;
+    if (!vEl || !vCanvas || !vCtx || !vEl.videoWidth) return;
     let vw = vEl.videoWidth; let vh = vEl.videoHeight;
     let size = Math.min(vw, vh);
     let startX = (vw - size) / 2; let startY = (vh - size) / 2;
@@ -577,15 +581,19 @@ function resetVideoToStart(vEl, vCanvas, vCtx) {
     setTimeout(() => { processGreenScreen(vEl, vCanvas, vCtx); }, 100);
 }
 
-videoEl.addEventListener('loadeddata', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
-videoEl.addEventListener('seeked', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
-videoEl.addEventListener('play', processVideoFrame);
-videoEl.addEventListener('ended', () => resetVideoToStart(videoEl, videoCanvas, videoCtx));
+if(videoEl && videoCanvas) {
+    videoEl.addEventListener('loadeddata', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
+    videoEl.addEventListener('seeked', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
+    videoEl.addEventListener('play', processVideoFrame);
+    videoEl.addEventListener('ended', () => resetVideoToStart(videoEl, videoCanvas, videoCtx));
+}
 
-videoEl2.addEventListener('loadeddata', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
-videoEl2.addEventListener('seeked', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
-videoEl2.addEventListener('play', processVideoFrame2);
-videoEl2.addEventListener('ended', () => resetVideoToStart(videoEl2, videoCanvas2, videoCtx2));
+if(videoEl2 && videoCanvas2) {
+    videoEl2.addEventListener('loadeddata', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+    videoEl2.addEventListener('seeked', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+    videoEl2.addEventListener('play', processVideoFrame2);
+    videoEl2.addEventListener('ended', () => resetVideoToStart(videoEl2, videoCanvas2, videoCtx2));
+}
 
 let systemActive = false;
 let dogHasSpoken = false;
@@ -775,7 +783,7 @@ document.body.addEventListener('touchstart', function(e) {}, { passive: true });
 let currentStep = 0;
 
 function showStep(id) {
-    ['scr-step1','scr-step2','scr-start'].forEach(sid => {
+    ['scr-step1','scr-step2','scr-start','scr-end'].forEach(sid => {
         let el = document.getElementById(sid);
         if(!el) return;
         if(sid === id) {
