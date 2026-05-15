@@ -607,21 +607,13 @@ function initAudioContext() {
 function unlockSystem() {
     initAudioContext();
     let gate = document.getElementById("scr-gatekeeper");
-    let startScr = document.getElementById("scr-start");
-    
+
     gate.style.opacity = "0";
     setTimeout(() => {
         gate.style.display = "none";
-        startScr.style.display = "block";
-        
-        setTimeout(() => {
-            startScr.style.opacity = "1";
-            if (!dogHasSpoken && videoEl) {
-                dogHasSpoken = true;
-                manageMedia('vid1');
-            }
-        }, 50);
-        
+        // Ebene 1 anzeigen und Video starten
+        dogHasSpoken = true;
+        goToStep1();
     }, 500);
 }
 
@@ -797,9 +789,7 @@ function showStep(id) {
 }
 
 function goToStep1() {
-    // Video auf Ebene 1 starten
-    let v1 = document.getElementById('dog-video');
-    if(v1) { v1.currentTime = 0; v1.play().catch(e=>{}); processVideoFrame(); }
+    manageMedia('vid1');
     showStep('scr-step1');
 }
 
