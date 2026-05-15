@@ -496,9 +496,9 @@ function manageMedia(action) {
     if(vidEnd) { vidEnd.pause(); }
 
     if(action === 'vid1') {
-        if(vid1) { vid1.currentTime = 0; vid1.play().catch(e=>{}); processVideoFrame(); }
+        if(vid1) { vid1.currentTime = 0; vid1.play().catch(e=>{}); try { processVideoFrame(); } catch(e){} }
     } else if(action === 'vid2') {
-        if(vidEnd) { vidEnd.currentTime = 0; vidEnd.muted = false; vidEnd.play().catch(e=>{}); processEndVideoFrame(); }
+        if(vidEnd) { vidEnd.currentTime = 0; vidEnd.muted = false; vidEnd.play().catch(e=>{}); try { processEndVideoFrame(); } catch(e){} }
     } else if(action === 'game') {
         if(bgMusic) {
             bgMusic.pause(); bgMusic.currentTime = 0;
@@ -614,15 +614,13 @@ function initAudioContext() {
 
 function unlockSystem() {
     initAudioContext();
-    let gate = document.getElementById("scr-gatekeeper");
-
+    var gate = document.getElementById("scr-gatekeeper");
     gate.style.opacity = "0";
-    setTimeout(() => {
+    gate.style.pointerEvents = "none";
+    setTimeout(function() {
         gate.style.display = "none";
-        // Ebene 1 anzeigen und Video starten
-        dogHasSpoken = true;
         goToStep1();
-    }, 500);
+    }, 400);
 }
 
 window.onload = function() {
@@ -782,54 +780,60 @@ document.body.addEventListener('touchstart', function(e) {}, { passive: true });
 // Navigation zwischen den 3 Ebenen
 let currentStep = 0;
 
-function showStep(id) {
-    ['scr-step1','scr-step2','scr-start','scr-end'].forEach(sid => {
-        let el = document.getElementById(sid);
+function zeige(id) {
+    ['scr-step1','scr-step2','scr-start','scr-end'].forEach(function(sid) {
+        var el = document.getElementById(sid);
         if(!el) return;
-        if(sid === id) {
-            el.style.display = 'flex';
-            requestAnimationFrame(() => { el.style.opacity = '1'; });
-        } else {
-            el.style.opacity = '0';
-            setTimeout(() => { if(el.style.opacity === '0') el.style.display = 'none'; }, 500);
-        }
+        el.style.display = (sid === id) ? 'flex' : 'none';
+        el.style.opacity = (sid === id) ? '1' : '0';
     });
 }
 
+function showStep(id) { zeige(id); }
+
 function goToStep1() {
-    manageMedia('vid1');
-    showStep('scr-step1');
+    zeige('scr-step1');
+    try { manageMedia('vid1'); } catch(e) {}
 }
 
 function goToStep2() {
-    // Video auf Ebene 2 starten
-    let v2 = document.getElementById('dog-video2');
-    if(v2) { v2.currentTime = 0; v2.muted = false; v2.play().catch(e=>{}); processVideoFrame2(); }
-    // Name aus localStorage vorausfüllen
+    zeige('scr-step2');
     try {
-        let saved = localStorage.getItem("doggycoAgent");
-        let inp = document.getElementById("pName");
+        var saved = localStorage.getItem("doggycoAgent");
+        var inp = document.getElementById("pName");
         if(saved && inp && !inp.value) inp.value = saved;
     } catch(e) {}
-    showStep('scr-step2');
 }
 
 function goToStep3() {
-    let nameInput = document.getElementById("pName");
-    let pName = nameInput ? nameInput.value.trim().toUpperCase() : '';
+    var nameInput = document.getElementById("pName");
+    var pName = nameInput ? nameInput.value.trim().toUpperCase() : '';
     if(!pName) {
         if(nameInput) {
             nameInput.focus();
             nameInput.style.boxShadow = "0 0 15px red";
             nameInput.style.borderColor = "red";
-            setTimeout(() => { nameInput.style.boxShadow = "none"; nameInput.style.borderColor = "var(--neon)"; }, 1000);
+            setTimeout(function() { nameInput.style.boxShadow = "none"; nameInput.style.borderColor = "var(--neon)"; }, 1000);
         }
         return;
     }
-    showStep('scr-start');
+    zeige('scr-start');
 }
 
-// Social Media Links — öffnet installierte App, sonst Web-Fallback
+function goToLevelSelect() {
+    document.documentElement.style.setProperty('--neon', '#00f2ff');
+    document.getElementById("controls").style.display = "flex";
+    document.getElementById("hud").style.display = "block";
+    document.getElementById("canvas").style.display = "block";
+    document.getElementById("game-wrap").style.visibility = "hidden";
+    document.getElementById("game-wrap").style.pointerEvents = "none";
+    document.getElementById("canvas").classList.remove("blur");
+    document.getElementById("phone-container").classList.remove("is-playing");
+    ctx.clearRect(0, 0, W, H);
+    document.getElementById("time-txt").innerText = "30s";
+    manageMedia('none');
+    zeige('scr-start');
+}
 function openSocial(platform, handle) {
     let appUrl, webUrl;
     if(platform === 'instagram') {
@@ -1106,11 +1110,14 @@ function start(m, startLvl) {
     
     initBackgroundGraphics();
     updateTheme(mode);
-    
-    let scrStart = document.getElementById("scr-start");
-    let gameWrap = document.getElementById("game-wrap");
-    
-    if(scrStart) scrStart.style.display = "none";
+
+    // Alle screens ausblenden
+    ['scr-step1','scr-step2','scr-start','scr-end'].forEach(function(sid) {
+        var el = document.getElementById(sid);
+        if(el) { el.style.display = 'none'; el.style.opacity = '0'; }
+    });
+
+    var gameWrap = document.getElementById("game-wrap");
     if(gameWrap) {
         gameWrap.style.visibility = "visible";
         gameWrap.style.pointerEvents = "auto";
@@ -1177,7 +1184,7 @@ function showEndScreen(win) {
     document.getElementById("game-wrap").style.pointerEvents = "none";
     document.getElementById("phone-container").classList.remove("is-playing");
     
-    document.getElementById("scr-end").style.display = "flex";
+    zeige('scr-end');
     
     let nameEl = document.getElementById("end-agent-name");
     let scoreEl = document.getElementById("f-score");
