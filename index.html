@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#111111">
     
-    <title>DOGGYCO MISSION - LANDSCAPE EDITION</title>
+    <title>DOGGYCO MISSION - ANDROID LANDSCAPE</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     
@@ -22,20 +21,19 @@
         #bg-fx { position: absolute; inset: -40px; background-image: url('hintergrund.png'); background-size: cover; background-position: center center; z-index: 1; }
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.7) 100%); z-index: 2; pointer-events: none; }
 
-        #phone-container { position: relative; width: 100%; height: 100%; background: transparent; z-index: 10; overflow: hidden; }
+        #phone-container { position: relative; width: 100%; height: 100%; background: transparent; z-index: 10; overflow: hidden; display: flex; justify-content: center; align-items: center; }
 
-        /* DER NEUE SPIELFELD-QUADER! (Perfekt zentriert, nicht zu breit) */
-        #game-wrap { position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto; width: 100%; height: 100%; max-width: 900px; max-height: 600px; background: rgba(0,0,0,0.3); border-radius: 20px; border: 2px solid rgba(255,255,255,0.05); box-shadow: 0 0 50px rgba(0,0,0,0.8); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
+        #game-wrap { position: absolute; margin: auto; width: 100%; height: 100%; max-width: 850px; background: rgba(0,0,0,0.2); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
         #canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; touch-action: none; }
 
-        #hud { position: absolute; top: 10px; width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; transition: opacity 0.3s; }
+        #hud { position: absolute; top: env(safe-area-inset-top, 10px); width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; transition: opacity 0.3s; }
         #mission-title { text-align: center; font-size: 24px; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
         #energy-box { width: 85%; height: 18px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 12px; border: 2px solid #fff; overflow: hidden; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
         #stats-bar { display: flex; justify-content: space-between; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 5px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); }
         .stat { font-weight: 900; font-size: 14px; text-shadow: 1px 1px 3px #000; }
 
-        #controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 300; pointer-events: none;}
+        #controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; z-index: 300; pointer-events: none;}
         .arrow { width: 150px; height: 100%; background: transparent; border: none; color: rgba(255, 255, 255, 0.4); font-size: 80px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; }
         .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon); }
 
@@ -51,7 +49,6 @@
         .gate-btn { background: var(--neon); color: #000; font-family: 'Orbitron'; font-weight: 900; font-size: 28px; padding: 20px 50px; border-radius: 20px; border: none; cursor: pointer; box-shadow: 0 6px 0 #008b99; }
         .gate-btn:active { transform: translateY(6px); box-shadow: 0 0px 0 #008b99; }
 
-        /* Secret Cyborg Popup */
         #secret-popup { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); opacity: 0; transition: 0.3s; pointer-events: none; }
         #secret-popup.show { opacity: 1; pointer-events: auto; }
         .secret-box { background: rgba(15, 15, 15, 0.95); border: 2px solid var(--red); padding: 30px 20px; border-radius: 20px; text-align: center; width: 85%; max-width: 400px; box-shadow: 0 0 40px rgba(255, 49, 49, 0.4); }
@@ -59,7 +56,8 @@
         .secret-box p { font-family: 'Plus Jakarta Sans'; font-size: 13px; margin-bottom: 12px; color: #ddd; }
         .blink-red { color: var(--red); animation: blinkRed 1s infinite alternate; text-shadow: 0 0 10px var(--red); }
         @keyframes blinkRed { 0% { opacity: 1; } 100% { opacity: 0.3; } }
-        #secret-code-input { width: 80%; padding: 12px; margin: 15px 0 25px 0; border-radius: 12px; border: 2px solid #444; background: #000; color: var(--neon); text-align: center; font-family: 'Orbitron'; font-size: 22px; font-weight: 900; outline: none; }
+        #secret-code-input { width: 80%; padding: 12px; margin: 15px 0 25px 0; border-radius: 12px; border: 2px solid #444; background: #000; color: var(--neon); text-align: center; font-family: 'Orbitron'; font-size: 22px; font-weight: 900; outline: none; transition: 0.2s; letter-spacing: 5px; }
+        #secret-code-input:focus { border-color: var(--neon); box-shadow: 0 0 15px rgba(0, 242, 255, 0.5); }
         .sec-btns { display: flex; gap: 10px; justify-content: center; }
         .sec-btns button { padding: 12px 15px; border-radius: 12px; border: none; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; flex: 1; transition: 0.1s; }
         .btn-override { background: var(--green); color: #000; box-shadow: 0 4px 0 #00b362; }
@@ -68,7 +66,7 @@
         .btn-cancel:active { transform: translateY(4px); box-shadow: 0 0px 0 #222; }
 
         .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; overflow-y: auto; pointer-events: auto; padding-bottom: 50px; }
-        .screen-inner { width: 100%; min-height: 100dvh; margin: 0 auto; max-width: 900px; display: flex; flex-direction: column; align-items: center; padding: 40px 20px 100px 20px; }
+        .screen-inner { width: 100%; min-height: 100dvh; margin: 0 auto; max-width: 900px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 40px 20px 100px 20px; }
 
         .start-glass-panel { width: 100%; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.15); padding: 30px; display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
         .app-title { font-size: clamp(32px, 5vw, 50px); color: var(--gold); margin-bottom: 20px; text-align: center; text-shadow: 0 0 10px var(--gold); }
@@ -79,7 +77,10 @@
         .btn-char span { font-size: 40px; margin-bottom: 5px; }
 
         .info-panel { width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); padding: 25px 20px; margin-bottom: 20px; backdrop-filter: blur(10px); }
-        .info-panel h3 { border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; color: var(--gold); border-bottom-color: var(--gold);}
+        .info-panel h3 { border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; }
+
+        .panel-gold { border-color: var(--gold); } .panel-gold h3 { color: var(--gold); border-bottom-color: var(--gold); }
+        .panel-neon { border-color: var(--neon); } .panel-neon h3 { color: var(--neon); border-bottom-color: var(--neon); }
         
         .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; width: 100%; }
         .btn-sup { height: 55px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 0 rgba(0,0,0,0.5); transition: 0.1s; }
@@ -89,10 +90,9 @@
         .bg-yt { background: linear-gradient(45deg, #c4302b, #ff0000); }
         .bg-email { background: linear-gradient(45deg, #333, #555); font-size: 10px; }
 
-        .store-badges { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; width: 100%; }
-        .play-store-btn { width: 180px; height: 53px; transition: transform 0.2s; cursor: pointer; }
-        .play-store-btn img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
-        .apple-btn img { background: #000; padding: 6px; box-sizing: border-box; } 
+        .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; }
+        .rank-gold { color: var(--gold); font-size: 18px; text-shadow: 0 0 10px var(--gold); font-weight: 900; }
+        .rank-white { color: #ffffff; text-shadow: 1px 1px 3px #000; }
 
         .end-popup-box { background: rgba(20, 20, 20, 0.9); border-radius: 25px; border: 1px solid var(--neon); padding: 40px; width: 100%; max-width: 500px; text-align: center; margin: auto; box-shadow: 0 0 50px rgba(0,242,255,0.3); }
         .btn-restart-green { background: #00ff88; color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 20px; padding: 15px; border-radius: 12px; width: 100%; border: none; cursor: pointer; margin-top: 20px; box-shadow: 0 6px 0 #00b362;}
@@ -100,16 +100,20 @@
     </style>
 </head>
 <body>
-<div id="bg-fx"></div><div id="bg-overlay"></div>
+
+<div id="bg-fx"></div>
+<div id="bg-overlay"></div>
+
 <div id="game-over-overlay"><div class="go-title">GAME OVER</div></div>
 
 <div id="scr-gatekeeper">
     <h1 style="font-family:'Orbitron'; font-size:50px; color:var(--gold); margin-bottom:20px; text-align:center;">DOGGYCO<br>MISSION</h1>
-    <p style="color: #fff; font-family: 'Plus Jakarta Sans'; margin-bottom: 40px;">Landscape Edition (PC Keys A/D Ready)</p>
+    <p style="color: #fff; font-family: 'Plus Jakarta Sans'; margin-bottom: 40px;">Landscape Edition</p>
     <button class="gate-btn" onclick="unlockSystem()">TAP TO START</button>
 </div>
 
 <div id="phone-container">
+    
     <div id="secret-popup" style="display:none;">
         <div class="secret-box">
             <h2>🔒 CLASSIFIED 🔒</h2>
@@ -150,7 +154,12 @@
                     <canvas id="dog-video-canvas" width="220" height="220" class="dog-video-canvas"></canvas>
                     <video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
                 </div>
+                
                 <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off">
+                <p style="font-family: 'Plus Jakarta Sans'; font-size: 11px; color: #bbb; text-align: center; margin-top: -20px; margin-bottom: 20px;">
+                    Optional: Submit your score to the global leaderboard.
+                </p>
+
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 20px; width: 100%; text-align:center;">CHOOSE START LEVEL</h3>
                 
                 <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:15px; width:100%; max-width: 600px;">
@@ -168,13 +177,13 @@
 
             <div class="info-panel panel-gold">
                 <h3>🏆 GLOBAL HALL OF FAME</h3>
-                <div id="leaderboard" style="text-align:center; font-family:'Plus Jakarta Sans';">Checking Connection...</div>
+                <div id="leaderboard" class="text-sm" style="text-align:center;">Checking Connection...</div>
             </div>
 
             <div class="info-panel" style="border-color: var(--neon);">
                 <h3 style="color: var(--neon); border-bottom-color: var(--neon);">📖 MISSION DIRECTIVES</h3>
                 <ul style="padding-left: 20px; font-family:'Plus Jakarta Sans'; font-size: 14px; line-height: 1.6;">
-                    <li><b>Controls:</b> Use <b>Arrows ◀ ▶</b> or <b>A / D</b> (PC).</li>
+                    <li><b>Controls:</b> Use <b>Arrows ◀ ▶</b>.</li>
                     <li><b>Provisions:</b> Collect food for <span style="color:var(--green)">+10 to +30 PTS</span>.</li>
                     <li><b>Power-Ups:</b> <br>
                         <b>🚀 Rocket Core = <span style="color:var(--rad)">7s Shield (☢️)</span></b><br>
@@ -194,15 +203,6 @@
                     <button onclick="window.open('https://www.tiktok.com/@doggyco0', '_blank')" class="btn-sup bg-tk">TIKTOK</button>
                     <button onclick="window.open('https://www.youtube.com/@doggyco.de9', '_blank')" class="btn-sup bg-yt">YOUTUBE</button>
                     <button class="btn-sup bg-email" onclick="copyText(this, 'give-me.org@gmx.net')">GIVE-ME.ORG<br>@GMX.NET</button>
-                </div>
-            </div>
-
-            <div class="info-panel" style="border-color: var(--green); text-align: center;">
-                <h3 style="color: var(--green); border-bottom-color: var(--green);">📱 GET THE APP</h3>
-                <div class="store-badges">
-                    <div class="play-store-btn apple-btn" onclick="window.open('https://apps.apple.com/de/app/doggyco-mission/id6763249087', '_blank')"><img alt="App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" /></div>
-                    <div class="play-store-btn" onclick="window.open('https://play.google.com/store/apps/details?id=com.doggycogames.doggyco', '_blank')"><img alt="Google Play" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" /></div>
-                    <div class="play-store-btn" onclick="window.open('https://apps.microsoft.com/detail/9NCRXPDDD1RP?hl=neutral&gl=DE&ocid=pdpshare', '_blank')"><img alt="Microsoft Store" src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Get_it_from_Microsoft_Badge.svg" /></div>
                 </div>
             </div>
 
@@ -228,13 +228,53 @@
 </div> 
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio>
 <script>
+const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
+const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
+let supabaseClient = null;
+
+async function fetchRanks() {
+    if(!supabaseClient) return;
+    try {
+        let { data, error } = await supabaseClient.from('leaderboard').select('*').order('s', { ascending: false }).limit(10);
+        if (error) throw error; 
+
+        if(data && data.length > 0) {
+            document.getElementById("leaderboard").innerHTML = data.map((x, i) => {
+                let rC = "rank-white"; 
+                if(i === 0) rC = "rank-gold"; else if(i === 1) rC = "rank-silver"; else if(i === 2) rC = "rank-bronze";
+                return `<div class="rank-row ${rC}"><span>#${i+1} ${x.n}</span><span>${x.s} PTS</span></div>`;
+            }).join('');
+        } else {
+            document.getElementById("leaderboard").innerHTML = "No agents yet! Be the first.";
+        }
+    } catch(e) {
+        document.getElementById("leaderboard").innerHTML = "Syncing with Mainframe...";
+        setTimeout(fetchRanks, 5000); 
+    }
+}
+
+async function saveScoreAndRefresh(newScore) {
+    if(!supabaseClient || typeof supabase === 'undefined' || agent === "GUEST") return;
+    try {
+        let { data, error: selectError } = await supabaseClient.from('leaderboard').select('*').eq('n', agent);
+        if (selectError) return;
+
+        if(data && data.length > 0) {
+            if(newScore > data[0].s) { await supabaseClient.from('leaderboard').update({ s: newScore }).eq('n', agent); }
+        } else {
+            await supabaseClient.from('leaderboard').insert([{ n: agent, s: newScore }]);
+        }
+        fetchRanks();
+    } catch(e) {}
+}
+
 function forceFullscreenAndLandscape() {
     let elem = document.documentElement;
     let req = elem.requestFullscreen || elem.webkitRequestFullscreen;
     if (req) {
         req.call(elem).then(() => {
             if(screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape').catch(e => {});
+                screen.orientation.lock('landscape').catch(e => console.log("Orientation lock failed", e));
             }
         }).catch(e => {});
     }
@@ -267,8 +307,9 @@ let videoCtx2 = videoCanvas2.getContext('2d', { willReadFrequently: true });
 
 function processGreenScreen(vEl, vCanvas, vCtx) {
     if (!vEl.videoWidth) return;
-    let size = Math.min(vEl.videoWidth, vEl.videoHeight);
-    let startX = (vEl.videoWidth - size) / 2; let startY = (vEl.videoHeight - size) / 2;
+    let vw = vEl.videoWidth; let vh = vEl.videoHeight;
+    let size = Math.min(vw, vh);
+    let startX = (vw - size) / 2; let startY = (vh - size) / 2;
     vCtx.drawImage(vEl, startX, startY, size, size, 0, 0, vCanvas.width, vCanvas.height);
     try {
         let frame = vCtx.getImageData(0, 0, vCanvas.width, vCanvas.height);
@@ -307,12 +348,16 @@ function initAudioContext() {
 function unlockSystem() {
     initAudioContext();
     if (!dogHasSpoken && videoEl) { dogHasSpoken = true; manageMedia('vid1'); }
+    
     forceFullscreenAndLandscape();
+    
     let gate = document.getElementById("scr-gatekeeper");
     let startScr = document.getElementById("scr-start");
+    
     gate.style.opacity = "0";
     setTimeout(() => { 
-        gate.style.display = "none"; startScr.style.display = "block";
+        gate.style.display = "none"; 
+        startScr.style.display = "block";
         setTimeout(() => { startScr.style.opacity = "1"; }, 50);
     }, 500);
 }
@@ -361,33 +406,62 @@ function checkSecretCode() {
 }
 
 window.onload = function() {
-    try { let savedName = localStorage.getItem("doggycoAgent"); if(savedName) document.getElementById("pName").value = savedName; updateCyborgButton(); } catch(e) {}
-    resizeCanvas(); window.addEventListener("resize", resizeCanvas);
+    try {
+        let savedName = localStorage.getItem("doggycoAgent");
+        if(savedName) document.getElementById("pName").value = savedName;
+        updateCyborgButton();
+    } catch(e) {}
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    setTimeout(() => {
+        if (navigator.onLine) {
+            let script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+            script.onload = () => {
+                if(typeof supabase !== 'undefined') {
+                    supabaseClient = supabase.createClient(SURL, SKEY);
+                    fetchRanks();
+                }
+            };
+            script.onerror = () => { document.getElementById("leaderboard").innerHTML = "OFFLINE MODE"; };
+            document.head.appendChild(script);
+        } else {
+            document.getElementById("leaderboard").innerHTML = "OFFLINE MODE";
+        }
+    }, 1000);
 }
 
 function goToLevelSelect() {
-    manageMedia('none'); forceFullscreenAndLandscape();
+    manageMedia('none');
+    forceFullscreenAndLandscape();
     document.getElementById("scr-end").style.display = "none";
     document.getElementById("controls").style.display = "flex";
     document.getElementById("hud").style.display = "block";
     document.getElementById("canvas").style.display = "block";
     document.getElementById("game-wrap").style.visibility = "hidden";
     document.getElementById("game-wrap").style.pointerEvents = "none";
+    document.getElementById("canvas").classList.remove("blur");
     document.getElementById("scr-start").style.display = "block";
     document.getElementById("scr-start").scrollTop = 0;
-    dogHasSpoken = false; updateCyborgButton();
+    dogHasSpoken = false; 
+    updateCyborgButton();
 }
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-let W = 900; let H = 600; let lanes = [];
+
+let W = 850; let H = 500;
+let lanes = [];
 
 function resizeCanvas() {
     let gw = document.getElementById("game-wrap");
     if(gw && gw.clientWidth > 0) {
         W = gw.clientWidth; H = gw.clientHeight;
         canvas.width = W; canvas.height = H;
-        let lw = W / 5; lanes = [lw*0.5, lw*1.5, lw*2.5, lw*3.5, lw*4.5];
+        
+        let lw = W / 5;
+        lanes = [lw*0.5, lw*1.5, lw*2.5, lw*3.5, lw*4.5];
         if(!active) { currLane = 2; playerX = targetX = lanes[2]; }
     }
 }
@@ -398,7 +472,7 @@ let mode = 'dog', agent = "UNKNOWN";
 let entities = [], floaters = [], permSpiders = [], fireworks = [], fxParticles = [], lastT = 0;
 let globalAnimationId = null; 
 
-let invincibleTimer = 0; let magnetTimer = 0;
+let invincibleTimer = 0; let alarmTimer = 0; let magnetTimer = 0;
 let rocket = null; let fallingCore = null; let fallingAlien = null; let fallingHearts = [];
 let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
 let charShake = 0, charJump = 0, spawnDelay = 0;
@@ -413,11 +487,17 @@ function updateTheme(newMode) {
     document.getElementById("stats-bar").style.borderColor = col;
 }
 
+// DIE GOOGLE-PLAY RETTUNG: Der Login-Blocker ist entfernt!
 function start(m, startLvl) {
-    let pName = document.getElementById("pName").value.trim().toUpperCase();
-    if(!pName) { document.getElementById("pName").focus(); return; }
+    let nameInput = document.getElementById("pName");
+    let pName = nameInput.value.trim().toUpperCase();
+    
+    if(!pName) { 
+        pName = "GUEST"; // Wenn der Google Tester nichts eingibt, ist er "GUEST" und das Spiel startet trotzdem!
+    } else {
+        try { localStorage.setItem("doggycoAgent", pName); } catch(e) {}
+    }
     agent = pName;
-    try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
 
     if(globalAnimationId) cancelAnimationFrame(globalAnimationId);
     let v2 = document.getElementById('dog-video2');
@@ -468,6 +548,7 @@ function showEndScreen(win) {
     try { 
         let localHS = parseInt(localStorage.getItem('doggycoHighScore')) || 0;
         if(score > localHS) localStorage.setItem('doggycoHighScore', Math.floor(score));
+        saveScoreAndRefresh(Math.floor(score)); // Supabase Sync!
     } catch(e) {}
 }
 
@@ -486,9 +567,10 @@ function loop(t) {
         let capLvl = Math.min(level, 14);
         let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11)); 
         let ptsScaling = speedMult; 
+
         let colDist = W / 10; 
 
-        if(invincibleTimer > 0) invincibleTimer -= dt;
+        if(invincibleTimer > 0) { invincibleTimer -= dt; if(invincibleTimer < 0) invincibleTimer = 0; }
         if (magnetTimer > 0) magnetTimer -= dt;
 
         if (!missionComplete) {
@@ -509,8 +591,10 @@ function loop(t) {
                 } else {
                     level++; timeLeft = 30; energy = Math.min(100, energy + (25 * speedMult));
                     rocket = null; fallingCore = null; fallingAlien = null; fallingHearts = [];
+                    
                     const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'unicorn', 'cyborg'];
                     let expectedMode = modeOrder[Math.floor((level - 1) / 2) % 7];
+                    
                     if(mode !== expectedMode) { mode = expectedMode; updateTheme(mode); }
                     let pop = document.getElementById("lvl-up-popup");
                     pop.innerHTML = "LEVEL " + level; pop.classList.add("show"); setTimeout(() => pop.classList.remove("show"), 2000);
