@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Windows spezifische Meta Tags -->
     <meta name="theme-color" content="#111111">
+    <meta name="msapplication-TileColor" content="#111111">
+    <meta name="msapplication-navbutton-color" content="#111111">
     
     <title>DOGGYCO MISSION - THE FINAL CUT</title>
     
@@ -37,10 +40,13 @@
             user-select: none; -webkit-user-select: none; 
         }
         
-        ::-webkit-scrollbar { display: none; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
         html, body {
             -ms-overflow-style: none;  
-            scrollbar-width: none;  
             overscroll-behavior: none;
             width: 100vw; height: 100dvh; overflow: hidden; 
         }
@@ -66,10 +72,22 @@
 
         #phone-container { position: relative; width: 100%; max-width: 420px; height: 100%; background: transparent; z-index: 10; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
 
+        /* Optimierung für Windows/Desktop Monitore */
         @media (min-width: 450px) {
-            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; }
-            #phone-container.is-playing { border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
-            #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); }
+            #phone-container { 
+                height: 90vh; max-height: 850px; 
+                border-radius: 20px; 
+                border: 2px solid rgba(255,255,255,0.1); 
+                box-shadow: 0 25px 60px rgba(0,0,0,0.9), 0 0 30px rgba(0, 242, 255, 0.1); 
+                background: #000;
+            }
+            #phone-container.is-playing { border-color: var(--neon); box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 50px rgba(0, 242, 255, 0.3); }
+            #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.95) 100%); }
+            
+            /* Maus-Hover Effekte für Desktop */
+            .btn-main:hover, .gate-btn:hover, .btn-restart-green:hover { filter: brightness(1.15); transform: translateY(-2px); }
+            .btn-sup:hover { filter: brightness(1.2); }
+            .arrow:hover { color: rgba(255, 255, 255, 0.9); text-shadow: 0 0 15px rgba(255,255,255,0.5); }
         }
 
         #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
@@ -110,8 +128,8 @@
 
         #scr-gatekeeper {
             position: absolute; inset: 0; z-index: 9999;
-            background: rgba(0, 0, 0, 0.5); 
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.7); 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 0.5s ease;
         }
@@ -212,7 +230,7 @@
 
         .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 12px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); transform: translateY(0); flex-shrink: 0; }
         .btn-char span { font-size: 36px; margin-bottom: 5px; }
-        .btn-char:hover { background: rgba(255,255,255,0.1); }
+        .btn-char:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); box-shadow: 0 6px 0 var(--neon), 0 8px 15px rgba(0,0,0,0.3); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
         .rank-row { display: flex; justify-content: space-between; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; }
@@ -283,13 +301,6 @@
             transform: translateY(6px);
             box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4);
         }
-
-        @media (orientation: landscape) and (min-height: 400px) {
-            #phone-container { max-width: 900px; }
-            #game-wrap { max-width: 900px; border-radius: 20px; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); }
-            #controls { max-width: 900px; }
-            .end-popup-box { max-width: 500px; margin: 0 auto; }
-        }
     </style>
 </head>
 <body>
@@ -303,6 +314,7 @@
 
 <div id="scr-gatekeeper">
     <h1 style="font-family:'Orbitron'; font-size:40px; color:var(--gold); margin-bottom:40px; text-align:center; text-shadow:0 0 20px var(--gold);">DOGGYCO<br>MISSION</h1>
+    <p style="color: #fff; font-family: 'Plus Jakarta Sans'; font-size: 14px; margin-bottom: 30px; text-shadow: 1px 1px 3px #000;">(Use Keyboard ◀ ▶ or A/D on PC)</p>
     <button class="gate-btn" onclick="unlockSystem()">TAP TO START</button>
 </div>
 
@@ -378,16 +390,15 @@
             <div class="info-panel panel-neon">
                 <h3>📖 MISSION DIRECTIVES</h3>
                 <ul class="rules text-sm">
-                    <li><b>Navigation:</b> Use <b>Arrows ◀ ▶</b> to evade hazards.</li>
+                    <li><b>PC Controls:</b> Use <b>Arrow Keys ◀ ▶</b> or <b>A / D</b>.</li>
+                    <li><b>Mobile:</b> Use on-screen Arrows ◀ ▶.</li>
                     <li><b>Environments:</b> Scenery adapts every 2 levels.</li>
                     <li><b>Provisions:</b> Collect food for <span style="color:var(--green)">+10 to +30 PTS</span>.</li>
                     <li><b>Power-Ups:</b> <br>
-                        <b>🚀 Rocket Core = <span style="color:var(--rad)">7s Radioactive Shield (☢️)</span></b><br>
+                        <b>🚀 Rocket Core = <span style="color:var(--rad)">7s Shield (☢️)</span></b><br>
                         <b>👽 Alien Core = <span style="color:var(--neon)">7s Magnet (🧲)</span></b><br>
                         <b>❤️ UFO Drop = <span style="color:var(--gold)">+1 ❤️</span></b><br>
-                        <i>(If HP full, Catching Drops = +Bonus PTS)</i>
                     </li>
-                    <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & drain).</li>
                     <li><b>Objective:</b> Survive 12 Levels to WIN!</li>
                 </ul>
             </div>
@@ -678,10 +689,11 @@ function triggerMove(dir, btnId) {
     if(btn) { btn.classList.add("glow"); setTimeout(() => btn.classList.remove("glow"), 150); }
 }
 
+// ERWEITERTE TASTATUR-STEUERUNG FÜR PC (Pfeiltasten + A/D)
 window.addEventListener("keydown", function(e) {
     if(!active || missionComplete) return;
-    if(e.key === "ArrowLeft") triggerMove(-1, 'btn-left');
-    if(e.key === "ArrowRight") triggerMove(1, 'btn-right');
+    if(e.key === "ArrowLeft" || e.key.toLowerCase() === "a") triggerMove(-1, 'btn-left');
+    if(e.key === "ArrowRight" || e.key.toLowerCase() === "d") triggerMove(1, 'btn-right');
 });
 
 function triggerVibration(pattern) {
