@@ -7,58 +7,49 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#111111">
     
-    <title>DOGGYCO MISSION - LANDSCAPE</title>
+    <title>DOGGYCO MISSION - LANDSCAPE EDITION</title>
     
-    <link href="[https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap](https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap)" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { 
-            --neon: #00f2ff; --green: #00ff88; --red: #ff3131; 
-            --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; 
-            --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff;
-            --unicorn: #ff00ff; --cyborg: #00ffff; --rad: #adff2f;
-        }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; -webkit-user-select: none; }
+        :root { --neon: #00f2ff; --green: #00ff88; --red: #ff3131; --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff; --unicorn: #ff00ff; --cyborg: #00ffff; --rad: #adff2f; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
         ::-webkit-scrollbar { display: none; }
 
-        html, body {
-            overscroll-behavior: none; width: 100vw; height: 100dvh; overflow: hidden; 
-            background: #111; font-family: 'Orbitron', sans-serif; color: #fff; display: flex; justify-content: center; align-items: center; 
-        }
-
-        input[type="text"], input[type="number"] { user-select: auto; -webkit-user-select: auto; transition: 0.3s; }
+        html, body { overscroll-behavior: none; width: 100vw; height: 100dvh; overflow: hidden; background: #111; font-family: 'Orbitron', sans-serif; color: #fff; display: flex; justify-content: center; align-items: center; }
+        input[type="text"], input[type="number"] { user-select: auto; transition: 0.3s; }
 
         #bg-fx { position: absolute; inset: -40px; background-image: url('hintergrund.png'); background-size: cover; background-position: center center; z-index: 1; }
-        #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.6) 100%); z-index: 2; pointer-events: none; }
+        #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.7) 100%); z-index: 2; pointer-events: none; }
 
-        #phone-container { position: relative; width: 100%; max-width: 100%; height: 100%; background: transparent; z-index: 10; overflow: hidden; }
+        #phone-container { position: relative; width: 100%; height: 100%; background: transparent; z-index: 10; overflow: hidden; }
 
-        #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
-        #canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; touch-action: none; transition: filter 0.3s; }
+        /* DER NEUE SPIELFELD-QUADER! (Perfekt zentriert, nicht zu breit) */
+        #game-wrap { position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto; width: 100%; height: 100%; max-width: 900px; max-height: 600px; background: rgba(0,0,0,0.3); border-radius: 20px; border: 2px solid rgba(255,255,255,0.05); box-shadow: 0 0 50px rgba(0,0,0,0.8); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
+        #canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; z-index: 50; touch-action: none; }
 
-        #hud { position: absolute; top: env(safe-area-inset-top, 10px); width: 100%; max-width: 800px; left: 50%; transform: translateX(-50%); z-index: 200; pointer-events: none; padding-top: 10px; transition: opacity 0.3s; }
-        #mission-title { text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); }
-        #energy-box { width: 85%; height: 22px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 12px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        #hud { position: absolute; top: 10px; width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; transition: opacity 0.3s; }
+        #mission-title { text-align: center; font-size: 24px; font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
+        #energy-box { width: 85%; height: 18px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 12px; border: 2px solid #fff; overflow: hidden; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
-        #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); }
-        .stat { font-weight: 900; font-size: 16px; text-shadow: 1px 1px 3px #000; }
+        #stats-bar { display: flex; justify-content: space-between; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 5px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); }
+        .stat { font-weight: 900; font-size: 14px; text-shadow: 1px 1px 3px #000; }
 
-        #controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 300; }
+        #controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 300; pointer-events: none;}
         .arrow { width: 150px; height: 100%; background: transparent; border: none; color: rgba(255, 255, 255, 0.4); font-size: 80px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; }
         .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon); }
 
-        #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255, 215, 0, 0.5); color: #fff; padding: 15px 30px; border-radius: 25px; font-size: 28px; font-weight: 900; z-index: 500; opacity: 0; transition: all 0.3s; text-align: center; }
+        #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); border: 1px solid var(--gold); color: #fff; padding: 15px 30px; border-radius: 25px; font-size: 24px; font-weight: 900; z-index: 500; opacity: 0; transition: all 0.3s; text-align: center; }
         #lvl-up-popup.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 
         #game-over-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.8s; }
         #game-over-overlay.show { opacity: 1; pointer-events: auto; }
-        .go-title { font-size: 60px; color: var(--red); text-shadow: 0 0 20px var(--red); font-weight: 900; letter-spacing: 5px; transform: scale(0.5); opacity: 0; transition: 1s; text-align: center; }
+        .go-title { font-size: 60px; color: var(--red); text-shadow: 0 0 20px var(--red); font-weight: 900; transform: scale(0.5); opacity: 0; transition: 1s; }
         #game-over-overlay.show .go-title { transform: scale(1); opacity: 1; }
 
-        #scr-gatekeeper { position: absolute; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
-        .gate-btn { background: var(--neon); color: #000; font-family: 'Orbitron'; font-weight: 900; font-size: 28px; padding: 20px 50px; border-radius: 20px; border: none; cursor: pointer; box-shadow: 0 0 20px rgba(0, 242, 255, 0.5), 0 6px 0 #008b99; }
-        .gate-btn:active { transform: translateY(6px); box-shadow: 0 0 10px rgba(0, 242, 255, 0.5), 0 0px 0 #008b99; }
+        #scr-gatekeeper { position: absolute; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
+        .gate-btn { background: var(--neon); color: #000; font-family: 'Orbitron'; font-weight: 900; font-size: 28px; padding: 20px 50px; border-radius: 20px; border: none; cursor: pointer; box-shadow: 0 6px 0 #008b99; }
+        .gate-btn:active { transform: translateY(6px); box-shadow: 0 0px 0 #008b99; }
 
         /* Secret Cyborg Popup */
         #secret-popup { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); opacity: 0; transition: 0.3s; pointer-events: none; }
@@ -72,13 +63,15 @@
         .sec-btns { display: flex; gap: 10px; justify-content: center; }
         .sec-btns button { padding: 12px 15px; border-radius: 12px; border: none; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; flex: 1; transition: 0.1s; }
         .btn-override { background: var(--green); color: #000; box-shadow: 0 4px 0 #00b362; }
+        .btn-override:active { transform: translateY(4px); box-shadow: 0 0px 0 #00b362; }
         .btn-cancel { background: #444; color: #fff; box-shadow: 0 4px 0 #222; }
+        .btn-cancel:active { transform: translateY(4px); box-shadow: 0 0px 0 #222; }
 
         .screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 100; overflow-y: auto; pointer-events: auto; padding-bottom: 50px; }
         .screen-inner { width: 100%; min-height: 100dvh; margin: 0 auto; max-width: 900px; display: flex; flex-direction: column; align-items: center; padding: 40px 20px 100px 20px; }
 
         .start-glass-panel { width: 100%; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px); border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.15); padding: 30px; display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
-        .app-title { font-size: clamp(32px, 5vw, 50px); color: var(--gold); margin-bottom: 20px; text-align: center; }
+        .app-title { font-size: clamp(32px, 5vw, 50px); color: var(--gold); margin-bottom: 20px; text-align: center; text-shadow: 0 0 10px var(--gold); }
         .dog-video-canvas { width: 220px; height: 220px; object-fit: contain; }
         .name-input { width: 100%; max-width: 400px; padding: 15px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; text-align: center; font-family: 'Orbitron'; font-size: 20px; margin-bottom: 30px; outline: none; }
 
@@ -88,8 +81,22 @@
         .info-panel { width: 100%; background: rgba(255,255,255,0.06); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); padding: 25px 20px; margin-bottom: 20px; backdrop-filter: blur(10px); }
         .info-panel h3 { border-bottom: 2px solid; padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; color: var(--gold); border-bottom-color: var(--gold);}
         
-        .end-popup-box { background: rgba(20, 20, 20, 0.9); border-radius: 25px; border: 1px solid var(--neon); padding: 40px; width: 100%; max-width: 500px; text-align: center; margin: auto; }
-        .btn-restart-green { background: #00ff88; color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 20px; padding: 15px; border-radius: 12px; width: 100%; border: none; cursor: pointer; margin-top: 20px; }
+        .sup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; width: 100%; }
+        .btn-sup { height: 55px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); font-weight: 900; font-family: 'Orbitron'; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 0 rgba(0,0,0,0.5); transition: 0.1s; }
+        .btn-sup:active { transform: translateY(4px); box-shadow: 0 0px 0 rgba(0,0,0,0.5); }
+        .bg-ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .bg-tk { background: linear-gradient(45deg, #000, #ff0050); } 
+        .bg-yt { background: linear-gradient(45deg, #c4302b, #ff0000); }
+        .bg-email { background: linear-gradient(45deg, #333, #555); font-size: 10px; }
+
+        .store-badges { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; width: 100%; }
+        .play-store-btn { width: 180px; height: 53px; transition: transform 0.2s; cursor: pointer; }
+        .play-store-btn img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
+        .apple-btn img { background: #000; padding: 6px; box-sizing: border-box; } 
+
+        .end-popup-box { background: rgba(20, 20, 20, 0.9); border-radius: 25px; border: 1px solid var(--neon); padding: 40px; width: 100%; max-width: 500px; text-align: center; margin: auto; box-shadow: 0 0 50px rgba(0,242,255,0.3); }
+        .btn-restart-green { background: #00ff88; color: #000; font-weight: 900; font-family: 'Orbitron'; font-size: 20px; padding: 15px; border-radius: 12px; width: 100%; border: none; cursor: pointer; margin-top: 20px; box-shadow: 0 6px 0 #00b362;}
+        .btn-restart-green:active { transform: translateY(6px); box-shadow: 0 0px 0 #00b362; }
     </style>
 </head>
 <body>
@@ -163,7 +170,42 @@
                 <h3>🏆 GLOBAL HALL OF FAME</h3>
                 <div id="leaderboard" style="text-align:center; font-family:'Plus Jakarta Sans';">Checking Connection...</div>
             </div>
-            
+
+            <div class="info-panel" style="border-color: var(--neon);">
+                <h3 style="color: var(--neon); border-bottom-color: var(--neon);">📖 MISSION DIRECTIVES</h3>
+                <ul style="padding-left: 20px; font-family:'Plus Jakarta Sans'; font-size: 14px; line-height: 1.6;">
+                    <li><b>Controls:</b> Use <b>Arrows ◀ ▶</b> or <b>A / D</b> (PC).</li>
+                    <li><b>Provisions:</b> Collect food for <span style="color:var(--green)">+10 to +30 PTS</span>.</li>
+                    <li><b>Power-Ups:</b> <br>
+                        <b>🚀 Rocket Core = <span style="color:var(--rad)">7s Shield (☢️)</span></b><br>
+                        <b>👽 Alien Core = <span style="color:var(--neon)">7s Magnet (🧲)</span></b><br>
+                        <b>🛸 UFO Drop = <span style="color:var(--gold)">+1 ❤️</span></b>
+                    </li>
+                    <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & drain).</li>
+                    <li><b>Objective:</b> Survive 12 Levels to WIN (or unlock Secret Levels)!</li>
+                </ul>
+            </div>
+
+            <div class="info-panel" style="border-color: var(--unicorn);">
+                <h3 style="color: var(--unicorn); border-bottom-color: var(--unicorn);">✨ PERSONALIZE & SUPPORT</h3>
+                <p style="font-family:'Plus Jakarta Sans'; font-size: 14px; text-align:justify;">Want to be the star of the game? For a qualifying donation, you can personalize the final level (Unicorn Area)! We will replace the unicorn with <b>YOUR custom face or icon</b>.</p>
+                <div class="sup-grid">
+                    <button onclick="window.open('https://www.instagram.com/doggyco.de/', '_blank')" class="btn-sup bg-ig">INSTAGRAM</button>
+                    <button onclick="window.open('https://www.tiktok.com/@doggyco0', '_blank')" class="btn-sup bg-tk">TIKTOK</button>
+                    <button onclick="window.open('https://www.youtube.com/@doggyco.de9', '_blank')" class="btn-sup bg-yt">YOUTUBE</button>
+                    <button class="btn-sup bg-email" onclick="copyText(this, 'give-me.org@gmx.net')">GIVE-ME.ORG<br>@GMX.NET</button>
+                </div>
+            </div>
+
+            <div class="info-panel" style="border-color: var(--green); text-align: center;">
+                <h3 style="color: var(--green); border-bottom-color: var(--green);">📱 GET THE APP</h3>
+                <div class="store-badges">
+                    <div class="play-store-btn apple-btn" onclick="window.open('https://apps.apple.com/de/app/doggyco-mission/id6763249087', '_blank')"><img alt="App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" /></div>
+                    <div class="play-store-btn" onclick="window.open('https://play.google.com/store/apps/details?id=com.doggycogames.doggyco', '_blank')"><img alt="Google Play" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" /></div>
+                    <div class="play-store-btn" onclick="window.open('https://apps.microsoft.com/detail/9NCRXPDDD1RP?hl=neutral&gl=DE&ocid=pdpshare', '_blank')"><img alt="Microsoft Store" src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Get_it_from_Microsoft_Badge.svg" /></div>
+                </div>
+            </div>
+
             <div class="info-panel" style="border-color: var(--silver); text-align:center; font-family:'Plus Jakarta Sans'; font-size:12px;">
                 <p>Private Project. © 2026 DOGGYCO GLOBAL ACADEMY. Design by M. Čujko.</p>
             </div>
@@ -338,7 +380,7 @@ function goToLevelSelect() {
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-let W = 900; let H = 500; let lanes = [];
+let W = 900; let H = 600; let lanes = [];
 
 function resizeCanvas() {
     let gw = document.getElementById("game-wrap");
@@ -584,6 +626,13 @@ function triggerMove(dir, btnId) {
     currLane = Math.max(0, Math.min(4, currLane + dir)); targetX = lanes[currLane]; 
     let btn = document.getElementById(btnId);
     if(btn) { btn.classList.add("glow"); setTimeout(() => btn.classList.remove("glow"), 150); }
+}
+
+function copyText(btn, text) {
+    navigator.clipboard.writeText(text).catch(e=>{});
+    let oldHtml = btn.innerHTML; let oldBg = btn.style.background;
+    btn.innerHTML = "✅ COPIED!"; btn.style.background = "linear-gradient(45deg, #004d26, #00ff88)"; btn.style.color = "#000";
+    setTimeout(() => { if(btn) { btn.innerHTML = oldHtml; btn.style.background = oldBg || ""; btn.style.color = "#fff"; } }, 2000);
 }
 
 window.addEventListener("keydown", function(e) {
