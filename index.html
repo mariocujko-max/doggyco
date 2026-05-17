@@ -634,25 +634,20 @@ function initAudioContext() {
 function unlockSystem() {
     initAudioContext();
     
-    // Unlock all media elements for mobile browsers by playing them silently
+    // Unlock media safely for mobile
     let bgMusic = document.getElementById("snd-action");
     let vid1 = document.getElementById("dog-video");
     let vid2 = document.getElementById("dog-video2");
     
-    if(bgMusic) { bgMusic.volume = 0; bgMusic.play().then(()=>{ bgMusic.pause(); bgMusic.volume = 0.2; }).catch(e=>{}); }
-    if(vid2) { vid2.muted = true; vid2.play().then(()=>{ vid2.pause(); }).catch(e=>{}); }
+    if(bgMusic) { bgMusic.muted = true; let p1 = bgMusic.play(); if(p1) p1.then(() => { bgMusic.pause(); bgMusic.muted = false; }).catch(e=>{}); }
+    if(vid2) { vid2.muted = true; let p2 = vid2.play(); if(p2) p2.then(() => { vid2.pause(); vid2.muted = false; }).catch(e=>{}); }
     
     if (!dogHasSpoken && vid1) { 
         dogHasSpoken = true; 
-        manageMedia('vid1');
-    }
-    
-    let elem = document.documentElement;
-    if (elem.requestFullscreen) { elem.requestFullscreen().catch(e => {}); }
-    else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen().catch(e => {}); }
-    
-    if(screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(e => {});
+        vid1.muted = false;
+        let p3 = vid1.play();
+        if(p3) p3.catch(e=>{});
+        processVideoFrame();
     }
     
     let gate = document.getElementById("scr-gatekeeper");
@@ -742,7 +737,7 @@ function closeSecret() {
 function checkSecretCode() {
     let inputEl = document.getElementById("secret-code-input");
     let code = inputEl.value;
-    if (code === "4321" || code === "") {
+    if (code === "4321") {
         closeSecret();
         start('cyborg', 13);
     } else {
