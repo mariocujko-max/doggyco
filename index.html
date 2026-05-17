@@ -447,7 +447,8 @@
                         <i>(If HP full, Catching Drops = +Bonus PTS)</i>
                     </li>
                     <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & drain).</li>
-                    <li><b>Objective:</b> Survive 12 Levels to WIN (or unlock Secret Levels)!</li>
+                    <li><b>Objective:</b> Survive 12 Levels to WIN!</li>
+                        <li><b>Cyber Level 13:</b> Reach 8,000 PTS or tap the 🔒 icon and use the override to unlock!</li>
                 </ul>
             </div>
 
@@ -631,21 +632,29 @@ function initAudioContext() {
 }
 
 function unlockSystem() {
-    forceFullscreen(); // Vollbild wieder eingefügt!
     initAudioContext();
     
-    if (!dogHasSpoken && videoEl) {
-        dogHasSpoken = true;
-        manageMedia('vid1');
+    // Unlock all media elements by playing them silently first (Mobile Safari/Chrome fix)
+    let bgMusic = document.getElementById("snd-action");
+    let vid1 = document.getElementById("dog-video");
+    let vid2 = document.getElementById("dog-video2");
+    
+    if(bgMusic) { bgMusic.muted = true; bgMusic.play().then(() => { bgMusic.pause(); bgMusic.muted = false; }).catch(e=>{}); }
+    if(vid2) { vid2.muted = true; vid2.play().then(() => { vid2.pause(); }).catch(e=>{}); }
+    
+    if (!dogHasSpoken && vid1) { 
+        dogHasSpoken = true; 
+        vid1.muted = false;
+        vid1.play().catch(e=>{});
+        processVideoFrame();
     }
     
+    forceFullscreenAndLandscape();
     let gate = document.getElementById("scr-gatekeeper");
     let startScr = document.getElementById("scr-start");
-    
     gate.style.opacity = "0";
-    setTimeout(() => {
-        gate.style.display = "none";
-        startScr.style.display = "block";
+    setTimeout(() => { 
+        gate.style.display = "none"; startScr.style.display = "block";
         setTimeout(() => { startScr.style.opacity = "1"; }, 50);
     }, 500);
 }
@@ -740,7 +749,12 @@ function checkSecretCode() {
 }
 
 function goToLevelSelect() {
-    forceFullscreen(); // Sichert das Vollbild ab
+    // Media zuerst stoppen
+    manageMedia('none');
+    
+    // Dann Fullscreen absichern
+    forceFullscreen(); 
+    
     document.documentElement.style.setProperty('--neon', '#00f2ff');
 
     document.getElementById("scr-end").style.display = "none";
@@ -761,7 +775,6 @@ function goToLevelSelect() {
     document.getElementById("scr-start").style.display = "block";
     document.getElementById("scr-start").scrollTop = 0;
     
-    manageMedia('none');
     dogHasSpoken = false;
     updateCyborgButton(); // Ensure it unlocks visually if they just hit 8000
 }
@@ -1058,20 +1071,21 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
-    forceFullscreen(); // Sichert das Vollbild beim Spielstart ab
     let nameInput = document.getElementById("pName");
     let pName = nameInput.value.trim().toUpperCase();
-    // GOOGLE FIX: Wenn das Feld leer ist, startet es trotzdem direkt als GUEST
     if(!pName) {
-        pName = "GUEST";
-    } else {
-        try { localStorage.setItem("doggycoAgent", pName); } catch(e) {}
+        nameInput.focus();
+        nameInput.style.boxShadow = "0 0 15px red";
+        nameInput.style.borderColor = "red";
+        setTimeout(() => { nameInput.style.boxShadow = "none"; nameInput.style.borderColor = "var(--neon)"; }, 1000);
+        return;
     }
     agent = pName;
     try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
 
     if(globalAnimationId) cancelAnimationFrame(globalAnimationId);
     
+    // 1. MEDIA ZUERST!
     let v2 = document.getElementById('dog-video2');
     if (v2) {
         v2.muted = false;
@@ -1080,8 +1094,10 @@ function start(m, startLvl) {
             p.then(() => { v2.pause(); v2.currentTime = 0; }).catch(e => {});
         }
     }
-    
     manageMedia('game');
+    
+    // 2. DANN FULLSCREEN!
+    forceFullscreen();
 
     mode = m;
     level = startLvl;
