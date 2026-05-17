@@ -447,8 +447,7 @@
                         <i>(If HP full, Catching Drops = +Bonus PTS)</i>
                     </li>
                     <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & drain).</li>
-                    <li><b>Objective:</b> Survive 12 Levels to WIN!</li>
-                    <li><b>Cyber Level 13:</b> Reach 8,000 PTS or tap the 🔒 icon and use the override to unlock!</li>
+                    <li><b>Objective:</b> Survive 12 Levels to WIN (or unlock Secret Levels)!</li>
                 </ul>
             </div>
 
@@ -632,30 +631,20 @@ function initAudioContext() {
 }
 
 function unlockSystem() {
+    forceFullscreen(); // Vollbild wieder eingefügt!
     initAudioContext();
     
-    // Unlock media safely for mobile
-    let bgMusic = document.getElementById("snd-action");
-    let vid1 = document.getElementById("dog-video");
-    let vid2 = document.getElementById("dog-video2");
-    
-    if(bgMusic) { bgMusic.muted = true; let p1 = bgMusic.play(); if(p1) p1.then(() => { bgMusic.pause(); bgMusic.muted = false; }).catch(e=>{}); }
-    if(vid2) { vid2.muted = true; let p2 = vid2.play(); if(p2) p2.then(() => { vid2.pause(); vid2.muted = false; }).catch(e=>{}); }
-    
-    if (!dogHasSpoken && vid1) { 
-        dogHasSpoken = true; 
-        vid1.muted = false;
-        let p3 = vid1.play();
-        if(p3) p3.catch(e=>{});
-        processVideoFrame();
+    if (!dogHasSpoken && videoEl) {
+        dogHasSpoken = true;
+        manageMedia('vid1');
     }
     
     let gate = document.getElementById("scr-gatekeeper");
     let startScr = document.getElementById("scr-start");
     
     gate.style.opacity = "0";
-    setTimeout(() => { 
-        gate.style.display = "none"; 
+    setTimeout(() => {
+        gate.style.display = "none";
         startScr.style.display = "block";
         setTimeout(() => { startScr.style.opacity = "1"; }, 50);
     }, 500);
@@ -814,8 +803,8 @@ function triggerMove(dir, btnId) {
 
 window.addEventListener("keydown", function(e) {
     if(!active || missionComplete) return;
-    if(e.key === "ArrowLeft") triggerMove(-1, 'btn-left');
-    if(e.key === "ArrowRight") triggerMove(1, 'btn-right');
+    if(e.key === "ArrowLeft" || e.key.toLowerCase() === "a") triggerMove(-1, 'btn-left');
+    if(e.key === "ArrowRight" || e.key.toLowerCase() === "d") triggerMove(1, 'btn-right');
 });
 
 function triggerVibration(pattern) {
