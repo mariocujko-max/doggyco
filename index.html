@@ -396,7 +396,7 @@
                     <button class="btn-char" style="border-color:var(--unicorn); min-width: 100px; flex: 1;" onclick="start('unicorn', 11)"><span>🦄</span>UNICORN</button>
                     <!-- Cyborg Lock Button -->
                     <button id="btn-cyborg" class="btn-char" style="border-color:var(--cyborg); background: rgba(0,255,255,0.1); min-width: 100px; flex: 1;" onclick="startCyborg()">
-                        <span id="cyborg-icon" style="opacity: 1.0; font-size: 55px; margin-bottom: 5px;">🔒</span>
+                        <span id="cyborg-icon" style="opacity: 1.0; font-size: 40px; margin-bottom: 5px;">🔒</span>
                         <span id="cyborg-text" style="font-size:14px; color:#fff; font-weight:900;">CYBER</span>
                     </button>
                 </div>
@@ -928,7 +928,7 @@ let globalAnimationId = null;
 
 let clouds = [], opponents = [], ufos = []; 
 
-let invincibleTimer = 0;
+let invincibleTimer = 0; let magnetTimer = 0;
 let alarmTimer = 0; 
 let rocketSpawned = false;
 let ufoSpawned = false;
@@ -1354,29 +1354,35 @@ function loop(t) {
 
         for(let i = entities.length - 1; i >= 0; i--) {
             let e = entities[i]; 
+            if(!missionComplete) e.y += e.s * dt;
             
-            if (magnetTimer > 0 && !e.bad && !missionComplete && e.y > 50) {
+            if (magnetTimer > 0 && !e.bad && !missionComplete) {
                 let dx = playerX - e.x;
                 let dy = (H - 150) - e.y;
-                let dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < (W * 1.5)) { 
-                    e.x += (dx / dist) * W * 1.5 * dt; 
-                    e.y += (dy / dist) * H * 0.8 * dt; 
-                } else {
-                    e.y += e.s * dt; 
-                }
-            } else {
-                if(!missionComplete) e.y += e.s * dt;
+                e.x += dx * 0.15;
+                e.y += dy * 0.15;
             }
-            
-            ctx.font = "45px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e.t, e.x, e.y);
+
+            ctx.font = "65px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e.t, e.x, e.y);
 
             if(!missionComplete && Math.abs(e.x - playerX) < colDist && e.y > hitTop && e.y < hitBottom) {
                 if(e.bad) {
-                    if (invincibleTimer > 0) { addFloat(e.x + 40, e.y, "BLOCKED!", "#00ff88", 20); } 
-                    else { hp--; charShake = 20; sfxHit(); hapticDamage(); addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); }
+                    if (invincibleTimer > 0) { 
+                        addFloat(e.x + 40, e.y, "BLOCKED!", "#adff2f", 20); 
+                    } else { 
+                        hp--; charShake = 20; if(typeof sfxHit !== 'undefined') sfxHit(); addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); 
+                    }
+                } else if (e.powerup) {
+                    if(typeof sfxRadioactive !== 'undefined') sfxRadioactive();
+                    if (e.type === 'magnet') {
+                        magnetTimer = 8;
+                        addFloat(e.x, e.y, "MAGNET ACTIVE!", "#00f2ff", 30);
+                    } else {
+                        invincibleTimer = 8;
+                        addFloat(e.x, e.y, "SHIELD ACTIVE!", "#adff2f", 30);
+                    }
                 } else { 
-                    let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; sfxCollect(); addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28); 
+                    score += e.pts; energy = Math.min(100, energy + 5); charJump = 15; if(typeof sfxCollect !== 'undefined') sfxCollect(); addFloat(e.x + 40, e.y, "+"+e.pts, "#00ff88", 28); 
                 }
                 entities.splice(i, 1);
             } else if (e.y > H + 60) { entities.splice(i, 1); }
