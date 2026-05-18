@@ -65,18 +65,10 @@
         
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; pointer-events: none; }
 
-        #phone-container { 
-            position: relative; width: 100%; max-width: 100%; height: 100%; 
-            background: transparent; z-index: 10; overflow: hidden; 
-            padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); 
-        }
+        #phone-container { position: relative; width: 100%; max-width: 900px; height: 100%; background: transparent; z-index: 10; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
 
         @media (min-width: 450px) {
-            #phone-container { 
-            position: relative; width: 100%; max-width: 100%; height: 100%; 
-            background: transparent; z-index: 10; overflow: hidden; 
-            padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); 
-        }
+            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; }
             #phone-container.is-playing { border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
             #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); }
         }
@@ -141,9 +133,9 @@
         }
 
         .screen-inner { 
-            width: 100%; min-height: 100dvh; margin: 0 auto; max-width: 420px; 
+            width: 100%; min-height: 100dvh; margin: 0 auto; max-width: 900px; 
             display: flex; flex-direction: column; justify-content: flex-start; align-items: center; 
-            padding: 40px 10px 100px 10px; 
+            padding: 40px 20px 100px 20px; 
         }
 
         .start-glass-panel {
@@ -294,11 +286,7 @@
         }
 
         @media (orientation: landscape) and (min-height: 400px) {
-            #phone-container { 
-            position: relative; width: 100%; max-width: 100%; height: 100%; 
-            background: transparent; z-index: 10; overflow: hidden; 
-            padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); 
-        }
+            #phone-container { max-width: 900px; }
             #game-wrap { max-width: 900px; border-radius: 20px; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); }
             #controls { max-width: 900px; }
             .end-popup-box { max-width: 500px; margin: 0 auto; }
@@ -399,24 +387,18 @@
 
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; width: 100%;">CHOOSE START LEVEL</h3>
                 
-                <div style="display:flex; flex-direction:column; gap:10px; width:100%; align-items: center;">
-                    <div style="display:flex; justify-content:center; gap:8px; width:100%;">
-                        <button class="btn-char" style="border-color:var(--neon); flex:1;" onclick="start('dog', 1)"><span>🐶</span>DOG</button>
-                        <button class="btn-char" style="border-color:var(--cat); flex:1;" onclick="start('cat', 3)"><span>🐱</span>CAT</button>
-                        <button class="btn-char" style="border-color:var(--rabbit); flex:1;" onclick="start('rabbit', 5)"><span>🐰</span>RABBIT</button>
-                    </div>
-                    <div style="display:flex; justify-content:center; gap:8px; width:75%;">
-                        <button class="btn-char" style="border-color:var(--fox); flex:1;" onclick="start('fox', 7)"><span>🦊</span>FOX</button>
-                        <button class="btn-char" style="border-color:var(--panda); flex:1;" onclick="start('panda', 9)"><span>🐼</span>PANDA</button>
-                    </div>
-                    <div style="display:flex; justify-content:center; gap:8px; width:45%;">
-                        <button class="btn-char" style="border-color:var(--unicorn); flex:1;" onclick="start('unicorn', 11)"><span>🦄</span>UNICORN</button>
-                    
-                    <button id="btn-cyborg" class="btn-char" style="border-color:var(--cyborg); background: rgba(0,255,255,0.1); flex:1;" onclick="startCyborg()">
-                        <span id="cyborg-icon" style="opacity: 1.0; font-size: 55px; margin-bottom: 5px;">🔒</span>
+                <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:15px; width:100%; max-width: 700px;">
+                    <button class="btn-char" style="border-color:var(--neon); min-width: 100px; flex: 1;" onclick="start('dog', 1)"><span>🐶</span>DOG</button>
+                    <button class="btn-char" style="border-color:var(--cat); min-width: 100px; flex: 1;" onclick="start('cat', 3)"><span>🐱</span>CAT</button>
+                    <button class="btn-char" style="border-color:var(--rabbit); min-width: 100px; flex: 1;" onclick="start('rabbit', 5)"><span>🐰</span>RABBIT</button>
+                    <button class="btn-char" style="border-color:var(--fox); min-width: 100px; flex: 1;" onclick="start('fox', 7)"><span>🦊</span>FOX</button>
+                    <button class="btn-char" style="border-color:var(--panda); min-width: 100px; flex: 1;" onclick="start('panda', 9)"><span>🐼</span>PANDA</button>
+                    <button class="btn-char" style="border-color:var(--unicorn); min-width: 100px; flex: 1;" onclick="start('unicorn', 11)"><span>🦄</span>UNICORN</button>
+                    <!-- Cyborg Lock Button -->
+                    <button id="btn-cyborg" class="btn-char" style="border-color:var(--cyborg); background: rgba(0,255,255,0.1); min-width: 100px; flex: 1;" onclick="startCyborg()">
+                        <span id="cyborg-icon" style="opacity: 1.0; font-size: 40px; margin-bottom: 5px;">🔒</span>
                         <span id="cyborg-text" style="font-size:14px; color:#fff; font-weight:900;">CYBER</span>
                     </button>
-</div>
                 </div>
             </div>
 
@@ -439,6 +421,7 @@
                     </li>
                     <li><b>Hazards:</b> Ninjas 🥷 (-1 ❤️) & Spiders 🕷️ (-30 PTS & drain).</li>
                     <li><b>Objective:</b> Survive 12 Levels to WIN!</li>
+                    <li><b>Cyber Level 13:</b> Reach 8,000 PTS or enter the passcode to decode the 🔒 Cyborg block!</li>
                 </ul>
             </div>
 
@@ -450,16 +433,23 @@
                     We will replace the unicorn with <b>YOUR custom face or icon</b>. Pick your own favorite items to catch.
                 </p>
 
-                <div class="store-badges">
-                    <div class="play-store-btn apple-btn" onclick="window.open('https://apps.apple.com/de/app/doggyco-mission/id6763249087', '_blank')">
-                        <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" />
-                    </div>
-                    <div class="play-store-btn" onclick="window.open('https://play.google.com/store/apps/details?id=com.doggycogames.doggyco', '_blank')">
-                        <img alt="Get it on Google Play" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" />
-                    </div>
-                    <div class="play-store-btn" onclick="window.open('https://apps.microsoft.com/detail/9NCRXPDDD1RP?hl=neutral&gl=DE&ocid=pdpshare', '_blank')">
-                        <img alt="Get it from Microsoft" src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Get_it_from_Microsoft_Badge.svg" />
-                    </div>
+                <div class="sup-grid">
+                    <button onclick="window.open('https://www.instagram.com/doggyco.de/', '_blank')" class="btn-sup bg-ig">
+                        <svg viewBox="0 0 448 512" fill="white" width="16" height="16"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
+                        INSTAGRAM
+                    </button>
+                    <button onclick="window.open('https://www.tiktok.com/@doggyco0', '_blank')" class="btn-sup bg-tk">
+                        <svg viewBox="0 0 448 512" fill="white" width="16" height="16"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
+                        TIKTOK
+                    </button>
+                    <button onclick="window.open('https://www.youtube.com/@doggyco.de9', '_blank')" class="btn-sup bg-yt">
+                        <svg viewBox="0 0 576 512" fill="white" width="16" height="14"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438-11.412-132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
+                        YOUTUBE
+                    </button>
+                    <button class="btn-sup bg-email" onclick="copyText(this, 'give-me.org@gmx.net')">
+                        <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> 
+                        <span style="line-height:1.2; text-align:left;">GIVE-ME.ORG<br>@GMX.NET</span>
+                    </button>
                 </div>
             </div>
             
@@ -671,7 +661,6 @@ function updateCyborgButton() {
             cbBtn.style.borderColor = "var(--cyborg)";
             cbBtn.style.background = "rgba(0,255,255,0.1)";
             document.getElementById("cyborg-icon").innerText = "🤖";
-            document.getElementById("cyborg-icon").style.opacity = "1";
             let cbTxt = document.getElementById("cyborg-text");
             cbTxt.innerText = "CYBER"; cbTxt.style.color = "#fff";
         }
