@@ -504,9 +504,9 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
-    let nameInput = document.getElementById("pName");
-    let pName = nameInput.value.trim().toUpperCase();
+    let pName = document.getElementById("pName").value.trim().toUpperCase();
     if(!pName) {
+        let nameInput = document.getElementById("pName");
         nameInput.focus();
         nameInput.style.boxShadow = "0 0 15px red";
         nameInput.style.borderColor = "red";
@@ -521,7 +521,6 @@ function start(m, startLvl) {
     if (v2) { v2.muted = false; let p = v2.play(); if(p) p.then(() => { v2.pause(); v2.currentTime = 0; }).catch(e => {}); }
     
     manageMedia('game');
-    forceFullscreenAndLandscape();
 
     mode = m; level = startLvl;
     hp = 3; energy = 100; score = 0; timeLeft = 30;
