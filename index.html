@@ -10,7 +10,8 @@
     <title>DOGGYCO MISSION - THE FINAL CUT</title>
     
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐶</text></svg>">
+    <link rel="icon" href="grafik.png" type="image/png">
+    <link rel="apple-touch-icon" href="grafik.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     
     <script>
@@ -892,8 +893,15 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
-    let pName = document.getElementById("pName").value.trim().toUpperCase();
-    if(!pName) { pName = "GUEST"; }
+    let nameInput = document.getElementById("pName");
+    let pName = nameInput.value.trim().toUpperCase();
+    if(!pName) {
+        nameInput.focus();
+        nameInput.style.boxShadow = "0 0 15px red";
+        nameInput.style.borderColor = "red";
+        setTimeout(() => { nameInput.style.boxShadow = "none"; nameInput.style.borderColor = "var(--neon)"; }, 1000);
+        return; 
+    }
     agent = pName;
     try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
 
