@@ -354,37 +354,32 @@
             .end-popup-box { max-width: 500px; margin: 0 auto; }
         }
         
-        html.pc-ms #phone-container { max-width: 520px; }
+        html.pc-ms #phone-container { max-width: 600px; }
         html.pc-ms #phone-container.is-playing {
-            width: auto !important;
-            max-height: calc(100dvh - 12px) !important;
+            max-height: calc(100dvh - 12px);
+            margin-left: auto;
+            margin-right: auto;
         }
         html.pc-ms .screen-inner { max-width: 520px; }
-        html.pc-ms #game-wrap.pc-play-layout {
-            position: relative !important;
-            inset: auto !important;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            margin: 0 auto;
-        }
-        html.pc-ms #game-wrap.pc-play-layout #canvas {
-            position: relative !important;
-            top: auto !important; left: auto !important; right: auto !important;
-            flex-shrink: 0;
-            display: block;
-        }
-        html.pc-ms #hud { top: 12px; padding-top: 8px; position: relative !important; }
-        html.pc-ms #game-wrap.pc-play-layout #hud { top: 0; padding-top: 6px; }
-        html.pc-ms #controls { padding-bottom: 12px; }
-        html.pc-ms #game-wrap.pc-play-layout #controls {
-            position: relative !important;
-            bottom: auto !important;
-            flex-shrink: 0;
+        html.pc-ms #game-wrap.is-pc-play #canvas {
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            object-fit: contain;
         }
         html.pc-ms .arrow { width: 100px; height: 88px; font-size: 52px; cursor: pointer; }
         html.pc-ms .gate-btn { cursor: pointer; }
         html.pc-ms .btn-char, html.pc-ms .btn-main, html.pc-ms .btn-restart-green { cursor: pointer; }
+
+        .panel-green { border: 1px solid var(--green); box-shadow: 0 5px 15px rgba(0,255,136,0.1), inset 0 0 20px rgba(0,255,136,0.05); }
+        .panel-green h3 { color: var(--green); border-bottom-color: var(--green); }
+        .store-badges { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 10px; width: 100%; }
+        .play-store-btn { display: block; width: 200px; max-width: 100%; height: 58px; transition: transform 0.2s ease-in-out; cursor: pointer; }
+        .play-store-btn img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; display: block; }
+        .play-store-btn.apple-btn img { background: #000; padding: 6px; box-sizing: border-box; }
+        .play-store-btn:hover { transform: scale(1.04); }
+        .play-store-btn:active { transform: scale(0.97); }
+        html:not(.pc-ms) .pc-only-panel { display: none !important; }
 
         #privacy-popup {
             position: fixed; inset: 0; z-index: 10001;
@@ -566,6 +561,27 @@
                         <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
                         <span style="line-height:1.2; text-align:left;">GIVE-ME.ORG<br>@GMX.NET</span>
                     </button>
+                </div>
+            </div>
+
+            <div class="info-panel panel-green pc-only-panel" style="text-align: center;">
+                <h3>📱 GET THE APP</h3>
+                <p class="text-sm" style="margin-bottom: 12px;">Play DOGGYCO MISSION as a real app on your device:</p>
+                <div class="store-badges">
+                    <div class="play-store-btn apple-btn" role="link" tabindex="0" onclick="window.open('https://apps.apple.com/de/app/doggyco-mission/id6763249087','_blank','noopener,noreferrer')">
+                        <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg">
+                    </div>
+                    <div class="play-store-btn" role="link" tabindex="0" onclick="window.open('https://play.google.com/store/apps/details?id=com.doggycogames.doggyco','_blank','noopener,noreferrer')">
+                        <img alt="Get it on Google Play" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg">
+                    </div>
+                    <div class="play-store-btn" role="link" tabindex="0" onclick="window.open('https://apps.microsoft.com/detail/9NCRXPDDD1RP?hl=neutral&amp;gl=DE&amp;ocid=pdpshare','_blank','noopener,noreferrer')">
+                        <img alt="Get it from Microsoft" src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Get_it_from_Microsoft_Badge.svg">
+                    </div>
+                    <p class="text-sm" style="margin-top:8px;color:#aaa;font-size:12px;">
+                        Browser: <a href="index.appel.html" style="color:var(--neon);">Apple (iPhone)</a> ·
+                        <a href="index.android.html" style="color:var(--neon);">Google (Android)</a> ·
+                        <a href="index.html" style="color:var(--neon);">Microsoft (PC)</a>
+                    </p>
                 </div>
             </div>
 
@@ -909,7 +925,7 @@ function goToLevelSelect() {
     
     document.getElementById("phone-container").classList.remove("is-playing");
     let gw = document.getElementById("game-wrap");
-    if (gw) gw.classList.remove("pc-play-layout");
+    if (gw) gw.classList.remove("pc-play-layout", "is-pc-play");
     
     ctx.clearRect(0, 0, W, H);
     document.getElementById("time-txt").innerText = "30s";
@@ -1167,47 +1183,60 @@ function resizeCanvas() {
     let ctrl = document.getElementById("controls");
     let hud = document.getElementById("hud");
     let pc = document.getElementById("phone-container");
-    if(!gw || gw.clientWidth <= 0) return;
+    if (!gw) return;
+    if (!active && gw.clientWidth <= 0) return;
 
     let ctrlH = ctrl ? ctrl.offsetHeight : 110;
     let hudH = hud ? hud.offsetHeight : 95;
 
+    gw.classList.remove("pc-play-layout", "is-pc-play");
+
     if (window.__pcMs && active) {
-        let pad = 16;
+        let pad = 20;
         let availH = window.innerHeight - hudH - ctrlH - pad;
-        let availW = window.innerWidth * 0.96;
+        let availW = window.innerWidth * 0.92;
         let side = Math.floor(Math.min(availH, availW, 560));
-        side = Math.max(300, side);
+        side = Math.max(320, side);
         W = side;
         H = side;
-        let totalH = hudH + H + ctrlH;
+        let totalH = hudH + H + ctrlH + 8;
+
         if (pc) {
-            pc.style.width = W + "px";
+            pc.style.width = side + "px";
             pc.style.height = totalH + "px";
         }
-        gw.style.width = W + "px";
-        gw.style.height = totalH + "px";
-        gw.classList.add("pc-play-layout");
-        canvas.style.top = "";
-        canvas.style.left = "";
-        canvas.style.transform = "";
-        canvas.style.width = W + "px";
-        canvas.style.height = H + "px";
+        gw.style.position = "absolute";
+        gw.style.inset = "0";
+        gw.style.width = "100%";
+        gw.style.height = "100%";
+        gw.classList.add("is-pc-play");
+
+        canvas.style.position = "absolute";
+        canvas.style.display = "block";
+        canvas.style.top = hudH + "px";
+        canvas.style.left = "50%";
+        canvas.style.right = "auto";
+        canvas.style.transform = "translateX(-50%)";
+        canvas.style.width = side + "px";
+        canvas.style.height = side + "px";
     } else {
-        gw.classList.remove("pc-play-layout");
         if (pc) { pc.style.width = ""; pc.style.height = ""; }
+        gw.style.position = "";
+        gw.style.inset = "";
         gw.style.width = "";
         gw.style.height = "";
-        W = gw.clientWidth;
+        W = gw.clientWidth || Math.min(window.innerWidth, 420);
         if (window.__pcMs) {
-            H = gw.clientHeight - ctrlH;
-            canvas.style.top = "";
-            canvas.style.left = "";
+            H = Math.max(300, gw.clientHeight - ctrlH);
+            canvas.style.position = "absolute";
+            canvas.style.top = "0";
+            canvas.style.left = "0";
             canvas.style.transform = "";
-            canvas.style.width = "";
+            canvas.style.width = "100%";
             canvas.style.height = "";
         } else {
             H = Math.max(250, gw.clientHeight - ctrlH - hudH);
+            canvas.style.position = "absolute";
             canvas.style.top = hudH + "px";
             canvas.style.left = "0";
             canvas.style.transform = "";
@@ -1218,7 +1247,6 @@ function resizeCanvas() {
 
     canvas.width = W;
     canvas.height = H;
-    if (window.__pcMs && active) canvas.style.height = H + "px";
 
     let lw = W / 5;
     lanes = [lw*0.5, lw*1.5, lw*2.5, lw*3.5, lw*4.5];
@@ -1344,15 +1372,17 @@ function start(m, startLvl) {
 
     document.getElementById("phone-container").classList.add("is-playing");
     active = true;
-    resizeCanvas();
-    initBackgroundGraphics();
-    
-    document.getElementById("canvas").classList.remove("blur");
-    
-    initPermSpiders();
 
-    lastT = 0;
-    globalAnimationId = requestAnimationFrame(loop);
+    function bootGame() {
+        resizeCanvas();
+        initBackgroundGraphics();
+        initPermSpiders();
+        document.getElementById("canvas").classList.remove("blur");
+        lastT = 0;
+        globalAnimationId = requestAnimationFrame(loop);
+    }
+    bootGame();
+    requestAnimationFrame(bootGame);
 }
 
 function getSafeSpiderLane(currentSpider) {
