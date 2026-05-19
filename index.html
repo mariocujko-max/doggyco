@@ -515,7 +515,9 @@
 
 </div> 
 
-<audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
+<audio id="snd-action" src="music.mp3" loop preload="auto"></audio>
+
+<script>
 function forceFullscreenAndLandscape() {
     let elem = document.documentElement;
     let req = elem.requestFullscreen || elem.webkitRequestFullscreen;
@@ -527,6 +529,8 @@ function forceFullscreenAndLandscape() {
         }).catch(() => {});
     }
 }
+
+function manageMedia(action) {
 
 <script>
 function manageMedia(action) {
