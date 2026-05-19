@@ -65,10 +65,18 @@
         
         #bg-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.4) 100%); z-index: 2; pointer-events: none; }
 
-        #phone-container { position: relative; width: 100%; max-width: 900px; height: 100%; background: transparent; z-index: 10; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
+        #phone-container { 
+            position: relative; width: 100%; max-width: 100%; height: 100%; 
+            background: transparent; z-index: 10; overflow: hidden; 
+            padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); 
+        }
 
         @media (min-width: 450px) {
-            #phone-container { height: 90vh; max-height: 850px; border-radius: 35px; }
+            #phone-container { 
+            position: relative; width: 100%; max-width: 100%; height: 100%; 
+            background: transparent; z-index: 10; overflow: hidden; 
+            padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); 
+        }
             #phone-container.is-playing { border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
             #bg-overlay { background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%); }
         }
@@ -286,7 +294,11 @@
         }
 
         @media (orientation: landscape) and (min-height: 400px) {
-            #phone-container { max-width: 900px; }
+            #phone-container { 
+            position: relative; width: 100%; max-width: 100%; height: 100%; 
+            background: transparent; z-index: 10; overflow: hidden; 
+            padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); 
+        }
             #game-wrap { max-width: 900px; border-radius: 20px; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); }
             #controls { max-width: 900px; }
             .end-popup-box { max-width: 500px; margin: 0 auto; }
@@ -379,10 +391,7 @@
 
                 <div id="auth-panel">
                     <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') this.blur();">
-                    <div class="privacy-consent">
-                        By playing, you consent to submitting your Codename & Score to our global leaderboard.<br>
-                        <a href="https://github.com/mariocujko-max/doggyco/blob/main/PRIVACY.md" target="_blank">Privacy Policy</a>
-                    </div>
+                    
                 </div>
 
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; width: 100%;">CHOOSE START LEVEL</h3>
@@ -395,8 +404,8 @@
                     <button class="btn-char" style="border-color:var(--panda); min-width: 100px; flex: 1;" onclick="start('panda', 9)"><span>🐼</span>PANDA</button>
                     <button class="btn-char" style="border-color:var(--unicorn); min-width: 100px; flex: 1;" onclick="start('unicorn', 11)"><span>🦄</span>UNICORN</button>
                     <!-- Cyborg Lock Button -->
-                    <button id="btn-cyborg" class="btn-char" style="border-color:var(--cyborg); background: rgba(0,255,255,0.1); min-width: 100px; flex: 1;" onclick="startCyborg()">
-                        <span id="cyborg-icon" style="opacity: 1.0; font-size: 40px; margin-bottom: 5px;">🔒</span>
+                    <button id="btn-cyborg" class="btn-char" style="border-color:var(--cyborg); background: rgba(0,255,255,0.15); min-width: 100px; flex: 1;" onclick="startCyborg()">
+                        <span id="cyborg-icon" style="opacity: 1.0; font-size: 55px; margin-bottom: 5px;">🔒</span>
                         <span id="cyborg-text" style="font-size:14px; color:#fff; font-weight:900;">CYBER</span>
                     </button>
                 </div>
@@ -509,38 +518,17 @@
 
 <script>
 function manageMedia(action) {
-    try {
-        let bgMusic = document.getElementById("snd-action");
-        let vid1 = document.getElementById("dog-video");
-        let vid2 = document.getElementById("dog-video2");
+    let bgMusic = document.getElementById("snd-action");
+    let vid1 = document.getElementById("dog-video");
+    let vid2 = document.getElementById("dog-video2");
 
-        if(bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
-        if(vid1) { vid1.pause(); }
-        if(vid2) { vid2.pause(); }
+    if(bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
+    if(vid1) { vid1.pause(); }
+    if(vid2) { vid2.pause(); }
 
-        if(action === 'vid1') {
-            if(vid1) { 
-                vid1.currentTime = 0; vid1.muted = false; 
-                let p = vid1.play(); 
-                if(p && p.catch) p.catch(e=>{}); 
-                processVideoFrame(); 
-            }
-        } else if(action === 'vid2') {
-            if(vid2) { 
-                vid2.currentTime = 0; vid2.muted = false; 
-                let p = vid2.play(); 
-                if(p && p.catch) p.catch(e=>{}); 
-                processVideoFrame2(); 
-            }
-        } else if(action === 'game') {
-            if(bgMusic) { 
-                bgMusic.volume = 1.0; bgMusic.playbackRate = 1.0; 
-                let p = bgMusic.play(); 
-                if(p && p.catch) p.catch(e=>{}); 
-            }
-        }
-    } catch(e) {}
-} else if(action === 'vid2') {
+    if(action === 'vid1') {
+        if(vid1) { vid1.currentTime = 0; vid1.muted = false; vid1.play().catch(e=>{}); processVideoFrame(); }
+    } else if(action === 'vid2') {
         if(vid2) { vid2.currentTime = 0; vid2.muted = false; vid2.play().catch(e=>{}); processVideoFrame2(); }
     } else if(action === 'game') {
         if(bgMusic) { bgMusic.volume = 0.12; bgMusic.playbackRate = 1.0; bgMusic.play().catch(e=>{}); }
@@ -633,19 +621,17 @@ function unlockSystem() {
     initAudioContext();
     if (!dogHasSpoken && videoEl) { dogHasSpoken = true; manageMedia('vid1'); }
     
-    try { forceFullscreenAndLandscape(); } catch(e) {}
+    forceFullscreenAndLandscape();
     
     let gate = document.getElementById("scr-gatekeeper");
     let startScr = document.getElementById("scr-start");
     
-    if (gate && startScr) {
-        gate.style.opacity = "0";
-        setTimeout(() => { 
-            gate.style.display = "none"; 
-            startScr.style.display = "block";
-            setTimeout(() => { startScr.style.opacity = "1"; }, 50);
-        }, 500);
-    }
+    gate.style.opacity = "0";
+    setTimeout(() => { 
+        gate.style.display = "none"; 
+        startScr.style.display = "block";
+        setTimeout(() => { startScr.style.opacity = "1"; }, 50);
+    }, 500);
 }
 
 window.onload = function() {
