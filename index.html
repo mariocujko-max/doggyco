@@ -355,15 +355,75 @@
         }
         
         html.pc-ms #phone-container { max-width: 520px; }
+        html.pc-ms #phone-container.is-playing {
+            width: auto !important;
+            height: auto !important;
+            max-height: calc(100dvh - 12px) !important;
+        }
         html.pc-ms .screen-inner { max-width: 520px; }
-        html.pc-ms #hud { top: 12px; padding-top: 8px; }
+        html.pc-ms #game-wrap.pc-play-layout {
+            position: relative !important;
+            inset: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            display: flex;
+            flex-direction: column;
+        }
+        html.pc-ms #game-wrap.pc-play-layout #canvas {
+            position: relative !important;
+            top: auto !important; left: auto !important; right: auto !important;
+            width: 100% !important;
+            height: auto !important;
+            flex-shrink: 0;
+        }
+        html.pc-ms #hud { top: 12px; padding-top: 8px; position: relative !important; }
+        html.pc-ms #game-wrap.pc-play-layout #hud { top: 0; padding-top: 6px; }
         html.pc-ms #controls { padding-bottom: 12px; }
+        html.pc-ms #game-wrap.pc-play-layout #controls {
+            position: relative !important;
+            bottom: auto !important;
+            flex-shrink: 0;
+        }
         html.pc-ms .arrow { width: 100px; height: 88px; font-size: 52px; cursor: pointer; }
         html.pc-ms .gate-btn { cursor: pointer; }
         html.pc-ms .btn-char, html.pc-ms .btn-main, html.pc-ms .btn-restart-green { cursor: pointer; }
+
+        #privacy-popup {
+            position: fixed; inset: 0; z-index: 10001;
+            background: rgba(0,0,0,0.85);
+            display: none; justify-content: center; align-items: center;
+            padding: 20px; backdrop-filter: blur(8px);
+        }
+        #privacy-popup.show { display: flex; }
+        .privacy-box {
+            background: rgba(15,15,15,0.98); border: 1px solid var(--neon);
+            border-radius: 20px; padding: 24px 20px; max-width: 400px; width: 100%;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .privacy-box h2 { color: var(--neon); font-size: 18px; margin-bottom: 12px; text-align: center; }
+        .privacy-box p { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #ddd; line-height: 1.55; margin-bottom: 10px; }
+        .privacy-close-btn {
+            margin-top: 16px; width: 100%; padding: 12px; border: none; border-radius: 12px;
+            background: var(--neon); color: #000; font-family: 'Orbitron'; font-weight: 900; cursor: pointer;
+        }
+        #secret-code-input::-webkit-outer-spin-button,
+        #secret-code-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        #secret-code-input { -moz-appearance: textfield; }
     </style>
 </head>
 <body>
+
+<div id="privacy-popup" onclick="if(event.target===this) closePrivacy();">
+    <div class="privacy-box">
+        <h2>Privacy Policy</h2>
+        <p>By playing, you agree that your chosen <b>codename</b> and <b>high score</b> may be stored in our online leaderboard so other players can see rankings.</p>
+        <p>We do not ask for your real name, email, or location in the game. Scores are linked only to the codename you enter.</p>
+        <p>Leaderboard data is hosted by our database provider (Supabase). Entries can be removed on request — contact: <b>give-me.org@gmx.net</b></p>
+        <p>This is a private, non-commercial fan project. No sale of personal data. No advertising trackers in the game file.</p>
+        <p style="font-size:11px;color:#888;">© 2026 DOGGYCO GLOBAL ACADEMY — Concept &amp; design by M. Čujko</p>
+        <button type="button" class="privacy-close-btn" onclick="closePrivacy()">OK</button>
+    </div>
+</div>
 
 <div id="bg-fx"></div>
 <div id="bg-overlay"></div>
@@ -385,7 +445,7 @@
             <h2>🔒 CLASSIFIED 🔒</h2>
             <p>This biological asset is heavily encrypted.</p>
             <p>Reach <b class="blink-red">8,000 PTS</b> to decode, or enter the override passcode.</p>
-            <input type="number" id="secret-code-input" placeholder="CODE" autocomplete="off" onkeydown="if(event.key === 'Enter') checkSecretCode();">
+            <input type="text" id="secret-code-input" placeholder="CODE" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off">
             <div class="sec-btns">
                 <button class="btn-cancel" onclick="closeSecret()">CANCEL</button>
                 <button class="btn-override" onclick="checkSecretCode()">OVERRIDE</button>
@@ -433,7 +493,7 @@
                     <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') this.blur();">
                     <div class="privacy-consent">
                         By playing, you consent to submitting your Codename & Score to our global leaderboard.<br>
-                        <a href="https://github.com/mariocujko-max/doggyco/blob/main/PRIVACY.md" target="_blank">Privacy Policy</a>
+                        <a href="#" onclick="openPrivacy(); return false;">Privacy Policy</a>
                     </div>
                 </div>
 
@@ -568,13 +628,24 @@ function manageMedia(action) {
     } else if(action === 'vid2') {
         if(vid2) { vid2.currentTime = 0; vid2.muted = false; vid2.play().catch(e=>{}); processVideoFrame2(); }
     } else if(action === 'game') {
-        if(bgMusic) { 
-            bgMusic.playbackRate = 1.0;
-            if (window.__pcMs) bgMusic.volume = 0.14;
-            bgMusic.play().catch(e=>{}); 
-        }
+        playGameMusic();
     } else if(action === 'none') {
     }
+}
+
+function playGameMusic() {
+    let bgMusic = document.getElementById("snd-action");
+    if (!bgMusic) return;
+    try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
+    bgMusic.muted = false;
+    bgMusic.playbackRate = 1.0;
+    if (window.musicGain) {
+        try { window.musicGain.gain.value = window.__pcMs ? 0.32 : 0.05; } catch(e) {}
+    }
+    if (window.__pcMs) bgMusic.volume = 1.0;
+    else bgMusic.volume = 1.0;
+    let p = bgMusic.play();
+    if (p && p.catch) p.catch(function () {});
 }
 
 let videoEl = document.getElementById('dog-video');
@@ -654,7 +725,7 @@ function initAudioContext() {
                 window.musicSource = audioCtx.createMediaElementSource(bgMusic);
                 window.musicGain = audioCtx.createGain();
                 
-                window.musicGain.gain.value = 0.05; 
+                window.musicGain.gain.value = window.__pcMs ? 0.32 : 0.05;
                 
                 window.musicSource.connect(window.musicGain);
                 window.musicGain.connect(audioCtx.destination);
@@ -783,9 +854,31 @@ function closeSecret() {
     setTimeout(() => pop.style.display = "none", 300);
 }
 
+function openPrivacy() {
+    let pop = document.getElementById("privacy-popup");
+    if (pop) pop.classList.add("show");
+}
+
+function closePrivacy() {
+    let pop = document.getElementById("privacy-popup");
+    if (pop) pop.classList.remove("show");
+}
+
+function isFormFocus() {
+    let el = document.activeElement;
+    if (!el) return false;
+    let tag = el.tagName;
+    return tag === "INPUT" || tag === "TEXTAREA" || el.isContentEditable;
+}
+
+function isSecretPopupOpen() {
+    let pop = document.getElementById("secret-popup");
+    return pop && pop.style.display !== "none" && pop.classList.contains("show");
+}
+
 function checkSecretCode() {
     let inputEl = document.getElementById("secret-code-input");
-    let code = inputEl.value;
+    let code = String(inputEl.value || "").replace(/\D/g, "");
     if (code === "4321") {
         closeSecret();
         start('cyborg', 13);
@@ -814,11 +907,14 @@ function goToLevelSelect() {
     document.getElementById("canvas").classList.remove("blur");
     
     document.getElementById("phone-container").classList.remove("is-playing");
+    let gw = document.getElementById("game-wrap");
+    if (gw) gw.classList.remove("pc-play-layout");
     
     ctx.clearRect(0, 0, W, H);
     document.getElementById("time-txt").innerText = "30s";
     
     document.getElementById("scr-start").style.display = "block";
+    resizeCanvas();
     document.getElementById("scr-start").scrollTop = 0;
     
     manageMedia('none');
@@ -862,10 +958,24 @@ function triggerMove(dir, btnId) {
 }
 
 window.addEventListener("keydown", function(e) {
+    if (isFormFocus() || isSecretPopupOpen()) return;
     if(!active || missionComplete) return;
     if(e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { e.preventDefault(); triggerMove(-1, 'btn-left'); }
     if(e.key === "ArrowRight" || e.key === "d" || e.key === "D") { e.preventDefault(); triggerMove(1, 'btn-right'); }
 });
+
+(function () {
+    let secIn = document.getElementById("secret-code-input");
+    if (!secIn) return;
+    secIn.addEventListener("keydown", function (e) {
+        e.stopPropagation();
+        if (e.key === "Enter") { e.preventDefault(); checkSecretCode(); return; }
+        if (e.key.indexOf("Arrow") === 0) e.preventDefault();
+    });
+    secIn.addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "").slice(0, 4);
+    });
+})();
 
 function triggerVibration(pattern) {
     if ("vibrate" in navigator) {
@@ -1054,19 +1164,42 @@ let lanes = [40, 120, 200, 280, 360];
 function resizeCanvas() {
     let gw = document.getElementById("game-wrap");
     let ctrl = document.getElementById("controls");
-    if(gw && gw.clientWidth > 0) {
-        let ctrlH = ctrl ? ctrl.offsetHeight : 110;
+    let hud = document.getElementById("hud");
+    let pc = document.getElementById("phone-container");
+    if(!gw || gw.clientWidth <= 0) return;
+
+    let ctrlH = ctrl ? ctrl.offsetHeight : 110;
+    let hudH = hud ? hud.offsetHeight : 95;
+
+    if (window.__pcMs && active) {
+        let pad = 20;
+        let availH = window.innerHeight - hudH - ctrlH - pad;
+        let availW = window.innerWidth * 0.96;
+        let side = Math.floor(Math.min(availH, availW, 560));
+        side = Math.max(300, side);
+        W = side;
+        H = side;
+        if (pc) pc.style.width = W + "px";
+        gw.style.width = W + "px";
+        gw.style.height = (hudH + H + ctrlH) + "px";
+        gw.classList.add("pc-play-layout");
+    } else {
+        gw.classList.remove("pc-play-layout");
+        if (pc) pc.style.width = "";
+        gw.style.width = "";
+        gw.style.height = "";
         W = gw.clientWidth;
         H = gw.clientHeight - ctrlH;
-        canvas.width = W;
-        canvas.height = H;
-        canvas.style.height = H + "px";
-        
-        let lw = W / 5;
-        lanes = [lw*0.5, lw*1.5, lw*2.5, lw*3.5, lw*4.5];
-        targetX = lanes[currLane];
-        if(!active) playerX = targetX;
     }
+
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.height = H + "px";
+
+    let lw = W / 5;
+    lanes = [lw*0.5, lw*1.5, lw*2.5, lw*3.5, lw*4.5];
+    targetX = lanes[currLane];
+    if(!active) playerX = targetX;
 }
 
 let currLane = 2, playerX = lanes[2], targetX = lanes[2];
@@ -1093,6 +1226,12 @@ let fallingHearts = [];
 let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
 let charShake = 0, charJump = 0, spawnDelay = 0;
 let currentOpponentIcon = '🐦';
+
+function getSkyFlyY() {
+    let yMin = H * 0.10;
+    let yMax = H / 3;
+    return yMin + Math.random() * (yMax - yMin);
+}
 
 function initBackgroundGraphics() {
     clouds = [];
@@ -1157,7 +1296,6 @@ function start(m, startLvl) {
     rocketSpawned = false; ufoSpawned = false; magnetSpawned = false;
     rocket = null; fallingCore = null; fallingAlien = null; fallingHearts = [];
     
-    initBackgroundGraphics();
     updateTheme(mode);
     
     let scrStart = document.getElementById("scr-start");
@@ -1168,15 +1306,17 @@ function start(m, startLvl) {
         gameWrap.style.visibility = "visible";
         gameWrap.style.pointerEvents = "auto";
     }
-    
+
+    document.getElementById("phone-container").classList.add("is-playing");
+    active = true;
     resizeCanvas();
+    initBackgroundGraphics();
     
     document.getElementById("canvas").classList.remove("blur");
-    document.getElementById("phone-container").classList.add("is-playing");
     
     permSpiders = [ { lane: 0, y: 60, dy: 1, hit: false }, { lane: 4, y: H-190, dy: -1, hit: false } ];
 
-    active = true; lastT = 0;
+    lastT = 0;
     globalAnimationId = requestAnimationFrame(loop);
 }
 
@@ -1305,21 +1445,22 @@ function loop(t) {
         if (!missionComplete) {
             timeLeft -= dt; energy -= (4 * speedMult) * dt;
 
-            let flyHeight = (H / 2);
-
             if(timeLeft <= 25 && !rocketSpawned) {
                 rocketSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2;
-                rocket = { x: W + 50, y: flyHeight, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'shield' }; sfxRocket();
+                let flyY = getSkyFlyY();
+                rocket = { x: W + 50, y: flyY, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'shield' }; sfxRocket();
             }
             
             if(timeLeft <= 16 && !magnetSpawned) {
                 magnetSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2;
-                rocket = { x: W + 50, y: flyHeight, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'magnet' }; sfxAlienFly();
+                let flyY = getSkyFlyY();
+                rocket = { x: W + 50, y: flyY, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'magnet' }; sfxAlienFly();
             }
 
             if(timeLeft <= 7 && !ufoSpawned) {
                 ufoSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2;
-                ufos.push({ x: W + 50, y: flyHeight, s: 75 * speedMult * (W/400), targetLane: safeL, dropped: false }); sfxUfo();
+                let flyY = getSkyFlyY();
+                ufos.push({ x: W + 50, y: flyY, s: 75 * speedMult * (W/400), targetLane: safeL, dropped: false }); sfxUfo();
             }
 
             if(timeLeft <= 0) {
