@@ -110,7 +110,7 @@
         }
 
         #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
-        #canvas { position: absolute; top: 0; left: 0; right: 0; width: 100%; height: auto; object-fit: contain; z-index: 50; touch-action: none; transition: filter 0.3s; }
+        #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; touch-action: none; transition: filter 0.3s; display: block; }
         #canvas.blur { filter: blur(5px); }
 
         #hud { position: absolute; top: 50px; width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; transition: opacity 0.3s; }
@@ -633,6 +633,13 @@ function manageMedia(action) {
     let vid1 = document.getElementById("dog-video");
     let vid2 = document.getElementById("dog-video2");
 
+    if (action === 'game') {
+        if (vid1) vid1.pause();
+        if (vid2) vid2.pause();
+        playGameMusic();
+        return;
+    }
+
     if(bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
     if(vid1) { vid1.pause(); }
     if(vid2) { vid2.pause(); }
@@ -641,14 +648,16 @@ function manageMedia(action) {
         if(vid1) { vid1.currentTime = 0; vid1.muted = false; vid1.play().catch(e=>{}); processVideoFrame(); }
     } else if(action === 'vid2') {
         if(vid2) { vid2.currentTime = 0; vid2.muted = false; vid2.play().catch(e=>{}); processVideoFrame2(); }
-    } else if(action === 'game') {
-        playGameMusic();
     } else if(action === 'none') {
     }
 }
 
 function musicGainLevel() {
-    return window.__pcMs ? 0.95 : 0.72;
+    return window.__pcMs ? 0.95 : 0.78;
+}
+
+function useMusicWebAudio() {
+    return !!(window.__pcMs && !window.__isIOS && !window.__isAndroid);
 }
 
 function playGameMusic() {
@@ -657,10 +666,13 @@ function playGameMusic() {
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
     bgMusic.muted = false;
     bgMusic.playbackRate = 1.0;
-    bgMusic.volume = 1.0;
-    if (window.musicGain) {
+    if (useMusicWebAudio() && window.musicGain) {
+        bgMusic.volume = 1.0;
         try { window.musicGain.gain.value = musicGainLevel(); } catch(e) {}
+    } else {
+        bgMusic.volume = musicGainLevel();
     }
+    if (!bgMusic.paused && bgMusic.currentTime > 0.2) return;
     let p = bgMusic.play();
     if (p && p.catch) p.catch(function () {});
 }
@@ -738,12 +750,10 @@ function initAudioContext() {
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
             let bgMusic = document.getElementById("snd-action");
-            if (bgMusic && !window.musicRouted) {
+            if (bgMusic && !window.musicRouted && useMusicWebAudio()) {
                 window.musicSource = audioCtx.createMediaElementSource(bgMusic);
                 window.musicGain = audioCtx.createGain();
-                
                 window.musicGain.gain.value = musicGainLevel();
-                
                 window.musicSource.connect(window.musicGain);
                 window.musicGain.connect(audioCtx.destination);
                 window.musicRouted = true;
@@ -1170,9 +1180,46 @@ async function fetchRanks() {
 
 const canvas = document.getElementById("canvas");
 const ctx = (function () {
-    try { return canvas.getContext("2d", { willReadFrequently: true, desynchronized: true }); }
+    let mobileCtx = window.__isIOS || window.__isAndroid;
+    let opts = mobileCtx ? { willReadFrequently: true } : { willReadFrequently: true, desynchronized: true };
+    try { return canvas.getContext("2d", opts); }
     catch (e) { return canvas.getContext("2d", { willReadFrequently: true }); }
 })();
+
+let canvasDpr = 1;
+
+function drawEmoji(text, x, y, sizePx, baseline) {
+    ctx.save();
+    ctx.font = sizePx + 'px Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = baseline || 'middle';
+    let w = ctx.measureText(text).width;
+    ctx.fillText(text, x - w / 2, y);
+    ctx.restore();
+}
+
+function applyCanvasSize() {
+    let dpr = 1;
+    let mobile = window.__isIOS || window.__isAndroid;
+    if (mobile) {
+        dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+    } else {
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+    }
+    canvasDpr = dpr;
+    if (dpr > 1) {
+        canvas.width = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    } else {
+        canvas.width = W;
+        canvas.height = H;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+}
 
 let W = 400;
 let H = 700;
@@ -1192,11 +1239,11 @@ function resizeCanvas() {
     gw.classList.remove("pc-play-layout", "is-pc-play");
 
     if (window.__pcMs && active) {
-        let pad = 20;
+        let pad = 8;
         let availH = window.innerHeight - hudH - ctrlH - pad;
-        let availW = window.innerWidth * 0.92;
-        let side = Math.floor(Math.min(availH, availW, 560));
-        side = Math.max(320, side);
+        let availW = window.innerWidth * 0.98;
+        let side = Math.floor(Math.min(availH, availW, 680));
+        side = Math.max(340, side);
         W = side;
         H = side;
         let totalH = hudH + H + ctrlH + 8;
@@ -1235,18 +1282,21 @@ function resizeCanvas() {
             canvas.style.width = "100%";
             canvas.style.height = "";
         } else {
-            H = Math.max(250, gw.clientHeight - ctrlH - hudH);
+            W = gw.clientWidth || window.innerWidth;
+            H = Math.max(280, gw.clientHeight - ctrlH);
             canvas.style.position = "absolute";
-            canvas.style.top = hudH + "px";
+            canvas.style.top = "0";
             canvas.style.left = "0";
             canvas.style.transform = "";
             canvas.style.width = "100%";
-            canvas.style.height = H + "px";
+            canvas.style.height = "100%";
+            canvas.style.display = "block";
+            canvas.style.visibility = "visible";
+            canvas.style.opacity = "1";
         }
     }
 
-    canvas.width = W;
-    canvas.height = H;
+    applyCanvasSize();
 
     let lw = W / 5;
     lanes = [lw*0.5, lw*1.5, lw*2.5, lw*3.5, lw*4.5];
@@ -1621,9 +1671,10 @@ function loop(t) {
         if (fallingCore && !missionComplete) {
             fallingCore.y += fallingCore.s * dt;
             let fx = lanes[fallingCore.lane];
-            ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 15; 
-            ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.font = "40px Arial"; ctx.fillStyle = "#adff2f"; ctx.fillText('☢️', fx, fallingCore.y); ctx.restore();
+            ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 15;
+            ctx.fillStyle = "#adff2f";
+            drawEmoji('☢️', fx, fallingCore.y, 40, 'middle');
+            ctx.restore();
             if (Math.abs(fx - playerX) < colDist && fallingCore.y > hitTop && fallingCore.y < hitBottom) {
                 invincibleTimer = 7.0; charJump = 20; sfxShield();
                 let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5);
@@ -1635,9 +1686,10 @@ function loop(t) {
         if (fallingAlien && !missionComplete) {
             fallingAlien.y += fallingAlien.s * dt;
             let fx = lanes[fallingAlien.lane];
-            ctx.save(); ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 15; 
-            ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.font = "40px Arial"; ctx.fillStyle = "#00f2ff"; ctx.fillText('🧲', fx, fallingAlien.y); ctx.restore();
+            ctx.save(); ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 15;
+            ctx.fillStyle = "#00f2ff";
+            drawEmoji('🧲', fx, fallingAlien.y, 40, 'middle');
+            ctx.restore();
             if (Math.abs(fx - playerX) < colDist && fallingAlien.y > hitTop && fallingAlien.y < hitBottom) {
                 magnetTimer = 7.0; charJump = 20; sfxStarCollect();
                 let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5);
@@ -1727,10 +1779,7 @@ function loop(t) {
             ctx.moveTo(sx, 0);
             ctx.lineTo(sx, s.y);
             ctx.stroke();
-
-            ctx.textAlign = "center"; ctx.textBaseline = "bottom";
-            ctx.font = "40px Arial";
-            ctx.fillText('🕷️', sx, s.y);
+            drawEmoji('🕷️', sx, s.y, 40, 'middle');
 
             if(!missionComplete) {
                 if(!s.hit && Math.abs(sx - playerX) < colDist && s.y > hitTop && s.y < hitBottom) {
@@ -1784,11 +1833,11 @@ function loop(t) {
             ctx.save(); ctx.beginPath(); ctx.arc(drawX, drawY, 45 + Math.sin(t/100)*5, 0, Math.PI*2);
             ctx.strokeStyle = "rgba(0, 242, 255, 0.6)"; ctx.lineWidth = 4; ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 15; ctx.stroke(); ctx.restore();
 
-            ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.font = "50px Arial";
+            ctx.save();
             let magnetAlpha = 0.5 + 0.5 * Math.abs(Math.sin(t / 150));
             ctx.globalAlpha = magnetAlpha; ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 20;
-            ctx.fillText('🧲', drawX, drawY - 55); ctx.restore();
+            drawEmoji('🧲', drawX, drawY - 55, 50, 'middle');
+            ctx.restore();
         }
 
         if (invincibleTimer > 0) {
@@ -1797,17 +1846,14 @@ function loop(t) {
             ctx.strokeStyle = `rgba(173, 255, 47, ${ringAlpha})`; ctx.lineWidth = 4;
             ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 20; ctx.stroke(); ctx.restore();
 
-            ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.font = "50px Arial";
+            ctx.save();
             let iconAlpha = 0.5 + 0.5 * Math.abs(Math.sin(t / 150));
             ctx.globalAlpha = iconAlpha; ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 20;
-            ctx.fillText('☢️', drawX, drawY - 55); ctx.restore();
+            drawEmoji('☢️', drawX, drawY - 55, 50, 'middle');
+            ctx.restore();
         }
 
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = "70px Arial";
-        ctx.fillText(charIcon, drawX, drawY);
+        drawEmoji(charIcon, drawX, drawY, 70, 'middle');
 
         for(let i = fxParticles.length - 1; i >= 0; i--) {
             let p = fxParticles[i];
