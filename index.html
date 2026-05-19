@@ -28,6 +28,7 @@
             --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; 
             --cat: #bc13fe; --rabbit: #ff8c00; --fox: #ff4500; --panda: #ffffff;
             --unicorn: #ff00ff;
+            --cyborg: #00ffff;
             --rad: #adff2f;
             --glass: rgba(255, 255, 255, 0.08);
         }
@@ -515,6 +516,17 @@
 </div> 
 
 <audio id="snd-action" src="music.mp3" loop preload="auto"></audio> 
+function forceFullscreenAndLandscape() {
+    let elem = document.documentElement;
+    let req = elem.requestFullscreen || elem.webkitRequestFullscreen;
+    if (req) {
+        req.call(elem).then(() => {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => {});
+            }
+        }).catch(() => {});
+    }
+}
 
 <script>
 function manageMedia(action) {
@@ -944,7 +956,6 @@ let alarmTimer = 0;
 let rocketSpawned = false;
 let ufoSpawned = false;
 let magnetSpawned = false;
-let magnetTimer = 0;
 let rocket = null;
 let fallingCore = null;
 let fallingAlien = null;
