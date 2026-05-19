@@ -881,6 +881,8 @@ function sfxShield() {
     } catch(e){}
 }
 
+function sfxRadioactive() { sfxShield(); }
+
 function sfxAlarm() {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
     try {
@@ -1116,7 +1118,14 @@ function showEndScreen(win) {
     });
 
     manageMedia('vid2'); 
-    try { saveScoreAndRefresh(Math.floor(score)); } catch(e) {}
+    try {
+        saveScoreAndRefresh(Math.floor(score));
+        let localHS = parseInt(localStorage.getItem('doggycoHighScore')) || 0;
+        if (score > localHS) {
+            localStorage.setItem('doggycoHighScore', Math.floor(score));
+            updateCyborgButton();
+        }
+    } catch(e) {}
 }
 
 function loop(t) {
@@ -1354,7 +1363,6 @@ function loop(t) {
                 spawnDelay = 0.4; 
             }
         }
-        }
 
         ctx.fillStyle = "#ffffff"; ctx.lineWidth = 2; 
         permSpiders.forEach(s => {
@@ -1396,12 +1404,11 @@ function loop(t) {
                         hp--; charShake = 20; if(typeof sfxHit !== 'undefined') sfxHit(); addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); 
                     }
                 } else if (e.powerup) {
-                    if(typeof sfxRadioactive !== 'undefined') sfxRadioactive();
                     if (e.type === 'magnet') {
-                        magnetTimer = 8;
+                        magnetTimer = 8; sfxStarCollect();
                         addFloat(e.x, e.y, "MAGNET ACTIVE!", "#00f2ff", 30);
                     } else {
-                        invincibleTimer = 8;
+                        invincibleTimer = 8; sfxRadioactive();
                         addFloat(e.x, e.y, "SHIELD ACTIVE!", "#adff2f", 30);
                     }
                 } else { 
