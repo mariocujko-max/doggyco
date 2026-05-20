@@ -282,6 +282,16 @@
 
         .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); transform: translateY(0); flex-shrink: 0; }
         .btn-char span { font-size: 32px; margin-bottom: 5px; }
+        .btn-cyborg-lock {
+            background: rgba(0,0,0,0.4) !important;
+            border-color: #555 !important;
+            min-height: 72px;
+            justify-content: center;
+            box-shadow: 0 4px 0 #555, 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .btn-cyborg-lock.btn-cyborg-unlocked { border-color: var(--cyborg) !important; box-shadow: 0 4px 0 var(--cyborg), 0 5px 10px rgba(0,0,0,0.2); }
+        .btn-cyborg-lock #cyborg-icon { font-size: 46px !important; margin: 0 !important; opacity: 0.88; line-height: 1; }
+        .btn-cyborg-lock.btn-cyborg-unlocked #cyborg-icon { font-size: 40px !important; opacity: 1; }
         .btn-char:hover { background: rgba(255,255,255,0.1); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
@@ -359,6 +369,12 @@
             max-height: calc(100dvh - 12px);
             margin-left: auto;
             margin-right: auto;
+            overflow: visible;
+            box-sizing: border-box;
+        }
+        html.pc-ms #game-wrap.is-pc-play {
+            overflow: visible;
+            box-sizing: border-box;
         }
         html.pc-ms .screen-inner { max-width: 520px; }
         html.pc-ms #game-wrap.is-pc-play #canvas {
@@ -505,9 +521,8 @@
                         <button class="btn-char" style="border-color:var(--unicorn); flex:1;" onclick="start('unicorn', 11)"><span>🦄</span>UNICORN</button>
                     </div>
                     <div style="display:flex; justify-content:center; gap:8px; width:50%;">
-                        <button id="btn-cyborg" class="btn-char" style="border-color:#555; background: #222; flex:1;" onclick="startCyborg()">
-                            <span id="cyborg-icon" style="opacity: 0.8; font-size: 28px; margin-bottom: 9px; margin-top: 4px;">🔒</span>
-                            <span id="cyborg-text" style="font-size:14px; color:#aaa; margin-top:2px;">???</span>
+                        <button id="btn-cyborg" type="button" class="btn-char btn-cyborg-lock" style="flex:1;" onclick="startCyborg()" aria-label="Level 13 Cyborg">
+                            <span id="cyborg-icon">🔒</span>
                         </button>
                     </div>
                 </div>
@@ -652,8 +667,11 @@ function manageMedia(action) {
     }
 }
 
+/** Max. Lautstärke der Hintergrundmusik (HTMLMediaElement + optional Web-Audio-Gain), 0–1 */
+var MUSIC_MAX_VOL = 0.5;
+
 function musicGainLevel() {
-    return window.__pcMs ? 0.95 : 0.78;
+    return MUSIC_MAX_VOL;
 }
 
 function useMusicWebAudio() {
@@ -665,7 +683,7 @@ function playGameMusic() {
     if (!bgMusic) return;
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
     bgMusic.muted = false;
-    bgMusic.playbackRate = 1.0;
+    try { bgMusic.playbackRate = getMusicRate(Math.min(Math.max(level, 1), 14)); } catch(e) { bgMusic.playbackRate = 1.0; }
     if (useMusicWebAudio() && window.musicGain) {
         bgMusic.volume = 1.0;
         try { window.musicGain.gain.value = musicGainLevel(); } catch(e) {}
@@ -794,25 +812,15 @@ function unlockSystem() {
 
 function updateCyborgButton() {
     let bestHS = parseInt(localStorage.getItem('doggycoHighScore')) || 0;
-    if(bestHS >= 8000) {
-        let cbBtn = document.getElementById("btn-cyborg");
-        if(cbBtn) {
-            cbBtn.style.borderColor = "var(--cyborg)";
-            cbBtn.style.background = "rgba(0,0,0,0.4)";
-            
-            let icon = document.getElementById("cyborg-icon");
-            icon.innerText = "🤖";
-            icon.style.opacity = "1";
-            icon.style.fontSize = "32px";
-            icon.style.marginBottom = "5px";
-            icon.style.marginTop = "0";
-            
-            let cbTxt = document.getElementById("cyborg-text");
-            cbTxt.innerText = "CYBORG"; 
-            cbTxt.style.color = "#fff"; 
-            cbTxt.style.fontSize = "11px";
-            cbTxt.style.fontWeight = "bold";
-        }
+    let cbBtn = document.getElementById("btn-cyborg");
+    let icon = document.getElementById("cyborg-icon");
+    if (!cbBtn || !icon) return;
+    if (bestHS >= 8000) {
+        cbBtn.classList.add("btn-cyborg-unlocked");
+        icon.innerText = "🤖";
+    } else {
+        cbBtn.classList.remove("btn-cyborg-unlocked");
+        icon.innerText = "🔒";
     }
 }
 
@@ -1239,11 +1247,12 @@ function resizeCanvas() {
     gw.classList.remove("pc-play-layout", "is-pc-play");
 
     if (window.__pcMs && active) {
-        let pad = 8;
+        let pad = 12;
+        let marginX = 32;
         let availH = window.innerHeight - hudH - ctrlH - pad;
-        let availW = window.innerWidth * 0.98;
-        let side = Math.floor(Math.min(availH, availW, 680));
-        side = Math.max(340, side);
+        let availW = window.innerWidth - marginX * 2;
+        let side = Math.floor(Math.min(availH, availW, 640));
+        side = Math.max(300, side);
         W = side;
         H = side;
         let totalH = hudH + H + ctrlH + 8;
@@ -1330,10 +1339,37 @@ let score = 0, hp = 3, energy = 100, level = 1, timeLeft = 30;
 let charShake = 0, charJump = 0, spawnDelay = 0;
 let currentOpponentIcon = '🐦';
 
-function getSkyFlyY() {
-    let yMin = H * 0.02;
-    let yMax = H * (2 / 6);
-    return yMin + Math.random() * (yMax - yMin);
+function getHudHeight() {
+    let hud = document.getElementById("hud");
+    return hud ? hud.offsetHeight : 95;
+}
+function getControlsHeight() {
+    let ctrl = document.getElementById("controls");
+    return ctrl ? ctrl.offsetHeight : 100;
+}
+/** Fortschritt Level 1 → 14 (0 … 1) */
+function getLevelProgress(lvl) {
+    let L = Math.max(1, Math.min(14, lvl));
+    return (L - 1) / 13;
+}
+/** Spieltempo: Minimum wie früher Level 2, Maximum wie Level 12, verteilt über 1–14 */
+function getSpeedMult(lvl) {
+    let speedAt2 = 1.35 + ((2 - 1) * (1.15 / 11));
+    let speedAt12 = 1.35 + ((12 - 1) * (1.15 / 11));
+    return speedAt2 + getLevelProgress(lvl) * (speedAt12 - speedAt2);
+}
+/** Musik-Tempo parallel zum Spiel (Level 2 … 12 → über 1 … 14) */
+function getMusicRate(lvl) {
+    let rateAt2 = 0.92;
+    let rateAt12 = 1.08;
+    return rateAt2 + getLevelProgress(lvl) * (rateAt12 - rateAt2);
+}
+/** UFO / Rakete / Alien: fest unter den HUD-Balken */
+function getFlyY() {
+    return getHudHeight() + 58;
+}
+function getPlayerY() {
+    return H - getControlsHeight() - 48;
 }
 
 function initPermSpiders() {
@@ -1520,9 +1556,11 @@ function loop(t) {
         ctx.shadowBlur = 0;
         ctx.clearRect(0,0,W,H);
 
-        const hitTop = H - 130; const hitBottom = H - 20;
-        let capLvl = Math.min(level, 14);
-        let speedMult = 1.35 + ((capLvl - 1) * (1.15 / 11));
+        let playerY = getPlayerY();
+        const hitTop = playerY - 78;
+        const hitBottom = H - 10;
+        let capLvl = Math.min(Math.max(level, 1), 14);
+        let speedMult = getSpeedMult(capLvl);
         let ptsScaling = speedMult;
 
         let parallaxX = ((W/2) - playerX) * 0.08;
@@ -1536,7 +1574,7 @@ function loop(t) {
         let bgMusic = document.getElementById("snd-action");
         if (bgMusic && !bgMusic.paused) {
             try {
-                let targetRate = 0.92 + ((capLvl - 1) / 11) * 0.16;
+                let targetRate = getMusicRate(capLvl);
                 let step = (targetRate - bgMusic.playbackRate) * 2.0 * dt;
                 if(Math.abs(step) > 0.001) {
                     let newRate = bgMusic.playbackRate + step;
@@ -1562,19 +1600,19 @@ function loop(t) {
 
             if(timeLeft <= 25 && !rocketSpawned) {
                 rocketSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2;
-                let flyY = getSkyFlyY();
+                let flyY = getFlyY();
                 rocket = { x: W + 50, y: flyY, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'shield' }; sfxRocket();
             }
             
             if(timeLeft <= 16 && !magnetSpawned) {
                 magnetSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2;
-                let flyY = getSkyFlyY();
+                let flyY = getFlyY();
                 rocket = { x: W + 50, y: flyY, s: 250 * (W/400), laid: false, targetLane: safeL, type: 'magnet' }; sfxAlienFly();
             }
 
             if(timeLeft <= 7 && !ufoSpawned) {
                 ufoSpawned = true; let safeL = getSafeLaneForItems(); if(safeL === -1) safeL = 2;
-                let flyY = getSkyFlyY();
+                let flyY = getFlyY();
                 ufos.push({ x: W + 50, y: flyY, s: 75 * speedMult * (W/400), targetLane: safeL, dropped: false }); sfxUfo();
             }
 
@@ -1795,7 +1833,7 @@ function loop(t) {
 
             if (magnetTimer > 0 && !e.bad && !missionComplete && e.y > 50) {
                 let dx = playerX - e.x;
-                let dy = (H - 60) - e.y;
+                let dy = getPlayerY() - e.y;
                 let dist = Math.sqrt(dx*dx + dy*dy);
                 if (dist > 30) {
                     e.x += (dx / dist) * W * 1.5 * dt;
@@ -1824,7 +1862,7 @@ function loop(t) {
         }
 
         if(!missionComplete) playerX += (targetX - playerX) * 0.15;
-        let drawX = playerX; let drawY = H - 60;
+        let drawX = playerX; let drawY = playerY;
 
         if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
         if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
