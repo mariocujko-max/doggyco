@@ -16,12 +16,19 @@
         try {
             var ua = navigator.userAgent || '';
             var win = /Windows/i.test(ua);
+            var proto = window.location && window.location.protocol;
             var m = window.matchMedia;
             var fineHover = m && m('(hover: hover) and (pointer: fine)').matches;
             var coarse = m && m('(pointer: coarse)').matches;
-            window.__pcMs = !!(win && fineHover && !coarse);
+            var msStore = proto === 'ms-appx:' || proto === 'ms-appx-web:' ||
+                !!(window.chrome && window.chrome.webview) ||
+                /WebView2|MSAppHost/i.test(ua);
+            if (win && m && m('(display-mode: standalone)').matches) msStore = true;
+            window.__msStoreApp = msStore;
+            window.__pcMs = !!(win && fineHover && !coarse && !msStore);
             document.documentElement.classList.toggle('pc-ms', window.__pcMs);
-        } catch (e) { window.__pcMs = false; }
+            if (msStore) document.documentElement.classList.add('ms-store-app');
+        } catch (e) { window.__pcMs = false; window.__msStoreApp = false; }
     })();
     </script>
     
@@ -303,14 +310,24 @@
         .btn-char span { font-size: 32px; margin-bottom: 5px; }
         .btn-cyborg-lock {
             background: rgba(0,0,0,0.4) !important;
-            border-color: #555 !important;
+            border-color: rgba(0, 242, 255, 0.45) !important;
             min-height: 72px;
             justify-content: center;
-            box-shadow: 0 4px 0 #555, 0 5px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 0 rgba(0, 160, 180, 0.55), 0 0 14px rgba(0, 242, 255, 0.15);
         }
-        .btn-cyborg-lock.btn-cyborg-unlocked { border-color: var(--cyborg) !important; box-shadow: 0 4px 0 var(--cyborg), 0 5px 10px rgba(0,0,0,0.2); }
-        .btn-cyborg-lock #cyborg-icon { font-size: 46px !important; margin: 0 !important; opacity: 0.88; line-height: 1; }
-        .btn-cyborg-lock.btn-cyborg-unlocked #cyborg-icon { font-size: 40px !important; opacity: 1; }
+        .btn-cyborg-lock.btn-cyborg-unlocked {
+            border-color: var(--cyborg) !important;
+            background: rgba(0, 28, 38, 0.55) !important;
+            box-shadow: 0 4px 0 var(--cyborg), 0 0 22px rgba(0, 255, 255, 0.35);
+        }
+        .btn-cyborg-lock #cyborg-icon {
+            font-size: 46px !important; margin: 0 !important; opacity: 0.92; line-height: 1;
+            filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.4));
+        }
+        .btn-cyborg-lock.btn-cyborg-unlocked #cyborg-icon {
+            font-size: 42px !important; opacity: 1;
+            filter: drop-shadow(0 0 12px var(--cyborg));
+        }
         @keyframes cyborgUnlockPop {
             0% { transform: scale(1); filter: brightness(1); }
             40% { transform: scale(1.14); filter: brightness(1.4); box-shadow: 0 0 28px var(--cyborg), 0 0 50px rgba(0,255,255,0.45); }
@@ -318,14 +335,6 @@
         }
         .btn-cyborg-lock.cyborg-unlock-flash { animation: cyborgUnlockPop 0.9s ease-out 2; border-color: var(--cyborg) !important; }
 
-        .music-vol-row {
-            width: 100%; margin-top: 12px; padding: 10px 12px; border-radius: 12px;
-            background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12);
-            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-        }
-        .music-vol-row label { font-family: 'Orbitron'; font-size: 11px; color: var(--neon); flex: 0 0 auto; }
-        .music-vol-row input[type="range"] { flex: 1; min-width: 120px; accent-color: var(--neon); }
-        #music-vol-label { font-family: 'Orbitron'; font-size: 11px; color: #aaa; min-width: 36px; text-align: right; }
         .btn-char:hover { background: rgba(255,255,255,0.1); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
@@ -430,6 +439,22 @@
         .play-store-btn:hover { transform: scale(1.04); }
         .play-store-btn:active { transform: scale(0.97); }
         html:not(.pc-ms) .pc-only-panel { display: none !important; }
+
+        html.ms-store-app #phone-container.is-playing {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        html.ms-store-app #game-wrap #canvas {
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            transform: none !important;
+            width: 100% !important;
+            height: 100% !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
 
         #privacy-popup {
             position: fixed; inset: 0; z-index: 10001;
@@ -537,11 +562,6 @@
                     <div class="privacy-consent">
                         By playing, you consent to submitting your Codename & Score to our global leaderboard.<br>
                         <a href="#" onclick="openPrivacy(); return false;">Privacy Policy</a>
-                    </div>
-                    <div class="music-vol-row">
-                        <label for="music-vol-slider">🔊 Music</label>
-                        <input type="range" id="music-vol-slider" min="0" max="100" value="100" oninput="onMusicVolChange(this.value)">
-                        <span id="music-vol-label">100%</span>
                     </div>
                 </div>
 
@@ -706,25 +726,13 @@ function manageMedia(action) {
     }
 }
 
-/** Max. Lautstärke-Obergrenze (50 %), skaliert mit Nutzer-Slider */
+/** Max. Lautstärke Hintergrundmusik 50 % */
 var MUSIC_VOL_CAP = 0.5;
-var musicVolUser = 1.0;
 var energyLowWarned = false;
 var cyborgWasLocked = true;
 
-function loadMusicVolPref() {
-    try {
-        let v = parseFloat(localStorage.getItem('doggycoMusicVol'));
-        if (!isNaN(v) && v >= 0 && v <= 1) musicVolUser = v;
-    } catch (e) {}
-    let sl = document.getElementById('music-vol-slider');
-    let lbl = document.getElementById('music-vol-label');
-    if (sl) sl.value = Math.round(musicVolUser * 100);
-    if (lbl) lbl.textContent = Math.round(musicVolUser * 100) + '%';
-}
-
 function musicGainLevel() {
-    return MUSIC_VOL_CAP * musicVolUser;
+    return MUSIC_VOL_CAP;
 }
 
 function applyMusicVolume() {
@@ -739,16 +747,12 @@ function applyMusicVolume() {
     }
 }
 
-function onMusicVolChange(val) {
-    musicVolUser = Math.max(0, Math.min(1, Number(val) / 100));
-    try { localStorage.setItem('doggycoMusicVol', String(musicVolUser)); } catch (e) {}
-    let lbl = document.getElementById('music-vol-label');
-    if (lbl) lbl.textContent = Math.round(musicVolUser * 100) + '%';
-    applyMusicVolume();
+function useMusicWebAudio() {
+    return !!(window.__pcMs && !window.__isIOS && !window.__isAndroid && !window.__msStoreApp);
 }
 
-function useMusicWebAudio() {
-    return !!(window.__pcMs && !window.__isIOS && !window.__isAndroid);
+function usePcSquareLayout() {
+    return !!(window.__pcMs && active && !window.__msStoreApp);
 }
 
 function playGameMusic() {
@@ -913,7 +917,6 @@ window.onload = function() {
         let pNameEl = document.getElementById("pName");
         if(savedName && pNameEl) { pNameEl.value = savedName; }
         
-        loadMusicVolPref();
         cyborgWasLocked = (parseInt(localStorage.getItem('doggycoHighScore')) || 0) < 8000;
         updateCyborgButton();
     } catch(e) {}
@@ -1270,7 +1273,7 @@ async function fetchRanks() {
 
 const canvas = document.getElementById("canvas");
 const ctx = (function () {
-    let mobileCtx = window.__isIOS || window.__isAndroid;
+    let mobileCtx = window.__isIOS || window.__isAndroid || window.__msStoreApp;
     let opts = mobileCtx ? { willReadFrequently: true } : { willReadFrequently: true, desynchronized: true };
     try { return canvas.getContext("2d", opts); }
     catch (e) { return canvas.getContext("2d", { willReadFrequently: true }); }
@@ -1290,7 +1293,7 @@ function drawEmoji(text, x, y, sizePx, baseline) {
 
 function applyCanvasSize() {
     let dpr = 1;
-    let mobile = window.__isIOS || window.__isAndroid;
+    let mobile = window.__isIOS || window.__isAndroid || window.__msStoreApp;
     if (mobile) {
         dpr = Math.min(window.devicePixelRatio || 1, 2.5);
         canvas.style.width = '100%';
@@ -1328,7 +1331,7 @@ function resizeCanvas() {
 
     gw.classList.remove("pc-play-layout", "is-pc-play");
 
-    if (window.__pcMs && active) {
+    if (usePcSquareLayout()) {
         let pad = 12;
         let marginX = 32;
         let availH = window.innerHeight - hudH - ctrlH - pad;
@@ -1453,21 +1456,6 @@ function getFlyY() {
 /** Spieler: knapp über den Richtungspfeilen */
 function getPlayerY() {
     return H - getControlsHeight() - 16;
-}
-
-function drawLaneGuides() {
-    let top = getHudHeight() + 6;
-    let bottom = H - getControlsHeight() - 6;
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
-    ctx.lineWidth = 1;
-    lanes.forEach(function (lx) {
-        ctx.beginPath();
-        ctx.moveTo(lx, top);
-        ctx.lineTo(lx, bottom);
-        ctx.stroke();
-    });
-    ctx.restore();
 }
 
 function initPermSpiders() {
@@ -1654,7 +1642,6 @@ function loop(t) {
 
         ctx.shadowBlur = 0;
         ctx.clearRect(0,0,W,H);
-        drawLaneGuides();
 
         let playerY = getPlayerY();
         const hitTop = playerY - 78;
