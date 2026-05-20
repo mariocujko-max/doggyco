@@ -445,11 +445,22 @@
         html:not(.pc-ms) .pc-only-panel { display: none !important; }
 
         html.ms-store-app #phone-container.is-playing {
-            width: 100% !important;
-            max-width: 100% !important;
+            width: auto !important;
+            max-width: min(420px, 100vw) !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
         }
         html.ms-store-app #game-wrap.is-ms-store-play {
             z-index: 20;
+            margin-left: auto;
+            margin-right: auto;
+            background: transparent;
+        }
+        html.ms-store-app #game-wrap.is-ms-store-play #hud,
+        html.ms-store-app #game-wrap.is-ms-store-play #controls {
+            width: 100%;
+            left: 0;
+            right: 0;
         }
         html.ms-store-app #game-wrap.is-ms-store-play #canvas {
             display: block !important;
@@ -1372,17 +1383,29 @@ function resizeCanvas() {
     gw.classList.remove("pc-play-layout", "is-pc-play", "is-ms-store-play");
 
     if (useMsStoreLayout()) {
+        let storeFieldMax = 420;
         let gwW = gw.clientWidth || window.innerWidth;
         let playH = Math.max(280, gw.clientHeight - ctrlH);
-        let side = Math.floor(Math.min(playH, gwW * 0.5));
-        side = Math.max(260, side);
+        let side = Math.floor(Math.min(playH, storeFieldMax, gwW * 0.42));
+        side = Math.max(260, Math.min(side, storeFieldMax));
         W = side;
         H = side;
 
-        if (pc) { pc.style.width = ""; pc.style.height = ""; }
+        if (pc) {
+            pc.style.width = side + "px";
+            pc.style.height = "";
+            pc.style.maxWidth = "100%";
+            pc.style.marginLeft = "auto";
+            pc.style.marginRight = "auto";
+        }
         gw.style.position = "absolute";
-        gw.style.inset = "0";
-        gw.style.width = "100%";
+        gw.style.inset = "auto";
+        gw.style.top = "0";
+        gw.style.bottom = "0";
+        gw.style.left = "50%";
+        gw.style.transform = "translateX(-50%)";
+        gw.style.width = side + "px";
+        gw.style.maxWidth = "100%";
         gw.style.height = "100%";
         gw.style.visibility = "visible";
         gw.classList.add("is-ms-store-play");
