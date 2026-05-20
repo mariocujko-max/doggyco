@@ -444,16 +444,13 @@
             width: 100% !important;
             max-width: 100% !important;
         }
-        html.ms-store-app #game-wrap #canvas {
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            transform: none !important;
-            width: 100% !important;
-            height: 100% !important;
+        html.ms-store-app #game-wrap.is-ms-store-play #canvas {
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
+            left: 50% !important;
+            right: auto !important;
+            transform: translateX(-50%) !important;
         }
 
         #privacy-popup {
@@ -730,6 +727,7 @@ function manageMedia(action) {
 var MUSIC_VOL_CAP = 0.5;
 var energyLowWarned = false;
 var cyborgWasLocked = true;
+var iosMusicCheck = 0;
 
 function musicGainLevel() {
     return MUSIC_VOL_CAP;
@@ -753,6 +751,10 @@ function useMusicWebAudio() {
 
 function usePcSquareLayout() {
     return !!(window.__pcMs && active && !window.__msStoreApp);
+}
+
+function useMsStoreLayout() {
+    return !!(window.__msStoreApp && active);
 }
 
 function playGameMusic() {
@@ -1024,7 +1026,7 @@ function goToLevelSelect() {
     
     document.getElementById("phone-container").classList.remove("is-playing");
     let gw = document.getElementById("game-wrap");
-    if (gw) gw.classList.remove("pc-play-layout", "is-pc-play");
+    if (gw) gw.classList.remove("pc-play-layout", "is-pc-play", "is-ms-store-play");
     
     ctx.clearRect(0, 0, W, H);
     document.getElementById("time-txt").innerText = "30s";
@@ -1110,22 +1112,21 @@ function hapticSpiderHit() { triggerVibration(60); }
 function hapticDamage() { triggerVibration(100); }
 function hapticGameOver() { triggerVibration([200, 60, 200]); }
 
-document.addEventListener("visibilitychange", function() {
-    if (document.visibilityState === "visible") {
-        try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch(e) {}
-        let bgMusic = document.getElementById("snd-action");
-        if (bgMusic && active && bgMusic.paused) {
-            bgMusic.play().catch(e => {});
-        }
-    }
-});
-window.addEventListener("focus", function() {
-    try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch(e) {}
+function resumeGameAudio() {
+    try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
     let bgMusic = document.getElementById("snd-action");
-    if (bgMusic && active && bgMusic.paused) {
-        bgMusic.play().catch(e => {});
-    }
+    if (!bgMusic || !active || missionComplete) return;
+    applyMusicVolume();
+    try { bgMusic.playbackRate = getMusicRate(Math.min(Math.max(level, 1), 14)); } catch (e) {}
+    if (bgMusic.paused) bgMusic.play().catch(function () {});
+}
+
+document.addEventListener("visibilitychange", function() {
+    if (document.visibilityState === "visible") resumeGameAudio();
 });
+window.addEventListener("pageshow", resumeGameAudio);
+window.addEventListener("focus", resumeGameAudio);
+window.addEventListener("resume", resumeGameAudio, false);
 
 function playTone(freq, type, duration, vol=0.6) {
     if(!systemActive || !audioCtx || audioCtx.state !== 'running') return;
@@ -1293,7 +1294,8 @@ function drawEmoji(text, x, y, sizePx, baseline) {
 
 function applyCanvasSize() {
     let dpr = 1;
-    let mobile = window.__isIOS || window.__isAndroid || window.__msStoreApp;
+    let pixelLayout = usePcSquareLayout() || useMsStoreLayout();
+    let mobile = (window.__isIOS || window.__isAndroid) && !pixelLayout;
     if (mobile) {
         dpr = Math.min(window.devicePixelRatio || 1, 2.5);
         canvas.style.width = '100%';
@@ -1329,9 +1331,36 @@ function resizeCanvas() {
     let ctrlH = ctrl ? ctrl.offsetHeight : 110;
     let hudH = hud ? hud.offsetHeight : 95;
 
-    gw.classList.remove("pc-play-layout", "is-pc-play");
+    gw.classList.remove("pc-play-layout", "is-pc-play", "is-ms-store-play");
 
-    if (usePcSquareLayout()) {
+    if (useMsStoreLayout()) {
+        let pad = 12;
+        let marginX = 24;
+        let availH = window.innerHeight - hudH - ctrlH - pad;
+        let availW = (window.innerWidth - marginX * 2) * 0.5;
+        let side = Math.floor(Math.min(availH, availW));
+        side = Math.max(260, side);
+        W = side;
+        H = side;
+
+        if (pc) { pc.style.width = ""; pc.style.height = ""; }
+        gw.style.position = "absolute";
+        gw.style.inset = "0";
+        gw.style.width = "100%";
+        gw.style.height = "100%";
+        gw.classList.add("is-ms-store-play");
+
+        canvas.style.position = "absolute";
+        canvas.style.display = "block";
+        canvas.style.visibility = "visible";
+        canvas.style.opacity = "1";
+        canvas.style.top = hudH + "px";
+        canvas.style.left = "50%";
+        canvas.style.right = "auto";
+        canvas.style.transform = "translateX(-50%)";
+        canvas.style.width = side + "px";
+        canvas.style.height = side + "px";
+    } else if (usePcSquareLayout()) {
         let pad = 12;
         let marginX = 32;
         let availH = window.innerHeight - hudH - ctrlH - pad;
@@ -1449,9 +1478,20 @@ function getMusicRate(lvl) {
     let rateAt12 = 1.08;
     return rateAt2 + getLevelProgress(lvl) * (rateAt12 - rateAt2);
 }
-/** UFO / Rakete / Alien: knapp unter Info-Balken (HUD) */
+/** UFO / Rakete / Alien: unterhalb HUD (auch Mac/iPhone mit Safe-Area) */
 function getFlyY() {
-    return getHudHeight() + 28;
+    let hud = document.getElementById("hud");
+    if (hud && canvas && active) {
+        try {
+            let hr = hud.getBoundingClientRect();
+            let cr = canvas.getBoundingClientRect();
+            if (cr.height > 20 && hr.height > 0) {
+                return Math.max(56, (hr.bottom - cr.top) + 18);
+            }
+        } catch (e) {}
+    }
+    let extra = (window.__isIOS || document.documentElement.classList.contains('platform-ios')) ? 68 : 52;
+    return getHudHeight() + extra;
 }
 /** Spieler: knapp über den Richtungspfeilen */
 function getPlayerY() {
@@ -1526,6 +1566,7 @@ function start(m, startLvl) {
     
     hp = 3; energy = 100; score = 0; timeLeft = 30;
     energyLowWarned = false;
+    iosMusicCheck = 0;
     entities = []; floaters = []; fireworks = []; fxParticles = []; missionComplete = false;
     
     invincibleTimer = 0; alarmTimer = 0; magnetTimer = 0; magnetSoundTimer = 0;
@@ -1680,6 +1721,15 @@ function loop(t) {
             magnetTimer -= dt; magnetSoundTimer -= dt;
             if (magnetSoundTimer <= 0) { sfxMagnet(); magnetSoundTimer = 0.6; }
             if (magnetTimer < 0) magnetTimer = 0;
+        }
+
+        if ((window.__isIOS || document.documentElement.classList.contains('platform-ios')) && active && !missionComplete) {
+            iosMusicCheck -= dt;
+            if (iosMusicCheck <= 0) {
+                iosMusicCheck = 1.8;
+                let bm = document.getElementById("snd-action");
+                if (bm && (bm.paused || (audioCtx && audioCtx.state === "suspended"))) resumeGameAudio();
+            }
         }
 
         if (!missionComplete) {
