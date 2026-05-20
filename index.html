@@ -28,8 +28,9 @@
                 if (m('(display-mode: fullscreen)').matches) msStore = true;
                 if (!m('(display-mode: browser)').matches) msStore = true;
             }
+            var inBrowser = !m || m('(display-mode: browser)').matches;
             window.__msStoreApp = msStore;
-            window.__pcMs = !!(win && fineHover && !coarse && !msStore);
+            window.__pcMs = !!(win && fineHover && !coarse && !msStore && inBrowser);
             document.documentElement.classList.toggle('pc-ms', window.__pcMs);
             if (msStore) document.documentElement.classList.add('ms-store-app');
         } catch (e) { window.__pcMs = false; window.__msStoreApp = false; }
@@ -37,7 +38,11 @@
     </script>
     
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐶</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="msapplication-TileImage" content="icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     
     <script>
@@ -776,6 +781,10 @@ function useMusicWebAudio() {
 
 function usePcSquareLayout() {
     if (window.__msStoreApp || (window.chrome && window.chrome.webview)) return false;
+    try {
+        var m = window.matchMedia;
+        if (m && !m('(display-mode: browser)').matches) return false;
+    } catch (e) {}
     return !!(window.__pcMs && active);
 }
 
@@ -800,6 +809,10 @@ function revalidateWindowsShell() {
             window.__pcMs = false;
             document.documentElement.classList.remove('pc-ms');
             document.documentElement.classList.add('ms-store-app');
+        }
+        if (inShell || window.__msStoreApp) {
+            window.__pcMs = false;
+            document.documentElement.classList.remove('pc-ms');
         }
     } catch (e) {}
 }
@@ -1384,28 +1397,22 @@ function resizeCanvas() {
 
     if (useMsStoreLayout()) {
         let storeFieldMax = 420;
-        let gwW = gw.clientWidth || window.innerWidth;
-        let playH = Math.max(280, gw.clientHeight - ctrlH);
+        let gwW = Math.max(window.innerWidth, gw.clientWidth || 0, 320);
+        let playH = Math.max(280, (gw.clientHeight || window.innerHeight) - ctrlH);
         let side = Math.floor(Math.min(playH, storeFieldMax, gwW * 0.42));
         side = Math.max(260, Math.min(side, storeFieldMax));
         W = side;
         H = side;
 
-        if (pc) {
-            pc.style.width = side + "px";
-            pc.style.height = "";
-            pc.style.maxWidth = "100%";
-            pc.style.marginLeft = "auto";
-            pc.style.marginRight = "auto";
-        }
+        if (pc) { pc.style.width = ""; pc.style.height = ""; pc.style.maxWidth = ""; pc.style.marginLeft = ""; pc.style.marginRight = ""; }
         gw.style.position = "absolute";
-        gw.style.inset = "auto";
-        gw.style.top = "0";
-        gw.style.bottom = "0";
-        gw.style.left = "50%";
-        gw.style.transform = "translateX(-50%)";
-        gw.style.width = side + "px";
-        gw.style.maxWidth = "100%";
+        gw.style.inset = "0";
+        gw.style.left = "";
+        gw.style.right = "";
+        gw.style.top = "";
+        gw.style.bottom = "";
+        gw.style.transform = "";
+        gw.style.width = "100%";
         gw.style.height = "100%";
         gw.style.visibility = "visible";
         gw.classList.add("is-ms-store-play");
@@ -1486,7 +1493,7 @@ function resizeCanvas() {
     if (active && !storeLayoutRecover && /Windows/i.test(navigator.userAgent || '')) {
         let visW = canvas.offsetWidth || parseInt(canvas.style.width, 10) || 0;
         let visH = canvas.offsetHeight || parseInt(canvas.style.height, 10) || 0;
-        if ((visW < 80 || visH < 80 || W < 80 || H < 80) && (usePcSquareLayout() || window.__pcMs)) {
+        if ((visW < 80 || visH < 80 || W < 80 || H < 80) && (usePcSquareLayout() || window.__pcMs || useMsStoreLayout())) {
             storeLayoutRecover = true;
             window.__msStoreApp = true;
             window.__pcMs = false;
