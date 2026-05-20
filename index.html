@@ -22,8 +22,12 @@
             var coarse = m && m('(pointer: coarse)').matches;
             var msStore = proto === 'ms-appx:' || proto === 'ms-appx-web:' ||
                 !!(window.chrome && window.chrome.webview) ||
-                /WebView2|MSAppHost/i.test(ua);
-            if (win && m && m('(display-mode: standalone)').matches) msStore = true;
+                /WebView2|MSAppHost|WebView/i.test(ua);
+            if (win && m) {
+                if (m('(display-mode: standalone)').matches) msStore = true;
+                if (m('(display-mode: fullscreen)').matches) msStore = true;
+                if (!m('(display-mode: browser)').matches) msStore = true;
+            }
             window.__msStoreApp = msStore;
             window.__pcMs = !!(win && fineHover && !coarse && !msStore);
             document.documentElement.classList.toggle('pc-ms', window.__pcMs);
@@ -444,13 +448,23 @@
             width: 100% !important;
             max-width: 100% !important;
         }
+        html.ms-store-app #game-wrap.is-ms-store-play {
+            z-index: 20;
+        }
         html.ms-store-app #game-wrap.is-ms-store-play #canvas {
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
+            z-index: 50 !important;
+            pointer-events: auto !important;
             left: 50% !important;
             right: auto !important;
+            top: 0 !important;
             transform: translateX(-50%) !important;
+        }
+        html.ms-store-app #game-wrap.is-ms-store-play #hud {
+            z-index: 200;
+            pointer-events: none;
         }
 
         #privacy-popup {
@@ -750,11 +764,33 @@ function useMusicWebAudio() {
 }
 
 function usePcSquareLayout() {
-    return !!(window.__pcMs && active && !window.__msStoreApp);
+    if (window.__msStoreApp || (window.chrome && window.chrome.webview)) return false;
+    return !!(window.__pcMs && active);
 }
 
 function useMsStoreLayout() {
     return !!(window.__msStoreApp && active);
+}
+
+/** Store-/WebView-App: Erkennung auch nach Laden (wichtig für Microsoft Store) */
+function revalidateWindowsShell() {
+    try {
+        var ua = navigator.userAgent || '';
+        if (!/Windows/i.test(ua)) return;
+        var m = window.matchMedia;
+        var proto = window.location && window.location.protocol;
+        var inShell = proto === 'ms-appx:' || proto === 'ms-appx-web:' ||
+            !!(window.chrome && window.chrome.webview) ||
+            /WebView2|MSAppHost|WebView/i.test(ua) ||
+            (m && (m('(display-mode: standalone)').matches || m('(display-mode: fullscreen)').matches)) ||
+            (m && !m('(display-mode: browser)').matches);
+        if (inShell && !window.__msStoreApp) {
+            window.__msStoreApp = true;
+            window.__pcMs = false;
+            document.documentElement.classList.remove('pc-ms');
+            document.documentElement.classList.add('ms-store-app');
+        }
+    } catch (e) {}
 }
 
 function playGameMusic() {
@@ -1281,6 +1317,7 @@ const ctx = (function () {
 })();
 
 let canvasDpr = 1;
+let storeLayoutRecover = false;
 
 function drawEmoji(text, x, y, sizePx, baseline) {
     ctx.save();
@@ -1327,6 +1364,7 @@ function resizeCanvas() {
     let pc = document.getElementById("phone-container");
     if (!gw) return;
     if (!active && gw.clientWidth <= 0) return;
+    if (active) revalidateWindowsShell();
 
     let ctrlH = ctrl ? ctrl.offsetHeight : 110;
     let hudH = hud ? hud.offsetHeight : 95;
@@ -1334,11 +1372,9 @@ function resizeCanvas() {
     gw.classList.remove("pc-play-layout", "is-pc-play", "is-ms-store-play");
 
     if (useMsStoreLayout()) {
-        let pad = 12;
-        let marginX = 24;
-        let availH = window.innerHeight - hudH - ctrlH - pad;
-        let availW = (window.innerWidth - marginX * 2) * 0.5;
-        let side = Math.floor(Math.min(availH, availW));
+        let gwW = gw.clientWidth || window.innerWidth;
+        let playH = Math.max(280, gw.clientHeight - ctrlH);
+        let side = Math.floor(Math.min(playH, gwW * 0.5));
         side = Math.max(260, side);
         W = side;
         H = side;
@@ -1348,15 +1384,18 @@ function resizeCanvas() {
         gw.style.inset = "0";
         gw.style.width = "100%";
         gw.style.height = "100%";
+        gw.style.visibility = "visible";
         gw.classList.add("is-ms-store-play");
 
         canvas.style.position = "absolute";
         canvas.style.display = "block";
         canvas.style.visibility = "visible";
         canvas.style.opacity = "1";
-        canvas.style.top = hudH + "px";
+        canvas.style.zIndex = "50";
+        canvas.style.top = "0";
         canvas.style.left = "50%";
         canvas.style.right = "auto";
+        canvas.style.bottom = "auto";
         canvas.style.transform = "translateX(-50%)";
         canvas.style.width = side + "px";
         canvas.style.height = side + "px";
@@ -1420,6 +1459,21 @@ function resizeCanvas() {
     }
 
     applyCanvasSize();
+
+    if (active && !storeLayoutRecover && /Windows/i.test(navigator.userAgent || '')) {
+        let visW = canvas.offsetWidth || parseInt(canvas.style.width, 10) || 0;
+        let visH = canvas.offsetHeight || parseInt(canvas.style.height, 10) || 0;
+        if ((visW < 80 || visH < 80 || W < 80 || H < 80) && (usePcSquareLayout() || window.__pcMs)) {
+            storeLayoutRecover = true;
+            window.__msStoreApp = true;
+            window.__pcMs = false;
+            document.documentElement.classList.remove('pc-ms');
+            document.documentElement.classList.add('ms-store-app');
+            resizeCanvas();
+            storeLayoutRecover = false;
+            return;
+        }
+    }
 
     let lw = W / 5;
     lanes = [lw*0.5, lw*1.5, lw*2.5, lw*3.5, lw*4.5];
@@ -1585,9 +1639,11 @@ function start(m, startLvl) {
     }
 
     document.getElementById("phone-container").classList.add("is-playing");
+    revalidateWindowsShell();
     active = true;
 
     function bootGame() {
+        revalidateWindowsShell();
         resizeCanvas();
         initBackgroundGraphics();
         initPermSpiders();
