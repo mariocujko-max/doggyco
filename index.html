@@ -118,14 +118,33 @@
         #mission-title { text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); animation: pulseNeon 1.5s infinite alternate; }
         @keyframes pulseNeon { 0% { opacity: 0.7; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1.02); } }
 
-        #energy-box { width: 85%; height: 22px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 12px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        #energy-box { width: 85%; height: 22px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 12px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); transition: border-color 0.2s; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
+        @keyframes energyWarn {
+            0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(255,49,49,0.5); }
+            50% { opacity: 0.5; box-shadow: 0 0 16px rgba(255,49,49,0.95); }
+        }
+        #energy-box.energy-low {
+            animation: energyWarn 0.5s ease-in-out infinite;
+            border-color: var(--red);
+        }
+        #energy-box.energy-low #energy-fill {
+            background: linear-gradient(90deg, #ff0000, var(--red), var(--gold));
+        }
         
         #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); }
         .stat { font-weight: 900; font-size: 16px; text-shadow: 1px 1px 3px #000; }
+        @keyframes timeWarn {
+            0%, 100% { color: var(--red); opacity: 1; }
+            50% { color: #ff8888; opacity: 0.5; }
+        }
+        #time-txt.time-low { animation: timeWarn 0.45s ease-in-out infinite; color: var(--red) !important; }
 
         #controls { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 10px; padding-bottom: max(env(safe-area-inset-bottom, 5px), 5px); z-index: 300; transition: opacity 0.3s; background: transparent; }
         .arrow { width: 120px; height: 100px; background: transparent; border: none; color: rgba(255, 255, 255, 0.5); font-size: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none; }
+        @media (max-width: 420px), (pointer: coarse) {
+            .arrow { min-width: 128px; min-height: 108px; font-size: 64px; }
+        }
         .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); }
 
         #lvl-up-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255, 215, 0, 0.5); color: #fff; padding: 15px 30px; border-radius: 25px; font-family: 'Orbitron'; font-size: 28px; font-weight: 900; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); text-shadow: 2px 2px 5px #000, 0 0 15px var(--gold); z-index: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; text-align: center; }
@@ -292,6 +311,21 @@
         .btn-cyborg-lock.btn-cyborg-unlocked { border-color: var(--cyborg) !important; box-shadow: 0 4px 0 var(--cyborg), 0 5px 10px rgba(0,0,0,0.2); }
         .btn-cyborg-lock #cyborg-icon { font-size: 46px !important; margin: 0 !important; opacity: 0.88; line-height: 1; }
         .btn-cyborg-lock.btn-cyborg-unlocked #cyborg-icon { font-size: 40px !important; opacity: 1; }
+        @keyframes cyborgUnlockPop {
+            0% { transform: scale(1); filter: brightness(1); }
+            40% { transform: scale(1.14); filter: brightness(1.4); box-shadow: 0 0 28px var(--cyborg), 0 0 50px rgba(0,255,255,0.45); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+        .btn-cyborg-lock.cyborg-unlock-flash { animation: cyborgUnlockPop 0.9s ease-out 2; border-color: var(--cyborg) !important; }
+
+        .music-vol-row {
+            width: 100%; margin-top: 12px; padding: 10px 12px; border-radius: 12px;
+            background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12);
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+        }
+        .music-vol-row label { font-family: 'Orbitron'; font-size: 11px; color: var(--neon); flex: 0 0 auto; }
+        .music-vol-row input[type="range"] { flex: 1; min-width: 120px; accent-color: var(--neon); }
+        #music-vol-label { font-family: 'Orbitron'; font-size: 11px; color: #aaa; min-width: 36px; text-align: right; }
         .btn-char:hover { background: rgba(255,255,255,0.1); }
         .btn-char:active { transform: translateY(4px); box-shadow: 0 0px 0 var(--neon), 0 2px 5px rgba(0,0,0,0.3); }
 
@@ -504,6 +538,11 @@
                         By playing, you consent to submitting your Codename & Score to our global leaderboard.<br>
                         <a href="#" onclick="openPrivacy(); return false;">Privacy Policy</a>
                     </div>
+                    <div class="music-vol-row">
+                        <label for="music-vol-slider">🔊 Music</label>
+                        <input type="range" id="music-vol-slider" min="0" max="100" value="100" oninput="onMusicVolChange(this.value)">
+                        <span id="music-vol-label">100%</span>
+                    </div>
                 </div>
 
                 <h3 style="color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; text-align: center; text-transform: uppercase; width: 100%;">CHOOSE START LEVEL</h3>
@@ -667,11 +706,45 @@ function manageMedia(action) {
     }
 }
 
-/** Max. Lautstärke der Hintergrundmusik (HTMLMediaElement + optional Web-Audio-Gain), 0–1 */
-var MUSIC_MAX_VOL = 0.5;
+/** Max. Lautstärke-Obergrenze (50 %), skaliert mit Nutzer-Slider */
+var MUSIC_VOL_CAP = 0.5;
+var musicVolUser = 1.0;
+var energyLowWarned = false;
+var cyborgWasLocked = true;
+
+function loadMusicVolPref() {
+    try {
+        let v = parseFloat(localStorage.getItem('doggycoMusicVol'));
+        if (!isNaN(v) && v >= 0 && v <= 1) musicVolUser = v;
+    } catch (e) {}
+    let sl = document.getElementById('music-vol-slider');
+    let lbl = document.getElementById('music-vol-label');
+    if (sl) sl.value = Math.round(musicVolUser * 100);
+    if (lbl) lbl.textContent = Math.round(musicVolUser * 100) + '%';
+}
 
 function musicGainLevel() {
-    return MUSIC_MAX_VOL;
+    return MUSIC_VOL_CAP * musicVolUser;
+}
+
+function applyMusicVolume() {
+    let bgMusic = document.getElementById('snd-action');
+    if (!bgMusic) return;
+    let lvl = musicGainLevel();
+    if (useMusicWebAudio() && window.musicGain) {
+        try { window.musicGain.gain.value = lvl; } catch (e) {}
+        bgMusic.volume = 1.0;
+    } else {
+        bgMusic.volume = lvl;
+    }
+}
+
+function onMusicVolChange(val) {
+    musicVolUser = Math.max(0, Math.min(1, Number(val) / 100));
+    try { localStorage.setItem('doggycoMusicVol', String(musicVolUser)); } catch (e) {}
+    let lbl = document.getElementById('music-vol-label');
+    if (lbl) lbl.textContent = Math.round(musicVolUser * 100) + '%';
+    applyMusicVolume();
 }
 
 function useMusicWebAudio() {
@@ -684,12 +757,7 @@ function playGameMusic() {
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
     bgMusic.muted = false;
     try { bgMusic.playbackRate = getMusicRate(Math.min(Math.max(level, 1), 14)); } catch(e) { bgMusic.playbackRate = 1.0; }
-    if (useMusicWebAudio() && window.musicGain) {
-        bgMusic.volume = 1.0;
-        try { window.musicGain.gain.value = musicGainLevel(); } catch(e) {}
-    } else {
-        bgMusic.volume = musicGainLevel();
-    }
+    applyMusicVolume();
     if (!bgMusic.paused && bgMusic.currentTime > 0.2) return;
     let p = bgMusic.play();
     if (p && p.catch) p.catch(function () {});
@@ -815,11 +883,19 @@ function updateCyborgButton() {
     let cbBtn = document.getElementById("btn-cyborg");
     let icon = document.getElementById("cyborg-icon");
     if (!cbBtn || !icon) return;
-    if (bestHS >= 8000) {
+    let nowUnlocked = bestHS >= 8000;
+    if (nowUnlocked) {
+        if (cyborgWasLocked) {
+            cyborgWasLocked = false;
+            cbBtn.classList.add("cyborg-unlock-flash");
+            setTimeout(function () { cbBtn.classList.remove("cyborg-unlock-flash"); }, 2000);
+            try { sfxStarCollect(); } catch (e) {}
+        }
         cbBtn.classList.add("btn-cyborg-unlocked");
         icon.innerText = "🤖";
     } else {
-        cbBtn.classList.remove("btn-cyborg-unlocked");
+        cyborgWasLocked = true;
+        cbBtn.classList.remove("btn-cyborg-unlocked", "cyborg-unlock-flash");
         icon.innerText = "🔒";
     }
 }
@@ -837,6 +913,8 @@ window.onload = function() {
         let pNameEl = document.getElementById("pName");
         if(savedName && pNameEl) { pNameEl.value = savedName; }
         
+        loadMusicVolPref();
+        cyborgWasLocked = (parseInt(localStorage.getItem('doggycoHighScore')) || 0) < 8000;
         updateCyborgButton();
     } catch(e) {}
 
@@ -1160,6 +1238,10 @@ function sfxCollect() { playTone(600, 'sine', 0.1, 0.4); setTimeout(() => playTo
 function sfxStarCollect() { [800, 1000, 1200].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.1, 0.4), i*50)); }
 function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.6); setTimeout(() => playTone(100, 'square', 0.4, 0.6), 100); }
 function sfxLevelUp() { [400, 500, 600, 800].forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.2, 0.4), i*100)); }
+function sfxLowEnergy() {
+    playTone(240, 'sine', 0.12, 0.32);
+    setTimeout(function () { playTone(180, 'triangle', 0.18, 0.28); }, 100);
+}
 
 const SURL = 'https://ovmsstdroxkinisqwlhw.supabase.co';
 const SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXNzdGRyb3hraW5pc3F3bGh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzM3OTEsImV4cCI6MjA4NzgwOTc5MX0.SOsi-Aeb_wSp40_TTymaiiU0Kn_3rhG_LnvLjJP66z8';
@@ -1364,12 +1446,28 @@ function getMusicRate(lvl) {
     let rateAt12 = 1.08;
     return rateAt2 + getLevelProgress(lvl) * (rateAt12 - rateAt2);
 }
-/** UFO / Rakete / Alien: fest unter den HUD-Balken */
+/** UFO / Rakete / Alien: knapp unter Info-Balken (HUD) */
 function getFlyY() {
-    return getHudHeight() + 58;
+    return getHudHeight() + 28;
 }
+/** Spieler: knapp über den Richtungspfeilen */
 function getPlayerY() {
-    return H - getControlsHeight() - 48;
+    return H - getControlsHeight() - 16;
+}
+
+function drawLaneGuides() {
+    let top = getHudHeight() + 6;
+    let bottom = H - getControlsHeight() - 6;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 1;
+    lanes.forEach(function (lx) {
+        ctx.beginPath();
+        ctx.moveTo(lx, top);
+        ctx.lineTo(lx, bottom);
+        ctx.stroke();
+    });
+    ctx.restore();
 }
 
 function initPermSpiders() {
@@ -1439,6 +1537,7 @@ function start(m, startLvl) {
     level = startLvl;
     
     hp = 3; energy = 100; score = 0; timeLeft = 30;
+    energyLowWarned = false;
     entities = []; floaters = []; fireworks = []; fxParticles = []; missionComplete = false;
     
     invincibleTimer = 0; alarmTimer = 0; magnetTimer = 0; magnetSoundTimer = 0;
@@ -1555,6 +1654,7 @@ function loop(t) {
 
         ctx.shadowBlur = 0;
         ctx.clearRect(0,0,W,H);
+        drawLaneGuides();
 
         let playerY = getPlayerY();
         const hitTop = playerY - 78;
@@ -1670,8 +1770,17 @@ function loop(t) {
         document.getElementById("hp-txt").innerText = "❤️".repeat(Math.max(0, hp));
         document.getElementById("score-txt").innerText = Math.floor(score) + " PTS";
         document.getElementById("time-txt").innerText = missionComplete ? "WIN" : Math.ceil(timeLeft) + "s";
+        let timeEl = document.getElementById("time-txt");
+        if (timeEl) timeEl.classList.toggle("time-low", timeLeft <= 5 && !missionComplete);
         document.getElementById("lvl-txt").innerText = level;
         document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
+        let eBox = document.getElementById("energy-box");
+        if (eBox) eBox.classList.toggle("energy-low", energy <= 25 && !missionComplete);
+        if (energy <= 25 && !energyLowWarned && !missionComplete) {
+            energyLowWarned = true;
+            sfxLowEnergy();
+        }
+        if (energy > 25) energyLowWarned = false;
 
         ctx.globalAlpha = 0.3;
         clouds.forEach(c => {
@@ -1709,7 +1818,7 @@ function loop(t) {
         if (fallingCore && !missionComplete) {
             fallingCore.y += fallingCore.s * dt;
             let fx = lanes[fallingCore.lane];
-            ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 15;
+            ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 5;
             ctx.fillStyle = "#adff2f";
             drawEmoji('☢️', fx, fallingCore.y, 40, 'middle');
             ctx.restore();
@@ -1724,7 +1833,7 @@ function loop(t) {
         if (fallingAlien && !missionComplete) {
             fallingAlien.y += fallingAlien.s * dt;
             let fx = lanes[fallingAlien.lane];
-            ctx.save(); ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 15;
+            ctx.save(); ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 5;
             ctx.fillStyle = "#00f2ff";
             drawEmoji('🧲', fx, fallingAlien.y, 40, 'middle');
             ctx.restore();
@@ -1752,7 +1861,7 @@ function loop(t) {
             ctx.save();
             let beamGrad = ctx.createLinearGradient(0, ufoY + 10, 0, ufoY + beamLength);
             beamGrad.addColorStop(0, "rgba(150, 255, 200, 1.0)"); beamGrad.addColorStop(0.4, "rgba(0, 255, 136, 0.8)"); beamGrad.addColorStop(1, "rgba(0, 255, 136, 0)");
-            ctx.fillStyle = beamGrad; ctx.shadowColor = "#00ff88"; ctx.shadowBlur = 25;
+            ctx.fillStyle = beamGrad; ctx.shadowColor = "#00ff88"; ctx.shadowBlur = 8;
             ctx.beginPath(); ctx.moveTo(u.x - 15, ufoY + 10); ctx.lineTo(u.x + 15, ufoY + 10); ctx.lineTo(u.x + 45, ufoY + beamLength); ctx.lineTo(u.x - 45, ufoY + beamLength); ctx.fill(); ctx.restore();
             
             ctx.textAlign = "center"; ctx.textBaseline = "middle";
@@ -1869,11 +1978,11 @@ function loop(t) {
 
         if (magnetTimer > 0) {
             ctx.save(); ctx.beginPath(); ctx.arc(drawX, drawY, 45 + Math.sin(t/100)*5, 0, Math.PI*2);
-            ctx.strokeStyle = "rgba(0, 242, 255, 0.6)"; ctx.lineWidth = 4; ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 15; ctx.stroke(); ctx.restore();
+            ctx.strokeStyle = "rgba(0, 242, 255, 0.6)"; ctx.lineWidth = 4; ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 5; ctx.stroke(); ctx.restore();
 
             ctx.save();
             let magnetAlpha = 0.5 + 0.5 * Math.abs(Math.sin(t / 150));
-            ctx.globalAlpha = magnetAlpha; ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 20;
+            ctx.globalAlpha = magnetAlpha;
             drawEmoji('🧲', drawX, drawY - 55, 50, 'middle');
             ctx.restore();
         }
@@ -1882,11 +1991,11 @@ function loop(t) {
             let ringAlpha = 0.4 + 0.6 * Math.abs(Math.sin(t / 120));
             ctx.save(); ctx.beginPath(); ctx.arc(drawX, drawY, 48 + Math.sin(t/80)*6, 0, Math.PI*2);
             ctx.strokeStyle = `rgba(173, 255, 47, ${ringAlpha})`; ctx.lineWidth = 4;
-            ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 20; ctx.stroke(); ctx.restore();
+            ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 5; ctx.stroke(); ctx.restore();
 
             ctx.save();
             let iconAlpha = 0.5 + 0.5 * Math.abs(Math.sin(t / 150));
-            ctx.globalAlpha = iconAlpha; ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 20;
+            ctx.globalAlpha = iconAlpha;
             drawEmoji('☢️', drawX, drawY - 55, 50, 'middle');
             ctx.restore();
         }
