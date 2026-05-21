@@ -23,20 +23,16 @@
             var msStore = proto === 'ms-appx:' || proto === 'ms-appx-web:' ||
                 !!(window.chrome && window.chrome.webview) ||
                 /WebView2|MSAppHost|WebView/i.test(ua);
-            var mobilePhone = /Android|iPhone|iPad|iPod/i.test(ua) ||
-                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
             window.__msStoreApp = msStore;
             window.__pcMs = !!(win && fineHover && !coarse && !msStore);
-            window.__mobilePhone = !!mobilePhone;
             document.documentElement.classList.toggle('pc-ms', window.__pcMs);
             if (msStore) document.documentElement.classList.add('ms-store-app');
-            if (mobilePhone) document.documentElement.classList.add('mobile-phone');
         } catch (e) { window.__pcMs = false; window.__msStoreApp = false; }
     })();
     </script>
     
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐶</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -406,58 +402,57 @@
             box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4);
         }
 
-        /* Nur Hochformat — Querformat blockieren */
-        #portrait-lock {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 100000;
-            background: rgba(0,0,0,0.94);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 24px;
-            pointer-events: all;
+        html.platform-ios #phone-container,
+        html.platform-android #phone-container,
+        html.is-ios #phone-container,
+        html.is-android #phone-container {
+            width: 100% !important;
+            max-width: 100% !important;
+            height: 100% !important;
+            height: 100dvh !important;
+            max-height: 100dvh !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
         }
-        #portrait-lock p {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 22px;
-            color: var(--neon);
-            text-shadow: 0 0 12px var(--neon);
-            line-height: 1.5;
-            max-width: 320px;
+        html.platform-ios #phone-container.is-playing,
+        html.platform-android #phone-container.is-playing {
+            box-shadow: none !important;
+            border: none !important;
         }
-        @media (orientation: landscape) {
-            html.platform-ios #portrait-lock,
-            html.platform-android #portrait-lock,
-            html.is-ios #portrait-lock,
-            html.is-android #portrait-lock,
-            html.mobile-phone #portrait-lock { display: flex; }
-        }
-        
-        html.pc-ms #phone-container { max-width: 600px; }
-        html.pc-ms #phone-container.is-playing {
+
+        html.pc-ms #phone-container,
+        html.ms-store-app #phone-container { max-width: 600px; }
+        html.pc-ms #phone-container.is-playing,
+        html.ms-store-app #phone-container.is-playing {
             max-height: calc(100dvh - 12px);
             margin-left: auto;
             margin-right: auto;
             overflow: visible;
             box-sizing: border-box;
         }
-        html.pc-ms #game-wrap.is-pc-play {
+        html.pc-ms #game-wrap.is-pc-play,
+        html.ms-store-app #game-wrap.is-pc-play {
             overflow: visible;
             box-sizing: border-box;
         }
-        html.pc-ms .screen-inner { max-width: 520px; }
-        html.pc-ms #game-wrap.is-pc-play #canvas {
+        html.pc-ms .screen-inner,
+        html.ms-store-app .screen-inner { max-width: 520px; }
+        html.pc-ms #game-wrap.is-pc-play #canvas,
+        html.ms-store-app #game-wrap.is-pc-play #canvas {
             left: 50%;
             right: auto;
             transform: translateX(-50%);
             object-fit: contain;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
-        html.pc-ms .arrow { width: 100px; height: 88px; font-size: 52px; cursor: pointer; }
-        html.pc-ms .gate-btn { cursor: pointer; }
-        html.pc-ms .btn-char, html.pc-ms .btn-main, html.pc-ms .btn-restart-green { cursor: pointer; }
+        html.pc-ms .arrow,
+        html.ms-store-app .arrow { width: 100px; height: 88px; font-size: 52px; cursor: pointer; }
+        html.pc-ms .gate-btn,
+        html.ms-store-app .gate-btn { cursor: pointer; }
+        html.pc-ms .btn-char, html.pc-ms .btn-main, html.pc-ms .btn-restart-green,
+        html.ms-store-app .btn-char, html.ms-store-app .btn-main, html.ms-store-app .btn-restart-green { cursor: pointer; }
 
         .panel-green { border: 1px solid var(--green); box-shadow: 0 5px 15px rgba(0,255,136,0.1), inset 0 0 20px rgba(0,255,136,0.05); }
         .panel-green h3 { color: var(--green); border-bottom-color: var(--green); }
@@ -470,40 +465,6 @@
         html:not(.pc-ms) .pc-only-panel { display: none !important; }
         html.platform-ios .pc-only-panel,
         html.platform-ios .browser-edition-links { display: none !important; }
-
-        html.ms-store-app #phone-container.is-playing {
-            width: 50% !important;
-            max-width: 420px !important;
-            min-width: 280px !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-            height: 100% !important;
-        }
-        html.ms-store-app #game-wrap.is-ms-store-play {
-            width: 100% !important;
-            height: 100% !important;
-            visibility: visible !important;
-        }
-        html.ms-store-app #game-wrap.is-ms-store-play #canvas {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            z-index: 50 !important;
-            pointer-events: auto !important;
-        }
-        html.mobile-phone #phone-container,
-        html.mobile-phone #phone-container.is-playing {
-            width: 100% !important;
-            max-width: 100% !important;
-            height: 100% !important;
-            height: 100dvh !important;
-            max-height: none !important;
-            border-radius: 0 !important;
-        }
-        html.mobile-phone .screen-inner {
-            max-width: 100% !important;
-            padding-top: max(env(safe-area-inset-top, 12px), 12px);
-        }
 
         #privacy-popup {
             position: fixed; inset: 0; z-index: 10001;
@@ -541,10 +502,6 @@
         <p style="font-size:11px;color:#888;">© 2026 DOGGYCO GLOBAL ACADEMY — Concept &amp; design by M. Čujko</p>
         <button type="button" class="privacy-close-btn" onclick="closePrivacy()">OK</button>
     </div>
-</div>
-
-<div id="portrait-lock" aria-live="polite">
-    <p>📱 DOGGYCO MISSION<br><br>Bitte Gerät ins <b>Hochformat</b> drehen.<br>Das Spiel läuft nur im Hochformat.</p>
 </div>
 
 <div id="bg-fx"></div>
@@ -768,20 +725,30 @@ function openExternalLink(url) {
     }
 }
 
-function forceFullscreen() {
-    if (window.__pcMs && !window.__msStoreApp) return;
-    let elem = document.documentElement;
-    let req = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.webkitEnterFullscreen || elem.msRequestFullscreen;
-    if (req) { req.call(elem).catch(function () {}); }
+function isMobileDevice() {
+    return !!(window.__isIOS || window.__isAndroid ||
+        document.documentElement.classList.contains('platform-ios') ||
+        document.documentElement.classList.contains('platform-android') ||
+        document.documentElement.classList.contains('is-ios') ||
+        document.documentElement.classList.contains('is-android'));
 }
 
-function lockPortraitOrientation() {
-    if (!isPortraitRequired()) return;
+/** Handy: Vollbild + Hochformat per API — ohne Dreh-Hinweis (verursacht Abstürze) */
+function lockMobilePortrait() {
+    if (!isMobileDevice()) return;
     try {
         if (screen.orientation && screen.orientation.lock) {
             screen.orientation.lock('portrait').catch(function () {});
         }
     } catch (e) {}
+}
+
+function forceFullscreen() {
+    if (window.__pcMs && !window.__msStoreApp) return;
+    if (!isMobileDevice()) return;
+    let elem = document.documentElement;
+    let req = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.webkitEnterFullscreen || elem.msRequestFullscreen;
+    if (req) { req.call(elem).catch(function () {}); }
 }
 
 function manageMedia(action) {
@@ -834,34 +801,9 @@ function useMusicWebAudio() {
     return !!(window.__pcMs && !window.__isIOS && !window.__isAndroid && !window.__msStoreApp);
 }
 
-function isPortraitRequired() {
-    return !!(window.__isIOS || window.__isAndroid || window.__mobilePhone ||
-        document.documentElement.classList.contains('platform-ios') ||
-        document.documentElement.classList.contains('platform-android') ||
-        document.documentElement.classList.contains('is-ios') ||
-        document.documentElement.classList.contains('is-android') ||
-        document.documentElement.classList.contains('mobile-phone'));
-}
-
-function isPortraitMode() {
-    if (!isPortraitRequired()) return true;
-    try {
-        return !window.matchMedia || window.matchMedia('(orientation: portrait)').matches;
-    } catch (e) { return true; }
-}
-
+/** PC online + Microsoft Store: gleiches quadratisches Spielfeld */
 function usePcSquareLayout() {
-    if (window.__msStoreApp || (window.chrome && window.chrome.webview)) return false;
-    if (!isPortraitMode()) return false;
-    return !!(window.__pcMs && active);
-}
-
-function useMsStoreLayout() {
-    return !!(window.__msStoreApp && active);
-}
-
-function useMobilePlayLayout() {
-    return active && (window.__isIOS || window.__isAndroid || window.__mobilePhone) && !useMsStoreLayout();
+    return !!((window.__pcMs || window.__msStoreApp) && active);
 }
 
 /** Store-/WebView-App: Erkennung auch nach Laden (wichtig für Microsoft Store) */
@@ -873,8 +815,7 @@ function revalidateWindowsShell() {
         var proto = window.location && window.location.protocol;
         var inShell = proto === 'ms-appx:' || proto === 'ms-appx-web:' ||
             !!(window.chrome && window.chrome.webview) ||
-            /WebView2|MSAppHost|WebView/i.test(ua) ||
-            (m && (m('(display-mode: standalone)').matches || m('(display-mode: fullscreen)').matches));
+            /WebView2|MSAppHost|WebView/i.test(ua);
         if (inShell) {
             window.__msStoreApp = true;
             window.__pcMs = false;
@@ -1003,8 +944,8 @@ function unlockSystem() {
     let gate = document.getElementById("scr-gatekeeper");
     let startScr = document.getElementById("scr-start");
     
+    lockMobilePortrait();
     forceFullscreen();
-    lockPortraitOrientation();
 
     gate.style.opacity = "0";
     setTimeout(() => { 
@@ -1052,11 +993,6 @@ window.onload = function() {
         cyborgWasLocked = (parseInt(localStorage.getItem('doggycoHighScore')) || 0) < 8000;
         updateCyborgButton();
     } catch(e) {}
-
-    if (isPortraitRequired()) {
-        forceFullscreen();
-        lockPortraitOrientation();
-    }
 
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
@@ -1414,7 +1350,7 @@ async function fetchRanks() {
 
 const canvas = document.getElementById("canvas");
 const ctx = (function () {
-    let mobileCtx = window.__isIOS || window.__isAndroid || window.__msStoreApp;
+    let mobileCtx = window.__isIOS || window.__isAndroid;
     let opts = mobileCtx ? { willReadFrequently: true } : { willReadFrequently: true, desynchronized: true };
     try { return canvas.getContext("2d", opts); }
     catch (e) { return canvas.getContext("2d", { willReadFrequently: true }); }
@@ -1434,8 +1370,8 @@ function drawEmoji(text, x, y, sizePx, baseline) {
 
 function applyCanvasSize() {
     let dpr = 1;
-    let pixelLayout = usePcSquareLayout() || useMsStoreLayout();
-    let mobile = useMobilePlayLayout() && !pixelLayout;
+    let pixelLayout = usePcSquareLayout();
+    let mobile = isMobileDevice() && !pixelLayout;
     if (mobile) {
         dpr = Math.min(window.devicePixelRatio || 1, 2.5);
         canvas.style.width = '100%';
@@ -1470,45 +1406,10 @@ function resizeCanvas() {
 
     let ctrlH = ctrl ? ctrl.offsetHeight : 110;
     let hudH = hud ? hud.offsetHeight : 95;
-    let gwW = gw.clientWidth || window.innerWidth || 400;
-    let gwH = gw.clientHeight || window.innerHeight || 700;
 
     gw.classList.remove("pc-play-layout", "is-pc-play", "is-ms-store-play");
 
-    if (useMsStoreLayout()) {
-        let playW = Math.floor(Math.min(window.innerWidth * 0.5, 420));
-        playW = Math.max(280, playW);
-        let playH = Math.max(320, window.innerHeight - ctrlH - hudH - 8);
-        W = playW;
-        H = playH;
-
-        if (pc) {
-            pc.style.width = playW + "px";
-            pc.style.maxWidth = "50vw";
-            pc.style.height = "100%";
-            pc.style.marginLeft = "auto";
-            pc.style.marginRight = "auto";
-        }
-        gw.style.position = "absolute";
-        gw.style.inset = "0";
-        gw.style.width = "100%";
-        gw.style.height = "100%";
-        gw.style.visibility = "visible";
-        gw.classList.add("is-ms-store-play");
-
-        canvas.style.position = "absolute";
-        canvas.style.display = "block";
-        canvas.style.visibility = "visible";
-        canvas.style.opacity = "1";
-        canvas.style.zIndex = "50";
-        canvas.style.top = hudH + "px";
-        canvas.style.left = "0";
-        canvas.style.right = "auto";
-        canvas.style.bottom = "auto";
-        canvas.style.transform = "none";
-        canvas.style.width = playW + "px";
-        canvas.style.height = playH + "px";
-    } else if (usePcSquareLayout()) {
+    if (usePcSquareLayout()) {
         let pad = 12;
         let marginX = 32;
         let availH = window.innerHeight - hudH - ctrlH - pad;
@@ -1543,25 +1444,28 @@ function resizeCanvas() {
         gw.style.inset = "";
         gw.style.width = "";
         gw.style.height = "";
-        if (window.__pcMs && !window.__msStoreApp) {
-            W = Math.min(gwW, 420);
-            H = Math.max(300, gwH - ctrlH);
+        W = gw.clientWidth || Math.min(window.innerWidth, 420);
+        if (window.__pcMs) {
+            H = Math.max(300, gw.clientHeight - ctrlH);
+            canvas.style.position = "absolute";
+            canvas.style.top = "0";
+            canvas.style.left = "0";
+            canvas.style.transform = "";
+            canvas.style.width = "100%";
+            canvas.style.height = "";
         } else {
-            W = gwW;
-            H = Math.max(280, gwH - ctrlH);
+            W = gw.clientWidth || window.innerWidth;
+            H = Math.max(280, gw.clientHeight - ctrlH);
+            canvas.style.position = "absolute";
+            canvas.style.top = "0";
+            canvas.style.left = "0";
+            canvas.style.transform = "";
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+            canvas.style.display = "block";
+            canvas.style.visibility = "visible";
+            canvas.style.opacity = "1";
         }
-        canvas.style.position = "absolute";
-        canvas.style.top = "0";
-        canvas.style.left = "0";
-        canvas.style.right = "";
-        canvas.style.bottom = "";
-        canvas.style.transform = "";
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        canvas.style.display = "block";
-        canvas.style.visibility = "visible";
-        canvas.style.opacity = "1";
-        canvas.style.zIndex = "50";
     }
 
     applyCanvasSize();
@@ -1739,15 +1643,11 @@ function start(m, startLvl) {
         gameWrap.style.pointerEvents = "auto";
     }
 
-    revalidateWindowsShell();
-    if (!isPortraitMode()) {
-        alert('Bitte Gerät ins Hochformat drehen. DOGGYCO läuft nur im Hochformat.');
-        return;
-    }
-
     document.getElementById("phone-container").classList.add("is-playing");
+    revalidateWindowsShell();
     active = true;
 
+    lockMobilePortrait();
     revalidateWindowsShell();
     resizeCanvas();
     initBackgroundGraphics();
@@ -1832,7 +1732,6 @@ function showEndScreen(win) {
 
 function loop(t) {
     if(!active) return;
-    if (!isPortraitMode()) return;
     globalAnimationId = requestAnimationFrame(loop);
     
     try {
@@ -2275,7 +2174,7 @@ function fixViewportHeight() {
 window.addEventListener('resize', fixViewportHeight);
 window.addEventListener('orientationchange', function () {
     fixViewportHeight();
-    lockPortraitOrientation();
+    lockMobilePortrait();
     if (active) resizeCanvas();
 });
 fixViewportHeight();
