@@ -513,11 +513,12 @@
         <h2>Privacy Policy</h2>
         <p>By playing, you agree that your chosen <b>codename</b> and <b>high score</b> may be stored in our online leaderboard so other players can see rankings.</p>
         <p>We do not ask for your real name, email, or location in the game. Scores are linked only to the codename you enter.</p>
-        <p>Leaderboard data is hosted by our database provider (Supabase). Entries can be removed on request — contact: <b>give-me.org@gmx.net</b></p>
-        <p id="privacy-text-main">This is a private, non-commercial fan project. No sale of personal data. No advertising trackers in the game file.</p>
-        <p id="privacy-text-ios" style="display:none;">DOGGYCO MISSION (iOS): We store your chosen codename and high score locally on your device and, if you play online, in our leaderboard database (Supabase). No account required. Contact: give-me.org@gmx.de. No source-code editing in the app.</p>
+        <p>Leaderboard data is hosted by Supabase. Entries can be removed on request — <b>give-me.org@gmx.de</b></p>
+        <p id="privacy-text-main">Private, non-commercial fan project. No ad trackers. Full policy: <a href="https://www.doggyco.de/privacy.html" style="color:var(--neon);" onclick="openPrivacy(); return false;">www.doggyco.de/privacy.html</a></p>
+        <p id="privacy-text-ios" style="display:none;">DOGGYCO MISSION (iOS): Codename and high score are stored on your device and, if you play online, in our leaderboard (Supabase). No account required. Full policy online.</p>
         <p style="font-size:11px;color:#888;">© 2026 DOGGYCO GLOBAL ACADEMY — Concept &amp; design by M. Čujko</p>
-        <button type="button" class="privacy-close-btn" onclick="closePrivacy()">OK</button>
+        <button type="button" class="privacy-close-btn" onclick="openPrivacy(true)">Open full policy</button>
+        <button type="button" class="privacy-close-btn" style="margin-top:8px;background:#333;color:#ccc;" onclick="closePrivacy()">Close</button>
     </div>
 </div>
 
@@ -589,7 +590,7 @@
                     <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') this.blur();">
                     <div class="privacy-consent">
                         By playing, you consent to submitting your Codename & Score to our global leaderboard.<br>
-                        <a href="#" onclick="openPrivacy(); return false;">Privacy Policy</a>
+                        <a href="https://www.doggyco.de/privacy.html" rel="noopener noreferrer" onclick="openPrivacy(); return false;">Privacy Policy</a>
                     </div>
                 </div>
 
@@ -1065,7 +1066,11 @@ function closeSecret() {
     setTimeout(() => pop.style.display = "none", 300);
 }
 
-function openPrivacy() {
+var PRIVACY_POLICY_URL = 'https://www.doggyco.de/privacy.html';
+
+function openPrivacy(onlyExternal) {
+    openExternalLink(PRIVACY_POLICY_URL);
+    if (onlyExternal) return;
     let pop = document.getElementById("privacy-popup");
     let main = document.getElementById("privacy-text-main");
     let ios = document.getElementById("privacy-text-ios");
