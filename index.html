@@ -455,10 +455,11 @@
         html.ms-store-app .screen-inner { max-width: 520px; }
         html.pc-ms #game-wrap.is-pc-play #canvas,
         html.ms-store-app #game-wrap.is-pc-play #canvas {
-            left: 50%;
-            right: auto;
-            transform: translateX(-50%);
-            object-fit: contain;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            transform: none !important;
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
@@ -817,7 +818,12 @@ function useMusicWebAudio() {
     return !!(window.__pcMs && !window.__isIOS && !window.__isAndroid && !window.__msStoreApp);
 }
 
-/** PC online + Microsoft Store: gleiches quadratisches Spielfeld */
+function needsSafeCanvas2d() {
+    return !!(window.__msStoreApp || window.__isIOS || window.__isAndroid ||
+        /Windows/i.test(navigator.userAgent || ''));
+}
+
+/** PC-Browser + Store-App: gleiches quadratisches Spielfeld */
 function usePcSquareLayout() {
     return !!((window.__pcMs || window.__msStoreApp) && active);
 }
@@ -1365,36 +1371,79 @@ async function fetchRanks() {
 }
 
 const canvas = document.getElementById("canvas");
-const ctx = (function () {
-    /* WebView2 (Microsoft Store): desynchronized zeichnet oft nichts — nur Standard-2D */
-    let safe2d = window.__isIOS || window.__isAndroid || window.__msStoreApp;
-    let opts = safe2d ? { willReadFrequently: true, alpha: true } : { willReadFrequently: true, desynchronized: true, alpha: true };
-    try { return canvas.getContext("2d", opts); }
-    catch (e) { return canvas.getContext("2d", { willReadFrequently: true, alpha: true }); }
-})();
-
+let ctx = null;
 let canvasDpr = 1;
 
+/** Chrome / WebView2: desynchronized-Canvas bleibt oft leer — Kontext bei Start neu */
+function initGameCanvas() {
+    if (!canvas) return;
+    try {
+        if (needsSafeCanvas2d()) {
+            ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true });
+        } else {
+            ctx = canvas.getContext('2d', { willReadFrequently: true, desynchronized: true, alpha: true });
+        }
+    } catch (e) {
+        ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: true });
+    }
+    if (!ctx) ctx = canvas.getContext('2d');
+    canvasDpr = 1;
+}
+initGameCanvas();
+
 function ensureCanvasTransform() {
+    if (!ctx) return;
     if (canvasDpr > 1) ctx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
     else ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
+var EMOJI_FB = {
+    '\uD83D\uDC36': '#e8a020', '\uD83D\uDC31': '#9aa0a6', '\uD83D\uDC30': '#c8e6c9',
+    '\uD83E\uDD8A': '#ff7043', '\uD83D\uDC3C': '#eceff1', '\uD83E\uDD84': '#ea80fc',
+    '\uD83E\uDD16': '#00e5ff', '\uD83D\uDD77': '#bc13fe', '\uD83D\uDE80': '#ff5252',
+    '\uD83D\uDC7D': '#69f0ae', '\u2622': '#adff2f', '\uD83E\uDDF2': '#00f2ff',
+    '\uD83D\uDC7B': '#7c4dff', '\uD83D\uDEF8': '#80cbc4', '\u2764': '#ff3131',
+    '\u2601': '#b0bec5', '\uD83E\uDD77': '#37474f'
+};
+
 function drawEmoji(text, x, y, sizePx, baseline) {
+    if (!ctx || text == null || text === '') return;
     ctx.save();
-    ctx.font = sizePx + 'px "Segoe UI Emoji", "Apple Color Emoji", Arial, sans-serif';
+    var font = sizePx + 'px "Segoe UI Emoji", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif';
+    ctx.font = font;
     ctx.textAlign = 'center';
     ctx.textBaseline = baseline || 'middle';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(text, x, y);
+    var drew = false;
+    try {
+        ctx.fillText(text, x, y);
+        drew = true;
+    } catch (e) {}
+    if (needsSafeCanvas2d()) {
+        var mw = 0;
+        try { mw = ctx.measureText(text).width; } catch (e2) {}
+        if (!drew || mw < 3) {
+            var col = EMOJI_FB[text] || '#00f2ff';
+            var r = Math.max(10, sizePx * 0.38);
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = col;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+            ctx.lineWidth = Math.max(2, sizePx * 0.04);
+            ctx.stroke();
+        }
+    }
     ctx.restore();
 }
 
 function applyCanvasSize() {
-    let dpr = 1;
+    if (!ctx || !canvas) return;
     let pixelLayout = usePcSquareLayout();
     let mobile = isMobileDevice() && !pixelLayout;
-    if (mobile) {
+    let dpr = 1;
+    if (mobile && !needsSafeCanvas2d()) {
         dpr = Math.min(window.devicePixelRatio || 1, 2.5);
         canvas.style.width = '100%';
         canvas.style.height = '100%';
@@ -1403,15 +1452,9 @@ function applyCanvasSize() {
         canvas.style.height = H + 'px';
     }
     canvasDpr = dpr;
-    if (dpr > 1) {
-        canvas.width = Math.round(W * dpr);
-        canvas.height = Math.round(H * dpr);
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    } else {
-        canvas.width = W;
-        canvas.height = H;
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-    }
+    canvas.width = Math.max(1, Math.round(W * dpr));
+    canvas.height = Math.max(1, Math.round(H * dpr));
+    ensureCanvasTransform();
 }
 
 let W = 400;
@@ -1460,16 +1503,16 @@ function resizeCanvas() {
         canvas.style.opacity = "1";
         canvas.style.zIndex = "50";
         canvas.style.pointerEvents = "auto";
-        canvas.style.left = "50%";
-        canvas.style.right = "auto";
-        canvas.style.transform = "translateX(-50%)";
+        canvas.style.left = "0";
+        canvas.style.right = "0";
+        canvas.style.marginLeft = "auto";
+        canvas.style.marginRight = "auto";
+        canvas.style.transform = "none";
         canvas.style.width = side + "px";
         canvas.style.height = side + "px";
-        if (window.__msStoreApp) {
-            canvas.style.top = "0";
-        } else {
-            canvas.style.top = hudH + "px";
-        }
+        canvas.style.top = hudH + "px";
+        canvas.style.bottom = "auto";
+        if (window.__msStoreApp) gw.classList.add("is-ms-store-play");
     } else {
         if (pc) { pc.style.width = ""; pc.style.height = ""; }
         gw.style.position = "";
@@ -1680,24 +1723,20 @@ function start(m, startLvl) {
     revalidateWindowsShell();
     active = true;
 
-    function bootGame() {
-        revalidateWindowsShell();
+    revalidateWindowsShell();
+    initGameCanvas();
+    resizeCanvas();
+    initBackgroundGraphics();
+    initPermSpiders();
+    document.getElementById("canvas").classList.remove("blur");
+    lastT = 0;
+    globalAnimationId = requestAnimationFrame(loop);
+    requestAnimationFrame(function () {
+        initGameCanvas();
         resizeCanvas();
-        ensureCanvasTransform();
-        initBackgroundGraphics();
         initPermSpiders();
-        document.getElementById("canvas").classList.remove("blur");
-        lastT = 0;
-        globalAnimationId = requestAnimationFrame(loop);
-    }
-    bootGame();
-    if (window.__msStoreApp) {
-        requestAnimationFrame(function () {
-            resizeCanvas();
-            ensureCanvasTransform();
-            initPermSpiders();
-        });
-    }
+        initBackgroundGraphics();
+    });
 }
 
 function getSafeSpiderLane(currentSpider) {
@@ -1775,12 +1814,15 @@ function showEndScreen(win) {
 
 function loop(t) {
     if(!active) return;
+    if (!ctx) { initGameCanvas(); if (!ctx) return; }
     globalAnimationId = requestAnimationFrame(loop);
     
     try {
         if(lastT === 0) lastT = t;
         let dt = (t - lastT) / 1000; lastT = t;
         if(dt > 0.1) dt = 0.016;
+
+        if (W < 50 || H < 50) resizeCanvas();
 
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
@@ -2041,7 +2083,9 @@ function loop(t) {
                 if(safeL !== -1) {
                     if(Math.random() < 0.85) {
                         let r = Math.random(); let tier = r < 0.5 ? 0 : (r < 0.8 ? 1 : 2);
-                        entities.push({ l: safeL, x: lanes[safeL], y: -50, t: items[mode][tier].i, pts: items[mode][tier].p, bad: false, s: 230 * speedMult });
+                        let pack = items[mode] || items['dog'];
+                        let item = pack[tier] || pack[0];
+                        entities.push({ l: safeL, x: lanes[safeL], y: -50, t: item.i, pts: item.p, bad: false, s: 230 * speedMult });
                     } else { entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '🥷', pts: 0, bad: true, s: 260 * speedMult }); }
                 }
                 spawnDelay = 0.35;
@@ -2182,7 +2226,9 @@ function loop(t) {
             return;
         }
 
-    } catch(e) {}
+    } catch(e) {
+        if (window.__msStoreApp || window.__pcMs) console.error('DOGGYCO loop', e);
+    }
 }
 
 function addFloat(x, y, txt, c, s) { floaters.push({ x, y, txt, c, s, o: 1 }); }
