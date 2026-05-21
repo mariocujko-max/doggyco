@@ -1350,21 +1350,27 @@ async function fetchRanks() {
 
 const canvas = document.getElementById("canvas");
 const ctx = (function () {
-    let mobileCtx = window.__isIOS || window.__isAndroid;
-    let opts = mobileCtx ? { willReadFrequently: true } : { willReadFrequently: true, desynchronized: true };
+    /* WebView2 (Microsoft Store): desynchronized zeichnet oft nichts — nur Standard-2D */
+    let safe2d = window.__isIOS || window.__isAndroid || window.__msStoreApp;
+    let opts = safe2d ? { willReadFrequently: true, alpha: true } : { willReadFrequently: true, desynchronized: true, alpha: true };
     try { return canvas.getContext("2d", opts); }
-    catch (e) { return canvas.getContext("2d", { willReadFrequently: true }); }
+    catch (e) { return canvas.getContext("2d", { willReadFrequently: true, alpha: true }); }
 })();
 
 let canvasDpr = 1;
 
+function ensureCanvasTransform() {
+    if (canvasDpr > 1) ctx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0);
+    else ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
 function drawEmoji(text, x, y, sizePx, baseline) {
     ctx.save();
-    ctx.font = sizePx + 'px Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
-    ctx.textAlign = 'left';
+    ctx.font = sizePx + 'px "Segoe UI Emoji", "Apple Color Emoji", Arial, sans-serif';
+    ctx.textAlign = 'center';
     ctx.textBaseline = baseline || 'middle';
-    let w = ctx.measureText(text).width;
-    ctx.fillText(text, x - w / 2, y);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(text, x, y);
     ctx.restore();
 }
 
@@ -1430,14 +1436,24 @@ function resizeCanvas() {
         gw.style.height = "100%";
         gw.classList.add("is-pc-play");
 
+        gw.style.visibility = "visible";
+
         canvas.style.position = "absolute";
         canvas.style.display = "block";
-        canvas.style.top = hudH + "px";
+        canvas.style.visibility = "visible";
+        canvas.style.opacity = "1";
+        canvas.style.zIndex = "50";
+        canvas.style.pointerEvents = "auto";
         canvas.style.left = "50%";
         canvas.style.right = "auto";
         canvas.style.transform = "translateX(-50%)";
         canvas.style.width = side + "px";
         canvas.style.height = side + "px";
+        if (window.__msStoreApp) {
+            canvas.style.top = "0";
+        } else {
+            canvas.style.top = hudH + "px";
+        }
     } else {
         if (pc) { pc.style.width = ""; pc.style.height = ""; }
         gw.style.position = "";
@@ -1644,17 +1660,28 @@ function start(m, startLvl) {
     }
 
     document.getElementById("phone-container").classList.add("is-playing");
+    lockMobilePortrait();
     revalidateWindowsShell();
     active = true;
 
-    lockMobilePortrait();
-    revalidateWindowsShell();
-    resizeCanvas();
-    initBackgroundGraphics();
-    initPermSpiders();
-    document.getElementById("canvas").classList.remove("blur");
-    lastT = 0;
-    globalAnimationId = requestAnimationFrame(loop);
+    function bootGame() {
+        revalidateWindowsShell();
+        resizeCanvas();
+        ensureCanvasTransform();
+        initBackgroundGraphics();
+        initPermSpiders();
+        document.getElementById("canvas").classList.remove("blur");
+        lastT = 0;
+        globalAnimationId = requestAnimationFrame(loop);
+    }
+    bootGame();
+    if (window.__msStoreApp) {
+        requestAnimationFrame(function () {
+            resizeCanvas();
+            ensureCanvasTransform();
+            initPermSpiders();
+        });
+    }
 }
 
 function getSafeSpiderLane(currentSpider) {
@@ -1740,7 +1767,9 @@ function loop(t) {
         if(dt > 0.1) dt = 0.016;
 
         ctx.shadowBlur = 0;
-        ctx.clearRect(0,0,W,H);
+        ctx.globalAlpha = 1;
+        ensureCanvasTransform();
+        ctx.clearRect(0, 0, W, H);
 
         let playerY = getPlayerY();
         const hitTop = playerY - 78;
@@ -1882,22 +1911,19 @@ function loop(t) {
             if(!missionComplete) c.x += (10 + speedMult*5) * dt;
             if(c.x > W + 50) c.x = -50;
             ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.font = c.s + "px Arial"; ctx.fillText('☁️', c.x, c.y);
+            drawEmoji('☁️', c.x, c.y, c.s, 'middle');
         }); ctx.globalAlpha = 1.0;
 
         if (rocket && !missionComplete) {
             rocket.x -= rocket.s * dt;
             ctx.save();
             ctx.translate(rocket.x, rocket.y + Math.sin(t/100)*5);
-            ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.font = "50px Arial"; 
-            
             if(rocket.type === 'shield') {
                 ctx.rotate(-Math.PI / 1.5);
-                ctx.fillText('🚀', 0, 0);
+                drawEmoji('🚀', 0, 0, 50, 'middle');
                 for(let p=0; p<2; p++) { fxParticles.push({ x: rocket.x + 30 + Math.random()*15, y: rocket.y + Math.sin(t/100)*5 + (Math.random()-0.5)*15, vx: 100 + Math.random()*50, vy: (Math.random()-0.5)*20, life: 0.2 + Math.random()*0.2, maxLife: 0.4, r: 3 + Math.random()*5, c: Math.random() > 0.5 ? '#FFD700' : '#ff3131' }); }
             } else if (rocket.type === 'magnet') {
-                ctx.fillText('👽', 0, 0);
+                drawEmoji('👽', 0, 0, 50, 'middle');
                 for(let p=0; p<2; p++) { fxParticles.push({ x: rocket.x + 25 + Math.random()*15, y: rocket.y + Math.sin(t/100)*5 + (Math.random()-0.5)*10, vx: 80 + Math.random()*40, vy: (Math.random()-0.5)*10, life: 0.3 + Math.random()*0.2, maxLife: 0.5, r: 3 + Math.random()*4, c: Math.random() > 0.5 ? '#bc13fe' : '#00f2ff' }); }
             }
             ctx.restore();
@@ -1946,7 +1972,7 @@ function loop(t) {
         opponents.forEach((o, i) => {
             if(!missionComplete) o.x -= o.s * dt;
             ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.font = "25px Arial"; ctx.fillText(currentOpponentIcon, o.x, o.y);
+            drawEmoji(currentOpponentIcon, o.x, o.y, 25, 'middle');
             if(o.x < -50) opponents.splice(i, 1);
         });
 
@@ -1961,8 +1987,7 @@ function loop(t) {
             ctx.fillStyle = beamGrad; ctx.shadowColor = "#00ff88"; ctx.shadowBlur = 8;
             ctx.beginPath(); ctx.moveTo(u.x - 15, ufoY + 10); ctx.lineTo(u.x + 15, ufoY + 10); ctx.lineTo(u.x + 45, ufoY + beamLength); ctx.lineTo(u.x - 45, ufoY + beamLength); ctx.fill(); ctx.restore();
             
-            ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.font = "45px Arial"; ctx.fillStyle = "#ffffff"; ctx.shadowBlur = 0; ctx.fillText('🛸', u.x, ufoY);
+            drawEmoji('🛸', u.x, ufoY, 45, 'middle');
             
             let dropX = lanes[u.targetLane];
             if(u.x <= dropX && !u.dropped && !missionComplete) { fallingHearts.push({ lane: u.targetLane, x: dropX, y: u.y, s: 280 * speedMult }); u.dropped = true; }
@@ -1973,8 +1998,7 @@ function loop(t) {
             let s = fallingHearts[i];
             if (s.lane !== undefined) s.x = snapToLane(s.lane);
             if(!missionComplete) s.y += s.s * dt;
-            ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.font = "40px Arial"; ctx.fillText('❤️', s.x, s.y);
+            drawEmoji('❤️', s.x, s.y, 40, 'middle');
             if(!missionComplete && Math.abs(s.x - playerX) < colDist && s.y > hitTop && s.y < hitBottom) {
                 if (hp < 3) {
                     hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35);
@@ -2056,8 +2080,7 @@ function loop(t) {
                 lockEntityToLane(e);
             }
 
-            ctx.textAlign = "center"; ctx.textBaseline = "middle";
-            ctx.font = "45px Arial"; ctx.fillText(e.t, e.x, e.y);
+            drawEmoji(e.t, e.x, e.y, 45, 'middle');
 
             if(!missionComplete && Math.abs(e.x - playerX) < colDist && e.y > hitTop && e.y < hitBottom) {
                 if(e.bad) {
