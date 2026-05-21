@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Datenschutzerklärung für DOGGYCO MISSION (iOS, Android, Microsoft Store, Web).">
+    <link rel="canonical" href="https://www.doggyco.de/privacy.html">
+    <title>Datenschutz — DOGGYCO MISSION</title>
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <style>
+        :root { --bg: #0d1117; --text: #e6edf3; --muted: #9aa7b5; --accent: #00f2ff; --gold: #ffd700; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.65;
+            padding: 24px 16px 48px;
+        }
+        .wrap { max-width: 720px; margin: 0 auto; }
+        h1 { font-size: 1.75rem; color: var(--gold); letter-spacing: 0.04em; margin: 0 0 8px; }
+        .sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 28px; }
+        h2 {
+            font-size: 1.15rem; color: var(--accent); margin: 28px 0 10px;
+            border-bottom: 1px solid rgba(0, 242, 255, 0.25); padding-bottom: 6px;
+        }
+        p, li { font-size: 0.98rem; }
+        ul { padding-left: 1.25rem; }
+        a { color: var(--accent); }
+        code { font-size: 0.9em; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; }
+        .box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin: 16px 0;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 12px 0; }
+        th, td { border: 1px solid #333; padding: 8px 10px; text-align: left; vertical-align: top; }
+        th { color: var(--accent); background: rgba(0,242,255,0.06); }
+        .en { margin-top: 40px; padding-top: 24px; border-top: 1px solid #333; }
+        footer { margin-top: 40px; font-size: 0.85rem; color: var(--muted); }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <h1>DOGGYCO MISSION</h1>
+    <p class="sub">Datenschutzerklärung · Aktualisiert: 20. Mai 2026 · iOS App Store, Google Play, Microsoft Store &amp; Web</p>
+
+    <div class="box">
+        <strong>Kurzfassung:</strong> Privates, nicht-kommerzielles Fan-Spiel von Mario Cujko.
+        In der App werden <strong>keine Werbe-Tracker</strong> eingesetzt.
+        Es werden nur ein von dir gewählter <strong>Codename</strong> (Spielername) und dein <strong>Highscore</strong> gespeichert —
+        lokal auf dem Gerät und optional in der Online-Bestenliste.
+        Kein Konto, kein Verkauf deiner Daten.
+    </div>
+
+    <h2>1. Verantwortlicher</h2>
+    <p>
+        Mario Cujko (Entwickler „DOGGYCO GLOBAL ACADEMY“)<br>
+        E-Mail: <a href="mailto:give-me.org@gmx.de">give-me.org@gmx.de</a>
+        (alternativ: <a href="mailto:give-me.org@gmx.net">give-me.org@gmx.net</a>)<br>
+        Website: <a href="https://www.doggyco.de/">https://www.doggyco.de</a>
+    </p>
+
+    <h2>2. Geltungsbereich</h2>
+    <p>Diese Erklärung gilt für die App <strong>DOGGYCO MISSION</strong> (iOS, Android, Microsoft Store) und die Web-Version unter doggyco.de.</p>
+
+    <h2>3. Welche Daten werden verarbeitet?</h2>
+    <table>
+        <thead>
+            <tr><th>Daten</th><th>Wofür?</th><th>Wo?</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Codename</strong> (max. 12 Zeichen, frei wählbar)</td>
+                <td>Anzeige in der App und in der Rangliste</td>
+                <td>Gerät (<code>localStorage</code>) und optional Supabase (Cloud-Datenbank)</td>
+            </tr>
+            <tr>
+                <td><strong>Highscore / Punkte</strong></td>
+                <td>Spielstand, lokaler Rekord, Bestenliste</td>
+                <td>Gerät und optional Supabase</td>
+            </tr>
+            <tr>
+                <td><strong>Technische Verbindungsdaten</strong></td>
+                <td>Nur wenn du online spielst (Rangliste laden/speichern)</td>
+                <td>Übertragung an Supabase (HTTPS); Standard-Server-Logs des Hosters</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Nicht</strong> erhoben: echter Name, E-Mail-Adresse im Spiel, Adresse, Standort, Werbe-ID, Zahlungsdaten, Kontakte, Fotos oder Mikrofon-Inhalte.</p>
+
+    <h2>4. Lokale Speicherung auf deinem Gerät</h2>
+    <p>Codename und Rekord werden im Browser bzw. App-WebView in <code>localStorage</code> gespeichert, damit du beim nächsten Besuch weiterspielen kannst. Du kannst diese Daten löschen, indem du App-Daten löschst oder die App deinstallierst.</p>
+
+    <h2>5. Online-Bestenliste (Supabase)</h2>
+    <p>Wenn du online spielst und den Hinweis beim Start akzeptierst, werden Codename und Score an unsere Datenbank bei <strong>Supabase</strong> (Drittanbieter für Hosting/Datenbank) übermittelt, um die globale Rangliste anzuzeigen. Es ist kein Benutzerkonto nötig.</p>
+    <p>Du kannst die Löschung deines Ranglisten-Eintrags jederzeit per E-Mail verlangen.</p>
+
+    <h2>6. Audio, Vibration &amp; Berechtigungen</h2>
+    <ul>
+        <li><strong>Ton/Musik:</strong> wird lokal in der App abgespielt; keine Übermittlung von Sprachaufnahmen.</li>
+        <li><strong>Vibration:</strong> optional bei Spielereignissen (nur auf unterstützten Geräten).</li>
+        <li><strong>Netzwerk:</strong> nur für Rangliste und Laden der App-Inhalte, sofern online genutzt.</li>
+        <li>Die App fragt <strong>keinen</strong> Zugriff auf Kamera, Mikrofon, Kontakte oder Standort an.</li>
+    </ul>
+
+    <h2>7. Tracking &amp; Werbung</h2>
+    <p>Keine Werbenetzwerke, kein Verkauf personenbezogener Daten, keine Profilbildung zu Marketingzwecken in der App-Datei.</p>
+
+    <h2>8. Rechtsgrundlage (DSGVO)</h2>
+    <ul>
+        <li><strong>Einwilligung</strong> (Art. 6 Abs. 1 lit. a DSGVO) — wenn du den Hinweis zu Codename/Rangliste akzeptierst und online spielst.</li>
+        <li><strong>Berechtigtes Interesse / Vertrag</strong> — lokale Speicherung zur Bereitstellung des Spiels.</li>
+    </ul>
+
+    <h2>9. Speicherdauer</h2>
+    <p>Lokale Daten: bis Löschung durch dich. Ranglisten-Einträge: bis zur Löschung auf Anfrage oder bei längerer Inaktivität nach interner Prüfung.</p>
+
+    <h2>10. Deine Rechte</h2>
+    <p>Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch und Datenübertragbarkeit — schreib an <a href="mailto:give-me.org@gmx.de">give-me.org@gmx.de</a>. Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde in deinem EU-Land.</p>
+
+    <h2>11. Kinder</h2>
+    <p>Die App richtet sich nicht gezielt an Kinder unter 13 Jahren. Eltern/Erziehungsberechtigte können uns zur Löschung von Einträgen kontaktieren.</p>
+
+    <h2>12. Hinweis für App Store Connect</h2>
+    <p>Für die Apple-Datenschutzangaben in App Store Connect: Es werden <strong>optionale</strong> Spielerdaten (Codename, Spielaktivität/Score) für die Rangliste verarbeitet — keine Kontaktdaten der Nutzer in der App.</p>
+
+    <h2>13. Änderungen</h2>
+    <p>Diese Seite kann angepasst werden. Maßgeblich ist das Datum oben. Fortgesetzte Nutzung nach einer Aktualisierung gilt als Kenntnisnahme, sofern nicht gesetzlich anders vorgeschrieben.</p>
+
+    <section class="en" lang="en">
+        <h1 style="font-size:1.4rem;color:var(--gold);">Privacy Policy (English)</h1>
+        <p class="sub">Last updated: May 20, 2026 — DOGGYCO MISSION</p>
+
+        <div class="box">
+            <strong>Summary:</strong> Private, non-commercial fan game. No ad trackers in the app.
+            We only store your chosen <strong>codename</strong> and <strong>high score</strong> (on-device and optional online leaderboard).
+            No account required. We do not sell your data.
+        </div>
+
+        <h2>Data collected</h2>
+        <ul>
+            <li><strong>Codename</strong> (player name, up to 12 characters, your choice).</li>
+            <li><strong>High score</strong> for local records and optional global leaderboard.</li>
+            <li><strong>Device storage</strong> via <code>localStorage</code>.</li>
+            <li><strong>Online leaderboard</strong>: codename and score sent to Supabase over HTTPS when you play online and consent.</li>
+        </ul>
+        <p>We do <strong>not</strong> collect your real name, email, address, location, ad IDs, or payment data in the game.</p>
+
+        <h2>Third parties &amp; rights</h2>
+        <p>Leaderboard hosting: Supabase. No sale of personal data. Contact: <a href="mailto:give-me.org@gmx.de">give-me.org@gmx.de</a> — you may request access, correction, or deletion of leaderboard entries.</p>
+
+        <h2>Children</h2>
+        <p>Not directed at children under 13. Parents may contact us to request deletion.</p>
+    </section>
+
+    <footer>
+        <p><a href="https://www.doggyco.de/">← Zurück zum Spiel (doggyco.de)</a></p>
+        <p>© 2026 DOGGYCO GLOBAL ACADEMY — Fan project. Concept, development &amp; design by M. Čujko.</p>
+    </footer>
+</div>
+</body>
+</html>
