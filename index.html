@@ -311,7 +311,16 @@
 
         .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); transform: translateY(0); flex-shrink: 0; }
         .btn-char span { font-size: 32px; margin-bottom: 5px; }
+        .level-cyborg-row {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            gap: 8px;
+        }
+        /* Breite = 2× ein DOG-Button (3 Buttons pro Zeile → 2/3 der Zeile) */
         .btn-cyborg-lock {
+            flex: 0 0 calc((100% - 16px) * 2 / 3);
+            max-width: 100%;
             background: rgba(0,0,0,0.4) !important;
             border-color: rgba(0, 242, 255, 0.45) !important;
             min-height: 72px;
@@ -323,12 +332,19 @@
             background: rgba(0, 28, 38, 0.55) !important;
             box-shadow: 0 4px 0 var(--cyborg), 0 0 22px rgba(0, 255, 255, 0.35);
         }
+        @keyframes cyborgLockBlink {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 12px rgba(0, 242, 255, 0.9)); }
+            50% { opacity: 0.2; filter: drop-shadow(0 0 4px rgba(0, 242, 255, 0.25)); }
+        }
+        .btn-cyborg-lock:not(.btn-cyborg-unlocked) #cyborg-icon {
+            animation: cyborgLockBlink 1s ease-in-out infinite;
+        }
         .btn-cyborg-lock #cyborg-icon {
-            font-size: 46px !important; margin: 0 !important; opacity: 0.92; line-height: 1;
-            filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.4));
+            font-size: 46px !important; margin: 0 !important; line-height: 1;
         }
         .btn-cyborg-lock.btn-cyborg-unlocked #cyborg-icon {
             font-size: 42px !important; opacity: 1;
+            animation: none;
             filter: drop-shadow(0 0 12px var(--cyborg));
         }
         @keyframes cyborgUnlockPop {
@@ -590,8 +606,8 @@
                         <button class="btn-char" style="border-color:var(--panda); flex:1;" onclick="start('panda', 9)"><span>🐼</span>PANDA</button>
                         <button class="btn-char" style="border-color:var(--unicorn); flex:1;" onclick="start('unicorn', 11)"><span>🦄</span>UNICORN</button>
                     </div>
-                    <div style="display:flex; justify-content:center; gap:8px; width:50%;">
-                        <button id="btn-cyborg" type="button" class="btn-char btn-cyborg-lock" style="flex:1;" onclick="startCyborg()" aria-label="Level 13 Cyborg">
+                    <div class="level-cyborg-row">
+                        <button id="btn-cyborg" type="button" class="btn-char btn-cyborg-lock" onclick="startCyborg()" aria-label="Level 13 Cyborg">
                             <span id="cyborg-icon">🔒</span>
                         </button>
                     </div>
