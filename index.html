@@ -23,10 +23,14 @@
             var msStore = proto === 'ms-appx:' || proto === 'ms-appx-web:' ||
                 !!(window.chrome && window.chrome.webview) ||
                 /WebView2|MSAppHost|WebView/i.test(ua);
+            var mobilePhone = /Android|iPhone|iPad|iPod/i.test(ua) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
             window.__msStoreApp = msStore;
             window.__pcMs = !!(win && fineHover && !coarse && !msStore);
+            window.__mobilePhone = !!mobilePhone;
             document.documentElement.classList.toggle('pc-ms', window.__pcMs);
             if (msStore) document.documentElement.classList.add('ms-store-app');
+            if (mobilePhone) document.documentElement.classList.add('mobile-phone');
         } catch (e) { window.__pcMs = false; window.__msStoreApp = false; }
     })();
     </script>
@@ -424,11 +428,12 @@
             line-height: 1.5;
             max-width: 320px;
         }
-        @media (orientation: landscape) and (pointer: coarse) {
+        @media (orientation: landscape) {
             html.platform-ios #portrait-lock,
             html.platform-android #portrait-lock,
             html.is-ios #portrait-lock,
-            html.is-android #portrait-lock { display: flex; }
+            html.is-android #portrait-lock,
+            html.mobile-phone #portrait-lock { display: flex; }
         }
         
         html.pc-ms #phone-container { max-width: 600px; }
@@ -466,35 +471,38 @@
         html.platform-ios .pc-only-panel,
         html.platform-ios .browser-edition-links { display: none !important; }
 
-        .score-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 11px;
-            color: #ddd;
-            margin-top: 8px;
-        }
-        .score-table th, .score-table td {
-            border: 1px solid rgba(255,255,255,0.15);
-            padding: 6px 8px;
-            text-align: left;
-        }
-        .score-table th { color: var(--neon); font-size: 10px; text-transform: uppercase; }
-
         html.ms-store-app #phone-container.is-playing {
-            width: 100% !important;
-            max-width: 100% !important;
+            width: 50% !important;
+            max-width: 420px !important;
+            min-width: 280px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            height: 100% !important;
         }
-        html.ms-store-app #game-wrap #canvas {
+        html.ms-store-app #game-wrap.is-ms-store-play {
+            width: 100% !important;
+            height: 100% !important;
+            visibility: visible !important;
+        }
+        html.ms-store-app #game-wrap.is-ms-store-play #canvas {
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
+            z-index: 50 !important;
+            pointer-events: auto !important;
+        }
+        html.mobile-phone #phone-container,
+        html.mobile-phone #phone-container.is-playing {
             width: 100% !important;
+            max-width: 100% !important;
             height: 100% !important;
-            transform: none !important;
+            height: 100dvh !important;
+            max-height: none !important;
+            border-radius: 0 !important;
+        }
+        html.mobile-phone .screen-inner {
+            max-width: 100% !important;
+            padding-top: max(env(safe-area-inset-top, 12px), 12px);
         }
 
         #privacy-popup {
@@ -654,17 +662,6 @@
                     <li><b>Objective:</b> Survive 12 Levels to WIN!</li>
                     <li><b>Cyber Level 13:</b> Reach 8,000 PTS or tap the 🔒 icon and use the override to unlock!</li>
                 </ul>
-                <table class="score-table" aria-label="Points distribution">
-                    <thead><tr><th>Source</th><th>Points (approx.)</th></tr></thead>
-                    <tbody>
-                        <tr><td>Collect tier 1 / 2 / 3</td><td>10 / 20 / 30 × level speed</td></tr>
-                        <tr><td>Spider hit</td><td>−30 × speed</td></tr>
-                        <tr><td>UFO ❤️ (HP full)</td><td>+50 × speed</td></tr>
-                        <tr><td>Win bonus (each ❤️ left)</td><td>+1000</td></tr>
-                        <tr><td><b>Typical strong run</b></td><td><b>~8,000–15,000</b></td></tr>
-                        <tr><td><b>Theoretical max (perfect 14 levels)</b></td><td><b>~25,000+</b></td></tr>
-                    </tbody>
-                </table>
             </div>
 
             <div class="info-panel panel-unicorn">
@@ -772,10 +769,19 @@ function openExternalLink(url) {
 }
 
 function forceFullscreen() {
-    if (window.__pcMs) return;
+    if (window.__pcMs && !window.__msStoreApp) return;
     let elem = document.documentElement;
-    let req = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.msRequestFullscreen;
+    let req = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.webkitEnterFullscreen || elem.msRequestFullscreen;
     if (req) { req.call(elem).catch(function () {}); }
+}
+
+function lockPortraitOrientation() {
+    if (!isPortraitRequired()) return;
+    try {
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('portrait').catch(function () {});
+        }
+    } catch (e) {}
 }
 
 function manageMedia(action) {
@@ -829,11 +835,12 @@ function useMusicWebAudio() {
 }
 
 function isPortraitRequired() {
-    return !!(window.__isIOS || window.__isAndroid ||
+    return !!(window.__isIOS || window.__isAndroid || window.__mobilePhone ||
         document.documentElement.classList.contains('platform-ios') ||
         document.documentElement.classList.contains('platform-android') ||
         document.documentElement.classList.contains('is-ios') ||
-        document.documentElement.classList.contains('is-android'));
+        document.documentElement.classList.contains('is-android') ||
+        document.documentElement.classList.contains('mobile-phone'));
 }
 
 function isPortraitMode() {
@@ -850,11 +857,11 @@ function usePcSquareLayout() {
 }
 
 function useMsStoreLayout() {
-    return false;
+    return !!(window.__msStoreApp && active);
 }
 
 function useMobilePlayLayout() {
-    return active && (window.__msStoreApp || window.__isIOS || window.__isAndroid);
+    return active && (window.__isIOS || window.__isAndroid || window.__mobilePhone) && !useMsStoreLayout();
 }
 
 /** Store-/WebView-App: Erkennung auch nach Laden (wichtig für Microsoft Store) */
@@ -996,6 +1003,9 @@ function unlockSystem() {
     let gate = document.getElementById("scr-gatekeeper");
     let startScr = document.getElementById("scr-start");
     
+    forceFullscreen();
+    lockPortraitOrientation();
+
     gate.style.opacity = "0";
     setTimeout(() => { 
         gate.style.display = "none"; 
@@ -1042,6 +1052,11 @@ window.onload = function() {
         cyborgWasLocked = (parseInt(localStorage.getItem('doggycoHighScore')) || 0) < 8000;
         updateCyborgButton();
     } catch(e) {}
+
+    if (isPortraitRequired()) {
+        forceFullscreen();
+        lockPortraitOrientation();
+    }
 
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
@@ -1419,8 +1434,8 @@ function drawEmoji(text, x, y, sizePx, baseline) {
 
 function applyCanvasSize() {
     let dpr = 1;
-    let pixelLayout = usePcSquareLayout();
-    let mobile = useMobilePlayLayout() || ((window.__isIOS || window.__isAndroid) && !pixelLayout);
+    let pixelLayout = usePcSquareLayout() || useMsStoreLayout();
+    let mobile = useMobilePlayLayout() && !pixelLayout;
     if (mobile) {
         dpr = Math.min(window.devicePixelRatio || 1, 2.5);
         canvas.style.width = '100%';
@@ -1460,7 +1475,40 @@ function resizeCanvas() {
 
     gw.classList.remove("pc-play-layout", "is-pc-play", "is-ms-store-play");
 
-    if (usePcSquareLayout()) {
+    if (useMsStoreLayout()) {
+        let playW = Math.floor(Math.min(window.innerWidth * 0.5, 420));
+        playW = Math.max(280, playW);
+        let playH = Math.max(320, window.innerHeight - ctrlH - hudH - 8);
+        W = playW;
+        H = playH;
+
+        if (pc) {
+            pc.style.width = playW + "px";
+            pc.style.maxWidth = "50vw";
+            pc.style.height = "100%";
+            pc.style.marginLeft = "auto";
+            pc.style.marginRight = "auto";
+        }
+        gw.style.position = "absolute";
+        gw.style.inset = "0";
+        gw.style.width = "100%";
+        gw.style.height = "100%";
+        gw.style.visibility = "visible";
+        gw.classList.add("is-ms-store-play");
+
+        canvas.style.position = "absolute";
+        canvas.style.display = "block";
+        canvas.style.visibility = "visible";
+        canvas.style.opacity = "1";
+        canvas.style.zIndex = "50";
+        canvas.style.top = hudH + "px";
+        canvas.style.left = "0";
+        canvas.style.right = "auto";
+        canvas.style.bottom = "auto";
+        canvas.style.transform = "none";
+        canvas.style.width = playW + "px";
+        canvas.style.height = playH + "px";
+    } else if (usePcSquareLayout()) {
         let pad = 12;
         let marginX = 32;
         let availH = window.innerHeight - hudH - ctrlH - pad;
@@ -2227,6 +2275,7 @@ function fixViewportHeight() {
 window.addEventListener('resize', fixViewportHeight);
 window.addEventListener('orientationchange', function () {
     fixViewportHeight();
+    lockPortraitOrientation();
     if (active) resizeCanvas();
 });
 fixViewportHeight();
