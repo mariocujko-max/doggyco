@@ -408,12 +408,27 @@
             box-shadow: 0 0px 0 #00b362, 0 2px 5px rgba(0,255,136,0.4);
         }
 
-        /* Breites Layout nur mit Touch / grober Eingabe (Handy quer) — nicht auf Windows-Desktop mit Maus */
+        /* Breites Layout nur Touch-Handy quer — nie auf PC-Browser mit Maus */
         @media (orientation: landscape) and (min-height: 400px) and (pointer: coarse) {
-            #phone-container { max-width: 900px; }
-            #game-wrap { max-width: 900px; border-radius: 20px; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); }
-            #controls { max-width: 900px; }
-            .end-popup-box { max-width: 500px; margin: 0 auto; }
+            html:not(.pc-ms) #phone-container { max-width: 900px; }
+            html:not(.pc-ms) #game-wrap { max-width: 900px; border-radius: 20px; box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); }
+            html:not(.pc-ms) #controls { max-width: 900px; }
+            html:not(.pc-ms) .end-popup-box { max-width: 500px; margin: 0 auto; }
+        }
+        /* PC online: Querformat spielbar — schmale Spalte wie Hochformat */
+        @media (orientation: landscape) and (hover: hover) and (pointer: fine) {
+            html.pc-ms #phone-container,
+            html.pc-ms #phone-container.is-playing {
+                max-width: min(420px, 92vh) !important;
+                width: auto !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+            }
+            html.pc-ms .screen-inner { max-width: min(420px, 92vw) !important; }
+            html.pc-ms #game-wrap.is-pc-play,
+            html.pc-ms #game-wrap.is-ms-store-play {
+                max-width: 100% !important;
+            }
         }
         
         html.pc-ms #phone-container { max-width: 600px; }
@@ -448,6 +463,23 @@
         .play-store-btn:hover { transform: scale(1.04); }
         .play-store-btn:active { transform: scale(0.97); }
         html:not(.pc-ms) .pc-only-panel { display: none !important; }
+        html.platform-ios .pc-only-panel,
+        html.platform-ios .browser-edition-links { display: none !important; }
+
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 11px;
+            color: #ddd;
+            margin-top: 8px;
+        }
+        .score-table th, .score-table td {
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 6px 8px;
+            text-align: left;
+        }
+        .score-table th { color: var(--neon); font-size: 10px; text-transform: uppercase; }
 
         html.ms-store-app #phone-container.is-playing {
             width: auto !important;
@@ -514,7 +546,8 @@
         <p>By playing, you agree that your chosen <b>codename</b> and <b>high score</b> may be stored in our online leaderboard so other players can see rankings.</p>
         <p>We do not ask for your real name, email, or location in the game. Scores are linked only to the codename you enter.</p>
         <p>Leaderboard data is hosted by our database provider (Supabase). Entries can be removed on request — contact: <b>give-me.org@gmx.net</b></p>
-        <p>This is a private, non-commercial fan project. No sale of personal data. No advertising trackers in the game file.</p>
+        <p id="privacy-text-main">This is a private, non-commercial fan project. No sale of personal data. No advertising trackers in the game file.</p>
+        <p id="privacy-text-ios" style="display:none;">DOGGYCO MISSION (iOS): We store your chosen codename and high score locally on your device and, if you play online, in our leaderboard database (Supabase). No account required. Contact: give-me.org@gmx.de. No source-code editing in the app.</p>
         <p style="font-size:11px;color:#888;">© 2026 DOGGYCO GLOBAL ACADEMY — Concept &amp; design by M. Čujko</p>
         <button type="button" class="privacy-close-btn" onclick="closePrivacy()">OK</button>
     </div>
@@ -635,6 +668,17 @@
                     <li><b>Objective:</b> Survive 12 Levels to WIN!</li>
                     <li><b>Cyber Level 13:</b> Reach 8,000 PTS or tap the 🔒 icon and use the override to unlock!</li>
                 </ul>
+                <table class="score-table" aria-label="Points distribution">
+                    <thead><tr><th>Source</th><th>Points (approx.)</th></tr></thead>
+                    <tbody>
+                        <tr><td>Collect tier 1 / 2 / 3</td><td>10 / 20 / 30 × level speed</td></tr>
+                        <tr><td>Spider hit</td><td>−30 × speed</td></tr>
+                        <tr><td>UFO ❤️ (HP full)</td><td>+50 × speed</td></tr>
+                        <tr><td>Win bonus (each ❤️ left)</td><td>+1000</td></tr>
+                        <tr><td><b>Typical strong run</b></td><td><b>~8,000–15,000</b></td></tr>
+                        <tr><td><b>Theoretical max (perfect 14 levels)</b></td><td><b>~25,000+</b></td></tr>
+                    </tbody>
+                </table>
             </div>
 
             <div class="info-panel panel-unicorn">
@@ -646,15 +690,15 @@
                 </p>
 
                 <div class="sup-grid">
-                    <button type="button" onclick="window.open('https://www.instagram.com/doggyco.de/','_blank','noopener,noreferrer')" class="btn-sup bg-ig">
+                    <button type="button" onclick="openExternalLink('https://www.instagram.com/doggyco.de/')" class="btn-sup bg-ig">
                         <svg viewBox="0 0 448 512" fill="white" width="16" height="16"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
                         INSTAGRAM
                     </button>
-                    <button type="button" onclick="window.open('https://www.tiktok.com/@doggyco0','_blank','noopener,noreferrer')" class="btn-sup bg-tk">
+                    <button type="button" onclick="openExternalLink('https://www.tiktok.com/@doggyco0')" class="btn-sup bg-tk">
                         <svg viewBox="0 0 448 512" fill="white" width="16" height="16"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
                         TIKTOK
                     </button>
-                    <button type="button" onclick="window.open('https://www.youtube.com/@doggyco.de9','_blank','noopener,noreferrer')" class="btn-sup bg-yt">
+                    <button type="button" onclick="openExternalLink('https://www.youtube.com/@doggyco.de9')" class="btn-sup bg-yt">
                         <svg viewBox="0 0 576 512" fill="white" width="16" height="14"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438-11.412-132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg>
                         YOUTUBE
                     </button>
@@ -669,19 +713,17 @@
                 <h3>📱 GET THE APP</h3>
                 <p class="text-sm" style="margin-bottom: 12px;">Play DOGGYCO MISSION as a real app on your device:</p>
                 <div class="store-badges">
-                    <div class="play-store-btn apple-btn" role="link" tabindex="0" onclick="window.open('https://apps.apple.com/de/app/doggyco-mission/id6763249087','_blank','noopener,noreferrer')">
+                    <div class="play-store-btn apple-btn" role="link" tabindex="0" onclick="openExternalLink('https://apps.apple.com/de/app/doggyco-mission/id6763249087')">
                         <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg">
                     </div>
-                    <div class="play-store-btn" role="link" tabindex="0" onclick="window.open('https://play.google.com/store/apps/details?id=com.doggycogames.doggyco','_blank','noopener,noreferrer')">
+                    <div class="play-store-btn" role="link" tabindex="0" onclick="openExternalLink('https://play.google.com/store/apps/details?id=com.doggycogames.doggyco')">
                         <img alt="Get it on Google Play" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg">
                     </div>
-                    <div class="play-store-btn" role="link" tabindex="0" onclick="window.open('https://apps.microsoft.com/detail/9NCRXPDDD1RP?hl=neutral&amp;gl=DE&amp;ocid=pdpshare','_blank','noopener,noreferrer')">
+                    <div class="play-store-btn" role="link" tabindex="0" onclick="openExternalLink('https://apps.microsoft.com/detail/9NCRXPDDD1RP?hl=neutral&amp;gl=DE&amp;ocid=pdpshare')">
                         <img alt="Get it from Microsoft" src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Get_it_from_Microsoft_Badge.svg">
                     </div>
-                    <p class="text-sm" style="margin-top:8px;color:#aaa;font-size:12px;">
-                        Browser: <a href="index.appel.html" style="color:var(--neon);">Apple (iPhone)</a> ·
-                        <a href="index.android.html" style="color:var(--neon);">Google (Android)</a> ·
-                        <a href="index.html" style="color:var(--neon);">Microsoft (PC)</a>
+                    <p class="text-sm browser-edition-links" style="margin-top:8px;color:#aaa;font-size:12px;">
+                        Also on App Store, Google Play and Microsoft Store.
                     </p>
                 </div>
             </div>
@@ -722,6 +764,27 @@
 
 <script>
 // Vollbild: nur auf Touch / nicht-PC-Geräten (Windows-Desktop mit Maus bleibt Fenster-Modus für Edge)
+function openExternalLink(url) {
+    if (!url) return;
+    try {
+        var w = window.open(url, '_blank', 'noopener,noreferrer');
+        if (!w) throw new Error('blocked');
+    } catch (e) {
+        try {
+            var a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 200);
+        } catch (e2) {
+            window.location.href = url;
+        }
+    }
+}
+
 function forceFullscreen() {
     if (window.__pcMs) return;
     let elem = document.documentElement;
@@ -753,8 +816,8 @@ function manageMedia(action) {
     }
 }
 
-/** Max. Lautstärke Hintergrundmusik 50 % */
-var MUSIC_VOL_CAP = 0.5;
+/** Max. Lautstärke Hintergrundmusik 25 % (von 100 %) */
+var MUSIC_VOL_CAP = 0.25;
 var energyLowWarned = false;
 var cyborgWasLocked = true;
 var iosMusicCheck = 0;
@@ -1034,6 +1097,11 @@ function closeSecret() {
 
 function openPrivacy() {
     let pop = document.getElementById("privacy-popup");
+    let main = document.getElementById("privacy-text-main");
+    let ios = document.getElementById("privacy-text-ios");
+    let isIos = window.__isIOS || document.documentElement.classList.contains('platform-ios');
+    if (main) main.style.display = isIos ? 'none' : 'block';
+    if (ios) ios.style.display = isIos ? 'block' : 'none';
     if (pop) pop.classList.add("show");
 }
 
@@ -1582,6 +1650,16 @@ function getPlayerY() {
     return H - getControlsHeight() - 16;
 }
 
+/** Fallende Objekte exakt auf Bahn 1–5 (Lane-Index 0–4) */
+function snapToLane(laneIndex) {
+    if (laneIndex < 0 || laneIndex > 4) return playerX;
+    return lanes[laneIndex];
+}
+
+function lockEntityToLane(e) {
+    if (e && e.l >= 0 && e.l <= 4) e.x = snapToLane(e.l);
+}
+
 function initPermSpiders() {
     let topY = Math.max(H * 0.10, 48);
     let botY = Math.min(H * 0.72, H - 110);
@@ -1932,15 +2010,16 @@ function loop(t) {
             
             if(rocket.x <= lanes[rocket.targetLane] && !rocket.laid) {
                 rocket.laid = true;
-                if(rocket.type === 'shield') { fallingCore = { lane: rocket.targetLane, y: rocket.y, s: 200 * speedMult }; }
-                else if (rocket.type === 'magnet') { fallingAlien = { lane: rocket.targetLane, y: rocket.y, s: 200 * speedMult }; }
+                if(rocket.type === 'shield') { fallingCore = { lane: rocket.targetLane, x: snapToLane(rocket.targetLane), y: rocket.y, s: 200 * speedMult }; }
+                else if (rocket.type === 'magnet') { fallingAlien = { lane: rocket.targetLane, x: snapToLane(rocket.targetLane), y: rocket.y, s: 200 * speedMult }; }
             }
             if(rocket.x < -100) rocket = null;
         }
 
         if (fallingCore && !missionComplete) {
             fallingCore.y += fallingCore.s * dt;
-            let fx = lanes[fallingCore.lane];
+            let fx = snapToLane(fallingCore.lane);
+            fallingCore.x = fx;
             ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 5;
             ctx.fillStyle = "#adff2f";
             drawEmoji('☢️', fx, fallingCore.y, 40, 'middle');
@@ -1955,7 +2034,8 @@ function loop(t) {
         
         if (fallingAlien && !missionComplete) {
             fallingAlien.y += fallingAlien.s * dt;
-            let fx = lanes[fallingAlien.lane];
+            let fx = snapToLane(fallingAlien.lane);
+            fallingAlien.x = fx;
             ctx.save(); ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 5;
             ctx.fillStyle = "#00f2ff";
             drawEmoji('🧲', fx, fallingAlien.y, 40, 'middle');
@@ -1991,12 +2071,14 @@ function loop(t) {
             ctx.font = "45px Arial"; ctx.fillStyle = "#ffffff"; ctx.shadowBlur = 0; ctx.fillText('🛸', u.x, ufoY);
             
             let dropX = lanes[u.targetLane];
-            if(u.x <= dropX && !u.dropped && !missionComplete) { fallingHearts.push({ x: dropX, y: u.y, s: 280 * speedMult }); u.dropped = true; }
+            if(u.x <= dropX && !u.dropped && !missionComplete) { fallingHearts.push({ lane: u.targetLane, x: dropX, y: u.y, s: 280 * speedMult }); u.dropped = true; }
             if(u.x < -50) ufos.splice(i, 1);
         }
 
         for(let i = fallingHearts.length - 1; i >= 0; i--) {
-            let s = fallingHearts[i]; if(!missionComplete) s.y += s.s * dt;
+            let s = fallingHearts[i];
+            if (s.lane !== undefined) s.x = snapToLane(s.lane);
+            if(!missionComplete) s.y += s.s * dt;
             ctx.textAlign = "center"; ctx.textBaseline = "middle";
             ctx.font = "40px Arial"; ctx.fillText('❤️', s.x, s.y);
             if(!missionComplete && Math.abs(s.x - playerX) < colDist && s.y > hitTop && s.y < hitBottom) {
@@ -2077,6 +2159,7 @@ function loop(t) {
                 }
             } else {
                 if(!missionComplete) e.y += e.s * dt;
+                lockEntityToLane(e);
             }
 
             ctx.textAlign = "center"; ctx.textBaseline = "middle";
@@ -2195,7 +2278,10 @@ function fixViewportHeight() {
     document.documentElement.style.setProperty('--vh', `${vh}px`);
 }
 window.addEventListener('resize', fixViewportHeight);
-window.addEventListener('orientationchange', fixViewportHeight);
+window.addEventListener('orientationchange', function () {
+    fixViewportHeight();
+    if (active) resizeCanvas();
+});
 fixViewportHeight();
 
 function copyText(btn, text) {
