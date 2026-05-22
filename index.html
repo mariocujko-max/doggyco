@@ -1167,7 +1167,6 @@ function move(dir) {
     if(!active) return;
     currLane = Math.max(0, Math.min(4, currLane + dir));
     targetX = snapToLane(currLane);
-    playerX = targetX;
 }
 
 function sfxMove() {
@@ -2213,11 +2212,10 @@ function loop(t) {
             } else if (e.y > H + 60) { entities.splice(i, 1); }
         }
 
-        if (!missionComplete && Math.abs(targetX - playerX) > 0.5) {
-            playerX += (targetX - playerX) * 0.2;
-            if (Math.abs(targetX - playerX) < 1.5) playerX = targetX;
+        if (!missionComplete) {
+            playerX += (targetX - playerX) * 0.15;
+            clampPlayerToLanes();
         }
-        clampPlayerToLanes();
         let drawX = clampDrawX(playerX); let drawY = playerY;
 
         if (charShake > 0) {
