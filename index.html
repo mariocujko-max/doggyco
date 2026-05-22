@@ -805,9 +805,15 @@ function manageMedia(action) {
     if(vid2) { vid2.pause(); }
 
     if(action === 'vid1') {
-        if(vid1) { vid1.currentTime = 0; vid1.muted = false; vid1.play().catch(e=>{}); processVideoFrame(); }
+        if (vid1) {
+            vid1.currentTime = 0; vid1.muted = false; vid1.play().catch(function () {});
+            if (!useBrowserAudioOnly()) processVideoFrame();
+        }
     } else if(action === 'vid2') {
-        if(vid2) { vid2.currentTime = 0; vid2.muted = false; vid2.play().catch(e=>{}); processVideoFrame2(); }
+        if (vid2) {
+            vid2.currentTime = 0; vid2.muted = false; vid2.play().catch(function () {});
+            if (!useBrowserAudioOnly()) processVideoFrame2();
+        }
     } else if(action === 'none') {
     }
 }
@@ -836,6 +842,20 @@ function applyMusicVolume() {
 
 function useMusicWebAudio() {
     return !!(window.__pcMs && !window.__isIOS && !window.__isAndroid && !window.__msStoreApp);
+}
+
+/** PC-Browser / Online (doggyco.de): Hund-Video nur Ton, kein Canvas-Video */
+function useBrowserAudioOnly() {
+    if (window.__msStoreApp || window.__isIOS || window.__isAndroid) return false;
+    return !!(window.__pcMs || /^https?:$/i.test((window.location && window.location.protocol) || ''));
+}
+
+function applyBrowserVideoUi() {
+    let hide = useBrowserAudioOnly();
+    ['dog-video-canvas', 'dog-video-canvas2'].forEach(function (id) {
+        let c = document.getElementById(id);
+        if (c) c.style.display = hide ? 'none' : '';
+    });
 }
 
 function needsSafeCanvas2d() {
@@ -908,6 +928,7 @@ function processGreenScreen(vEl, vCanvas, vCtx) {
 }
 
 function processVideoFrame() {
+    if (useBrowserAudioOnly()) return;
     if (!videoEl.paused && !videoEl.ended) {
         processGreenScreen(videoEl, videoCanvas, videoCtx);
         videoAnimationId = requestAnimationFrame(processVideoFrame);
@@ -915,6 +936,7 @@ function processVideoFrame() {
 }
 
 function processVideoFrame2() {
+    if (useBrowserAudioOnly()) return;
     if (!videoEl2.paused && !videoEl2.ended) {
         processGreenScreen(videoEl2, videoCanvas2, videoCtx2);
         videoAnimationId2 = requestAnimationFrame(processVideoFrame2);
@@ -924,18 +946,31 @@ function processVideoFrame2() {
 function resetVideoToStart(vEl, vCanvas, vCtx) {
     vEl.pause();
     vEl.currentTime = 0;
+    if (useBrowserAudioOnly()) return;
     setTimeout(() => { processGreenScreen(vEl, vCanvas, vCtx); }, 100);
 }
 
-videoEl.addEventListener('loadeddata', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
-videoEl.addEventListener('seeked', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
-videoEl.addEventListener('play', processVideoFrame);
-videoEl.addEventListener('ended', () => resetVideoToStart(videoEl, videoCanvas, videoCtx));
+videoEl.addEventListener('loadeddata', function () {
+    if (!useBrowserAudioOnly()) processGreenScreen(videoEl, videoCanvas, videoCtx);
+});
+videoEl.addEventListener('seeked', function () {
+    if (!useBrowserAudioOnly()) processGreenScreen(videoEl, videoCanvas, videoCtx);
+});
+videoEl.addEventListener('play', function () {
+    if (!useBrowserAudioOnly()) processVideoFrame();
+});
+videoEl.addEventListener('ended', function () { resetVideoToStart(videoEl, videoCanvas, videoCtx); });
 
-videoEl2.addEventListener('loadeddata', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
-videoEl2.addEventListener('seeked', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
-videoEl2.addEventListener('play', processVideoFrame2);
-videoEl2.addEventListener('ended', () => resetVideoToStart(videoEl2, videoCanvas2, videoCtx2));
+videoEl2.addEventListener('loadeddata', function () {
+    if (!useBrowserAudioOnly()) processGreenScreen(videoEl2, videoCanvas2, videoCtx2);
+});
+videoEl2.addEventListener('seeked', function () {
+    if (!useBrowserAudioOnly()) processGreenScreen(videoEl2, videoCanvas2, videoCtx2);
+});
+videoEl2.addEventListener('play', function () {
+    if (!useBrowserAudioOnly()) processVideoFrame2();
+});
+videoEl2.addEventListener('ended', function () { resetVideoToStart(videoEl2, videoCanvas2, videoCtx2); });
 
 let systemActive = false;
 let dogHasSpoken = false;
@@ -975,12 +1010,12 @@ function unlockSystem() {
     if(bgMusic) { bgMusic.muted = true; let p1 = bgMusic.play(); if(p1) p1.then(() => { bgMusic.pause(); bgMusic.muted = false; }).catch(e=>{}); }
     if(vid2) { vid2.muted = true; let p2 = vid2.play(); if(p2) p2.then(() => { vid2.pause(); vid2.muted = false; }).catch(e=>{}); }
     
-    if (!dogHasSpoken && vid1) { 
-        dogHasSpoken = true; 
+    if (!dogHasSpoken && vid1) {
+        dogHasSpoken = true;
         vid1.muted = false;
         let p3 = vid1.play();
-        if(p3) p3.catch(e=>{});
-        processVideoFrame();
+        if (p3) p3.catch(function () {});
+        if (!useBrowserAudioOnly()) processVideoFrame();
     }
     
     let gate = document.getElementById("scr-gatekeeper");
@@ -1020,6 +1055,8 @@ function updateCyborgButton() {
 }
 
 window.onload = function() {
+    try { applyBrowserVideoUi(); } catch (e) {}
+
     try {
         let savedName = localStorage.getItem("doggycoAgent");
         let pNameEl = document.getElementById("pName");
@@ -1655,14 +1692,15 @@ function getLaneMargin() {
 
 function rebuildLanes() {
     let margin = getLaneMargin();
-    let inner = Math.max(100, W - margin * 2);
-    let lw = inner / 5;
+    let centerX = W / 2;
+    let step = Math.min((centerX - margin) / 2, (W - margin - centerX) / 2);
+    if (step < 24) step = Math.max(24, (W - margin * 2) / 4);
     lanes = [
-        margin + lw * 0.5,
-        margin + lw * 1.5,
-        margin + lw * 2.5,
-        margin + lw * 3.5,
-        margin + lw * 4.5
+        centerX - 2 * step,
+        centerX - step,
+        centerX,
+        centerX + step,
+        centerX + 2 * step
     ];
 }
 
