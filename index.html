@@ -333,11 +333,11 @@
             box-shadow: 0 4px 0 var(--cyborg), 0 0 22px rgba(0, 255, 255, 0.35);
         }
         @keyframes cyborgLockBlink {
-            0%, 100% { opacity: 1; filter: drop-shadow(0 0 12px rgba(0, 242, 255, 0.9)); }
-            50% { opacity: 0.2; filter: drop-shadow(0 0 4px rgba(0, 242, 255, 0.25)); }
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.85)); }
+            50% { opacity: 0.55; filter: drop-shadow(0 0 6px rgba(0, 242, 255, 0.4)); }
         }
         .btn-cyborg-lock:not(.btn-cyborg-unlocked) #cyborg-icon {
-            animation: cyborgLockBlink 1s ease-in-out infinite;
+            animation: cyborgLockBlink 2.8s ease-in-out infinite;
         }
         .btn-cyborg-lock #cyborg-icon {
             font-size: 46px !important; margin: 0 !important; line-height: 1;
@@ -466,8 +466,27 @@
         }
         html.pc-ms .arrow,
         html.ms-store-app .arrow { width: 100px; height: 88px; font-size: 52px; cursor: pointer; }
+        html.pc-ms #scr-gatekeeper,
+        html.ms-store-app #scr-gatekeeper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
         html.pc-ms .gate-btn,
-        html.ms-store-app .gate-btn { cursor: pointer; }
+        html.ms-store-app .gate-btn {
+            cursor: pointer;
+            background: var(--neon);
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 24px;
+            padding: 20px 40px;
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5), 0 6px 0 #008b99;
+            animation: pulseGate 1.5s infinite alternate;
+        }
         html.pc-ms .btn-char, html.pc-ms .btn-main, html.pc-ms .btn-restart-green,
         html.ms-store-app .btn-char, html.ms-store-app .btn-main, html.ms-store-app .btn-restart-green { cursor: pointer; }
 
@@ -1002,13 +1021,6 @@ function updateCyborgButton() {
 
 window.onload = function() {
     try {
-        if (window.__pcMs) {
-            let gb = document.getElementById("gate-start-btn");
-            if (gb) gb.innerText = "CLICK OR SPACE TO START";
-        }
-    } catch (e) {}
-
-    try {
         let savedName = localStorage.getItem("doggycoAgent");
         let pNameEl = document.getElementById("pName");
         if(savedName && pNameEl) { pNameEl.value = savedName; }
@@ -1143,10 +1155,18 @@ function goToLevelSelect() {
     updateCyborgButton(); // Ensure it unlocks visually if they just hit 8000
 }
 
+function clampPlayerToLanes() {
+    if (!lanes || lanes.length < 5) return;
+    let lo = lanes[0], hi = lanes[4];
+    playerX = Math.max(lo, Math.min(hi, playerX));
+    targetX = Math.max(lo, Math.min(hi, targetX));
+    currLane = Math.max(0, Math.min(4, currLane));
+}
+
 function move(dir) {
     if(!active) return;
     currLane = Math.max(0, Math.min(4, currLane + dir));
-    targetX = lanes[currLane];
+    targetX = snapToLane(currLane);
 }
 
 function sfxMove() {
@@ -1552,8 +1572,10 @@ function resizeCanvas() {
 
     let lw = W / 5;
     lanes = [lw*0.5, lw*1.5, lw*2.5, lw*3.5, lw*4.5];
-    targetX = lanes[currLane];
-    if(!active) playerX = targetX;
+    targetX = snapToLane(currLane);
+    if (!active) playerX = targetX;
+    else clampPlayerToLanes();
+    if (active) resnapAllLaneObjects();
     if (active && permSpiders.length) initPermSpiders();
 }
 
@@ -1635,6 +1657,15 @@ function snapToLane(laneIndex) {
 
 function lockEntityToLane(e) {
     if (e && e.l >= 0 && e.l <= 4) e.x = snapToLane(e.l);
+}
+
+function resnapAllLaneObjects() {
+    entities.forEach(lockEntityToLane);
+    if (fallingCore && fallingCore.lane >= 0) fallingCore.x = snapToLane(fallingCore.lane);
+    if (fallingAlien && fallingAlien.lane >= 0) fallingAlien.x = snapToLane(fallingAlien.lane);
+    fallingHearts.forEach(function (h) {
+        if (h.lane >= 0) h.x = snapToLane(h.lane);
+    });
 }
 
 function initPermSpiders() {
@@ -2090,8 +2121,8 @@ function loop(t) {
                         let r = Math.random(); let tier = r < 0.5 ? 0 : (r < 0.8 ? 1 : 2);
                         let pack = items[mode] || items['dog'];
                         let item = pack[tier] || pack[0];
-                        entities.push({ l: safeL, x: lanes[safeL], y: -50, t: item.i, pts: item.p, bad: false, s: 230 * speedMult });
-                    } else { entities.push({ l: safeL, x: lanes[safeL], y: -50, t: '🥷', pts: 0, bad: true, s: 260 * speedMult }); }
+                        entities.push({ l: safeL, x: snapToLane(safeL), y: -50, t: item.i, pts: item.p, bad: false, s: 230 * speedMult });
+                    } else { entities.push({ l: safeL, x: snapToLane(safeL), y: -50, t: '🥷', pts: 0, bad: true, s: 260 * speedMult }); }
                 }
                 spawnDelay = 0.35;
             }
@@ -2128,20 +2159,21 @@ function loop(t) {
         for(let i = entities.length - 1; i >= 0; i--) {
             let e = entities[i];
 
-            if (magnetTimer > 0 && !e.bad && !missionComplete && e.y > 50) {
+            let magnetPull = magnetTimer > 0 && !e.bad && !missionComplete && e.y > 50;
+            if (magnetPull) {
                 let dx = playerX - e.x;
                 let dy = getPlayerY() - e.y;
-                let dist = Math.sqrt(dx*dx + dy*dy);
+                let dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist > 30) {
                     e.x += (dx / dist) * W * 1.5 * dt;
                     e.y += (dy / dist) * H * 0.8 * dt;
                 } else {
-                    let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; sfxCollect(); addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28);
+                    let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; sfxCollect(); addFloat(e.x + 40, e.y, "+" + pG, "#00ff88", 28);
                     entities.splice(i, 1);
                     continue;
                 }
             } else {
-                if(!missionComplete) e.y += e.s * dt;
+                if (!missionComplete) e.y += e.s * dt;
                 lockEntityToLane(e);
             }
 
@@ -2158,7 +2190,10 @@ function loop(t) {
             } else if (e.y > H + 60) { entities.splice(i, 1); }
         }
 
-        if(!missionComplete) playerX += (targetX - playerX) * 0.15;
+        if(!missionComplete) {
+            playerX += (targetX - playerX) * 0.15;
+            clampPlayerToLanes();
+        }
         let drawX = playerX; let drawY = playerY;
 
         if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
