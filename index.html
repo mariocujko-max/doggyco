@@ -1167,6 +1167,7 @@ function move(dir) {
     if(!active) return;
     currLane = Math.max(0, Math.min(4, currLane + dir));
     targetX = snapToLane(currLane);
+    playerX = targetX;
 }
 
 function sfxMove() {
@@ -1570,8 +1571,7 @@ function resizeCanvas() {
 
     applyCanvasSize();
 
-    let lw = W / 5;
-    lanes = [lw*0.5, lw*1.5, lw*2.5, lw*3.5, lw*4.5];
+    rebuildLanes();
     targetX = snapToLane(currLane);
     if (!active) playerX = targetX;
     else clampPlayerToLanes();
@@ -1649,10 +1649,33 @@ function getPlayerY() {
     return H - getControlsHeight() - 16;
 }
 
+/** Rand links/rechts — Emoji (~70px) bleibt im Spielfeld */
+function getLaneMargin() {
+    return Math.max(44, Math.round(W * 0.10));
+}
+
+function rebuildLanes() {
+    let margin = getLaneMargin();
+    let inner = Math.max(100, W - margin * 2);
+    let lw = inner / 5;
+    lanes = [
+        margin + lw * 0.5,
+        margin + lw * 1.5,
+        margin + lw * 2.5,
+        margin + lw * 3.5,
+        margin + lw * 4.5
+    ];
+}
+
 /** Fallende Objekte exakt auf Bahn 1–5 (Lane-Index 0–4) */
 function snapToLane(laneIndex) {
     if (laneIndex < 0 || laneIndex > 4) return playerX;
     return lanes[laneIndex];
+}
+
+function clampDrawX(x) {
+    if (!lanes || lanes.length < 5) return x;
+    return Math.max(lanes[0], Math.min(lanes[4], x));
 }
 
 function lockEntityToLane(e) {
@@ -2190,13 +2213,17 @@ function loop(t) {
             } else if (e.y > H + 60) { entities.splice(i, 1); }
         }
 
-        if(!missionComplete) {
-            playerX += (targetX - playerX) * 0.15;
-            clampPlayerToLanes();
+        if (!missionComplete && Math.abs(targetX - playerX) > 0.5) {
+            playerX += (targetX - playerX) * 0.2;
+            if (Math.abs(targetX - playerX) < 1.5) playerX = targetX;
         }
-        let drawX = playerX; let drawY = playerY;
+        clampPlayerToLanes();
+        let drawX = clampDrawX(playerX); let drawY = playerY;
 
-        if (charShake > 0) { drawX += Math.sin(charShake * 0.8) * 12; charShake--; }
+        if (charShake > 0) {
+            drawX = clampDrawX(drawX + Math.sin(charShake * 0.8) * 8);
+            charShake--;
+        }
         if (charJump > 0) { drawY -= Math.sin(charJump * 0.2) * 10; charJump--; }
 
         if (magnetTimer > 0) {
