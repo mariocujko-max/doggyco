@@ -317,21 +317,12 @@
             width: 100%;
             gap: 8px;
         }
-        /* Breite = 2× ein DOG-Button (3 Buttons pro Zeile → 2/3 der Zeile) */
+        /* Breite = 2× ein DOG-Button; Rahmen wie .btn-char */
         .btn-cyborg-lock {
             flex: 0 0 calc((100% - 16px) * 2 / 3);
             max-width: 100%;
-            background: rgba(0,0,0,0.4) !important;
-            border-color: rgba(0, 242, 255, 0.45) !important;
-            min-height: 72px;
-            justify-content: center;
-            box-shadow: 0 4px 0 rgba(0, 160, 180, 0.55), 0 0 14px rgba(0, 242, 255, 0.15);
         }
-        .btn-cyborg-lock.btn-cyborg-unlocked {
-            border-color: var(--cyborg) !important;
-            background: rgba(0, 28, 38, 0.55) !important;
-            box-shadow: 0 4px 0 var(--cyborg), 0 0 22px rgba(0, 255, 255, 0.35);
-        }
+        .btn-cyborg-lock.btn-cyborg-unlocked { border-color: var(--cyborg); box-shadow: 0 4px 0 var(--cyborg), 0 5px 10px rgba(0,0,0,0.2); }
         @keyframes cyborgLockBlink {
             0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.85)); }
             50% { opacity: 0.55; filter: drop-shadow(0 0 6px rgba(0, 242, 255, 0.4)); }
@@ -436,8 +427,14 @@
             border: none !important;
         }
 
+        html.pc-ms body, html.ms-store-app body {
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100dvh; width: 100%; margin: 0;
+        }
         html.pc-ms #phone-container,
-        html.ms-store-app #phone-container { max-width: 600px; }
+        html.ms-store-app #phone-container {
+            max-width: 600px; margin-left: auto !important; margin-right: auto !important;
+        }
         html.pc-ms #phone-container.is-playing,
         html.ms-store-app #phone-container.is-playing {
             max-height: calc(100dvh - 12px);
@@ -498,7 +495,11 @@
         .play-store-btn.apple-btn img { background: #000; padding: 6px; box-sizing: border-box; }
         .play-store-btn:hover { transform: scale(1.04); }
         .play-store-btn:active { transform: scale(0.97); }
-        html:not(.pc-ms) .pc-only-panel { display: none !important; }
+        html:not(.pc-ms) .pc-only-panel,
+        html.platform-android .pc-only-panel,
+        html.platform-ios .pc-only-panel,
+        html.is-android .pc-only-panel,
+        html.is-ios .pc-only-panel { display: none !important; }
         html.platform-ios .pc-only-panel,
         html.platform-ios .browser-edition-links { display: none !important; }
 
@@ -686,6 +687,7 @@
                 </div>
             </div>
 
+            <!-- STORE_PANEL_START -->
             <div class="info-panel panel-green pc-only-panel" style="text-align: center;">
                 <h3>📱 GET THE APP</h3>
                 <p class="text-sm" style="margin-bottom: 12px;">Play DOGGYCO MISSION as a real app on your device:</p>
@@ -704,6 +706,7 @@
                     </p>
                 </div>
             </div>
+            <!-- STORE_PANEL_END -->
 
             <div class="info-panel panel-silver">
                 <h3>⚖️ LEGAL NOTICE</h3>
@@ -805,15 +808,9 @@ function manageMedia(action) {
     if(vid2) { vid2.pause(); }
 
     if(action === 'vid1') {
-        if (vid1) {
-            vid1.currentTime = 0; vid1.muted = false; vid1.play().catch(function () {});
-            if (!useBrowserAudioOnly()) processVideoFrame();
-        }
+        if (vid1) { vid1.currentTime = 0; vid1.muted = false; vid1.play().catch(function () {}); processVideoFrame(); }
     } else if(action === 'vid2') {
-        if (vid2) {
-            vid2.currentTime = 0; vid2.muted = false; vid2.play().catch(function () {});
-            if (!useBrowserAudioOnly()) processVideoFrame2();
-        }
+        if (vid2) { vid2.currentTime = 0; vid2.muted = false; vid2.play().catch(function () {}); processVideoFrame2(); }
     } else if(action === 'none') {
     }
 }
@@ -842,20 +839,6 @@ function applyMusicVolume() {
 
 function useMusicWebAudio() {
     return !!(window.__pcMs && !window.__isIOS && !window.__isAndroid && !window.__msStoreApp);
-}
-
-/** PC-Browser / Online (doggyco.de): Hund-Video nur Ton, kein Canvas-Video */
-function useBrowserAudioOnly() {
-    if (window.__msStoreApp || window.__isIOS || window.__isAndroid) return false;
-    return !!(window.__pcMs || /^https?:$/i.test((window.location && window.location.protocol) || ''));
-}
-
-function applyBrowserVideoUi() {
-    let hide = useBrowserAudioOnly();
-    ['dog-video-canvas', 'dog-video-canvas2'].forEach(function (id) {
-        let c = document.getElementById(id);
-        if (c) c.style.display = hide ? 'none' : '';
-    });
 }
 
 function needsSafeCanvas2d() {
@@ -928,7 +911,6 @@ function processGreenScreen(vEl, vCanvas, vCtx) {
 }
 
 function processVideoFrame() {
-    if (useBrowserAudioOnly()) return;
     if (!videoEl.paused && !videoEl.ended) {
         processGreenScreen(videoEl, videoCanvas, videoCtx);
         videoAnimationId = requestAnimationFrame(processVideoFrame);
@@ -936,7 +918,6 @@ function processVideoFrame() {
 }
 
 function processVideoFrame2() {
-    if (useBrowserAudioOnly()) return;
     if (!videoEl2.paused && !videoEl2.ended) {
         processGreenScreen(videoEl2, videoCanvas2, videoCtx2);
         videoAnimationId2 = requestAnimationFrame(processVideoFrame2);
@@ -946,31 +927,18 @@ function processVideoFrame2() {
 function resetVideoToStart(vEl, vCanvas, vCtx) {
     vEl.pause();
     vEl.currentTime = 0;
-    if (useBrowserAudioOnly()) return;
     setTimeout(() => { processGreenScreen(vEl, vCanvas, vCtx); }, 100);
 }
 
-videoEl.addEventListener('loadeddata', function () {
-    if (!useBrowserAudioOnly()) processGreenScreen(videoEl, videoCanvas, videoCtx);
-});
-videoEl.addEventListener('seeked', function () {
-    if (!useBrowserAudioOnly()) processGreenScreen(videoEl, videoCanvas, videoCtx);
-});
-videoEl.addEventListener('play', function () {
-    if (!useBrowserAudioOnly()) processVideoFrame();
-});
-videoEl.addEventListener('ended', function () { resetVideoToStart(videoEl, videoCanvas, videoCtx); });
+videoEl.addEventListener('loadeddata', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
+videoEl.addEventListener('seeked', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
+videoEl.addEventListener('play', processVideoFrame);
+videoEl.addEventListener('ended', () => resetVideoToStart(videoEl, videoCanvas, videoCtx));
 
-videoEl2.addEventListener('loadeddata', function () {
-    if (!useBrowserAudioOnly()) processGreenScreen(videoEl2, videoCanvas2, videoCtx2);
-});
-videoEl2.addEventListener('seeked', function () {
-    if (!useBrowserAudioOnly()) processGreenScreen(videoEl2, videoCanvas2, videoCtx2);
-});
-videoEl2.addEventListener('play', function () {
-    if (!useBrowserAudioOnly()) processVideoFrame2();
-});
-videoEl2.addEventListener('ended', function () { resetVideoToStart(videoEl2, videoCanvas2, videoCtx2); });
+videoEl2.addEventListener('loadeddata', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+videoEl2.addEventListener('seeked', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+videoEl2.addEventListener('play', processVideoFrame2);
+videoEl2.addEventListener('ended', () => resetVideoToStart(videoEl2, videoCanvas2, videoCtx2));
 
 let systemActive = false;
 let dogHasSpoken = false;
@@ -1015,7 +983,7 @@ function unlockSystem() {
         vid1.muted = false;
         let p3 = vid1.play();
         if (p3) p3.catch(function () {});
-        if (!useBrowserAudioOnly()) processVideoFrame();
+        processVideoFrame();
     }
     
     let gate = document.getElementById("scr-gatekeeper");
@@ -1055,8 +1023,6 @@ function updateCyborgButton() {
 }
 
 window.onload = function() {
-    try { applyBrowserVideoUi(); } catch (e) {}
-
     try {
         let savedName = localStorage.getItem("doggycoAgent");
         let pNameEl = document.getElementById("pName");
@@ -1550,6 +1516,8 @@ function resizeCanvas() {
         if (pc) {
             pc.style.width = side + "px";
             pc.style.height = totalH + "px";
+            pc.style.marginLeft = "auto";
+            pc.style.marginRight = "auto";
         }
         gw.style.position = "absolute";
         gw.style.inset = "0";
