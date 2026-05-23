@@ -452,11 +452,11 @@
         html.ms-store-app .screen-inner { max-width: 520px; }
         html.pc-ms #game-wrap.is-pc-play #canvas,
         html.ms-store-app #game-wrap.is-pc-play #canvas {
-            left: 0;
-            right: 0;
-            margin-left: auto;
-            margin-right: auto;
-            transform: none !important;
+            left: 50% !important;
+            right: auto !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            transform: translateX(-50%) !important;
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
@@ -1533,11 +1533,11 @@ function resizeCanvas() {
         canvas.style.opacity = "1";
         canvas.style.zIndex = "50";
         canvas.style.pointerEvents = "auto";
-        canvas.style.left = "0";
-        canvas.style.right = "0";
-        canvas.style.marginLeft = "auto";
-        canvas.style.marginRight = "auto";
-        canvas.style.transform = "none";
+        canvas.style.left = "50%";
+        canvas.style.right = "auto";
+        canvas.style.marginLeft = "0";
+        canvas.style.marginRight = "0";
+        canvas.style.transform = "translateX(-50%)";
         canvas.style.width = side + "px";
         canvas.style.height = side + "px";
         canvas.style.top = hudH + "px";
@@ -1555,8 +1555,12 @@ function resizeCanvas() {
             canvas.style.position = "absolute";
             canvas.style.top = "0";
             canvas.style.left = "0";
-            canvas.style.transform = "";
+            canvas.style.right = "0";
+            canvas.style.marginLeft = "auto";
+            canvas.style.marginRight = "auto";
+            canvas.style.transform = "none";
             canvas.style.width = "100%";
+            canvas.style.maxWidth = "100%";
             canvas.style.height = "";
         } else {
             W = gw.clientWidth || window.innerWidth;
@@ -1574,6 +1578,16 @@ function resizeCanvas() {
     }
 
     applyCanvasSize();
+    if (canvas) {
+        let cr = canvas.getBoundingClientRect();
+        if (cr.width > 10 && cr.height > 10) {
+            W = Math.round(cr.width);
+            H = Math.round(cr.height);
+            canvas.width = Math.max(1, W);
+            canvas.height = Math.max(1, H);
+            ensureCanvasTransform();
+        }
+    }
 
     rebuildLanes();
     targetX = snapToLane(currLane);
@@ -1660,16 +1674,9 @@ function getLaneMargin() {
 
 function rebuildLanes() {
     let margin = getLaneMargin();
-    let centerX = W / 2;
-    let step = Math.min((centerX - margin) / 2, (W - margin - centerX) / 2);
-    if (step < 24) step = Math.max(24, (W - margin * 2) / 4);
-    lanes = [
-        centerX - 2 * step,
-        centerX - step,
-        centerX,
-        centerX + step,
-        centerX + 2 * step
-    ];
+    let span = Math.max(80, W - margin * 2);
+    let step = span / 4;
+    lanes = [margin, margin + step, margin + 2 * step, margin + 3 * step, margin + 4 * step];
 }
 
 /** Fallende Objekte exakt auf Bahn 1–5 (Lane-Index 0–4) */
