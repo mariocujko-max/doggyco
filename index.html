@@ -1937,6 +1937,16 @@ function clampDrawX(x) {
     return Math.max(lanes[0], Math.min(lanes[4], x));
 }
 
+function getNearestLaneIndex(x) {
+    if (!lanes || lanes.length < 5) return 2;
+    let best = 2, bestD = Infinity;
+    for (let i = 0; i < 5; i++) {
+        let d = Math.abs(lanes[i] - x);
+        if (d < bestD) { bestD = d; best = i; }
+    }
+    return best;
+}
+
 function lockEntityToLane(e) {
     if (e && e.l >= 0 && e.l <= 4) e.x = snapToLane(e.l);
 }
@@ -2479,6 +2489,8 @@ function loop(t) {
                 if (dist > 30) {
                     e.x += (dx / dist) * W * 1.5 * dt;
                     e.y += (dy / dist) * H * 0.8 * dt;
+                    e.l = getNearestLaneIndex(e.x);
+                    e.x = clampDrawX(e.x);
                 } else {
                     let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; sfxCollect(); addFloat(e.x + 40, e.y, "+" + pG, "#00ff88", 28);
                     entities.splice(i, 1);
@@ -2486,7 +2498,10 @@ function loop(t) {
                 }
             } else {
                 if (!missionComplete) e.y += e.s * dt;
-                lockEntityToLane(e);
+                if (e.l >= 0 && e.l <= 4) {
+                    e.l = getNearestLaneIndex(e.x);
+                    e.x = clampDrawX(e.x);
+                }
             }
 
             drawEmoji(e.t, e.x, e.y, 45, 'middle');
