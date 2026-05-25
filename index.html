@@ -24,8 +24,12 @@
                 !!(window.chrome && window.chrome.webview) ||
                 /WebView2|MSAppHost|WebView/i.test(ua);
             window.__msStoreApp = msStore;
+            window.__isIOS = /iPhone|iPad|iPod/i.test(ua);
+            window.__isAndroid = /Android/i.test(ua);
             window.__pcMs = !!(win && fineHover && !coarse && !msStore);
             document.documentElement.classList.toggle('pc-ms', window.__pcMs);
+            if (window.__isIOS) document.documentElement.classList.add('is-ios');
+            if (window.__isAndroid) document.documentElement.classList.add('is-android');
             if (msStore) document.documentElement.classList.add('ms-store-app');
         } catch (e) { window.__pcMs = false; window.__msStoreApp = false; }
     })();
@@ -142,7 +146,7 @@
             background: linear-gradient(90deg, #ff0000, var(--red), var(--gold));
         }
         
-        #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); }
+        #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); position: relative; }
         .stat { font-weight: 900; font-size: 16px; text-shadow: 1px 1px 3px #000; }
         @keyframes timeWarn {
             0%, 100% { color: var(--red); opacity: 1; }
@@ -317,7 +321,6 @@
             width: 100%;
             gap: 8px;
         }
-        /* Breite = 2× ein DOG-Button; Rahmen wie .btn-char */
         .btn-cyborg-lock {
             flex: 0 0 calc((100% - 16px) * 2 / 3);
             max-width: 100%;
@@ -503,24 +506,37 @@
         html.platform-ios .pc-only-panel,
         html.platform-ios .browser-edition-links { display: none !important; }
 
-        #privacy-popup {
+        #privacy-fullscreen {
             position: fixed; inset: 0; z-index: 10001;
-            background: rgba(0,0,0,0.85);
-            display: none; justify-content: center; align-items: center;
-            padding: 20px; backdrop-filter: blur(8px);
+            background: #0d1117; display: none; flex-direction: column;
         }
-        #privacy-popup.show { display: flex; }
-        .privacy-box {
-            background: rgba(15,15,15,0.98); border: 1px solid var(--neon);
-            border-radius: 20px; padding: 24px 20px; max-width: 400px; width: 100%;
-            max-height: 80vh; overflow-y: auto;
+        #privacy-fullscreen.show { display: flex; }
+        .privacy-full-header {
+            flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
+            padding: max(env(safe-area-inset-top, 12px), 12px) 16px 12px;
+            border-bottom: 1px solid rgba(0, 242, 255, 0.3); background: #111;
         }
-        .privacy-box h2 { color: var(--neon); font-size: 18px; margin-bottom: 12px; text-align: center; }
-        .privacy-box p { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: #ddd; line-height: 1.55; margin-bottom: 10px; }
-        .privacy-close-btn {
-            margin-top: 16px; width: 100%; padding: 12px; border: none; border-radius: 12px;
-            background: var(--neon); color: #000; font-family: 'Orbitron'; font-weight: 900; cursor: pointer;
+        .privacy-full-header h2 { margin: 0; color: var(--neon); font-size: 16px; font-family: 'Orbitron', sans-serif; }
+        .privacy-full-close {
+            border: 1px solid var(--neon); background: transparent; color: var(--neon);
+            font-family: 'Orbitron', sans-serif; font-weight: 900; padding: 8px 14px; border-radius: 10px; cursor: pointer;
         }
+        #privacy-full-scroll {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding: 16px 16px max(env(safe-area-inset-bottom, 20px), 24px);
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            color: #e6edf3; line-height: 1.65; font-size: 14px;
+        }
+        #privacy-full-scroll h1 { font-size: 1.4rem; color: var(--gold); margin: 0 0 8px; }
+        #privacy-full-scroll h2 { font-size: 1.05rem; color: var(--neon); margin: 22px 0 8px; border-bottom: 1px solid rgba(0,242,255,0.25); padding-bottom: 4px; }
+        #privacy-full-scroll .sub { color: #9aa7b5; font-size: 0.92rem; margin-bottom: 16px; }
+        #privacy-full-scroll .box { background: rgba(255,255,255,0.04); border: 1px solid rgba(0,242,255,0.2); border-radius: 10px; padding: 12px; margin: 12px 0; }
+        #privacy-full-scroll table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 10px 0; }
+        #privacy-full-scroll th, #privacy-full-scroll td { border: 1px solid #333; padding: 6px 8px; text-align: left; vertical-align: top; }
+        #privacy-full-scroll th { color: var(--neon); }
+        #privacy-full-scroll a { color: var(--neon); }
+        #privacy-full-scroll .en { margin-top: 28px; padding-top: 20px; border-top: 1px solid #333; }
+        #privacy-full-scroll ul { padding-left: 1.2rem; }
         #secret-code-input::-webkit-outer-spin-button,
         #secret-code-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         #secret-code-input { -moz-appearance: textfield; }
@@ -528,19 +544,144 @@
 </head>
 <body>
 
-<div id="privacy-popup" onclick="if(event.target===this) closePrivacy();">
-    <div class="privacy-box">
-        <h2>Privacy Policy</h2>
-        <p>By playing, you agree that your chosen <b>codename</b> and <b>high score</b> may be stored in our online leaderboard so other players can see rankings.</p>
-        <p>We do not ask for your real name, email, or location in the game. Scores are linked only to the codename you enter.</p>
-        <p>Leaderboard data is hosted by Supabase. Entries can be removed on request — <b>give-me.org@gmx.de</b></p>
-        <p id="privacy-text-main">Private, non-commercial fan project. No ad trackers. Full policy: <a href="https://www.doggyco.de/privacy.html" style="color:var(--neon);" onclick="openPrivacy(); return false;">www.doggyco.de/privacy.html</a></p>
-        <p id="privacy-text-ios" style="display:none;">DOGGYCO MISSION (iOS): Codename and high score are stored on your device and, if you play online, in our leaderboard (Supabase). No account required. Full policy online.</p>
-        <p style="font-size:11px;color:#888;">© 2026 DOGGYCO GLOBAL ACADEMY — Concept &amp; design by M. Čujko</p>
-        <button type="button" class="privacy-close-btn" onclick="openPrivacy(true)">Open full policy</button>
-        <button type="button" class="privacy-close-btn" style="margin-top:8px;background:#333;color:#ccc;" onclick="closePrivacy()">Close</button>
+<div id="privacy-fullscreen">
+    <div class="privacy-full-header">
+        <h2>Datenschutz / Privacy</h2>
+        <button type="button" class="privacy-full-close" onclick="closePrivacyFullscreen()">Schließen</button>
     </div>
+    <div id="privacy-full-scroll"></div>
 </div>
+<template id="privacy-embed-fallback"><h1>DOGGYCO MISSION</h1>
+    <p class="sub">Datenschutzerklärung · Aktualisiert: 20. Mai 2026 · iOS App Store, Google Play, Microsoft Store &amp; Web</p>
+
+    <div class="box">
+        <strong>Kurzfassung:</strong> Privates, nicht-kommerzielles Fan-Spiel von Mario Cujko.
+        In der App werden <strong>keine Werbe-Tracker</strong> eingesetzt.
+        Es werden nur ein von dir gewählter <strong>Codename</strong> (Spielername) und dein <strong>Highscore</strong> gespeichert —
+        lokal auf dem Gerät und optional in der Online-Bestenliste.
+        Kein Konto, kein Verkauf deiner Daten.
+    </div>
+
+    <h2>1. Verantwortlicher</h2>
+    <p>
+        Mario Cujko (Entwickler „DOGGYCO GLOBAL ACADEMY“)<br>
+        E-Mail: <a href="mailto:give-me.org@gmx.de">give-me.org@gmx.de</a>
+        (alternativ: <a href="mailto:give-me.org@gmx.net">give-me.org@gmx.net</a>)<br>
+        Website: <a href="https://www.doggyco.de/">https://www.doggyco.de</a>
+    </p>
+
+    <h2>2. Geltungsbereich</h2>
+    <p>Diese Erklärung gilt für die App <strong>DOGGYCO MISSION</strong> (iOS, Android, Microsoft Store) und die Web-Version unter doggyco.de.</p>
+
+    <h2>3. Welche Daten werden verarbeitet?</h2>
+    <table>
+        <thead>
+            <tr><th>Daten</th><th>Wofür?</th><th>Wo?</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Codename</strong> (max. 12 Zeichen, frei wählbar)</td>
+                <td>Anzeige in der App und in der Rangliste</td>
+                <td>Gerät (<code>localStorage</code>) und optional Supabase (Cloud-Datenbank)</td>
+            </tr>
+            <tr>
+                <td><strong>Highscore / Punkte</strong></td>
+                <td>Spielstand, lokaler Rekord, Bestenliste</td>
+                <td>Gerät und optional Supabase</td>
+            </tr>
+            <tr>
+                <td><strong>Technische Verbindungsdaten</strong></td>
+                <td>Nur wenn du online spielst (Rangliste laden/speichern)</td>
+                <td>Übertragung an Supabase (HTTPS); Standard-Server-Logs des Hosters</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Nicht</strong> erhoben: echter Name, E-Mail-Adresse im Spiel, Adresse, Standort, Werbe-ID, Zahlungsdaten, Kontakte, Fotos oder Mikrofon-Inhalte.</p>
+
+    <h2>4. Lokale Speicherung auf deinem Gerät</h2>
+    <p>Codename und Rekord werden im Browser bzw. App-WebView in <code>localStorage</code> gespeichert, damit du beim nächsten Besuch weiterspielen kannst. Du kannst diese Daten löschen, indem du App-Daten löschst oder die App deinstallierst.</p>
+
+    <h2>5. Online-Bestenliste (Supabase)</h2>
+    <p>Wenn du online spielst und den Hinweis beim Start akzeptierst, werden Codename und Score an unsere Datenbank bei <strong>Supabase</strong> (Drittanbieter für Hosting/Datenbank) übermittelt, um die globale Rangliste anzuzeigen. Es ist kein Benutzerkonto nötig.</p>
+    <p>Du kannst die Löschung deines Ranglisten-Eintrags jederzeit per E-Mail verlangen.</p>
+
+    <h2>6. Audio, Vibration &amp; Berechtigungen</h2>
+    <ul>
+        <li><strong>Ton/Musik:</strong> wird lokal in der App abgespielt; keine Übermittlung von Sprachaufnahmen.</li>
+        <li><strong>Vibration:</strong> optional bei Spielereignissen (nur auf unterstützten Geräten).</li>
+        <li><strong>Netzwerk:</strong> nur für Rangliste und Laden der App-Inhalte, sofern online genutzt.</li>
+        <li>Die App fragt <strong>keinen</strong> Zugriff auf Kamera, Mikrofon, Kontakte oder Standort an.</li>
+    </ul>
+
+    <h2>7. Tracking &amp; Werbung</h2>
+    <p>Keine Werbenetzwerke, kein Verkauf personenbezogener Daten, keine Profilbildung zu Marketingzwecken in der App-Datei.</p>
+
+    <h2>8. Rechtsgrundlage (DSGVO)</h2>
+    <ul>
+        <li><strong>Einwilligung</strong> (Art. 6 Abs. 1 lit. a DSGVO) — wenn du den Hinweis zu Codename/Rangliste akzeptierst und online spielst.</li>
+        <li><strong>Berechtigtes Interesse / Vertrag</strong> — lokale Speicherung zur Bereitstellung des Spiels.</li>
+    </ul>
+
+    <h2>9. Speicherdauer</h2>
+    <p>Lokale Daten: bis Löschung durch dich. Ranglisten-Einträge: bis zur Löschung auf Anfrage oder bei längerer Inaktivität nach interner Prüfung.</p>
+
+    <h2>10. Deine Rechte</h2>
+    <p>Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch und Datenübertragbarkeit — schreib an <a href="mailto:give-me.org@gmx.de">give-me.org@gmx.de</a>. Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde in deinem EU-Land.</p>
+
+    <h2>11. Kinder</h2>
+    <p>Die App richtet sich nicht gezielt an Kinder unter 13 Jahren. Eltern/Erziehungsberechtigte können uns zur Löschung von Einträgen kontaktieren.</p>
+
+    <h2>12. Hinweis für App Store Connect</h2>
+    <p>Für die Apple-Datenschutzangaben in App Store Connect: Es werden <strong>optionale</strong> Spielerdaten (Codename, Spielaktivität/Score) für die Rangliste verarbeitet — keine Kontaktdaten der Nutzer in der App.</p>
+
+    <h2>13. Änderungen</h2>
+    <p>Diese Seite kann angepasst werden. Maßgeblich ist das Datum oben. Fortgesetzte Nutzung nach einer Aktualisierung gilt als Kenntnisnahme, sofern nicht gesetzlich anders vorgeschrieben.</p>
+
+    <section class="en" lang="en">
+        <h1 style="font-size:1.4rem;color:var(--gold);">Privacy Policy (English)</h1>
+        <p class="sub">Last updated: May 20, 2026 — DOGGYCO MISSION</p>
+
+        <div class="box">
+            <strong>Summary:</strong> Private, non-commercial fan game. No ad trackers in the app.
+            We only store your chosen <strong>codename</strong> and <strong>high score</strong> (on-device and optional online leaderboard).
+            No account required. We do not sell your data.
+        </div>
+
+        <h2>Data collected</h2>
+        <ul>
+            <li><strong>Codename</strong> (player name, up to 12 characters, your choice).</li>
+            <li><strong>High score</strong> for local records and optional global leaderboard.</li>
+            <li><strong>Device storage</strong> via <code>localStorage</code>.</li>
+            <li><strong>Online leaderboard</strong>: codename and score sent to Supabase over HTTPS when you play online and consent.</li>
+        </ul>
+        <p>We do <strong>not</strong> collect your real name, email, address, location, ad IDs, or payment data in the game.</p>
+
+        <h2>Third parties &amp; rights</h2>
+        <p>Leaderboard hosting: Supabase. No sale of personal data. Contact: <a href="mailto:give-me.org@gmx.de">give-me.org@gmx.de</a> — you may request access, correction, or deletion of leaderboard entries.</p>
+
+        <h2>Children</h2>
+        <p>Not directed at children under 13. Parents may contact us to request deletion.</p>
+    </section>
+
+    <footer>
+        <p>
+            <a id="privacy-back-link" href="index.appel.html">← Zurück zum Spiel</a>
+            · <a href="index.html">Web-Version</a>
+            · <a href="https://www.doggyco.de/">doggyco.de</a>
+        </p>
+        <p>© 2026 DOGGYCO GLOBAL ACADEMY — Fan project. Concept, development &amp; design by M. Čujko.</p>
+    </footer>
+    <script>
+    (function () {
+        try {
+            var back = sessionStorage.getItem('doggycoPrivacyBack');
+            if (back) {
+                var a = document.getElementById('privacy-back-link');
+                if (a) { a.href = back; a.textContent = '← Zurück zum Spiel'; }
+            }
+        } catch (e) {}
+    })();
+    </script></template>
 
 <div id="bg-fx"></div>
 <div id="bg-overlay"></div>
@@ -574,8 +715,7 @@
         <div id="hud">
             <div id="mission-title">DOG MISSION</div>
             <div id="energy-box"><div id="energy-fill"></div></div>
-            <div id="stats-bar">
-                <div class="stat" style="background:var(--neon); color:#000; padding:2px 8px; border-radius:5px; font-weight:900; font-size:16px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
+            <div id="stats-bar"><div class="stat" style="background:var(--neon); color:#000; padding:2px 8px; border-radius:5px; font-weight:900; font-size:16px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
                 <div id="hp-txt" class="stat">❤️❤️❤️</div>
                 <div id="score-txt" class="stat" style="color:var(--gold)">0 PTS</div>
                 <div id="time-txt" class="stat" style="color:var(--neon)">30s</div>
@@ -610,7 +750,7 @@
                     <input type="text" id="pName" class="name-input" placeholder="ENTER CODENAME" maxlength="12" autocomplete="off" onkeydown="if(event.key === 'Enter') this.blur();">
                     <div class="privacy-consent">
                         By playing, you consent to submitting your Codename & Score to our global leaderboard.<br>
-                        <a href="https://www.doggyco.de/privacy.html" rel="noopener noreferrer" onclick="openPrivacy(); return false;">Privacy Policy</a>
+                        <a href="privacy.html" rel="noopener noreferrer" onclick="return openPrivacyPolicyPage(event);">Privacy Policy</a>
                     </div>
                 </div>
 
@@ -747,30 +887,51 @@
 function openExternalLink(url) {
     if (!url) return;
     try {
-        var w = window.open(url, '_blank', 'noopener,noreferrer');
-        if (!w) throw new Error('blocked');
-    } catch (e) {
-        try {
-            var a = document.createElement('a');
-            a.href = url;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 200);
-        } catch (e2) {
-            window.location.href = url;
+        if (window.webkit && window.webkit.messageHandlers) {
+            if (window.webkit.messageHandlers.openURL) {
+                window.webkit.messageHandlers.openURL.postMessage(url);
+                return;
+            }
+            if (window.webkit.messageHandlers.openLink) {
+                window.webkit.messageHandlers.openLink.postMessage(url);
+                return;
+            }
         }
+    } catch (e0) {}
+    try {
+        var w = window.open(url, '_blank', 'noopener,noreferrer');
+        if (w) return;
+    } catch (e1) {}
+    try {
+        var a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 200);
+    } catch (e2) {
+        if (!isIOSDevice()) window.location.href = url;
     }
 }
 
 function isMobileDevice() {
-    return !!(window.__isIOS || window.__isAndroid ||
+    if (window.__isIOS || window.__isAndroid ||
         document.documentElement.classList.contains('platform-ios') ||
         document.documentElement.classList.contains('platform-android') ||
         document.documentElement.classList.contains('is-ios') ||
-        document.documentElement.classList.contains('is-android'));
+        document.documentElement.classList.contains('is-android')) return true;
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent || '')) return true;
+    try {
+        var m = window.matchMedia;
+        if (m && m('(pointer: coarse)').matches && m('(max-width: 900px)').matches) return true;
+    } catch (e) {}
+    return false;
+}
+
+function isPhonePlayLayout() {
+    return isMobileDevice() && !usePcSquareLayout();
 }
 
 /** Handy: Vollbild + Hochformat per API — ohne Dreh-Hinweis (verursacht Abstürze) */
@@ -815,14 +976,19 @@ function manageMedia(action) {
     }
 }
 
-/** Max. Lautstärke Hintergrundmusik 25 % (von 100 %) */
-var MUSIC_VOL_CAP = 0.25;
+/** Hintergrundmusik leiser, damit Spiel-SFX (Bewegung, Treffer) hörbar bleiben */
+var MUSIC_VOL_CAP = 0.14;
+var SFX_VOL_MUL = 1.35;
 var energyLowWarned = false;
 var cyborgWasLocked = true;
 var iosMusicCheck = 0;
 
 function musicGainLevel() {
     return MUSIC_VOL_CAP;
+}
+
+function sfxGainMul() {
+    return SFX_VOL_MUL;
 }
 
 function applyMusicVolume() {
@@ -838,11 +1004,28 @@ function applyMusicVolume() {
 }
 
 function useMusicWebAudio() {
-    return !!(window.__pcMs && !window.__isIOS && !window.__isAndroid && !window.__msStoreApp);
+    return !!(window.musicRouted && window.musicGain && audioCtx);
+}
+
+function hasCyborgHighscore() {
+    return (parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0) >= 8000;
+}
+
+/** Level 13 über 8000 PTS: nur einmal spielbar (nicht dauerhaft frei) */
+function canPlayCyborgFromScore() {
+    return hasCyborgHighscore() && localStorage.getItem('doggycoCyborg8000Used') !== '1';
+}
+
+function markCyborg8000Used() {
+    try { localStorage.setItem('doggycoCyborg8000Used', '1'); } catch (e) {}
+}
+
+function isIOSDevice() {
+    return !!(window.__isIOS || document.documentElement.classList.contains('platform-ios'));
 }
 
 function needsSafeCanvas2d() {
-    return !!(window.__msStoreApp || window.__isIOS || window.__isAndroid ||
+    return !!(window.__msStoreApp || window.__isAndroid ||
         /Windows/i.test(navigator.userAgent || ''));
 }
 
@@ -955,7 +1138,7 @@ function initAudioContext() {
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
             let bgMusic = document.getElementById("snd-action");
-            if (bgMusic && !window.musicRouted && useMusicWebAudio()) {
+            if (bgMusic && !window.musicRouted) {
                 window.musicSource = audioCtx.createMediaElementSource(bgMusic);
                 window.musicGain = audioCtx.createGain();
                 window.musicGain.gain.value = musicGainLevel();
@@ -1005,7 +1188,7 @@ function updateCyborgButton() {
     let cbBtn = document.getElementById("btn-cyborg");
     let icon = document.getElementById("cyborg-icon");
     if (!cbBtn || !icon) return;
-    let nowUnlocked = bestHS >= 8000;
+    let nowUnlocked = canPlayCyborgFromScore();
     if (nowUnlocked) {
         if (cyborgWasLocked) {
             cyborgWasLocked = false;
@@ -1064,8 +1247,8 @@ window.onload = function() {
 
 // Secret Code Logic
 function startCyborg() {
-    let localHS = parseInt(localStorage.getItem('doggycoHighScore')) || 0;
-    if (localHS >= 8000) {
+    if (canPlayCyborgFromScore()) {
+        markCyborg8000Used();
         start('cyborg', 13);
     } else {
         document.getElementById("secret-code-input").value = "";
@@ -1083,21 +1266,45 @@ function closeSecret() {
 
 var PRIVACY_POLICY_URL = 'https://www.doggyco.de/privacy.html';
 
+function loadPrivacyFullText() {
+    var scroll = document.getElementById('privacy-full-scroll');
+    if (!scroll || scroll.dataset.loaded === '1') return;
+    var tpl = document.getElementById('privacy-embed-fallback');
+    if (tpl && tpl.innerHTML.trim()) {
+        scroll.innerHTML = tpl.innerHTML;
+        scroll.dataset.loaded = '1';
+        return;
+    }
+    fetch('privacy.html').then(function (r) { return r.text(); }).then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var wrap = doc.querySelector('.wrap');
+        scroll.innerHTML = wrap ? wrap.innerHTML : html;
+        scroll.dataset.loaded = '1';
+    }).catch(function () {
+        scroll.innerHTML = '<p>Datenschutz konnte nicht geladen werden. Bitte öffne <a href="https://www.doggyco.de/privacy.html">www.doggyco.de/privacy.html</a> im Browser.</p>';
+        scroll.dataset.loaded = '1';
+    });
+}
+
+function openPrivacyPolicyPage(ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    loadPrivacyFullText();
+    var full = document.getElementById('privacy-fullscreen');
+    if (full) full.classList.add('show');
+    return false;
+}
+
+function closePrivacyFullscreen() {
+    var full = document.getElementById('privacy-fullscreen');
+    if (full) full.classList.remove('show');
+}
+
 function openPrivacy(onlyExternal) {
-    openExternalLink(PRIVACY_POLICY_URL);
-    if (onlyExternal) return;
-    let pop = document.getElementById("privacy-popup");
-    let main = document.getElementById("privacy-text-main");
-    let ios = document.getElementById("privacy-text-ios");
-    let isIos = window.__isIOS || document.documentElement.classList.contains('platform-ios');
-    if (main) main.style.display = isIos ? 'none' : 'block';
-    if (ios) ios.style.display = isIos ? 'block' : 'none';
-    if (pop) pop.classList.add("show");
+    openPrivacyPolicyPage();
 }
 
 function closePrivacy() {
-    let pop = document.getElementById("privacy-popup");
-    if (pop) pop.classList.remove("show");
+    closePrivacyFullscreen();
 }
 
 function isFormFocus() {
@@ -1177,6 +1384,11 @@ function sfxMove() {
     try { playTone(400, 'sine', 0.05, 0.1); } catch(e) {}
 }
 
+function dustParticleY() {
+    let py = (typeof getPlayerY === 'function' && active) ? getPlayerY() : (H - 90);
+    return py - 8 + (Math.random() - 0.5) * 12;
+}
+
 function triggerMove(dir, btnId) {
     if(!active || missionComplete) return;
     try { if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); } } catch(e) {}
@@ -1186,7 +1398,7 @@ function triggerMove(dir, btnId) {
     for(let i=0; i<8; i++) {
         fxParticles.push({
             x: playerX + (Math.random()-0.5)*30,
-            y: H - 140 + (Math.random()-0.5)*10,
+            y: dustParticleY(),
             vx: -dir * 30 + (Math.random()-0.5)*40,
             vy: -10 - Math.random()*20,
             life: 0.4 + Math.random()*0.2,
@@ -1223,20 +1435,29 @@ window.addEventListener("keydown", function(e) {
 
 function triggerVibration(pattern) {
     if ("vibrate" in navigator) {
-        try { navigator.vibrate(pattern); return; } catch(e) {}
+        try {
+            if (window.__isAndroid && typeof pattern === 'number') {
+                if (pattern <= 20) navigator.vibrate([10, 18, 14]);
+                else if (pattern <= 70) navigator.vibrate([28, 22, 55]);
+                else navigator.vibrate([70, 35, 110]);
+            } else {
+                navigator.vibrate(pattern);
+            }
+            return;
+        } catch(e) {}
     }
     try {
         if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.haptic) {
-            let type = Array.isArray(pattern) ? "medium" : (pattern <= 25 ? "light" : pattern <= 150 ? "light" : "medium");
+            let type = Array.isArray(pattern) ? "medium" : (pattern <= 25 ? "light" : pattern <= 80 ? "medium" : "heavy");
             window.webkit.messageHandlers.haptic.postMessage(type);
         }
     } catch(e) {}
 }
 
-function hapticMove() { triggerVibration(15); }
-function hapticSpiderHit() { triggerVibration(60); }
-function hapticDamage() { triggerVibration(100); }
-function hapticGameOver() { triggerVibration([200, 60, 200]); }
+function hapticMove() { triggerVibration(18); }
+function hapticSpiderHit() { triggerVibration(55); }
+function hapticDamage() { triggerVibration(95); }
+function hapticGameOver() { triggerVibration([200, 60, 200, 60, 280]); }
 
 function resumeGameAudio() {
     try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
@@ -1259,6 +1480,7 @@ function playTone(freq, type, duration, vol=0.6) {
     try {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
+        vol = Math.min(1, vol * sfxGainMul());
         osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
         gain.gain.setValueAtTime(vol, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
@@ -1468,11 +1690,11 @@ function drawEmoji(text, x, y, sizePx, baseline) {
 
 function applyCanvasSize() {
     if (!ctx || !canvas) return;
-    let pixelLayout = usePcSquareLayout();
-    let mobile = isMobileDevice() && !pixelLayout;
     let dpr = 1;
-    if (mobile && !needsSafeCanvas2d()) {
-        dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    if (isPhonePlayLayout()) {
+        if (!needsSafeCanvas2d()) {
+            dpr = Math.min(window.devicePixelRatio || 1, isIOSDevice() ? 2 : 2.5);
+        }
         canvas.style.width = '100%';
         canvas.style.height = '100%';
     } else {
@@ -1483,6 +1705,26 @@ function applyCanvasSize() {
     canvas.width = Math.max(1, Math.round(W * dpr));
     canvas.height = Math.max(1, Math.round(H * dpr));
     ensureCanvasTransform();
+}
+
+/** W/H = echte Canvas-Pixel (Safari + App) */
+function syncPlayfieldMetrics() {
+    if (!canvas || !isPhonePlayLayout()) return;
+    let r = canvas.getBoundingClientRect();
+    let w = Math.round(r.width);
+    let h = Math.round(r.height);
+    if (w < 50 || h < 50) return;
+    if (w === W && h === H) return;
+    W = w;
+    H = h;
+    applyCanvasSize();
+    rebuildLanes();
+    targetX = snapToLane(currLane);
+    if (!active) playerX = targetX;
+    else {
+        clampPlayerToLanes();
+        resnapAllLaneObjects();
+    }
 }
 
 let W = 400;
@@ -1533,11 +1775,11 @@ function resizeCanvas() {
         canvas.style.opacity = "1";
         canvas.style.zIndex = "50";
         canvas.style.pointerEvents = "auto";
-        canvas.style.left = "50%";
-        canvas.style.right = "auto";
-        canvas.style.marginLeft = "0";
-        canvas.style.marginRight = "0";
-        canvas.style.transform = "translateX(-50%)";
+        canvas.style.left = "0";
+        canvas.style.right = "0";
+        canvas.style.marginLeft = "auto";
+        canvas.style.marginRight = "auto";
+        canvas.style.transform = "none";
         canvas.style.width = side + "px";
         canvas.style.height = side + "px";
         canvas.style.top = hudH + "px";
@@ -1555,20 +1797,17 @@ function resizeCanvas() {
             canvas.style.position = "absolute";
             canvas.style.top = "0";
             canvas.style.left = "0";
-            canvas.style.right = "0";
-            canvas.style.marginLeft = "auto";
-            canvas.style.marginRight = "auto";
-            canvas.style.transform = "none";
+            canvas.style.transform = "";
             canvas.style.width = "100%";
-            canvas.style.maxWidth = "100%";
             canvas.style.height = "";
         } else {
             W = gw.clientWidth || window.innerWidth;
-            H = Math.max(280, gw.clientHeight - ctrlH);
+            H = Math.max(280, gw.clientHeight);
             canvas.style.position = "absolute";
             canvas.style.top = "0";
             canvas.style.left = "0";
-            canvas.style.transform = "";
+            canvas.style.right = "0";
+            canvas.style.transform = "none";
             canvas.style.width = "100%";
             canvas.style.height = "100%";
             canvas.style.display = "block";
@@ -1578,16 +1817,7 @@ function resizeCanvas() {
     }
 
     applyCanvasSize();
-    if (canvas) {
-        let cr = canvas.getBoundingClientRect();
-        if (cr.width > 10 && cr.height > 10) {
-            W = Math.round(cr.width);
-            H = Math.round(cr.height);
-            canvas.width = Math.max(1, W);
-            canvas.height = Math.max(1, H);
-            ensureCanvasTransform();
-        }
-    }
+    syncPlayfieldMetrics();
 
     rebuildLanes();
     targetX = snapToLane(currLane);
@@ -1662,8 +1892,18 @@ function getFlyY() {
     let extra = (window.__isIOS || document.documentElement.classList.contains('platform-ios')) ? 68 : 52;
     return getHudHeight() + extra;
 }
-/** Spieler: knapp über den Richtungspfeilen */
+/** Spieler: knapp über den Pfeilen (Canvas ↔ Controls per DOM) */
 function getPlayerY() {
+    if (isPhonePlayLayout() && canvas) {
+        let ctrl = document.getElementById("controls");
+        if (ctrl) {
+            try {
+                let cr = canvas.getBoundingClientRect();
+                let tr = ctrl.getBoundingClientRect();
+                return Math.max(60, Math.round(tr.top - cr.top - 16));
+            } catch (e) {}
+        }
+    }
     return H - getControlsHeight() - 16;
 }
 
@@ -1674,9 +1914,16 @@ function getLaneMargin() {
 
 function rebuildLanes() {
     let margin = getLaneMargin();
-    let span = Math.max(80, W - margin * 2);
-    let step = span / 4;
-    lanes = [margin, margin + step, margin + 2 * step, margin + 3 * step, margin + 4 * step];
+    let centerX = W / 2;
+    let step = Math.min((centerX - margin) / 2, (W - margin - centerX) / 2);
+    if (step < 24) step = Math.max(24, (W - margin * 2) / 4);
+    lanes = [
+        centerX - 2 * step,
+        centerX - step,
+        centerX,
+        centerX + step,
+        centerX + 2 * step
+    ];
 }
 
 /** Fallende Objekte exakt auf Bahn 1–5 (Lane-Index 0–4) */
@@ -1703,13 +1950,31 @@ function resnapAllLaneObjects() {
     });
 }
 
+function getSpiderPlayTop() {
+    let hud = document.getElementById("hud");
+    if (hud && canvas) {
+        try {
+            let hr = hud.getBoundingClientRect();
+            let cr = canvas.getBoundingClientRect();
+            if (cr.height > 20) return Math.max(2, Math.round(hr.bottom - cr.top + 2));
+        } catch (e) {}
+    }
+    return Math.max(48, Math.round(getHudHeight() + 8));
+}
+
+function getSpiderBounds() {
+    let py = getPlayerY();
+    let topY = getSpiderPlayTop();
+    let botY = Math.max(topY + 80, py - 18);
+    if (botY > py + 12) botY = py + 12;
+    return { top: topY, bottom: botY };
+}
+
 function initPermSpiders() {
-    let topY = Math.max(H * 0.10, 48);
-    let botY = Math.min(H * 0.72, H - 110);
-    if (botY <= topY + 60) botY = topY + 80;
+    let b = getSpiderBounds();
     permSpiders = [
-        { lane: 0, y: topY, dy: 1, hit: false },
-        { lane: 4, y: botY, dy: -1, hit: false }
+        { lane: 0, y: b.top, dy: 1, hit: false },
+        { lane: 4, y: b.bottom, dy: -1, hit: false }
     ];
 }
 
@@ -1805,6 +2070,7 @@ function start(m, startLvl) {
     requestAnimationFrame(function () {
         initGameCanvas();
         resizeCanvas();
+        syncPlayfieldMetrics();
         initPermSpiders();
         initBackgroundGraphics();
     });
@@ -2164,29 +2430,40 @@ function loop(t) {
         }
 
         ctx.fillStyle = "#ffffff"; ctx.lineWidth = 2;
-        let spiderTop = H * 0.08;
-        let spiderBottom = H - 90;
+        let spiderB = getSpiderBounds();
+        let spiderTop = spiderB.top;
+        let spiderBottom = spiderB.bottom;
         permSpiders.forEach(s => {
             if(!missionComplete) s.y += (180 * speedMult * s.dy) * dt;
 
             if(!missionComplete) {
-                if(s.y >= spiderBottom) { s.dy = -1; s.y = spiderBottom; s.hit = false; }
+                if(s.y >= spiderBottom) { s.dy = -1; s.y = spiderBottom; }
                 if(s.y <= spiderTop) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = spiderTop; s.hit = false; }
             }
 
             let sx = lanes[s.lane];
             ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(sx, 0);
+            ctx.moveTo(sx, spiderTop);
             ctx.lineTo(sx, s.y);
             ctx.stroke();
             drawEmoji('🕷️', sx, s.y, 40, 'middle');
 
             if(!missionComplete) {
-                if(!s.hit && Math.abs(sx - playerX) < colDist && s.y > hitTop && s.y < hitBottom) {
-                    if (invincibleTimer > 0) { addFloat(sx + 40, s.y, "BLOCKED!", "#00ff88", 20); }
-                    else { let pLoss = Math.floor(30 * ptsScaling); score = Math.max(0, score - pLoss); energy -= 30; charShake = 20; sfxHit(); hapticSpiderHit(); addFloat(sx + 40, s.y, "-⚡", "#ff3131", 35); }
-                    s.hit = true;
+                if(!s.hit && Math.abs(sx - playerX) < colDist && s.y > hitTop && s.y < hitBottom + 20) {
+                    if (invincibleTimer > 0) {
+                        addFloat(sx + 40, s.y, "BLOCKED!", "#00ff88", 20);
+                        s.hit = true;
+                    } else {
+                        let pLoss = Math.floor(30 * ptsScaling);
+                        score = Math.max(0, score - pLoss);
+                        energy -= 30;
+                        charShake = 20;
+                        sfxHit();
+                        hapticSpiderHit();
+                        addFloat(sx + 40, s.y, "-⚡", "#ff3131", 35);
+                        s.hit = true;
+                    }
                 }
             }
         });
