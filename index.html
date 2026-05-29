@@ -178,6 +178,18 @@
         }
         #game-over-overlay.show .go-title { transform: scale(1); opacity: 1; }
 
+        #level-countdown-overlay {
+            position: absolute; inset: 0; z-index: 600; pointer-events: none;
+            display: none; justify-content: center; align-items: center;
+        }
+        #level-countdown-overlay.show { display: flex; }
+        #level-countdown-num {
+            font-family: 'Orbitron', sans-serif; font-size: clamp(72px, 18vw, 120px);
+            font-weight: 900; color: var(--neon);
+            text-shadow: 0 0 25px var(--neon), 0 0 50px var(--neon), 2px 2px 0 #000;
+            transform: scale(1); opacity: 1;
+        }
+
         #scr-gatekeeper {
             position: absolute; inset: 0; z-index: 9999;
             background: rgba(0, 0, 0, 0.5);
@@ -690,6 +702,10 @@
     <div class="go-title">GAME OVER</div>
 </div>
 
+<div id="level-countdown-overlay" aria-hidden="true">
+    <div id="level-countdown-num">3</div>
+</div>
+
 <div id="scr-gatekeeper">
     <h1 style="font-family:'Orbitron'; font-size:40px; color:var(--gold); margin-bottom:40px; text-align:center; text-shadow:0 0 20px var(--gold);">DOGGYCO<br>MISSION</h1>
     <button class="gate-btn" id="gate-start-btn" onclick="unlockSystem()">TAP TO START</button>
@@ -742,7 +758,7 @@
                 <div id="video-host-1" style="width: 100%;">
                     <div class="dog-video-wrapper" id="main-vid-wrapper">
                         <canvas id="dog-video-canvas" width="250" height="250" class="dog-video-canvas"></canvas>
-                        <video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
+                        <video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="metadata" muted crossorigin="anonymous" style="display:none;"></video>
                     </div>
                 </div>
 
@@ -867,7 +883,7 @@
                 
                 <div class="dog-video-wrapper" style="margin-bottom: 10px;">
                     <canvas id="dog-video-canvas2" width="220" height="220" class="dog-video-canvas"></canvas>
-                    <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted crossorigin="anonymous" style="display:none;"></video>
+                    <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="metadata" muted crossorigin="anonymous" style="display:none;"></video>
                 </div>
 
                 <h1 id="f-score" style="font-family: 'Orbitron'; font-size: 42px; margin: 10px 0 20px 0; line-height: 1; text-align: center; color: var(--gold); text-shadow: 0 0 15px var(--gold);">0 PTS</h1>
@@ -880,7 +896,7 @@
 
 </div>
 
-<audio id="snd-action" src="music.mp3" loop preload="auto"></audio>
+<audio id="snd-action" src="music.mp3" loop preload="metadata"></audio>
 
 <script>
 // Vollbild: nur auf Touch / nicht-PC-Geräten (Windows-Desktop mit Maus bleibt Fenster-Modus für Edge)
@@ -952,27 +968,44 @@ function forceFullscreen() {
     if (req) { req.call(elem).catch(function () {}); }
 }
 
+function stopMenuVideos() {
+    if (videoAnimationId) { cancelAnimationFrame(videoAnimationId); videoAnimationId = null; }
+    if (videoAnimationId2) { cancelAnimationFrame(videoAnimationId2); videoAnimationId2 = null; }
+    let vid1 = document.getElementById("dog-video");
+    let vid2 = document.getElementById("dog-video2");
+    [vid1, vid2].forEach(function (v) {
+        if (!v) return;
+        v.pause();
+        v.muted = true;
+    });
+}
+
+function isMenuVideoPlaying() {
+    let vid1 = document.getElementById("dog-video");
+    let vid2 = document.getElementById("dog-video2");
+    return (vid1 && !vid1.paused && !vid1.ended) || (vid2 && !vid2.paused && !vid2.ended);
+}
+
 function manageMedia(action) {
     let bgMusic = document.getElementById("snd-action");
     let vid1 = document.getElementById("dog-video");
     let vid2 = document.getElementById("dog-video2");
 
     if (action === 'game') {
-        if (vid1) vid1.pause();
-        if (vid2) vid2.pause();
+        stopMenuVideos();
+        if (vid1) try { vid1.currentTime = 0; } catch (e) {}
+        if (vid2) try { vid2.currentTime = 0; } catch (e) {}
         playGameMusic();
         return;
     }
 
-    if(bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
-    if(vid1) { vid1.pause(); }
-    if(vid2) { vid2.pause(); }
+    if (bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
+    stopMenuVideos();
 
-    if(action === 'vid1') {
-        if (vid1) { vid1.currentTime = 0; vid1.muted = false; vid1.play().catch(function () {}); processVideoFrame(); }
-    } else if(action === 'vid2') {
-        if (vid2) { vid2.currentTime = 0; vid2.muted = false; vid2.play().catch(function () {}); processVideoFrame2(); }
-    } else if(action === 'none') {
+    if (action === 'vid1') {
+        if (vid1) { vid1.muted = false; vid1.currentTime = 0; vid1.play().catch(function () {}); processVideoFrame(); }
+    } else if (action === 'vid2') {
+        if (vid2) { vid2.muted = false; vid2.currentTime = 0; vid2.play().catch(function () {}); processVideoFrame2(); }
     }
 }
 
@@ -982,6 +1015,9 @@ var SFX_VOL_MUL = 1.35;
 var energyLowWarned = false;
 var cyborgWasLocked = true;
 var iosMusicCheck = 0;
+var levelCountdown = 0;
+var lastCountdownLabel = '';
+var gameAssetsWarmed = false;
 
 function musicGainLevel() {
     return MUSIC_VOL_CAP;
@@ -1056,6 +1092,7 @@ function revalidateWindowsShell() {
 function playGameMusic() {
     let bgMusic = document.getElementById("snd-action");
     if (!bgMusic) return;
+    stopMenuVideos();
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
     bgMusic.muted = false;
     try { bgMusic.playbackRate = getMusicRate(Math.min(Math.max(level, 1), 14)); } catch(e) { bgMusic.playbackRate = 1.0; }
@@ -1063,6 +1100,54 @@ function playGameMusic() {
     if (!bgMusic.paused && bgMusic.currentTime > 0.2) return;
     let p = bgMusic.play();
     if (p && p.catch) p.catch(function () {});
+}
+
+function needsLevelCountdown(startLvl) {
+    return startLvl >= 1 && startLvl <= 11;
+}
+
+function showCountdownUI(show) {
+    let el = document.getElementById('level-countdown-overlay');
+    if (el) {
+        el.classList.toggle('show', !!show);
+        el.setAttribute('aria-hidden', show ? 'false' : 'true');
+    }
+}
+
+function updateCountdownUI() {
+    let el = document.getElementById('level-countdown-num');
+    if (!el || levelCountdown <= 0) return;
+    let label = 'GO!';
+    if (levelCountdown > 2.4) label = '3';
+    else if (levelCountdown > 1.4) label = '2';
+    else if (levelCountdown > 0.45) label = '1';
+    if (label !== lastCountdownLabel) {
+        lastCountdownLabel = label;
+        el.innerText = label;
+        try { playTone(label === 'GO!' ? 880 : 520, 'sine', 0.08, 0.35); } catch (e) {}
+    }
+}
+
+function prewarmGameAssets() {
+    if (gameAssetsWarmed) return;
+    gameAssetsWarmed = true;
+    try { initGameCanvas(); resizeCanvas(); } catch (e) {}
+    let bg = document.getElementById('snd-action');
+    if (bg && bg.readyState < 2) { try { bg.load(); } catch (e) {} }
+    [document.getElementById('dog-video'), document.getElementById('dog-video2')].forEach(function (v) {
+        if (v && v.readyState < 1) { try { v.load(); } catch (e) {} }
+    });
+}
+
+function prewarmGameWorld() {
+    initGameCanvas();
+    resizeCanvas();
+    if (typeof syncPlayfieldMetrics === 'function') syncPlayfieldMetrics();
+    initBackgroundGraphics();
+    initPermSpiders();
+    document.getElementById("canvas").classList.remove("blur");
+    ensureCanvasTransform();
+    if (ctx) ctx.clearRect(0, 0, W, H);
 }
 
 let videoEl = document.getElementById('dog-video');
@@ -1152,18 +1237,26 @@ function initAudioContext() {
 
 function unlockSystem() {
     initAudioContext();
+    prewarmGameAssets();
     
-    // Unlock media safely for mobile
     let bgMusic = document.getElementById("snd-action");
     let vid1 = document.getElementById("dog-video");
     let vid2 = document.getElementById("dog-video2");
     
-    if(bgMusic) { bgMusic.muted = true; let p1 = bgMusic.play(); if(p1) p1.then(() => { bgMusic.pause(); bgMusic.muted = false; }).catch(e=>{}); }
-    if(vid2) { vid2.muted = true; let p2 = vid2.play(); if(p2) p2.then(() => { vid2.pause(); vid2.muted = false; }).catch(e=>{}); }
+    if (bgMusic) {
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+        bgMusic.muted = true;
+        let p1 = bgMusic.play();
+        if (p1) p1.then(function () { bgMusic.pause(); bgMusic.muted = false; bgMusic.currentTime = 0; }).catch(function () {});
+    }
+    stopMenuVideos();
     
     if (!dogHasSpoken && vid1) {
         dogHasSpoken = true;
+        if (bgMusic) bgMusic.pause();
         vid1.muted = false;
+        vid1.currentTime = 0;
         let p3 = vid1.play();
         if (p3) p3.catch(function () {});
         processVideoFrame();
@@ -1362,6 +1455,8 @@ function goToLevelSelect() {
     
     manageMedia('none');
     dogHasSpoken = false;
+    levelCountdown = 0;
+    showCountdownUI(false);
     updateCyborgButton(); // Ensure it unlocks visually if they just hit 8000
 }
 
@@ -1374,7 +1469,7 @@ function clampPlayerToLanes() {
 }
 
 function move(dir) {
-    if(!active) return;
+    if(!active || levelCountdown > 0) return;
     currLane = Math.max(0, Math.min(4, currLane + dir));
     targetX = snapToLane(currLane);
 }
@@ -1390,7 +1485,7 @@ function dustParticleY() {
 }
 
 function triggerMove(dir, btnId) {
-    if(!active || missionComplete) return;
+    if(!active || missionComplete || levelCountdown > 0) return;
     try { if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); } } catch(e) {}
     hapticMove();
     sfxMove();
@@ -2029,17 +2124,6 @@ function start(m, startLvl) {
     try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
 
     if(globalAnimationId) cancelAnimationFrame(globalAnimationId);
-    
-    let v2 = document.getElementById('dog-video2');
-    if (v2) {
-        v2.muted = false;
-        let p = v2.play();
-        if(p !== undefined) {
-            p.then(() => { v2.pause(); v2.currentTime = 0; }).catch(e => {});
-        }
-    }
-    
-    manageMedia('game');
 
     mode = m;
     level = startLvl;
@@ -2047,6 +2131,8 @@ function start(m, startLvl) {
     hp = 3; energy = 100; score = 0; timeLeft = 30;
     energyLowWarned = false;
     iosMusicCheck = 0;
+    levelCountdown = 0;
+    lastCountdownLabel = '';
     entities = []; floaters = []; fireworks = []; fxParticles = []; missionComplete = false;
     
     invincibleTimer = 0; alarmTimer = 0; magnetTimer = 0; magnetSoundTimer = 0;
@@ -2054,6 +2140,11 @@ function start(m, startLvl) {
     rocket = null; fallingCore = null; fallingAlien = null; fallingHearts = [];
     
     updateTheme(mode);
+    currLane = 2;
+    playerX = snapToLane(2);
+    targetX = playerX;
+    let lvlTxt = document.getElementById("lvl-txt");
+    if (lvlTxt) lvlTxt.innerText = String(level);
     
     let scrStart = document.getElementById("scr-start");
     let gameWrap = document.getElementById("game-wrap");
@@ -2069,21 +2160,20 @@ function start(m, startLvl) {
     revalidateWindowsShell();
     active = true;
 
-    revalidateWindowsShell();
-    initGameCanvas();
-    resizeCanvas();
-    initBackgroundGraphics();
-    initPermSpiders();
-    document.getElementById("canvas").classList.remove("blur");
+    prewarmGameWorld();
+    manageMedia('game');
+
+    if (needsLevelCountdown(startLvl)) {
+        levelCountdown = 3.2;
+        lastCountdownLabel = '';
+        showCountdownUI(true);
+        updateCountdownUI();
+    } else {
+        showCountdownUI(false);
+    }
+
     lastT = 0;
     globalAnimationId = requestAnimationFrame(loop);
-    requestAnimationFrame(function () {
-        initGameCanvas();
-        resizeCanvas();
-        syncPlayfieldMetrics();
-        initPermSpiders();
-        initBackgroundGraphics();
-    });
 }
 
 function getSafeSpiderLane(currentSpider) {
@@ -2176,6 +2266,34 @@ function loop(t) {
         ensureCanvasTransform();
         ctx.clearRect(0, 0, W, H);
 
+        if (levelCountdown > 0) {
+            levelCountdown -= dt;
+            updateCountdownUI();
+            showCountdownUI(true);
+            let cdPlayerY = getPlayerY();
+            let parallaxX = ((W/2) - playerX) * 0.08;
+            let bgFxEl = document.getElementById("bg-fx");
+            if (bgFxEl) bgFxEl.style.backgroundPosition = `calc(50% + ${parallaxX}px) 50%`;
+            ctx.globalAlpha = 0.3;
+            clouds.forEach(function (c) {
+                c.x += 8 * dt;
+                if (c.x > W + 50) c.x = -50;
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                drawEmoji('☁️', c.x, c.y, c.s, 'middle');
+            });
+            ctx.globalAlpha = 1;
+            let cdIcon = { 'dog':'🐶', 'cat':'🐱', 'rabbit':'🐰', 'fox':'🦊', 'panda':'🐼', 'unicorn':'🦄', 'cyborg':'🤖' }[mode] || '🐶';
+            drawEmoji(cdIcon, clampDrawX(playerX), cdPlayerY, 70, 'middle');
+            if (levelCountdown <= 0) {
+                levelCountdown = 0;
+                showCountdownUI(false);
+                lastCountdownLabel = '';
+                lastT = t;
+            }
+            return;
+        }
+        showCountdownUI(false);
+
         let playerY = getPlayerY();
         const hitTop = playerY - 78;
         const hitBottom = H - 10;
@@ -2220,7 +2338,7 @@ function loop(t) {
             if (iosMusicCheck <= 0) {
                 iosMusicCheck = 1.8;
                 let bm = document.getElementById("snd-action");
-                if (bm && (bm.paused || (audioCtx && audioCtx.state === "suspended"))) resumeGameAudio();
+                if (!isMenuVideoPlaying() && (bm.paused || (audioCtx && audioCtx.state === "suspended"))) resumeGameAudio();
             }
         }
 
