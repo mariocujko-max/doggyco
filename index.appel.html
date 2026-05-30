@@ -1080,6 +1080,9 @@ var MUSIC_VOL_CAP = 0.14;
 var SFX_VOL_MUL = 1.35;
 var energyLowWarned = false;
 var cyborgWasLocked = true;
+var cyborgUnlockAnnounced = false;
+var cyborg8000CrossedThisRun = false;
+var cyborgScoreLaunch = false;
 var iosMusicCheck = 0;
 var levelCountdown = 0;
 var lastCountdownLabel = '';
@@ -1109,17 +1112,116 @@ function useMusicWebAudio() {
     return !!(window.musicRouted && window.musicGain && audioCtx);
 }
 
+function initCyborgProgress() {
+    if (typeof window.__doggycoHighScoreMem !== 'number') window.__doggycoHighScoreMem = 0;
+    if (typeof window.__cyborg8000EarnedMem !== 'boolean') window.__cyborg8000EarnedMem = false;
+    if (typeof window.__cyborg8000UsedMem !== 'boolean') window.__cyborg8000UsedMem = false;
+    try {
+        let hs = parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0;
+        if (hs > window.__doggycoHighScoreMem) window.__doggycoHighScoreMem = hs;
+        if (localStorage.getItem('doggycoCyborg8000Earned') === '1') window.__cyborg8000EarnedMem = true;
+        if (localStorage.getItem('doggycoCyborg8000Used') === '1') window.__cyborg8000UsedMem = true;
+    } catch (e) {}
+    if (window.__doggycoHighScoreMem >= 8000) window.__cyborg8000EarnedMem = true;
+}
+
+function readLocalHighScore() {
+    initCyborgProgress();
+    return window.__doggycoHighScoreMem || 0;
+}
+
+function writeLocalHighScore(val) {
+    initCyborgProgress();
+    let n = Math.floor(val);
+    if (isNaN(n) || n <= window.__doggycoHighScoreMem) return;
+    window.__doggycoHighScoreMem = n;
+    try { localStorage.setItem('doggycoHighScore', String(n)); } catch (e) {}
+}
+
+function isCyborg8000Used() {
+    initCyborgProgress();
+    return window.__cyborg8000UsedMem;
+}
+
 function hasCyborgHighscore() {
-    return (parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0) >= 8000;
+    return readLocalHighScore() >= 8000;
+}
+
+function hasCyborg8000Earned() {
+    initCyborgProgress();
+    if (window.__cyborg8000EarnedMem) return true;
+    return readLocalHighScore() >= 8000;
+}
+
+function clearCyborg8000Used() {
+    initCyborgProgress();
+    window.__cyborg8000UsedMem = false;
+    try { localStorage.removeItem('doggycoCyborg8000Used'); } catch (e) {}
+}
+
+function grantCyborg8000Earned(pts, preserveUsed) {
+    initCyborgProgress();
+    let s = pts !== undefined ? Math.floor(pts) : (typeof score !== 'undefined' ? Math.floor(score) : 0);
+    if (isNaN(s) || s < 8000) return;
+    let runScore = (typeof score !== 'undefined') ? Math.floor(score) : 0;
+    if (!preserveUsed && runScore >= 8000 && !cyborg8000CrossedThisRun) {
+        cyborg8000CrossedThisRun = true;
+        clearCyborg8000Used();
+    }
+    window.__cyborg8000EarnedMem = true;
+    writeLocalHighScore(s);
+    try { localStorage.setItem('doggycoCyborg8000Earned', '1'); } catch (e) {}
+}
+
+function syncCyborg8000EarnedFromHighscore() {
+    if (readLocalHighScore() >= 8000) grantCyborg8000Earned(readLocalHighScore(), true);
+}
+
+function ensureCyborgUnlockFromProgress() {
+    if (typeof score !== 'undefined' && Math.floor(score) >= 8000) grantCyborg8000Earned(Math.floor(score));
+    syncCyborg8000EarnedFromHighscore();
 }
 
 /** Level 13 über 8000 PTS: nur einmal spielbar (nicht dauerhaft frei) */
 function canPlayCyborgFromScore() {
-    return hasCyborgHighscore() && localStorage.getItem('doggycoCyborg8000Used') !== '1';
+    if (isCyborg8000Used()) return false;
+    return hasCyborg8000Earned();
 }
 
 function markCyborg8000Used() {
+    initCyborgProgress();
+    window.__cyborg8000UsedMem = true;
     try { localStorage.setItem('doggycoCyborg8000Used', '1'); } catch (e) {}
+}
+
+function has8000Points() {
+    if (typeof score !== 'undefined' && Math.floor(score) >= 8000) return true;
+    return readLocalHighScore() >= 8000 || hasCyborg8000Earned();
+}
+
+function getModeForLevel(lvl) {
+    const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'unicorn', 'cyborg'];
+    if (lvl <= 12) return modeOrder[Math.floor((lvl - 1) / 2)];
+    if (lvl <= 14) return 'cyborg';
+    return modeOrder[Math.floor((lvl - 15) / 2) % 7];
+}
+
+function triggerLevelCountdown() {
+    levelCountdown = 3.2;
+    lastCountdownLabel = '';
+    showCountdownUI(true);
+    updateCountdownUI();
+}
+
+function check8000UnlockProgress() {
+    if (missionComplete || !active || Math.floor(score) < 8000) return;
+    grantCyborg8000Earned();
+    if (!cyborgUnlockAnnounced && canPlayCyborgFromScore()) {
+        cyborgUnlockAnnounced = true;
+        addFloat(W / 2, H / 3, "LEVEL 13 UNLOCKED!", "#00ffff", 28);
+        try { sfxStarCollect(); } catch (e) {}
+    }
+    updateCyborgButton();
 }
 
 function isIOSDevice() {
@@ -1161,7 +1263,7 @@ function playGameMusic() {
     stopMenuVideos();
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
     bgMusic.muted = false;
-    try { bgMusic.playbackRate = getMusicRate(Math.min(Math.max(level, 1), 14)); } catch(e) { bgMusic.playbackRate = 1.0; }
+    try { bgMusic.playbackRate = getMusicRate(Math.max(level, 1)); } catch(e) { bgMusic.playbackRate = 1.0; }
     applyMusicVolume();
     if (!bgMusic.paused && bgMusic.currentTime > 0.2) return;
     let p = bgMusic.play();
@@ -1169,7 +1271,7 @@ function playGameMusic() {
 }
 
 function needsLevelCountdown(startLvl) {
-    return startLvl >= 1 && startLvl <= 11;
+    return (startLvl >= 1 && startLvl <= 11) || startLvl === 13;
 }
 
 function showCountdownUI(show) {
@@ -1341,7 +1443,6 @@ function unlockSystem() {
 }
 
 function updateCyborgButton() {
-    let bestHS = parseInt(localStorage.getItem('doggycoHighScore')) || 0;
     let cbBtn = document.getElementById("btn-cyborg");
     let icon = document.getElementById("cyborg-icon");
     if (!cbBtn || !icon) return;
@@ -1363,12 +1464,14 @@ function updateCyborgButton() {
 }
 
 window.onload = function() {
+    initCyborgProgress();
+    ensureCyborgUnlockFromProgress();
     try {
         let savedName = localStorage.getItem("doggycoAgent");
         let pNameEl = document.getElementById("pName");
         if(savedName && pNameEl) { pNameEl.value = savedName; }
         
-        cyborgWasLocked = (parseInt(localStorage.getItem('doggycoHighScore')) || 0) < 8000;
+        cyborgWasLocked = !canPlayCyborgFromScore();
         updateCyborgButton();
     } catch(e) {}
 
@@ -1408,7 +1511,7 @@ window.onload = function() {
 // Secret Code Logic
 function startCyborg() {
     if (canPlayCyborgFromScore()) {
-        markCyborg8000Used();
+        cyborgScoreLaunch = true;
         start('cyborg', 13);
     } else {
         document.getElementById("secret-code-input").value = "";
@@ -1545,7 +1648,8 @@ function goToLevelSelect() {
     dogHasSpoken = true;
     levelCountdown = 0;
     showCountdownUI(false);
-    updateCyborgButton(); // Ensure it unlocks visually if they just hit 8000
+    ensureCyborgUnlockFromProgress();
+    updateCyborgButton();
 }
 
 function clampPlayerToLanes() {
@@ -1648,7 +1752,7 @@ function resumeGameAudio() {
     let bgMusic = document.getElementById("snd-action");
     if (!bgMusic || !active || missionComplete) return;
     applyMusicVolume();
-    try { bgMusic.playbackRate = getMusicRate(Math.min(Math.max(level, 1), 14)); } catch (e) {}
+    try { bgMusic.playbackRate = getMusicRate(Math.max(level, 1)); } catch (e) {}
     if (bgMusic.paused) bgMusic.play().catch(function () {});
 }
 
@@ -2117,20 +2221,32 @@ function getControlsHeight() {
 }
 /** Fortschritt Level 1 → 14 (0 … 1) */
 function getLevelProgress(lvl) {
-    let L = Math.max(1, Math.min(14, lvl));
-    return (L - 1) / 13;
+    let L = Math.max(1, lvl);
+    if (L <= 14) return (L - 1) / 13;
+    return 1 + (L - 14) * 0.07;
 }
-/** Spieltempo: Minimum wie früher Level 2, Maximum wie Level 12, verteilt über 1–14 */
+/** Spieltempo: steigt über Level 14 hinaus weiter */
 function getSpeedMult(lvl) {
     let speedAt2 = 1.35 + ((2 - 1) * (1.15 / 11));
     let speedAt12 = 1.35 + ((12 - 1) * (1.15 / 11));
-    return speedAt2 + getLevelProgress(lvl) * (speedAt12 - speedAt2);
+    let progress = getLevelProgress(lvl);
+    let base = speedAt2 + Math.min(progress, 1) * (speedAt12 - speedAt2);
+    if (lvl > 14) base += (lvl - 14) * 0.04;
+    return base;
 }
-/** Musik-Tempo parallel zum Spiel (Level 2 … 12 → über 1 … 14) */
+/** Musik-Tempo parallel zum Spiel */
 function getMusicRate(lvl) {
     let rateAt2 = 0.92;
     let rateAt12 = 1.08;
-    return rateAt2 + getLevelProgress(lvl) * (rateAt12 - rateAt2);
+    let progress = getLevelProgress(lvl);
+    let base = rateAt2 + Math.min(progress, 1) * (rateAt12 - rateAt2);
+    if (lvl > 14) base = Math.min(1.35, base + (lvl - 14) * 0.02);
+    return base;
+}
+
+function getPtsScaling(lvl, speedMult) {
+    if (lvl <= 14) return speedMult;
+    return speedMult * (1 + (lvl - 14) * 0.1);
 }
 /** UFO / Rakete / Alien: unterhalb HUD (auch Mac/iPhone mit Safe-Area) */
 function getFlyY() {
@@ -2278,6 +2394,10 @@ function start(m, startLvl) {
     iosMusicCheck = 0;
     levelCountdown = 0;
     lastCountdownLabel = '';
+    cyborgUnlockAnnounced = false;
+    cyborg8000CrossedThisRun = false;
+    if (cyborgScoreLaunch && m === 'cyborg' && startLvl === 13) markCyborg8000Used();
+    cyborgScoreLaunch = false;
     entities = []; floaters = []; fireworks = []; fxParticles = []; missionComplete = false;
     
     invincibleTimer = 0; alarmTimer = 0; magnetTimer = 0; magnetSoundTimer = 0;
@@ -2388,8 +2508,10 @@ function showEndScreen(win) {
     manageMedia('vid2');
     try { 
         saveScoreAndRefresh(Math.floor(score)); 
+        grantCyborg8000Earned(Math.floor(score));
         let localHS = parseInt(localStorage.getItem('doggycoHighScore')) || 0;
         if(score > localHS) { localStorage.setItem('doggycoHighScore', Math.floor(score)); }
+        updateCyborgButton();
     } catch(e) {}
 }
 
@@ -2455,9 +2577,11 @@ function loop(t) {
         let playerY = getPlayerY();
         const hitTop = playerY - 78;
         const hitBottom = H - 10;
-        let capLvl = Math.min(Math.max(level, 1), 14);
+        let capLvl = Math.max(level, 1);
         let speedMult = getSpeedMult(capLvl);
-        let ptsScaling = speedMult;
+        let ptsScaling = getPtsScaling(level, speedMult);
+
+        check8000UnlockProgress();
 
         let parallaxX = ((W/2) - playerX) * 0.08;
         let bgFxEl = document.getElementById("bg-fx");
@@ -2522,13 +2646,10 @@ function loop(t) {
             }
 
             if(timeLeft <= 0) {
-                let localHS = parseInt(localStorage.getItem('doggycoHighScore')) || 0;
                 let isGameWon = false;
-                
-                if (level === 14) {
-                    isGameWon = true; 
-                } else if (level === 12 && localHS < 8000) {
-                    isGameWon = true; 
+
+                if (level === 12 && !has8000Points()) {
+                    isGameWon = true;
                 }
 
                 if(isGameWon) {
@@ -2551,18 +2672,22 @@ function loop(t) {
                     level++; timeLeft = 30; energy = Math.min(100, energy + (25 * speedMult));
                     rocketSpawned = false; ufoSpawned = false; magnetSpawned = false; rocket = null; fallingCore = null; fallingAlien = null; fallingHearts = [];
                     
-                    const modeOrder = ['dog', 'cat', 'rabbit', 'fox', 'panda', 'unicorn', 'cyborg'];
-                    let expectedModeIndex = Math.floor((level - 1) / 2) % 7;
-                    let expectedMode = modeOrder[expectedModeIndex];
+                    let expectedMode = getModeForLevel(level);
                     let pop = document.getElementById("lvl-up-popup");
 
                     if(mode !== expectedMode) {
                         mode = expectedMode; updateTheme(mode);
                         for(let j=0; j<4; j++) { setTimeout(() => { let x = Math.random() * W; let y = Math.random() * (H/2) + 50; for(let i=0; i<30; i++) fireworks.push({ x: x, y: y, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, life: 1.5, c: '#00f2ff' }); }, j * 300); }
                         pop.innerHTML = "LEVEL " + level + "<br><span style='font-size:20px; color:#fff'>" + mode.toUpperCase() + " UNLOCKED!</span>";
-                    } else { pop.innerHTML = "NEXT LEVEL " + level; }
+                    } else {
+                        pop.innerHTML = level >= 15
+                            ? "LEVEL " + level + "<br><span style='font-size:18px; color:var(--gold)'>HYPER RUN!</span>"
+                            : "NEXT LEVEL " + level;
+                    }
 
                     pop.classList.add("show"); sfxLevelUp(); setTimeout(() => pop.classList.remove("show"), 2000);
+
+                    if (level === 13) triggerLevelCountdown();
                 }
             }
 
@@ -2862,6 +2987,7 @@ function loop(t) {
 
         if(hp <= 0 && !missionComplete) {
             active = false;
+            if (Math.floor(score) >= 8000) grantCyborg8000Earned();
             sfxHit(); hapticGameOver();
             
             let goOverlay = document.getElementById("game-over-overlay");
