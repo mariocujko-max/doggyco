@@ -1041,6 +1041,8 @@ var SFX_VOL_MUL = 1.35;
 var energyLowWarned = false;
 var cyborgWasLocked = true;
 var cyborgUnlockAnnounced = false;
+var cyborg8000CrossedThisRun = false;
+var cyborgScoreLaunch = false;
 var iosMusicCheck = 0;
 var levelCountdown = 0;
 var lastCountdownLabel = '';
@@ -1070,48 +1072,92 @@ function useMusicWebAudio() {
     return !!(window.musicRouted && window.musicGain && audioCtx);
 }
 
+function initCyborgProgress() {
+    if (typeof window.__doggycoHighScoreMem !== 'number') window.__doggycoHighScoreMem = 0;
+    if (typeof window.__cyborg8000EarnedMem !== 'boolean') window.__cyborg8000EarnedMem = false;
+    if (typeof window.__cyborg8000UsedMem !== 'boolean') window.__cyborg8000UsedMem = false;
+    try {
+        let hs = parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0;
+        if (hs > window.__doggycoHighScoreMem) window.__doggycoHighScoreMem = hs;
+        if (localStorage.getItem('doggycoCyborg8000Earned') === '1') window.__cyborg8000EarnedMem = true;
+        if (localStorage.getItem('doggycoCyborg8000Used') === '1') window.__cyborg8000UsedMem = true;
+    } catch (e) {}
+    if (window.__doggycoHighScoreMem >= 8000) window.__cyborg8000EarnedMem = true;
+}
+
+function readLocalHighScore() {
+    initCyborgProgress();
+    return window.__doggycoHighScoreMem || 0;
+}
+
+function writeLocalHighScore(val) {
+    initCyborgProgress();
+    let n = Math.floor(val);
+    if (isNaN(n) || n <= window.__doggycoHighScoreMem) return;
+    window.__doggycoHighScoreMem = n;
+    try { localStorage.setItem('doggycoHighScore', String(n)); } catch (e) {}
+}
+
+function isCyborg8000Used() {
+    initCyborgProgress();
+    return window.__cyborg8000UsedMem;
+}
+
 function hasCyborgHighscore() {
-    return (parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0) >= 8000;
+    return readLocalHighScore() >= 8000;
 }
 
 function hasCyborg8000Earned() {
-    try {
-        if (localStorage.getItem('doggycoCyborg8000Earned') === '1') return true;
-    } catch (e) {}
-    return hasCyborgHighscore();
+    initCyborgProgress();
+    if (window.__cyborg8000EarnedMem) return true;
+    return readLocalHighScore() >= 8000;
 }
 
-function grantCyborg8000Earned(pts) {
-    let s = pts !== undefined ? Math.floor(pts) : Math.floor(score);
-    if (s < 8000) return;
-    try {
-        localStorage.setItem('doggycoCyborg8000Earned', '1');
-        let localHS = parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0;
-        if (s > localHS) localStorage.setItem('doggycoHighScore', String(s));
-    } catch (e) {}
+function clearCyborg8000Used() {
+    initCyborgProgress();
+    window.__cyborg8000UsedMem = false;
+    try { localStorage.removeItem('doggycoCyborg8000Used'); } catch (e) {}
+}
+
+function grantCyborg8000Earned(pts, preserveUsed) {
+    initCyborgProgress();
+    let s = pts !== undefined ? Math.floor(pts) : (typeof score !== 'undefined' ? Math.floor(score) : 0);
+    if (isNaN(s) || s < 8000) return;
+    let runScore = (typeof score !== 'undefined') ? Math.floor(score) : 0;
+    if (!preserveUsed && runScore >= 8000 && !cyborg8000CrossedThisRun) {
+        cyborg8000CrossedThisRun = true;
+        clearCyborg8000Used();
+    }
+    window.__cyborg8000EarnedMem = true;
+    writeLocalHighScore(s);
+    try { localStorage.setItem('doggycoCyborg8000Earned', '1'); } catch (e) {}
 }
 
 function syncCyborg8000EarnedFromHighscore() {
-    if (hasCyborgHighscore()) grantCyborg8000Earned(parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0);
+    if (readLocalHighScore() >= 8000) grantCyborg8000Earned(readLocalHighScore(), true);
+}
+
+function ensureCyborgUnlockFromProgress() {
+    if (typeof score !== 'undefined' && Math.floor(score) >= 8000) grantCyborg8000Earned(Math.floor(score));
+    syncCyborg8000EarnedFromHighscore();
 }
 
 /** Level 13 über 8000 PTS: nur einmal spielbar (nicht dauerhaft frei) */
 function canPlayCyborgFromScore() {
-    try {
-        return hasCyborg8000Earned() && localStorage.getItem('doggycoCyborg8000Used') !== '1';
-    } catch (e) {
-        return false;
-    }
+    if (isCyborg8000Used()) return false;
+    return hasCyborg8000Earned();
 }
 
 function markCyborg8000Used() {
+    initCyborgProgress();
+    window.__cyborg8000UsedMem = true;
     try { localStorage.setItem('doggycoCyborg8000Used', '1'); } catch (e) {}
 }
 
 /** 8000 PTS erreicht (Rekord, Freischalt-Flag oder aktueller Lauf) */
 function has8000Points() {
-    if (typeof score !== 'undefined' && active && Math.floor(score) >= 8000) return true;
-    return hasCyborg8000Earned();
+    if (typeof score !== 'undefined' && Math.floor(score) >= 8000) return true;
+    return readLocalHighScore() >= 8000 || hasCyborg8000Earned();
 }
 
 function getModeForLevel(lvl) {
@@ -1129,9 +1175,9 @@ function triggerLevelCountdown() {
 }
 
 function check8000UnlockProgress() {
-    if (missionComplete || !active || Math.floor(score) < 8000) return;
+    if (typeof score === 'undefined' || Math.floor(score) < 8000) return;
     grantCyborg8000Earned();
-    if (!cyborgUnlockAnnounced && canPlayCyborgFromScore()) {
+    if (active && !missionComplete && !cyborgUnlockAnnounced && canPlayCyborgFromScore()) {
         cyborgUnlockAnnounced = true;
         addFloat(W / 2, H / 3, "LEVEL 13 UNLOCKED!", "#00ffff", 28);
         try { sfxStarCollect(); } catch (e) {}
@@ -1359,7 +1405,6 @@ function unlockSystem() {
 }
 
 function updateCyborgButton() {
-    let bestHS = parseInt(localStorage.getItem('doggycoHighScore')) || 0;
     let cbBtn = document.getElementById("btn-cyborg");
     let icon = document.getElementById("cyborg-icon");
     if (!cbBtn || !icon) return;
@@ -1381,7 +1426,8 @@ function updateCyborgButton() {
 }
 
 window.onload = function() {
-    syncCyborg8000EarnedFromHighscore();
+    initCyborgProgress();
+    ensureCyborgUnlockFromProgress();
     try {
         let savedName = localStorage.getItem("doggycoAgent");
         let pNameEl = document.getElementById("pName");
@@ -1424,7 +1470,7 @@ window.onload = function() {
 // Secret Code Logic
 function startCyborg() {
     if (canPlayCyborgFromScore()) {
-        markCyborg8000Used();
+        cyborgScoreLaunch = true;
         start('cyborg', 13);
     } else {
         document.getElementById("secret-code-input").value = "";
@@ -1540,7 +1586,8 @@ function goToLevelSelect() {
     dogHasSpoken = true;
     levelCountdown = 0;
     showCountdownUI(false);
-    updateCyborgButton(); // Ensure it unlocks visually if they just hit 8000
+    ensureCyborgUnlockFromProgress();
+    updateCyborgButton();
 }
 
 function clampPlayerToLanes() {
@@ -2230,6 +2277,9 @@ function start(m, startLvl) {
     levelCountdown = 0;
     lastCountdownLabel = '';
     cyborgUnlockAnnounced = false;
+    cyborg8000CrossedThisRun = false;
+    if (cyborgScoreLaunch && m === 'cyborg' && startLvl === 13) markCyborg8000Used();
+    cyborgScoreLaunch = false;
     entities = []; floaters = []; fireworks = []; fxParticles = []; missionComplete = false;
     
     invincibleTimer = 0; alarmTimer = 0; magnetTimer = 0; magnetSoundTimer = 0;
@@ -2342,8 +2392,6 @@ function showEndScreen(win) {
     try { 
         saveScoreAndRefresh(Math.floor(score)); 
         grantCyborg8000Earned(Math.floor(score));
-        let localHS = parseInt(localStorage.getItem('doggycoHighScore')) || 0;
-        if(score > localHS) { localStorage.setItem('doggycoHighScore', Math.floor(score)); }
         updateCyborgButton();
     } catch(e) {}
 }
