@@ -38,6 +38,13 @@
                     location.replace('index.appel.html' + (location.search || '') + (location.hash || ''));
                 }
             }
+            if (window.__isAndroid) {
+                var pathA = (location.pathname || '').toLowerCase();
+                var baseA = pathA.split('/').pop() || '';
+                if ((baseA === '' || baseA === 'index.html') && !/index\.android\.html/i.test(pathA)) {
+                    location.replace('index.android.html' + (location.search || '') + (location.hash || ''));
+                }
+            }
         } catch (e) { window.__pcMs = false; window.__msStoreApp = false; }
     })();
     </script>
