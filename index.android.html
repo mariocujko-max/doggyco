@@ -23,13 +23,7 @@
             document.documentElement.classList.add('platform-android', 'is-android');
             var ua = navigator.userAgent || '';
             var webView = /;\s*wv\)/.test(ua);
-            var standalone = false;
-            try {
-                standalone = window.matchMedia('(display-mode: standalone)').matches
-                    || window.matchMedia('(display-mode: minimal-ui)').matches
-                    || window.matchMedia('(display-mode: fullscreen)').matches;
-            } catch (e) {}
-            if (webView || standalone || window.__PLAY_STORE_APP === true) {
+            if (webView || window.__PLAY_STORE_APP === true) {
                 window.__androidStoreApp = true;
                 document.documentElement.classList.add('android-store-app');
             }
@@ -840,6 +834,27 @@
                 <div id="leaderboard" class="text-sm" style="text-align:center;">Checking Connection...</div>
             </div>
 
+            <!-- STORE_PANEL_START -->
+            <div class="info-panel panel-green browser-only-panel" style="text-align: center;">
+                <h3>📱 GET THE APP</h3>
+                <p class="text-sm" style="margin-bottom: 12px;">Play DOGGYCO MISSION as a real app on your device:</p>
+                <div class="store-badges">
+                    <div class="play-store-btn apple-btn" role="link" tabindex="0" onclick="openExternalLink('https://apps.apple.com/de/app/doggyco-mission/id6763249087')">
+                        <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg">
+                    </div>
+                    <div class="play-store-btn" role="link" tabindex="0" onclick="openExternalLink('https://play.google.com/store/apps/details?id=com.doggycogames.doggyco')">
+                        <img alt="Get it on Google Play" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg">
+                    </div>
+                    <div class="play-store-btn" role="link" tabindex="0" onclick="openExternalLink('https://apps.microsoft.com/detail/9NCRXPDDD1RP?hl=neutral&amp;gl=DE&amp;ocid=pdpshare')">
+                        <img alt="Get it from Microsoft" src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Get_it_from_Microsoft_Badge.svg">
+                    </div>
+                    <p class="text-sm" style="margin-top:8px;color:#aaa;font-size:12px;">
+                        App Store · Google Play · Microsoft Store
+                    </p>
+                </div>
+            </div>
+            <!-- STORE_PANEL_END -->
+
             <div class="info-panel panel-neon">
                 <h3>📖 MISSION DIRECTIVES</h3>
                 <ul class="rules text-sm">
@@ -885,27 +900,6 @@
                     </button>
                 </div>
             </div>
-
-            <!-- STORE_PANEL_START -->
-            <div class="info-panel panel-green browser-only-panel" style="text-align: center;">
-                <h3>📱 GET THE APP</h3>
-                <p class="text-sm" style="margin-bottom: 12px;">Play DOGGYCO MISSION as a real app on your device:</p>
-                <div class="store-badges">
-                    <div class="play-store-btn apple-btn" role="link" tabindex="0" onclick="openExternalLink('https://apps.apple.com/de/app/doggyco-mission/id6763249087')">
-                        <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg">
-                    </div>
-                    <div class="play-store-btn" role="link" tabindex="0" onclick="openExternalLink('https://play.google.com/store/apps/details?id=com.doggycogames.doggyco')">
-                        <img alt="Get it on Google Play" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg">
-                    </div>
-                    <div class="play-store-btn" role="link" tabindex="0" onclick="openExternalLink('https://apps.microsoft.com/detail/9NCRXPDDD1RP?hl=neutral&amp;gl=DE&amp;ocid=pdpshare')">
-                        <img alt="Get it from Microsoft" src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Get_it_from_Microsoft_Badge.svg">
-                    </div>
-                    <p class="text-sm" style="margin-top:8px;color:#aaa;font-size:12px;">
-                        App Store · Google Play · Microsoft Store
-                    </p>
-                </div>
-            </div>
-            <!-- STORE_PANEL_END -->
 
             
 <div class="info-panel panel-silver">
@@ -1132,13 +1126,7 @@ function revalidateAndroidShell() {
         var ua = navigator.userAgent || '';
         if (!/Android/i.test(ua)) return;
         var webView = /;\s*wv\)/.test(ua);
-        var standalone = false;
-        try {
-            standalone = window.matchMedia('(display-mode: standalone)').matches
-                || window.matchMedia('(display-mode: minimal-ui)').matches
-                || window.matchMedia('(display-mode: fullscreen)').matches;
-        } catch (e) {}
-        var inShell = webView || standalone || window.__PLAY_STORE_APP === true;
+        var inShell = webView || window.__PLAY_STORE_APP === true;
         if (inShell) {
             window.__androidStoreApp = true;
             document.documentElement.classList.add('android-store-app');
