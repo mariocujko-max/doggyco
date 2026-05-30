@@ -7,6 +7,7 @@
     <meta name="theme-color" content="#111111">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-orientation" content="portrait">
 
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="msapplication-TileColor" content="#111111">
@@ -77,11 +78,42 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
+            min-height: -webkit-fill-available;
             overflow: hidden;
             position: fixed;
+            inset: 0;
             background: #111; font-family: 'Orbitron', sans-serif; color: #fff;
             display: flex; justify-content: center; align-items: center;
         }
+
+        #landscape-block {
+            position: fixed; inset: 0; z-index: 100000;
+            background: rgba(0, 0, 0, 0.96);
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center;
+            padding: max(env(safe-area-inset-top, 16px), 24px) 24px max(env(safe-area-inset-bottom, 16px), 24px);
+            pointer-events: auto;
+        }
+        #landscape-block.show { display: flex; }
+        .landscape-icon {
+            font-size: 72px; margin-bottom: 18px;
+            animation: landscape-wiggle 1.4s ease-in-out infinite;
+        }
+        @keyframes landscape-wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            35%, 65% { transform: rotate(-90deg); }
+        }
+        .landscape-title {
+            font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 900;
+            color: var(--neon); text-shadow: 0 0 16px var(--neon);
+            letter-spacing: 1px;
+        }
+        .landscape-text {
+            margin-top: 12px; font-size: 14px; line-height: 1.5; color: #bbb; max-width: 280px;
+        }
+        html.is-landscape #phone-container,
+        html.is-landscape #scr-gatekeeper { pointer-events: none; }
         
         ::-webkit-scrollbar { display: none; }
 
@@ -711,6 +743,12 @@
     <div id="level-countdown-num">3</div>
 </div>
 
+<div id="landscape-block" aria-hidden="true">
+    <div class="landscape-icon">📱</div>
+    <div class="landscape-title">NUR HOCHFORMAT</div>
+    <div class="landscape-text">Bitte das iPhone hochkant halten.<br>Querformat ist blockiert.</div>
+</div>
+
 <div id="scr-gatekeeper">
     <h1 style="font-family:'Orbitron'; font-size:40px; color:var(--gold); margin-bottom:40px; text-align:center; text-shadow:0 0 20px var(--gold);">DOGGYCO<br>MISSION</h1>
     <button class="gate-btn" id="gate-start-btn" onclick="unlockSystem()">TAP TO START</button>
@@ -935,22 +973,53 @@ function isPhonePlayLayout() {
     return isMobileDevice() && !usePcSquareLayout();
 }
 
-/** Handy: Vollbild + Hochformat per API — ohne Dreh-Hinweis (verursacht Abstürze) */
+/** iPhone: Querformat erkannt? */
+function isLandscapeBlocked() {
+    return window.innerWidth > window.innerHeight;
+}
+
+function updateLandscapeBlock() {
+    let el = document.getElementById('landscape-block');
+    if (!el) return;
+    let landscape = isLandscapeBlocked();
+    el.classList.toggle('show', landscape);
+    el.setAttribute('aria-hidden', landscape ? 'false' : 'true');
+    document.documentElement.classList.toggle('is-landscape', landscape);
+}
+
+/** iPhone: Vollbild + Hochformat — Querformat per Overlay blockiert */
 function lockMobilePortrait() {
-    if (!isMobileDevice()) return;
+    updateLandscapeBlock();
+    if (isLandscapeBlocked()) return;
     try {
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('portrait').catch(function () {});
+        if (screen.orientation && typeof screen.orientation.lock === 'function') {
+            screen.orientation.lock('portrait-primary').catch(function () {
+                screen.orientation.lock('portrait').catch(function () {});
+            });
         }
     } catch (e) {}
 }
 
 function forceFullscreen() {
     if (window.__pcMs && !window.__msStoreApp) return;
-    if (!isMobileDevice()) return;
-    let elem = document.documentElement;
-    let req = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.webkitEnterFullscreen || elem.msRequestFullscreen;
-    if (req) { req.call(elem).catch(function () {}); }
+    try {
+        let elem = document.documentElement;
+        let req = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.webkitEnterFullscreen || elem.msRequestFullscreen;
+        if (req) req.call(elem).catch(function () {});
+    } catch (e) {}
+    if (window.__isIOS) {
+        try {
+            document.documentElement.style.height = '100%';
+            document.body.style.minHeight = window.innerHeight + 'px';
+            window.scrollTo(0, 0);
+        } catch (e2) {}
+    }
+}
+
+function enterIosPlayMode() {
+    forceFullscreen();
+    lockMobilePortrait();
+    updateLandscapeBlock();
 }
 
 function stopGameMusic() {
@@ -1261,8 +1330,7 @@ function unlockSystem() {
     let gate = document.getElementById("scr-gatekeeper");
     let startScr = document.getElementById("scr-start");
     
-    lockMobilePortrait();
-    forceFullscreen();
+    enterIosPlayMode();
 
     gate.style.opacity = "0";
     setTimeout(() => { 
@@ -1449,7 +1517,7 @@ function checkSecretCode() {
 }
 
 function goToLevelSelect() {
-    forceFullscreen(); // Sichert das Vollbild ab
+    enterIosPlayMode(); // Sichert das Vollbild ab
     document.documentElement.style.setProperty('--neon', '#00f2ff');
 
     document.getElementById("scr-end").style.display = "none";
@@ -1489,7 +1557,7 @@ function clampPlayerToLanes() {
 }
 
 function move(dir) {
-    if(!active || levelCountdown > 0) return;
+    if(!active || levelCountdown > 0 || isLandscapeBlocked()) return;
     currLane = Math.max(0, Math.min(4, currLane + dir));
     targetX = snapToLane(currLane);
 }
@@ -1505,7 +1573,7 @@ function dustParticleY() {
 }
 
 function triggerMove(dir, btnId) {
-    if(!active || missionComplete || levelCountdown > 0) return;
+    if(!active || missionComplete || levelCountdown > 0 || isLandscapeBlocked()) return;
     try { if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); } } catch(e) {}
     hapticMove();
     sfxMove();
@@ -2187,7 +2255,7 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
-    forceFullscreen(); // Sichert das Vollbild beim Spielstart ab
+    enterIosPlayMode(); // Sichert das Vollbild beim Spielstart ab
     let nameInput = document.getElementById("pName");
     let pName = nameInput.value.trim().toUpperCase();
     if(!pName) {
@@ -2233,8 +2301,7 @@ function start(m, startLvl) {
     }
 
     document.getElementById("phone-container").classList.add("is-playing");
-    lockMobilePortrait();
-    revalidateWindowsShell();
+    enterIosPlayMode();
     active = true;
 
     prewarmGameWorld();
@@ -2328,6 +2395,11 @@ function showEndScreen(win) {
 
 function loop(t) {
     if(!active) return;
+    if (isLandscapeBlocked()) {
+        updateLandscapeBlock();
+        globalAnimationId = requestAnimationFrame(loop);
+        return;
+    }
     if (!ctx) { initGameCanvas(); if (!ctx) return; }
     globalAnimationId = requestAnimationFrame(loop);
     
@@ -2835,10 +2907,26 @@ function fixViewportHeight() {
 window.addEventListener('resize', fixViewportHeight);
 window.addEventListener('orientationchange', function () {
     fixViewportHeight();
-    lockMobilePortrait();
-    if (active) resizeCanvas();
+    enterIosPlayMode();
+    if (active) resizeCanvasSoon();
 });
 fixViewportHeight();
+updateLandscapeBlock();
+
+(function setupIosImmersive() {
+    if (!window.__isIOS) return;
+    var lastImmersive = 0;
+    function onGesture() {
+        var now = Date.now();
+        if (now - lastImmersive < 900) return;
+        lastImmersive = now;
+        enterIosPlayMode();
+    }
+    document.addEventListener('touchstart', onGesture, { capture: true, passive: true });
+    document.addEventListener('click', onGesture, { capture: true, passive: true });
+    window.addEventListener('pageshow', enterIosPlayMode);
+    window.addEventListener('focus', enterIosPlayMode);
+})();
 
 function copyText(btn, text) {
     navigator.clipboard.writeText(text).catch(e=>{});
