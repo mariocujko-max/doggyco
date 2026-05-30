@@ -1040,6 +1040,7 @@ var MUSIC_VOL_CAP = 0.14;
 var SFX_VOL_MUL = 1.35;
 var energyLowWarned = false;
 var cyborgWasLocked = true;
+var cyborgUnlockAnnounced = false;
 var iosMusicCheck = 0;
 var levelCountdown = 0;
 var lastCountdownLabel = '';
@@ -1073,19 +1074,44 @@ function hasCyborgHighscore() {
     return (parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0) >= 8000;
 }
 
+function hasCyborg8000Earned() {
+    try {
+        if (localStorage.getItem('doggycoCyborg8000Earned') === '1') return true;
+    } catch (e) {}
+    return hasCyborgHighscore();
+}
+
+function grantCyborg8000Earned(pts) {
+    let s = pts !== undefined ? Math.floor(pts) : Math.floor(score);
+    if (s < 8000) return;
+    try {
+        localStorage.setItem('doggycoCyborg8000Earned', '1');
+        let localHS = parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0;
+        if (s > localHS) localStorage.setItem('doggycoHighScore', String(s));
+    } catch (e) {}
+}
+
+function syncCyborg8000EarnedFromHighscore() {
+    if (hasCyborgHighscore()) grantCyborg8000Earned(parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0);
+}
+
 /** Level 13 über 8000 PTS: nur einmal spielbar (nicht dauerhaft frei) */
 function canPlayCyborgFromScore() {
-    return hasCyborgHighscore() && localStorage.getItem('doggycoCyborg8000Used') !== '1';
+    try {
+        return hasCyborg8000Earned() && localStorage.getItem('doggycoCyborg8000Used') !== '1';
+    } catch (e) {
+        return false;
+    }
 }
 
 function markCyborg8000Used() {
     try { localStorage.setItem('doggycoCyborg8000Used', '1'); } catch (e) {}
 }
 
-/** 8000 PTS erreicht (Rekord oder aktueller Lauf) */
+/** 8000 PTS erreicht (Rekord, Freischalt-Flag oder aktueller Lauf) */
 function has8000Points() {
-    let localHS = parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0;
-    return localHS >= 8000 || Math.floor(score) >= 8000;
+    if (typeof score !== 'undefined' && active && Math.floor(score) >= 8000) return true;
+    return hasCyborg8000Earned();
 }
 
 function getModeForLevel(lvl) {
@@ -1103,13 +1129,13 @@ function triggerLevelCountdown() {
 
 function check8000UnlockProgress() {
     if (missionComplete || !active || Math.floor(score) < 8000) return;
-    try {
-        let localHS = parseInt(localStorage.getItem('doggycoHighScore'), 10) || 0;
-        if (Math.floor(score) > localHS) {
-            localStorage.setItem('doggycoHighScore', Math.floor(score));
-        }
-        if (cyborgWasLocked && hasCyborgHighscore()) updateCyborgButton();
-    } catch (e) {}
+    grantCyborg8000Earned();
+    if (!cyborgUnlockAnnounced && canPlayCyborgFromScore()) {
+        cyborgUnlockAnnounced = true;
+        addFloat(W / 2, H / 3, "LEVEL 13 UNLOCKED!", "#00ffff", 28);
+        try { sfxStarCollect(); } catch (e) {}
+    }
+    updateCyborgButton();
 }
 
 function isIOSDevice() {
@@ -1354,12 +1380,13 @@ function updateCyborgButton() {
 }
 
 window.onload = function() {
+    syncCyborg8000EarnedFromHighscore();
     try {
         let savedName = localStorage.getItem("doggycoAgent");
         let pNameEl = document.getElementById("pName");
         if(savedName && pNameEl) { pNameEl.value = savedName; }
         
-        cyborgWasLocked = (parseInt(localStorage.getItem('doggycoHighScore')) || 0) < 8000;
+        cyborgWasLocked = !canPlayCyborgFromScore();
         updateCyborgButton();
     } catch(e) {}
 
@@ -2201,6 +2228,7 @@ function start(m, startLvl) {
     iosMusicCheck = 0;
     levelCountdown = 0;
     lastCountdownLabel = '';
+    cyborgUnlockAnnounced = false;
     entities = []; floaters = []; fireworks = []; fxParticles = []; missionComplete = false;
     
     invincibleTimer = 0; alarmTimer = 0; magnetTimer = 0; magnetSoundTimer = 0;
@@ -2312,6 +2340,7 @@ function showEndScreen(win) {
     manageMedia('vid2');
     try { 
         saveScoreAndRefresh(Math.floor(score)); 
+        grantCyborg8000Earned(Math.floor(score));
         let localHS = parseInt(localStorage.getItem('doggycoHighScore')) || 0;
         if(score > localHS) { localStorage.setItem('doggycoHighScore', Math.floor(score)); }
         updateCyborgButton();
@@ -2774,6 +2803,7 @@ function loop(t) {
 
         if(hp <= 0 && !missionComplete) {
             active = false;
+            if (Math.floor(score) >= 8000) grantCyborg8000Earned();
             sfxHit(); hapticGameOver();
             
             let goOverlay = document.getElementById("game-over-overlay");
