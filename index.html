@@ -31,6 +31,13 @@
             if (window.__isIOS) document.documentElement.classList.add('is-ios');
             if (window.__isAndroid) document.documentElement.classList.add('is-android');
             if (msStore) document.documentElement.classList.add('ms-store-app');
+            if (window.__isIOS) {
+                var path = (location.pathname || '').toLowerCase();
+                var base = path.split('/').pop() || '';
+                if ((base === '' || base === 'index.html') && !/index\.appel\.html/i.test(path)) {
+                    location.replace('index.appel.html' + (location.search || '') + (location.hash || ''));
+                }
+            }
         } catch (e) { window.__pcMs = false; window.__msStoreApp = false; }
     })();
     </script>
@@ -968,6 +975,18 @@ function forceFullscreen() {
     if (req) { req.call(elem).catch(function () {}); }
 }
 
+function stopGameMusic() {
+    let bgMusic = document.getElementById("snd-action");
+    if (!bgMusic) return;
+    try {
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+    } catch (e) {}
+    if (useMusicWebAudio() && window.musicGain) {
+        try { window.musicGain.gain.value = 0; } catch (e) {}
+    }
+}
+
 function stopMenuVideos() {
     if (videoAnimationId) { cancelAnimationFrame(videoAnimationId); videoAnimationId = null; }
     if (videoAnimationId2) { cancelAnimationFrame(videoAnimationId2); videoAnimationId2 = null; }
@@ -999,7 +1018,7 @@ function manageMedia(action) {
         return;
     }
 
-    if (bgMusic) { bgMusic.pause(); bgMusic.currentTime = 0; }
+    stopGameMusic();
     stopMenuVideos();
 
     if (action === 'vid1') {
@@ -1091,7 +1110,7 @@ function revalidateWindowsShell() {
 
 function playGameMusic() {
     let bgMusic = document.getElementById("snd-action");
-    if (!bgMusic) return;
+    if (!bgMusic || isMenuVideoPlaying()) return;
     stopMenuVideos();
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
     bgMusic.muted = false;
@@ -1238,28 +1257,27 @@ function initAudioContext() {
 function unlockSystem() {
     initAudioContext();
     prewarmGameAssets();
-    
+
     let bgMusic = document.getElementById("snd-action");
-    let vid1 = document.getElementById("dog-video");
-    let vid2 = document.getElementById("dog-video2");
-    
     if (bgMusic) {
-        bgMusic.pause();
-        bgMusic.currentTime = 0;
+        stopGameMusic();
         bgMusic.muted = true;
         let p1 = bgMusic.play();
-        if (p1) p1.then(function () { bgMusic.pause(); bgMusic.muted = false; bgMusic.currentTime = 0; }).catch(function () {});
+        if (p1) {
+            p1.then(function () {
+                stopGameMusic();
+                bgMusic.muted = false;
+            }).catch(function () { bgMusic.muted = false; });
+        } else {
+            bgMusic.muted = false;
+        }
     }
-    stopMenuVideos();
-    
-    if (!dogHasSpoken && vid1) {
+
+    if (!dogHasSpoken) {
         dogHasSpoken = true;
-        if (bgMusic) bgMusic.pause();
-        vid1.muted = false;
-        vid1.currentTime = 0;
-        let p3 = vid1.play();
-        if (p3) p3.catch(function () {});
-        processVideoFrame();
+        manageMedia('vid1');
+    } else {
+        stopMenuVideos();
     }
     
     let gate = document.getElementById("scr-gatekeeper");
@@ -1453,8 +1471,8 @@ function goToLevelSelect() {
     resizeCanvas();
     document.getElementById("scr-start").scrollTop = 0;
     
-    manageMedia('none');
-    dogHasSpoken = false;
+    manageMedia('vid1');
+    dogHasSpoken = true;
     levelCountdown = 0;
     showCountdownUI(false);
     updateCyborgButton(); // Ensure it unlocks visually if they just hit 8000
@@ -1556,6 +1574,7 @@ function hapticGameOver() { triggerVibration([200, 60, 200, 60, 280]); }
 
 function resumeGameAudio() {
     try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
+    if (isMenuVideoPlaying()) return;
     let bgMusic = document.getElementById("snd-action");
     if (!bgMusic || !active || missionComplete) return;
     applyMusicVolume();
