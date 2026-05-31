@@ -129,12 +129,12 @@
         #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; touch-action: none; transition: filter 0.3s; display: block; }
         #canvas.blur { filter: blur(5px); }
 
-        #hud { position: absolute; top: 50px; width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; transition: opacity 0.3s; }
+        #hud { position: absolute; top: 25px; width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; transition: opacity 0.3s; }
         
-        #mission-title { text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); animation: pulseNeon 1.5s infinite alternate; }
+        #mission-title { text-align: center; font-size: 42px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 18px; color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); animation: pulseNeon 1.5s infinite alternate; }
         @keyframes pulseNeon { 0% { opacity: 0.7; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1.02); } }
 
-        #energy-box { width: 85%; height: 22px; margin: 0 auto 10px; background: rgba(0,0,0,0.8); border-radius: 12px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); transition: border-color 0.2s; }
+        #energy-box { width: 85%; height: 33px; margin: 0 auto 15px; background: rgba(0,0,0,0.8); border-radius: 12px; border: 2px solid #fff; overflow: hidden; box-shadow: 0 0 10px rgba(255,255,255,0.3); transition: border-color 0.2s; }
         #energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--red), var(--gold), var(--green)); transition: width 0.2s linear; }
         @keyframes energyWarn {
             0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(255,49,49,0.5); }
@@ -148,8 +148,22 @@
             background: linear-gradient(90deg, #ff0000, var(--red), var(--gold));
         }
         
-        #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); position: relative; }
-        .stat { font-weight: 900; font-size: 16px; text-shadow: 1px 1px 3px #000; }
+        #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 12px 22px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); position: relative; }
+        .stat { font-weight: 900; font-size: 24px; text-shadow: 1px 1px 3px #000; }
+        #hp-txt { font-size: 28px; letter-spacing: 2px; display: inline-block; transform-origin: center center; }
+        @keyframes hpLossBurst {
+            0% { transform: scale(1); filter: brightness(1); }
+            20% { transform: scale(1.85) rotate(-6deg); filter: brightness(1.6); color: #ff3131; }
+            45% { transform: scale(0.65) rotate(8deg); }
+            100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+        }
+        @keyframes hpGainPop {
+            0% { transform: scale(1); filter: brightness(1); }
+            35% { transform: scale(1.55); filter: brightness(1.45) drop-shadow(0 0 12px #00ff88); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+        #hp-txt.hp-txt-loss { animation: hpLossBurst 0.58s ease-out; }
+        #hp-txt.hp-txt-gain { animation: hpGainPop 0.65s ease-out; }
         @keyframes timeWarn {
             0%, 100% { color: var(--red); opacity: 1; }
             50% { color: #ff8888; opacity: 0.5; }
@@ -768,7 +782,7 @@
         <div id="hud">
             <div id="mission-title">DOG MISSION</div>
             <div id="energy-box"><div id="energy-fill"></div></div>
-            <div id="stats-bar"><div class="stat" style="background:var(--neon); color:#000; padding:2px 8px; border-radius:5px; font-weight:900; font-size:16px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
+            <div id="stats-bar"><div class="stat" style="background:var(--neon); color:#000; padding:3px 12px; border-radius:5px; font-weight:900; font-size:24px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
                 <div id="hp-txt" class="stat">❤️❤️❤️</div>
                 <div id="score-txt" class="stat" style="color:var(--gold)">0 PTS</div>
                 <div id="time-txt" class="stat" style="color:var(--neon)">30s</div>
@@ -837,19 +851,13 @@
             <!-- STORE_PANEL_START -->
             <div class="info-panel panel-green browser-only-panel" style="text-align: center;">
                 <h3>📱 GET THE APP</h3>
-                <p class="text-sm" style="margin-bottom: 12px;">Play DOGGYCO MISSION as a real app on your device:</p>
+                <p class="text-sm" style="margin-bottom: 12px;">Play DOGGYCO MISSION on Android:</p>
                 <div class="store-badges">
-                    <div class="play-store-btn apple-btn" role="link" tabindex="0" onclick="openExternalLink('https://apps.apple.com/de/app/doggyco-mission/id6763249087')">
-                        <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg">
-                    </div>
                     <div class="play-store-btn" role="link" tabindex="0" onclick="openExternalLink('https://play.google.com/store/apps/details?id=com.doggycogames.doggyco')">
                         <img alt="Get it on Google Play" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg">
                     </div>
-                    <div class="play-store-btn" role="link" tabindex="0" onclick="openExternalLink('https://apps.microsoft.com/detail/9NCRXPDDD1RP?hl=neutral&amp;gl=DE&amp;ocid=pdpshare')">
-                        <img alt="Get it from Microsoft" src="https://upload.wikimedia.org/wikipedia/commons/f/f7/Get_it_from_Microsoft_Badge.svg">
-                    </div>
                     <p class="text-sm" style="margin-top:8px;color:#aaa;font-size:12px;">
-                        App Store · Google Play · Microsoft Store
+                        Google Play
                     </p>
                 </div>
             </div>
@@ -1856,6 +1864,52 @@ function sfxMagnet() {
 function sfxCollect() { playTone(600, 'sine', 0.1, 0.4); setTimeout(() => playTone(1200, 'sine', 0.15, 0.4), 80); }
 function sfxStarCollect() { [800, 1000, 1200].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.1, 0.4), i*50)); }
 function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.6); setTimeout(() => playTone(100, 'square', 0.4, 0.6), 100); }
+function sfxHeartLost() {
+    playTone(85, 'sawtooth', 0.18, 0.85 * sfxGainMul());
+    setTimeout(() => playTone(55, 'square', 0.42, 0.9 * sfxGainMul()), 70);
+    setTimeout(() => playTone(140, 'triangle', 0.12, 0.45 * sfxGainMul()), 180);
+}
+function sfxHeartGain() {
+    [523, 659, 784, 988].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.2, 0.62 * sfxGainMul()), i * 75));
+}
+function hapticHeartGain() { triggerVibration([35, 50, 80]); }
+function spawnHeartBurst(x, y, isGain) {
+    let cols = isGain ? ['#00ff88', '#ff69b4', '#ffd700', '#ffffff'] : ['#ff3131', '#ff0000', '#cc0000', '#ff6666'];
+    for (let i = 0; i < 26; i++) {
+        fireworks.push({
+            x: x + (Math.random() - 0.5) * 36,
+            y: y + (Math.random() - 0.5) * 28,
+            vx: (Math.random() - 0.5) * (isGain ? 20 : 28),
+            vy: (Math.random() - 0.5) * (isGain ? 20 : 28) - (isGain ? 10 : 6),
+            life: 0.75 + Math.random() * 0.65,
+            c: cols[Math.floor(Math.random() * cols.length)]
+        });
+    }
+}
+function refreshHpHud(prevHp, fxX, fxY) {
+    let el = document.getElementById("hp-txt");
+    if (el) el.innerText = "❤️".repeat(Math.max(0, hp));
+    let px = fxX !== undefined ? fxX : playerX;
+    let py = fxY !== undefined ? fxY : (typeof getPlayerY === 'function' ? getPlayerY() : H / 2);
+    if (hp < prevHp) {
+        sfxHeartLost();
+        hapticDamage();
+        spawnHeartBurst(px, py, false);
+        if (el) { el.classList.remove("hp-txt-gain"); void el.offsetWidth; el.classList.add("hp-txt-loss"); setTimeout(function () { el.classList.remove("hp-txt-loss"); }, 650); }
+    } else if (hp > prevHp) {
+        sfxHeartGain();
+        hapticHeartGain();
+        spawnHeartBurst(px, py, true);
+        if (el) { el.classList.remove("hp-txt-loss"); void el.offsetWidth; el.classList.add("hp-txt-gain"); setTimeout(function () { el.classList.remove("hp-txt-gain"); }, 700); }
+    }
+}
+function changeHp(delta, fxX, fxY) {
+    let prev = hp;
+    hp = Math.max(0, Math.min(3, hp + delta));
+    if (hp === prev) return false;
+    refreshHpHud(prev, fxX, fxY);
+    return true;
+}
 function sfxLevelUp() { [400, 500, 600, 800].forEach((f, i) => setTimeout(() => playTone(f, 'square', 0.2, 0.4), i*100)); }
 function sfxLowEnergy() {
     playTone(240, 'sine', 0.12, 0.32);
@@ -2602,8 +2656,9 @@ function loop(t) {
             }
 
             if(energy <= 0 && !missionComplete) {
-                hp--;
-                if(hp > 0) { energy = 100; charShake = 20; sfxHit(); hapticDamage(); addFloat(playerX, H/2, "-1 ❤️", "#ff3131", 35); }
+                if (changeHp(-1, playerX, getPlayerY())) {
+                    if (hp > 0) { energy = 100; charShake = 20; addFloat(playerX, getPlayerY(), "-1 ❤️", "#ff3131", 50); }
+                }
             }
         }
 
@@ -2717,7 +2772,9 @@ function loop(t) {
             drawEmoji('❤️', s.x, s.y, 40, 'middle');
             if(!missionComplete && Math.abs(s.x - playerX) < colDist && s.y > hitTop && s.y < hitBottom) {
                 if (hp < 3) {
-                    hp++; charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 35);
+                    changeHp(1, s.x + 40, s.y);
+                    charJump = 15;
+                    addFloat(s.x + 40, s.y, "+1 ❤️", "#00ff88", 46);
                 } else {
                     let pG = Math.floor(50 * ptsScaling); score += pG; energy = Math.min(100, energy + 5);
                     charJump = 15; sfxStarCollect(); addFloat(s.x + 40, s.y, "+" + pG, "#00ff88", 30);
@@ -2820,7 +2877,7 @@ function loop(t) {
             if(!missionComplete && Math.abs(e.x - playerX) < colDist && e.y > hitTop && e.y < hitBottom) {
                 if(e.bad) {
                     if (invincibleTimer > 0) { addFloat(e.x + 40, e.y, "BLOCKED!", "#00ff88", 20); }
-                    else { hp--; charShake = 20; sfxHit(); hapticDamage(); addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 35); }
+                    else { changeHp(-1, e.x + 40, e.y); charShake = 20; addFloat(e.x + 40, e.y, "-1 ❤️", "#ff3131", 50); }
                 } else {
                     let pG = Math.floor(e.pts * ptsScaling); score += pG; energy = Math.min(100, energy + 5); charJump = 15; sfxCollect(); addFloat(e.x + 40, e.y, "+"+pG, "#00ff88", 28);
                 }
