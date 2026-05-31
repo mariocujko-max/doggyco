@@ -15,36 +15,44 @@
     (function () {
         try {
             var ua = navigator.userAgent || '';
-            var win = /Windows/i.test(ua);
-            var proto = window.location && window.location.protocol;
+            var q = location.search || '';
+            var h = location.hash || '';
+            var path = (location.pathname || '').toLowerCase();
+            var file = path.split('/').pop() || 'index.html';
+            var isIOS = /iPhone|iPad|iPod/i.test(ua) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            var isAndroid = /Android/i.test(ua);
             var m = window.matchMedia;
             var fineHover = m && m('(hover: hover) and (pointer: fine)').matches;
             var coarse = m && m('(pointer: coarse)').matches;
+            var isWin = /Windows/i.test(ua);
+            var proto = window.location && window.location.protocol;
             var msStore = proto === 'ms-appx:' || proto === 'ms-appx-web:' ||
                 !!(window.chrome && window.chrome.webview) ||
-                /WebView2|MSAppHost|WebView/i.test(ua);
+                /WebView2|MSAppHost/i.test(ua);
+            var isPcDesktop = !!(isWin && fineHover && !coarse && !msStore && !isIOS && !isAndroid);
+
+            if (isIOS && !/index\.appel\.html$/i.test(file)) {
+                location.replace('index.appel.html' + q + h);
+                return;
+            }
+            if (isAndroid && !/index\.android\.html$/i.test(file)) {
+                location.replace('index.android.html' + q + h);
+                return;
+            }
+            if (isPcDesktop && /index\.(appel|android)\.html$/i.test(file)) {
+                location.replace('index.html' + q + h);
+                return;
+            }
+
             window.__msStoreApp = msStore;
-            window.__isIOS = /iPhone|iPad|iPod/i.test(ua);
-            window.__isAndroid = /Android/i.test(ua);
-            window.__pcMs = !!(win && fineHover && !coarse && !msStore);
+            window.__isIOS = isIOS;
+            window.__isAndroid = isAndroid;
+            window.__pcMs = isPcDesktop;
             document.documentElement.classList.toggle('pc-ms', window.__pcMs);
             if (window.__isIOS) document.documentElement.classList.add('is-ios');
             if (window.__isAndroid) document.documentElement.classList.add('is-android');
             if (msStore) document.documentElement.classList.add('ms-store-app');
-            if (window.__isIOS) {
-                var path = (location.pathname || '').toLowerCase();
-                var base = path.split('/').pop() || '';
-                if ((base === '' || base === 'index.html') && !/index\.appel\.html/i.test(path)) {
-                    location.replace('index.appel.html' + (location.search || '') + (location.hash || ''));
-                }
-            }
-            if (window.__isAndroid) {
-                var pathA = (location.pathname || '').toLowerCase();
-                var baseA = pathA.split('/').pop() || '';
-                if ((baseA === '' || baseA === 'index.html') && !/index\.android\.html/i.test(pathA)) {
-                    location.replace('index.android.html' + (location.search || '') + (location.hash || ''));
-                }
-            }
         } catch (e) { window.__pcMs = false; window.__msStoreApp = false; }
     })();
     </script>
@@ -765,7 +773,7 @@
 
     <footer>
         <p>
-            <a id="privacy-back-link" href="index.appel.html">← Zurück zum Spiel</a>
+            <a id="privacy-back-link" href="index.html">← Zurück zum Spiel</a>
             · <a href="index.html">Web-Version</a>
             · <a href="https://www.doggyco.de/">doggyco.de</a>
         </p>
@@ -1283,7 +1291,7 @@ function revalidateWindowsShell() {
         var proto = window.location && window.location.protocol;
         var inShell = proto === 'ms-appx:' || proto === 'ms-appx-web:' ||
             !!(window.chrome && window.chrome.webview) ||
-            /WebView2|MSAppHost|WebView/i.test(ua);
+            /WebView2|MSAppHost/i.test(ua);
         if (inShell) {
             window.__msStoreApp = true;
             window.__pcMs = false;
