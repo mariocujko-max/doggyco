@@ -184,8 +184,52 @@
 
         #controls { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 10px; padding-bottom: max(env(safe-area-inset-bottom, 5px), 5px); z-index: 300; transition: opacity 0.3s; background: transparent; }
         .arrow { width: 120px; height: 100px; background: transparent; border: none; color: rgba(255, 255, 255, 0.5); font-size: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none; }
-        @media (max-width: 420px), (pointer: coarse) {
+        @media (pointer: coarse) {
             .arrow { min-width: 128px; min-height: 108px; font-size: 64px; }
+            html:not(.pc-ms) #hud {
+                top: max(env(safe-area-inset-top, 0px), 6px);
+                padding-top: 2px;
+            }
+            html:not(.pc-ms) #mission-title {
+                font-size: clamp(15px, 4.2vw, 21px);
+                letter-spacing: 0.5px;
+                margin-bottom: 6px;
+                line-height: 1.05;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                padding: 0 6px;
+            }
+            html:not(.pc-ms) #energy-box {
+                width: 92%;
+                height: 20px;
+                margin: 0 auto 6px;
+            }
+            html:not(.pc-ms) #stats-bar {
+                flex-wrap: nowrap;
+                gap: 4px;
+                width: 96%;
+                padding: 5px 8px;
+            }
+            html:not(.pc-ms) #stats-bar .stat {
+                font-size: 13px !important;
+                padding: 1px 5px !important;
+                white-space: nowrap;
+                flex-shrink: 0;
+                line-height: 1.1;
+            }
+            html:not(.pc-ms) #hp-txt {
+                font-size: 14px;
+                letter-spacing: 0;
+            }
+            html:not(.pc-ms) #score-txt {
+                font-size: 11px;
+                flex-shrink: 1;
+                min-width: 0;
+            }
+            html:not(.pc-ms) #time-txt {
+                font-size: 13px;
+            }
         }
         .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); }
 
