@@ -551,7 +551,48 @@
             border: none !important;
         }
         html.platform-android #hud {
-            top: max(env(safe-area-inset-top, 8px), 8px);
+            top: max(env(safe-area-inset-top, 0px), 6px);
+            padding-top: 2px;
+        }
+        html.platform-android #mission-title {
+            font-size: clamp(15px, 4.2vw, 21px);
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            line-height: 1.05;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 6px;
+        }
+        html.platform-android #energy-box {
+            width: 92%;
+            height: 20px;
+            margin: 0 auto 6px;
+        }
+        html.platform-android #stats-bar {
+            flex-wrap: nowrap;
+            gap: 4px;
+            width: 96%;
+            padding: 5px 8px;
+        }
+        html.platform-android #stats-bar .stat {
+            font-size: 13px !important;
+            padding: 1px 5px !important;
+            white-space: nowrap;
+            flex-shrink: 0;
+            line-height: 1.1;
+        }
+        html.platform-android #hp-txt {
+            font-size: 14px;
+            letter-spacing: 0;
+        }
+        html.platform-android #score-txt {
+            font-size: 11px;
+            flex-shrink: 1;
+            min-width: 0;
+        }
+        html.platform-android #time-txt {
+            font-size: 13px;
         }
         html.platform-android #controls {
             padding-bottom: max(env(safe-area-inset-bottom, 12px), 12px);
