@@ -168,9 +168,108 @@
             background: linear-gradient(90deg, #ff0000, var(--red), var(--gold));
         }
         
-        #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 12px 22px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); position: relative; }
-        .stat { font-weight: 900; font-size: 24px; text-shadow: 1px 1px 3px #000; }
-        #hp-txt { font-size: 28px; letter-spacing: 2px; display: inline-block; transform-origin: center center; }
+        #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 8px 14px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); position: relative; gap: 6px; }
+        .stat { font-weight: 900; font-size: 16px; text-shadow: 1px 1px 3px #000; }
+        .hud-stat { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .hud-lvl-wrap { min-width: 36px; }
+        .hud-pyramid {
+            position: relative;
+            width: 36px;
+            height: 32px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 3px;
+            background: linear-gradient(165deg, rgba(0,242,255,0.45) 0%, rgba(0,90,110,0.92) 55%, rgba(0,40,55,0.95) 100%);
+            clip-path: polygon(50% 4%, 92% 100%, 8% 100%);
+            filter: drop-shadow(0 0 7px var(--neon));
+            box-shadow: inset 0 -2px 0 rgba(0,242,255,0.35);
+        }
+        #lvl-txt {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 15px;
+            line-height: 1;
+            color: #001018;
+            text-shadow: 0 0 6px rgba(0,242,255,0.9);
+        }
+        .hud-score-wrap { flex: 1; min-width: 0; justify-content: center; }
+        .hud-odometer {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            color: var(--gold);
+            filter: drop-shadow(0 0 6px rgba(255,215,0,0.45));
+        }
+        .odo-col {
+            height: 1.15em;
+            width: 0.62em;
+            overflow: hidden;
+            border-radius: 2px;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,215,0,0.25);
+        }
+        .odo-strip {
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.4s cubic-bezier(0.34, 1.25, 0.64, 1);
+            will-change: transform;
+        }
+        .odo-strip span {
+            height: 1.15em;
+            line-height: 1.15em;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 16px;
+            color: var(--gold);
+        }
+        .hud-time-wrap { min-width: 44px; }
+        .hud-clock {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hud-clock-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        .hud-clock-bg {
+            fill: none;
+            stroke: rgba(0,0,0,0.65);
+            stroke-width: 5;
+        }
+        .hud-clock-fill {
+            fill: none;
+            stroke: var(--neon);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-dasharray: 113.097;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.12s linear, stroke 0.25s;
+            filter: drop-shadow(0 0 4px var(--neon));
+        }
+        .hud-clock-num {
+            position: relative;
+            z-index: 2;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 13px;
+            color: #fff;
+            text-shadow: 0 0 8px var(--neon), 1px 1px 2px #000;
+            line-height: 1;
+        }
+        .hud-clock.time-low .hud-clock-fill { stroke: var(--red); filter: drop-shadow(0 0 6px var(--red)); }
+        .hud-clock.time-low .hud-clock-num { color: #ffe0e0; text-shadow: 0 0 8px var(--red), 1px 1px 2px #000; animation: timeWarn 0.45s ease-in-out infinite; }
+        #hp-txt { display: inline-block; transform-origin: center center; flex-shrink: 0; }
         @keyframes hpLossBurst {
             0% { transform: scale(1); filter: brightness(1); }
             20% { transform: scale(1.85) rotate(-6deg); filter: brightness(1.6); color: #ff3131; }
@@ -188,7 +287,7 @@
             0%, 100% { color: var(--red); opacity: 1; }
             50% { color: #ff8888; opacity: 0.5; }
         }
-        #time-txt.time-low { animation: timeWarn 0.45s ease-in-out infinite; color: var(--red) !important; }
+        #time-txt.time-low { animation: none; }
 
         #controls { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 10px; padding-bottom: max(env(safe-area-inset-bottom, 5px), 5px); z-index: 300; transition: opacity 0.3s; background: transparent; }
         .arrow { width: 120px; height: 100px; background: transparent; border: none; color: rgba(255, 255, 255, 0.5); font-size: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; pointer-events: auto; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); touch-action: none; }
@@ -221,23 +320,13 @@
             }
             html:not(.pc-ms) #stats-bar .stat {
                 font-size: 13px !important;
-                padding: 1px 5px !important;
-                white-space: nowrap;
-                flex-shrink: 0;
-                line-height: 1.1;
             }
-            html:not(.pc-ms) #hp-txt {
-                font-size: 14px;
-                letter-spacing: 0;
-            }
-            html:not(.pc-ms) #score-txt {
-                font-size: 11px;
-                flex-shrink: 1;
-                min-width: 0;
-            }
-            html:not(.pc-ms) #time-txt {
-                font-size: 13px;
-            }
+            html:not(.pc-ms) .hud-pyramid { width: 30px; height: 28px; }
+            html:not(.pc-ms) #lvl-txt { font-size: 12px; }
+            html:not(.pc-ms) .odo-strip span { font-size: 13px; height: 1.1em; line-height: 1.1em; }
+            html:not(.pc-ms) .odo-col { height: 1.1em; width: 0.55em; }
+            html:not(.pc-ms) .hud-clock { width: 38px; height: 38px; }
+            html:not(.pc-ms) .hud-clock-num { font-size: 11px; }
         }
         .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); }
 
@@ -827,10 +916,23 @@
         <div id="hud">
             <div id="mission-title">DOG MISSION</div>
             <div id="energy-box"><div id="energy-fill"></div></div>
-            <div id="stats-bar"><div class="stat" style="background:var(--neon); color:#000; padding:3px 12px; border-radius:5px; font-weight:900; font-size:24px; text-shadow:none;">LVL <span id="lvl-txt">1</span></div>
+            <div id="stats-bar">
+                <div class="hud-stat hud-lvl-wrap" aria-label="Level">
+                    <div class="hud-pyramid"><span id="lvl-txt">1</span></div>
+                </div>
                 <div id="hp-txt" class="stat">❤️❤️❤️</div>
-                <div id="score-txt" class="stat" style="color:var(--gold)">0 PTS</div>
-                <div id="time-txt" class="stat" style="color:var(--neon)">30s</div>
+                <div class="hud-stat hud-score-wrap" aria-label="Punkte">
+                    <div id="score-odo" class="hud-odometer" aria-live="polite"></div>
+                </div>
+                <div class="hud-stat hud-time-wrap" aria-label="Zeit">
+                    <div class="hud-clock" id="time-clock">
+                        <svg class="hud-clock-svg" viewBox="0 0 44 44" aria-hidden="true">
+                            <circle class="hud-clock-bg" cx="22" cy="22" r="18"></circle>
+                            <circle class="hud-clock-fill" id="time-clock-ring" cx="22" cy="22" r="18"></circle>
+                        </svg>
+                        <span id="time-txt" class="hud-clock-num">30</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1518,6 +1620,7 @@ window.onload = function() {
         
         cyborgWasLocked = !canPlayCyborgFromScore();
         updateCyborgButton();
+        initHudStats();
     } catch(e) {}
 
     resizeCanvas();
@@ -1659,7 +1762,8 @@ function goToLevelSelect() {
     if (gw) gw.classList.remove("pc-play-layout", "is-pc-play", "is-ms-store-play");
     
     ctx.clearRect(0, 0, W, H);
-    document.getElementById("time-txt").innerText = "30s";
+    document.getElementById("time-txt").innerText = "30";
+    updateTimeHud(30, false);
     
     document.getElementById("scr-start").style.display = "block";
     resizeCanvas();
@@ -2363,6 +2467,66 @@ function initBackgroundGraphics() {
     opponents = []; ufos = [];
 }
 
+var HUD_CLOCK_CIRC = 113.097;
+var HUD_LEVEL_TIME = 30;
+
+function makeOdoColumn() {
+    let col = document.createElement('span');
+    col.className = 'odo-col';
+    let strip = document.createElement('span');
+    strip.className = 'odo-strip';
+    for (let d = 0; d <= 9; d++) {
+        let sp = document.createElement('span');
+        sp.textContent = String(d);
+        strip.appendChild(sp);
+    }
+    col.appendChild(strip);
+    return col;
+}
+
+function updateLevelHud(lvl) {
+    let el = document.getElementById('lvl-txt');
+    if (el) el.innerText = String(Math.max(1, lvl));
+}
+
+function updateScoreHud(val) {
+    let el = document.getElementById('score-odo');
+    if (!el) return;
+    let s = String(Math.max(0, Math.floor(val)));
+    if (s.length === 0) s = '0';
+    while (el.childElementCount < s.length) el.appendChild(makeOdoColumn());
+    while (el.childElementCount > s.length) el.removeChild(el.lastChild);
+    for (let i = 0; i < s.length; i++) {
+        let digit = parseInt(s.charAt(i), 10);
+        let strip = el.children[i].querySelector('.odo-strip');
+        if (strip) strip.style.transform = 'translateY(-' + (digit * 10) + '%)';
+    }
+}
+
+function updateTimeHud(seconds, isWin) {
+    let txt = document.getElementById('time-txt');
+    let ring = document.getElementById('time-clock-ring');
+    let wrap = document.getElementById('time-clock');
+    if (!txt) return;
+    if (isWin) {
+        txt.innerText = '★';
+        if (ring) ring.style.strokeDashoffset = '0';
+        if (wrap) wrap.classList.remove('time-low');
+        return;
+    }
+    let s = Math.max(0, Math.ceil(seconds));
+    txt.innerText = String(s);
+    let progress = Math.min(1, s / HUD_LEVEL_TIME);
+    if (ring) ring.style.strokeDashoffset = String(HUD_CLOCK_CIRC * (1 - progress));
+    if (wrap) wrap.classList.toggle('time-low', s <= 5);
+}
+
+function initHudStats() {
+    updateLevelHud(1);
+    updateScoreHud(0);
+    updateTimeHud(HUD_LEVEL_TIME, false);
+}
+
 function updateTheme(newMode) {
     const colors = { 'dog':'#00f2ff', 'cat':'#bc13fe', 'rabbit':'#ff8c00', 'fox':'#ff4500', 'panda':'#ffffff', 'unicorn':'#ff00ff', 'cyborg':'#00ffff' };
     const titles = { 'dog':'DOG MISSION', 'cat':'CAT LAND', 'rabbit':'RABBIT WORLD', 'fox':'FOX TASK', 'panda':'PANDA UNIVERSE', 'unicorn':'UNICORN AREA', 'cyborg':'CYBER CITY' };
@@ -2420,7 +2584,7 @@ function start(m, startLvl) {
     playerX = snapToLane(2);
     targetX = playerX;
     let lvlTxt = document.getElementById("lvl-txt");
-    if (lvlTxt) lvlTxt.innerText = String(level);
+    if (lvlTxt) updateLevelHud(startLvl);
     
     let scrStart = document.getElementById("scr-start");
     let gameWrap = document.getElementById("game-wrap");
@@ -2712,11 +2876,9 @@ function loop(t) {
         }
 
         document.getElementById("hp-txt").innerText = "❤️".repeat(Math.max(0, hp));
-        document.getElementById("score-txt").innerText = Math.floor(score) + " PTS";
-        document.getElementById("time-txt").innerText = missionComplete ? "WIN" : Math.ceil(timeLeft) + "s";
-        let timeEl = document.getElementById("time-txt");
-        if (timeEl) timeEl.classList.toggle("time-low", timeLeft <= 5 && !missionComplete);
-        document.getElementById("lvl-txt").innerText = level;
+        updateScoreHud(score);
+        updateTimeHud(timeLeft, missionComplete);
+        updateLevelHud(level);
         document.getElementById("energy-fill").style.width = Math.max(0, energy) + "%";
         let eBox = document.getElementById("energy-box");
         if (eBox) eBox.classList.toggle("energy-low", energy <= 25 && !missionComplete);
