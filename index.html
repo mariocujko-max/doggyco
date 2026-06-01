@@ -168,108 +168,173 @@
             background: linear-gradient(90deg, #ff0000, var(--red), var(--gold));
         }
         
-        #stats-bar { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto; background: rgba(255,255,255,0.15); padding: 8px 14px; border-radius: 15px; border: 1px solid var(--neon); backdrop-filter: blur(10px); position: relative; gap: 6px; }
+        #stats-bar {
+            --odo-h: 26px;
+            --odo-w: 16px;
+            --odo-fs: 22px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            align-items: stretch;
+            width: 94%;
+            min-height: 58px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 2px;
+            border-radius: 15px;
+            border: 1px solid var(--neon);
+            backdrop-filter: blur(10px);
+            position: relative;
+            gap: 0;
+        }
+        .hud-quarter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 2px 3px;
+        }
+        .hud-quarter + .hud-quarter {
+            border-left: 1px solid rgba(255,255,255,0.1);
+        }
         .stat { font-weight: 900; font-size: 16px; text-shadow: 1px 1px 3px #000; }
-        .hud-stat { display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .hud-lvl-wrap { min-width: 36px; }
+        .hud-hp {
+            font-size: clamp(14px, 3.8vw, 20px);
+            line-height: 1;
+            white-space: nowrap;
+        }
         .hud-pyramid {
             position: relative;
-            width: 36px;
-            height: 32px;
+            width: 54px;
+            height: 50px;
+            color: var(--neon);
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            padding-bottom: 3px;
-            background: linear-gradient(165deg, rgba(0,242,255,0.45) 0%, rgba(0,90,110,0.92) 55%, rgba(0,40,55,0.95) 100%);
-            clip-path: polygon(50% 4%, 92% 100%, 8% 100%);
-            filter: drop-shadow(0 0 7px var(--neon));
-            box-shadow: inset 0 -2px 0 rgba(0,242,255,0.35);
+            padding-bottom: 7px;
+            filter: drop-shadow(0 0 10px var(--neon));
+        }
+        .hud-pyramid-art {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .hud-pyramid-art .pyra-body {
+            fill: url(#pyraGrad);
+            stroke: rgba(255,255,255,0.55);
+            stroke-width: 1.5;
+            stroke-linejoin: round;
+        }
+        .hud-pyramid-art .pyra-shine {
+            fill: rgba(255,255,255,0.22);
+            stroke: none;
+        }
+        .hud-pyramid-art .pyra-base {
+            fill: none;
+            stroke: var(--neon);
+            stroke-width: 2;
+            opacity: 0.85;
         }
         #lvl-txt {
+            position: relative;
+            z-index: 2;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
-            font-size: 15px;
+            font-size: 18px;
             line-height: 1;
-            color: #001018;
-            text-shadow: 0 0 6px rgba(0,242,255,0.9);
+            color: #fff;
+            text-shadow: 0 0 8px var(--neon), 0 1px 3px #000, 0 0 2px #000;
         }
-        .hud-score-wrap { flex: 1; min-width: 0; justify-content: center; }
         .hud-odometer {
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: 2px;
+            gap: 3px;
+            max-width: 100%;
             color: var(--gold);
-            filter: drop-shadow(0 0 6px rgba(255,215,0,0.45));
+            filter: drop-shadow(0 0 8px rgba(255,215,0,0.5));
         }
         .odo-col {
-            height: 1.15em;
-            width: 0.62em;
+            height: var(--odo-h);
+            width: var(--odo-w);
             overflow: hidden;
-            border-radius: 2px;
-            background: rgba(0,0,0,0.35);
-            border: 1px solid rgba(255,215,0,0.25);
+            border-radius: 3px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,215,0,0.4);
+            flex-shrink: 0;
         }
         .odo-strip {
             display: flex;
             flex-direction: column;
-            transition: transform 0.4s cubic-bezier(0.34, 1.25, 0.64, 1);
+            transition: transform 0.35s cubic-bezier(0.34, 1.25, 0.64, 1);
             will-change: transform;
         }
         .odo-strip span {
-            height: 1.15em;
-            line-height: 1.15em;
+            height: var(--odo-h);
+            line-height: var(--odo-h);
+            width: 100%;
             text-align: center;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
-            font-size: 16px;
+            font-size: var(--odo-fs);
             color: var(--gold);
         }
-        .hud-time-wrap { min-width: 44px; }
         .hud-clock {
             position: relative;
-            width: 44px;
-            height: 44px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            border: 2px solid rgba(255,255,255,0.25);
+            box-shadow: 0 0 12px rgba(0,0,0,0.45), inset 0 0 10px rgba(0,0,0,0.35);
+            overflow: hidden;
+            flex-shrink: 0;
         }
-        .hud-clock-svg {
+        .hud-clock-pie {
             position: absolute;
             inset: 0;
-            width: 100%;
-            height: 100%;
-            transform: rotate(-90deg);
-        }
-        .hud-clock-bg {
-            fill: none;
-            stroke: rgba(0,0,0,0.65);
-            stroke-width: 5;
-        }
-        .hud-clock-fill {
-            fill: none;
-            stroke: var(--neon);
-            stroke-width: 4;
-            stroke-linecap: round;
-            stroke-dasharray: 113.097;
-            stroke-dashoffset: 0;
-            transition: stroke-dashoffset 0.12s linear, stroke 0.25s;
-            filter: drop-shadow(0 0 4px var(--neon));
+            border-radius: 50%;
+            --time-pct: 1;
+            background: conic-gradient(
+                from -90deg,
+                #aafcff 0deg,
+                var(--neon) calc(var(--time-pct, 1) * 360deg),
+                #0c141c calc(var(--time-pct, 1) * 360deg),
+                #1e2a34 360deg
+            );
         }
         .hud-clock-num {
             position: relative;
-            z-index: 2;
+            z-index: 3;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
-            font-size: 13px;
+            font-size: 15px;
             color: #fff;
-            text-shadow: 0 0 8px var(--neon), 1px 1px 2px #000;
+            text-shadow: 0 0 10px var(--neon), 0 1px 3px #000;
             line-height: 1;
         }
-        .hud-clock.time-low .hud-clock-fill { stroke: var(--red); filter: drop-shadow(0 0 6px var(--red)); }
-        .hud-clock.time-low .hud-clock-num { color: #ffe0e0; text-shadow: 0 0 8px var(--red), 1px 1px 2px #000; animation: timeWarn 0.45s ease-in-out infinite; }
-        #hp-txt { display: inline-block; transform-origin: center center; flex-shrink: 0; }
+        .hud-clock.time-low .hud-clock-pie {
+            background: conic-gradient(
+                from -90deg,
+                #ffaaaa 0deg,
+                var(--red) calc(var(--time-pct, 1) * 360deg),
+                #180808 calc(var(--time-pct, 1) * 360deg),
+                #2a1010 360deg
+            );
+        }
+        .hud-clock.time-low .hud-clock-num {
+            color: #ffe8e8;
+            text-shadow: 0 0 10px var(--red), 0 1px 3px #000;
+            animation: timeWarn 0.45s ease-in-out infinite;
+        }
+        #hp-txt { display: inline-block; transform-origin: center center; }
         @keyframes hpLossBurst {
             0% { transform: scale(1); filter: brightness(1); }
             20% { transform: scale(1.85) rotate(-6deg); filter: brightness(1.6); color: #ff3131; }
@@ -313,20 +378,20 @@
                 margin: 0 auto 6px;
             }
             html:not(.pc-ms) #stats-bar {
-                flex-wrap: nowrap;
-                gap: 4px;
-                width: 96%;
-                padding: 5px 8px;
+                width: 98%;
+                min-height: 54px;
+                padding: 3px 1px;
+                --odo-h: 24px;
+                --odo-w: 15px;
+                --odo-fs: 20px;
             }
             html:not(.pc-ms) #stats-bar .stat {
-                font-size: 13px !important;
+                font-size: 14px !important;
             }
-            html:not(.pc-ms) .hud-pyramid { width: 30px; height: 28px; }
-            html:not(.pc-ms) #lvl-txt { font-size: 12px; }
-            html:not(.pc-ms) .odo-strip span { font-size: 13px; height: 1.1em; line-height: 1.1em; }
-            html:not(.pc-ms) .odo-col { height: 1.1em; width: 0.55em; }
-            html:not(.pc-ms) .hud-clock { width: 38px; height: 38px; }
-            html:not(.pc-ms) .hud-clock-num { font-size: 11px; }
+            html:not(.pc-ms) .hud-pyramid { width: 46px; height: 42px; padding-bottom: 6px; }
+            html:not(.pc-ms) #lvl-txt { font-size: 15px; }
+            html:not(.pc-ms) .hud-clock { width: 46px; height: 46px; }
+            html:not(.pc-ms) .hud-clock-num { font-size: 14px; }
         }
         .arrow.glow { color: var(--neon); transform: scale(0.95); text-shadow: 0 0 30px var(--neon), 0 0 50px var(--neon); }
 
@@ -917,19 +982,32 @@
             <div id="mission-title">DOG MISSION</div>
             <div id="energy-box"><div id="energy-fill"></div></div>
             <div id="stats-bar">
-                <div class="hud-stat hud-lvl-wrap" aria-label="Level">
-                    <div class="hud-pyramid"><span id="lvl-txt">1</span></div>
+                <div class="hud-quarter" aria-label="Level">
+                    <div class="hud-pyramid">
+                        <svg class="hud-pyramid-art" viewBox="0 0 64 58" aria-hidden="true">
+                            <defs>
+                                <linearGradient id="pyraGrad" x1="32" y1="4" x2="32" y2="54" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#e8feff"/>
+                                    <stop offset="35%" stop-color="var(--neon)"/>
+                                    <stop offset="100%" stop-color="#003844"/>
+                                </linearGradient>
+                            </defs>
+                            <polygon class="pyra-body" points="32,5 58,53 6,53"/>
+                            <polygon class="pyra-shine" points="32,12 44,48 20,48"/>
+                            <line class="pyra-base" x1="6" y1="53" x2="58" y2="53"/>
+                        </svg>
+                        <span id="lvl-txt">1</span>
+                    </div>
                 </div>
-                <div id="hp-txt" class="stat">❤️❤️❤️</div>
-                <div class="hud-stat hud-score-wrap" aria-label="Punkte">
+                <div class="hud-quarter" aria-label="Leben">
+                    <div id="hp-txt" class="stat hud-hp">❤️❤️❤️</div>
+                </div>
+                <div class="hud-quarter" aria-label="Punkte">
                     <div id="score-odo" class="hud-odometer" aria-live="polite"></div>
                 </div>
-                <div class="hud-stat hud-time-wrap" aria-label="Zeit">
+                <div class="hud-quarter" aria-label="Zeit">
                     <div class="hud-clock" id="time-clock">
-                        <svg class="hud-clock-svg" viewBox="0 0 44 44" aria-hidden="true">
-                            <circle class="hud-clock-bg" cx="22" cy="22" r="18"></circle>
-                            <circle class="hud-clock-fill" id="time-clock-ring" cx="22" cy="22" r="18"></circle>
-                        </svg>
+                        <div class="hud-clock-pie" id="time-clock-pie"></div>
                         <span id="time-txt" class="hud-clock-num">30</span>
                     </div>
                 </div>
@@ -2505,20 +2583,19 @@ function updateScoreHud(val) {
 
 function updateTimeHud(seconds, isWin) {
     let txt = document.getElementById('time-txt');
-    let ring = document.getElementById('time-clock-ring');
+    let pie = document.getElementById('time-clock-pie');
     let wrap = document.getElementById('time-clock');
     if (!txt) return;
     if (isWin) {
         txt.innerText = '★';
-        if (ring) ring.style.strokeDashoffset = '0';
+        if (pie) pie.style.setProperty('--time-pct', '1');
         if (wrap) wrap.classList.remove('time-low');
         return;
     }
-    let s = Math.max(0, Math.ceil(seconds));
-    txt.innerText = String(s);
-    let progress = Math.min(1, s / HUD_LEVEL_TIME);
-    if (ring) ring.style.strokeDashoffset = String(HUD_CLOCK_CIRC * (1 - progress));
-    if (wrap) wrap.classList.toggle('time-low', s <= 5);
+    let frac = Math.max(0, Math.min(1, seconds / HUD_LEVEL_TIME));
+    if (pie) pie.style.setProperty('--time-pct', String(frac));
+    txt.innerText = String(Math.max(0, Math.ceil(seconds)));
+    if (wrap) wrap.classList.toggle('time-low', seconds <= 5);
 }
 
 function initHudStats() {
