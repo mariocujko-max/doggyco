@@ -169,14 +169,14 @@
         }
         
         #stats-bar {
-            --odo-h: 26px;
-            --odo-w: 16px;
-            --odo-fs: 22px;
+            --odo-h: 36px;
+            --odo-w: 24px;
+            --odo-fs: 23px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             align-items: stretch;
             width: 94%;
-            min-height: 58px;
+            min-height: 64px;
             margin: 0 auto;
             background: rgba(255,255,255,0.15);
             padding: 4px 2px;
@@ -263,10 +263,11 @@
             height: var(--odo-h);
             width: var(--odo-w);
             overflow: hidden;
-            border-radius: 3px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,215,0,0.4);
+            border-radius: 4px;
+            background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(255,215,0,0.45);
             flex-shrink: 0;
+            box-sizing: border-box;
         }
         .odo-strip {
             display: flex;
@@ -276,9 +277,12 @@
         }
         .odo-strip span {
             height: var(--odo-h);
+            min-height: var(--odo-h);
             line-height: var(--odo-h);
             width: 100%;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
             font-size: var(--odo-fs);
@@ -286,33 +290,40 @@
         }
         .hud-clock {
             position: relative;
-            width: 50px;
-            height: 50px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid rgba(255,255,255,0.25);
-            box-shadow: 0 0 12px rgba(0,0,0,0.45), inset 0 0 10px rgba(0,0,0,0.35);
-            overflow: hidden;
+            background: rgba(0,0,0,0.55);
             flex-shrink: 0;
         }
-        .hud-clock-pie {
+        .hud-clock-svg {
             position: absolute;
             inset: 0;
-            border-radius: 50%;
-            --time-pct: 1;
-            background: conic-gradient(
-                from -90deg,
-                #aafcff 0deg,
-                var(--neon) calc(var(--time-pct, 1) * 360deg),
-                #0c141c calc(var(--time-pct, 1) * 360deg),
-                #1e2a34 360deg
-            );
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+            pointer-events: none;
+        }
+        .hud-clock-bg {
+            fill: none;
+            stroke: rgba(255,255,255,0.22);
+            stroke-width: 4;
+        }
+        .hud-clock-fill {
+            fill: none;
+            stroke: var(--neon);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-dasharray: 138.23;
+            stroke-dashoffset: 0;
+            filter: drop-shadow(0 0 5px var(--neon));
         }
         .hud-clock-num {
             position: relative;
-            z-index: 3;
+            z-index: 2;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
             font-size: 15px;
@@ -320,14 +331,9 @@
             text-shadow: 0 0 10px var(--neon), 0 1px 3px #000;
             line-height: 1;
         }
-        .hud-clock.time-low .hud-clock-pie {
-            background: conic-gradient(
-                from -90deg,
-                #ffaaaa 0deg,
-                var(--red) calc(var(--time-pct, 1) * 360deg),
-                #180808 calc(var(--time-pct, 1) * 360deg),
-                #2a1010 360deg
-            );
+        .hud-clock.time-low .hud-clock-fill {
+            stroke: var(--red);
+            filter: drop-shadow(0 0 6px var(--red));
         }
         .hud-clock.time-low .hud-clock-num {
             color: #ffe8e8;
@@ -379,11 +385,11 @@
             }
             html:not(.pc-ms) #stats-bar {
                 width: 98%;
-                min-height: 54px;
-                padding: 3px 1px;
-                --odo-h: 24px;
-                --odo-w: 15px;
-                --odo-fs: 20px;
+                min-height: 60px;
+                padding: 4px 1px;
+                --odo-h: 32px;
+                --odo-w: 21px;
+                --odo-fs: 21px;
             }
             html:not(.pc-ms) #stats-bar .stat {
                 font-size: 14px !important;
@@ -1007,7 +1013,10 @@
                 </div>
                 <div class="hud-quarter" aria-label="Zeit">
                     <div class="hud-clock" id="time-clock">
-                        <div class="hud-clock-pie" id="time-clock-pie"></div>
+                        <svg class="hud-clock-svg" viewBox="0 0 52 52" aria-hidden="true">
+                            <circle class="hud-clock-bg" cx="26" cy="26" r="22"></circle>
+                            <circle class="hud-clock-fill" id="time-clock-ring" cx="26" cy="26" r="22"></circle>
+                        </svg>
                         <span id="time-txt" class="hud-clock-num">30</span>
                     </div>
                 </div>
@@ -2545,7 +2554,7 @@ function initBackgroundGraphics() {
     opponents = []; ufos = [];
 }
 
-var HUD_CLOCK_CIRC = 113.097;
+var HUD_CLOCK_CIRC = 138.23;
 var HUD_LEVEL_TIME = 30;
 
 function makeOdoColumn() {
@@ -2583,17 +2592,17 @@ function updateScoreHud(val) {
 
 function updateTimeHud(seconds, isWin) {
     let txt = document.getElementById('time-txt');
-    let pie = document.getElementById('time-clock-pie');
+    let ring = document.getElementById('time-clock-ring');
     let wrap = document.getElementById('time-clock');
     if (!txt) return;
     if (isWin) {
         txt.innerText = '★';
-        if (pie) pie.style.setProperty('--time-pct', '1');
+        if (ring) ring.style.strokeDashoffset = '0';
         if (wrap) wrap.classList.remove('time-low');
         return;
     }
     let frac = Math.max(0, Math.min(1, seconds / HUD_LEVEL_TIME));
-    if (pie) pie.style.setProperty('--time-pct', String(frac));
+    if (ring) ring.style.strokeDashoffset = String(HUD_CLOCK_CIRC * (1 - frac));
     txt.innerText = String(Math.max(0, Math.ceil(seconds)));
     if (wrap) wrap.classList.toggle('time-low', seconds <= 5);
 }
