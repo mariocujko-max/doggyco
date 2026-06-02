@@ -166,6 +166,30 @@
             box-shadow: 0 0 10px rgba(255,255,255,0.3);
             transition: border-color 0.2s, filter 0.2s;
         }
+        .battery-energy-icon {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            font-size: 14px;
+            color: rgba(0,0,0,0.8);
+            text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+            pointer-events: none;
+        }
+        .battery-pole {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 4;
+            font-size: 12px;
+            font-weight: 900;
+            color: #000;
+            line-height: 1;
+            pointer-events: none;
+        }
+        .battery-minus { left: 6px; }
+        .battery-plus { right: -7px; }
         /* Battery terminal cap (right side) */
         #energy-box::after {
             content: '';
@@ -241,13 +265,13 @@
         }
         .hud-pyramid {
             position: relative;
-            width: 54px;
-            height: 50px;
+            width: 64px;
+            height: 58px;
             color: var(--neon);
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             justify-content: center;
-            padding-bottom: 7px;
+            padding-bottom: 0;
             filter: drop-shadow(0 0 10px var(--neon));
         }
         .hud-pyramid-art {
@@ -278,7 +302,7 @@
             z-index: 2;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
-            font-size: 18px;
+            font-size: 21px;
             line-height: 1;
             color: #fff;
             text-shadow: 0 0 8px var(--neon), 0 1px 3px #000, 0 0 2px #000;
@@ -369,17 +393,14 @@
             /* JS setzt jetzt den Farbverlauf (rot->gelb->gruen). */
             filter: drop-shadow(0 0 6px rgba(0,0,0,0));
         }
-        .hud-clock.time-low .hud-clock-num {
-            /* Keine fixe Rot-Animation, damit der JS-Verlauf sichtbar bleibt. */
-            animation: none;
-        }
+        .hud-clock.time-low .hud-clock-num { animation: none; }
         #hp-txt {
             display: inline-block;
             transform-origin: center center;
             font-size: clamp(20px, 5vw, 30px);
             line-height: 1;
             letter-spacing: 1px;
-            animation: heartBeat 1s ease-in-out infinite;
+            animation: heartBeat 1.8s ease-in-out infinite;
         }
         @keyframes heartBeat {
             0%, 100% { transform: scale(1); filter: brightness(1); }
@@ -438,8 +459,8 @@
             html:not(.pc-ms) #stats-bar .stat {
                 font-size: 14px !important;
             }
-            html:not(.pc-ms) .hud-pyramid { width: 46px; height: 42px; padding-bottom: 6px; }
-            html:not(.pc-ms) #lvl-txt { font-size: 15px; }
+            html:not(.pc-ms) .hud-pyramid { width: 54px; height: 48px; padding-bottom: 0; }
+            html:not(.pc-ms) #lvl-txt { font-size: 18px; }
             html:not(.pc-ms) .hud-clock { width: 46px; height: 46px; }
             html:not(.pc-ms) .hud-clock-num { font-size: 14px; }
         }
@@ -611,6 +632,22 @@
 
         .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); transform: translateY(0); flex-shrink: 0; }
         .btn-char span { font-size: 32px; margin-bottom: 5px; }
+        .char-head {
+            display: inline-block;
+            transform-origin: 50% 70%;
+            animation: charCall 1.8s ease-in-out infinite;
+        }
+        .char-head.head-2 { animation-delay: 0.15s; }
+        .char-head.head-3 { animation-delay: 0.3s; }
+        .char-head.head-4 { animation-delay: 0.45s; }
+        .char-head.head-5 { animation-delay: 0.6s; }
+        .char-head.head-6 { animation-delay: 0.75s; }
+        @keyframes charCall {
+            0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+            25% { transform: translateY(-3px) rotate(-7deg) scale(1.05); }
+            50% { transform: translateY(-5px) rotate(7deg) scale(1.08); }
+            75% { transform: translateY(-3px) rotate(-5deg) scale(1.04); }
+        }
         .level-cyborg-row {
             display: flex;
             justify-content: center;
@@ -1030,24 +1067,28 @@
     <div id="game-wrap">
         <div id="hud">
             <div id="mission-title">DOG MISSION</div>
-            <div id="energy-box"><div id="energy-fill"></div></div>
+            <div id="energy-box">
+                <span class="battery-pole battery-minus">-</span>
+                <span class="battery-pole battery-plus">+</span>
+                <span class="battery-energy-icon">⚡</span>
+                <div id="energy-fill"></div>
+            </div>
             <div id="stats-bar">
                 <div class="hud-quarter" aria-label="Level">
                     <div class="hud-pyramid">
                         <svg class="hud-pyramid-art" viewBox="0 0 64 58" aria-hidden="true">
                             <defs>
-                                <linearGradient id="starGrad" x1="32" y1="4" x2="32" y2="54" gradientUnits="userSpaceOnUse">
+                                <linearGradient id="starGrad" x1="32" y1="2" x2="32" y2="56" gradientUnits="userSpaceOnUse">
                                     <stop offset="0%" stop-color="#e8feff"/>
-                                    <stop offset="35%" stop-color="var(--neon)"/>
+                                    <stop offset="40%" stop-color="var(--neon)"/>
                                     <stop offset="100%" stop-color="#003844"/>
                                 </linearGradient>
                             </defs>
                             <!-- Star (Level symbol) -->
                             <polygon fill="url(#starGrad)" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"
-                                points="32,6 39.6,24.2 59,24.2 43.2,35.4 49.8,54 32,42.6 14.2,54 20.8,35.4 5,24.2 24.4,24.2"/>
+                                points="32,3 39,21 59,21 43,33 49,55 32,43 15,55 21,33 5,21 25,21"/>
                             <polygon fill="rgba(255,255,255,0.22)" stroke="none"
-                                points="32,13 37,25 50,25 39.4,32.2 43.6,45 32,38.4 20.4,45 24.6,32.2 14,25 27,25"/>
-                            <line x1="10" y1="49" x2="54" y2="49" stroke="var(--neon)" stroke-width="2" opacity="0.9"/>
+                                points="32,11 36,22 48,22 38.5,29 42,42 32,35 22,42 25.5,29 16,22 28,22"/>
                         </svg>
                         <span id="lvl-txt">1</span>
                     </div>
@@ -1107,14 +1148,14 @@
                 <!-- Level-Auswahl mit versiegeltem Cyborg-Button -->
                 <div style="display:flex; flex-direction:column; gap:10px; width:100%; align-items: center;">
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
-                        <button class="btn-char" style="border-color:var(--neon); flex:1;" onclick="start('dog', 1)"><span>🐶</span>DOG</button>
-                        <button class="btn-char" style="border-color:var(--cat); flex:1;" onclick="start('cat', 3)"><span>🐱</span>CAT</button>
-                        <button class="btn-char" style="border-color:var(--rabbit); flex:1;" onclick="start('rabbit', 5)"><span>🐰</span>RABBIT</button>
+                        <button class="btn-char" style="border-color:var(--neon); flex:1;" onclick="start('dog', 1)"><span class="char-head head-1">🐶</span>DOG</button>
+                        <button class="btn-char" style="border-color:var(--cat); flex:1;" onclick="start('cat', 3)"><span class="char-head head-2">🐱</span>CAT</button>
+                        <button class="btn-char" style="border-color:var(--rabbit); flex:1;" onclick="start('rabbit', 5)"><span class="char-head head-3">🐰</span>RABBIT</button>
                     </div>
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
-                        <button class="btn-char" style="border-color:var(--fox); flex:1;" onclick="start('fox', 7)"><span>🦊</span>FOX</button>
-                        <button class="btn-char" style="border-color:var(--panda); flex:1;" onclick="start('panda', 9)"><span>🐼</span>PANDA</button>
-                        <button class="btn-char" style="border-color:var(--unicorn); flex:1;" onclick="start('unicorn', 11)"><span>🦄</span>UNICORN</button>
+                        <button class="btn-char" style="border-color:var(--fox); flex:1;" onclick="start('fox', 7)"><span class="char-head head-4">🦊</span>FOX</button>
+                        <button class="btn-char" style="border-color:var(--panda); flex:1;" onclick="start('panda', 9)"><span class="char-head head-5">🐼</span>PANDA</button>
+                        <button class="btn-char" style="border-color:var(--unicorn); flex:1;" onclick="start('unicorn', 11)"><span class="char-head head-6">🦄</span>UNICORN</button>
                     </div>
                     <div class="level-cyborg-row">
                         <button id="btn-cyborg" type="button" class="btn-char btn-cyborg-lock" onclick="startCyborg()" aria-label="Level 13 Cyborg">
@@ -2649,8 +2690,6 @@ function updateTimeHud(seconds, isWin) {
             ring.setAttribute('stroke', '#00ff88');
             ring.style.filter = 'drop-shadow(0 0 7px rgba(0,255,136,0.85))';
         }
-        txt.style.color = '#00ff88';
-        txt.style.textShadow = '0 0 10px rgba(0,255,136,0.95), 0 1px 3px #000';
         if (wrap) wrap.classList.remove('time-low');
         return;
     }
@@ -2683,16 +2722,12 @@ function updateTimeHud(seconds, isWin) {
             ring.setAttribute('stroke', color);
             ring.style.filter = 'drop-shadow(0 0 7px rgba(' + r + ',' + g + ',' + b + ',0.85))';
         }
-        txt.style.color = color;
-        txt.style.textShadow = '0 0 10px rgba(' + r + ',' + g + ',' + b + ',0.95), 0 1px 3px #000';
     } else {
         // zurueck auf Default (neon)
         if (ring) {
             ring.removeAttribute('stroke');
             ring.style.filter = '';
         }
-        txt.style.color = '';
-        txt.style.textShadow = '';
     }
 }
 
