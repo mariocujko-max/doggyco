@@ -1,16 +1,41 @@
-const CACHE_NAME = 'doggyco-cache-v,6';
+const CACHE_NAME = 'doggyco-cache-v6';
+const ASSETS = [
+  './',
+  './index.html',
+  './index.android.html',
+  './index.appel.html',
+  './manifest.json',
+  './icon.svg',
+  './favicon-32.png',
+  './icon-192.png'
+];
 
-// Installations-Event
 self.addEventListener('install', (event) => {
-    self.skipWaiting();
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+  );
 });
 
-// Aktivierungs-Event
 self.addEventListener('activate', (event) => {
-    event.waitUntil(clients.claim());
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    ).then(() => clients.claim())
+  );
 });
 
-// Fetch-Event (für PWABuilder notwendig)
 self.addEventListener('fetch', (event) => {
-    event.respondWith(fetch(event.request));
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      const networkFetch = fetch(event.request).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        return res;
+      });
+      return cached || networkFetch;
+    })
+  );
 });
