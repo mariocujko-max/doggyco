@@ -206,7 +206,7 @@
             --odo-w: 24px;
             --odo-fs: 23px;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: 1.05fr 1.2fr 1.65fr 1.1fr;
             align-items: stretch;
             width: 94%;
             min-height: 64px;
@@ -234,10 +234,14 @@
         }
         .stat { font-weight: 900; font-size: 16px; text-shadow: 1px 1px 3px #000; }
         .hud-hp {
-            font-size: clamp(14px, 3.8vw, 20px);
+            font-size: clamp(16px, 3.5vw, 24px);
             line-height: 1;
             white-space: nowrap;
+            letter-spacing: 0;
         }
+        #stats-bar.score-4 { --odo-w: 21px; --odo-fs: 21px; }
+        #stats-bar.score-5,
+        #stats-bar.score-6 { --odo-w: 18px; --odo-fs: 19px; }
         .hud-pyramid {
             position: relative;
             width: 70px;
@@ -441,6 +445,7 @@
                 --odo-h: 32px;
                 --odo-w: 21px;
                 --odo-fs: 21px;
+                grid-template-columns: 1fr 1.15fr 1.75fr 1.1fr;
             }
             html:not(.pc-ms) #stats-bar .stat {
                 font-size: 14px !important;
@@ -2651,9 +2656,16 @@ function updateLevelHud(lvl) {
 
 function updateScoreHud(val) {
     let el = document.getElementById('score-odo');
+    let bar = document.getElementById('stats-bar');
     if (!el) return;
     let s = String(Math.max(0, Math.floor(val)));
     if (s.length === 0) s = '0';
+    if (bar) {
+        bar.classList.remove('score-4', 'score-5', 'score-6');
+        if (s.length === 4) bar.classList.add('score-4');
+        else if (s.length === 5) bar.classList.add('score-5');
+        else if (s.length >= 6) bar.classList.add('score-6');
+    }
     while (el.childElementCount < s.length) el.appendChild(makeOdoColumn());
     while (el.childElementCount > s.length) el.removeChild(el.lastChild);
     for (let i = 0; i < s.length; i++) {
