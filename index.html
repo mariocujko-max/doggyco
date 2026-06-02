@@ -177,33 +177,6 @@
             text-shadow: 0 1px 0 rgba(255,255,255,0.35);
             pointer-events: none;
         }
-        .battery-pole {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 4;
-            font-size: 12px;
-            font-weight: 900;
-            color: #000;
-            line-height: 1;
-            pointer-events: none;
-        }
-        .battery-minus { left: 6px; }
-        .battery-plus { right: -7px; }
-        /* Battery terminal cap (right side) */
-        #energy-box::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: -10px;
-            transform: translateY(-50%);
-            width: 10px;
-            height: 60%;
-            border: 2px solid #fff;
-            border-left: none;
-            border-radius: 0 6px 6px 0;
-            background: rgba(0,0,0,0.35);
-        }
         #energy-fill {
             height: 100%;
             width: 100%;
@@ -221,7 +194,6 @@
             border-color: var(--red);
             filter: drop-shadow(0 0 10px rgba(255,49,49,0.25));
         }
-        #energy-box.energy-low::after { border-color: var(--red); background: rgba(0,0,0,0.2); }
         #energy-box.energy-low #energy-fill {
             background: linear-gradient(90deg, #ff0000, var(--red), var(--gold));
         }
@@ -265,14 +237,14 @@
         }
         .hud-pyramid {
             position: relative;
-            width: 64px;
-            height: 58px;
+            width: 70px;
+            height: 64px;
             color: var(--neon);
             display: flex;
             align-items: center;
             justify-content: center;
             padding-bottom: 0;
-            filter: drop-shadow(0 0 10px var(--neon));
+            filter: drop-shadow(0 0 16px var(--neon));
         }
         .hud-pyramid-art {
             position: absolute;
@@ -280,6 +252,17 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
+        }
+        .hud-pyramid-art .star-main {
+            filter: drop-shadow(0 0 8px var(--neon));
+        }
+        .hud-pyramid-art .star-flare {
+            fill: none;
+            stroke: rgba(0,242,255,0.92);
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-dasharray: 2 3;
+            opacity: 0.9;
         }
         .hud-pyramid-art .pyra-body {
             fill: url(#pyraGrad);
@@ -302,10 +285,10 @@
             z-index: 2;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
-            font-size: 21px;
+            font-size: 22px;
             line-height: 1;
             color: #fff;
-            text-shadow: 0 0 8px var(--neon), 0 1px 3px #000, 0 0 2px #000;
+            text-shadow: 0 0 12px var(--neon), 0 1px 3px #000, 0 0 2px #000;
         }
         .hud-odometer {
             display: flex;
@@ -459,8 +442,8 @@
             html:not(.pc-ms) #stats-bar .stat {
                 font-size: 14px !important;
             }
-            html:not(.pc-ms) .hud-pyramid { width: 54px; height: 48px; padding-bottom: 0; }
-            html:not(.pc-ms) #lvl-txt { font-size: 18px; }
+            html:not(.pc-ms) .hud-pyramid { width: 60px; height: 54px; padding-bottom: 0; }
+            html:not(.pc-ms) #lvl-txt { font-size: 19px; }
             html:not(.pc-ms) .hud-clock { width: 46px; height: 46px; }
             html:not(.pc-ms) .hud-clock-num { font-size: 14px; }
         }
@@ -1068,8 +1051,6 @@
         <div id="hud">
             <div id="mission-title">DOG MISSION</div>
             <div id="energy-box">
-                <span class="battery-pole battery-minus">-</span>
-                <span class="battery-pole battery-plus">+</span>
                 <span class="battery-energy-icon">⚡</span>
                 <div id="energy-fill"></div>
             </div>
@@ -1085,10 +1066,11 @@
                                 </linearGradient>
                             </defs>
                             <!-- Star (Level symbol) -->
-                            <polygon fill="url(#starGrad)" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"
+                            <polygon class="star-main" fill="url(#starGrad)" stroke="rgba(255,255,255,0.7)" stroke-width="1.8"
                                 points="32,3 39,21 59,21 43,33 49,55 32,43 15,55 21,33 5,21 25,21"/>
-                            <polygon fill="rgba(255,255,255,0.22)" stroke="none"
+                            <polygon fill="rgba(255,255,255,0.26)" stroke="none"
                                 points="32,11 36,22 48,22 38.5,29 42,42 32,35 22,42 25.5,29 16,22 28,22"/>
+                            <polygon class="star-flare" points="32,3 39,21 59,21 43,33 49,55 32,43 15,55 21,33 5,21 25,21"/>
                         </svg>
                         <span id="lvl-txt">1</span>
                     </div>
@@ -1159,7 +1141,7 @@
                     </div>
                     <div class="level-cyborg-row">
                         <button id="btn-cyborg" type="button" class="btn-char btn-cyborg-lock" onclick="startCyborg()" aria-label="Level 13 Cyborg">
-                            <span id="cyborg-icon">🔒</span>
+                            <span id="cyborg-icon" class="char-head head-6">🔒</span>
                         </button>
                     </div>
                 </div>
@@ -2697,37 +2679,26 @@ function updateTimeHud(seconds, isWin) {
     if (ring) ring.style.strokeDashoffset = String(HUD_CLOCK_CIRC * (1 - frac));
     txt.innerText = String(Math.max(0, Math.ceil(seconds)));
     let s = Math.max(0, seconds);
-    let isLow = s <= 5;
-    if (wrap) wrap.classList.toggle('time-low', isLow);
+    let t = Math.max(0, Math.min(1, (HUD_LEVEL_TIME - s) / HUD_LEVEL_TIME));
+    if (wrap) wrap.classList.toggle('time-low', s <= 5);
 
-    // Sekunden-Farbe: rot -> gelb -> gruen (im letzten Abschnitt)
-    if (isLow) {
-        // t: 0 bei 5s (rot), 1 bei 0s (gruen)
-        let t = Math.max(0, Math.min(1, (5 - s) / 5));
-        let r, g, b;
-        // RED (255,49,49) -> YELLOW (255,210,74) -> GREEN (0,255,136)
-        if (t < 0.5) {
-            let u = t / 0.5;
-            r = 255;
-            g = Math.round(49 + (210 - 49) * u);
-            b = Math.round(49 + (74 - 49) * u);
-        } else {
-            let u = (t - 0.5) / 0.5;
-            r = Math.round(255 + (0 - 255) * u);
-            g = 210 + Math.round((255 - 210) * u);
-            b = Math.round(74 + (136 - 74) * u);
-        }
-        let color = 'rgb(' + r + ',' + g + ',' + b + ')';
-        if (ring) {
-            ring.setAttribute('stroke', color);
-            ring.style.filter = 'drop-shadow(0 0 7px rgba(' + r + ',' + g + ',' + b + ',0.85))';
-        }
+    // Ueber den gesamten Timer: rot -> gelb -> gruen
+    let r, g, b;
+    if (t < 0.5) {
+        let u = t / 0.5;
+        r = 255;
+        g = Math.round(49 + (210 - 49) * u);
+        b = Math.round(49 + (74 - 49) * u);
     } else {
-        // zurueck auf Default (neon)
-        if (ring) {
-            ring.removeAttribute('stroke');
-            ring.style.filter = '';
-        }
+        let u = (t - 0.5) / 0.5;
+        r = Math.round(255 + (0 - 255) * u);
+        g = 210 + Math.round((255 - 210) * u);
+        b = Math.round(74 + (136 - 74) * u);
+    }
+    let color = 'rgb(' + r + ',' + g + ',' + b + ')';
+    if (ring) {
+        ring.setAttribute('stroke', color);
+        ring.style.filter = 'drop-shadow(0 0 7px rgba(' + r + ',' + g + ',' + b + ',0.85))';
     }
 }
 
