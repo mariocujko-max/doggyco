@@ -5,11 +5,12 @@
 (function (global) {
     "use strict";
 
-    var BPM = 124;
-    var LOOKAHEAD = 0.16;
-    var TICK_MS = 22;
+    var BPM = 126;
+    var LOOKAHEAD = 0.18;
+    var TICK_MS = 20;
     var LOOP_STEPS = 32;
     var MASTER_GAIN = 1.38;
+    var RATE_MAX = 1.55;
 
     var CHORDS = [
         [57, 60, 64],
@@ -19,29 +20,33 @@
     ];
     var BASS = [45, 41, 36, 43];
 
-    /** Main melody – 32 sixteenth steps (-1 = rest) */
     var LEAD_DEG = [
         0, 3, 5, 3, 5, 7, 5, 3,
-        0, 2, 3, 5, 7, 5, 3, 2,
-        0, 3, 5, 7, 5, 3, 2, 0,
-        -2, 0, 3, 5, 7, 5, 3, 0
+        2, 3, 5, 7, 8, 7, 5, 3,
+        0, 3, 5, 7, 8, 7, 5, 3,
+        2, 0, 3, 5, 7, 8, 7, 5
     ];
-    /** Harmony line (thirds/sixths under lead) */
+    var LEAD2_DEG = [
+        5, 7, 8, 7, 5, 3, 2, 0,
+        3, 5, 7, 5, 3, 2, 0, 2,
+        5, 7, 8, 10, 8, 7, 5, 3,
+        2, 3, 5, 7, 5, 3, 2, 0
+    ];
     var HARM_DEG = [
-        -1, -1, 2, -1, 2, -1, 0, -1,
-        -1, -1, 0, 2, -1, 0, -1, -1,
-        -1, -1, 2, -1, 0, -1, -1, -1,
-        -1, -1, 0, 2, -1, 0, -1, -1
+        2, 3, 5, 3, 2, 0, 2, 3,
+        0, 2, 3, 5, 3, 2, 0, 2,
+        2, 3, 5, 7, 5, 3, 2, 0,
+        0, 2, 3, 5, 3, 2, 0, 2
     ];
-    /** Upper sparkle / counter */
     var HIGH_DEG = [
-        7, -1, 10, -1, 7, -1, 12, -1,
-        7, -1, 10, -1, 12, -1, 10, -1,
-        7, -1, 10, 12, -1, 10, -1, 7,
-        -1, 7, -1, 10, 12, 10, 7, -1
+        7, 10, 12, 10, 7, 5, 7, 10,
+        12, 10, 7, 10, 12, 14, 12, 10,
+        7, 10, 12, 14, 12, 10, 7, 5,
+        7, 10, 12, 14, 12, 10, 7, 5
     ];
-    /** Walking bass fill degrees (every 2 steps) */
-    var BASS_WALK = [0, 2, 3, 5, 3, 2, 0, -2];
+    var ARP_A = [0, 3, 5, 7, 8, 7, 5, 3];
+    var ARP_B = [5, 7, 8, 10, 8, 7, 5, 3];
+    var BASS_WALK = [0, 2, 3, 5, 7, 5, 3, 2];
 
     var engine = {
         ctx: null,
@@ -71,7 +76,7 @@
         osc.frequency.setValueAtTime(freq, time);
         var v = Math.max(0.0001, vol);
         g.gain.setValueAtTime(0.0001, time);
-        g.gain.exponentialRampToValueAtTime(v, time + 0.016);
+        g.gain.exponentialRampToValueAtTime(v, time + 0.014);
         g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
         osc.connect(g);
         g.connect(engine.bus);
@@ -81,7 +86,7 @@
 
     function scheduleMelody(time, midi, dur, vol) {
         var ctx = engine.ctx;
-        if (!ctx || !engine.bus || midi == null) return;
+        if (!ctx || !engine.bus) return;
         var freq = noteFreq(midi);
         var oscA = ctx.createOscillator();
         var oscB = ctx.createOscillator();
@@ -89,19 +94,19 @@
         oscA.type = "triangle";
         oscB.type = "sine";
         oscA.frequency.setValueAtTime(freq, time);
-        oscB.frequency.setValueAtTime(freq * 1.005, time);
+        oscB.frequency.setValueAtTime(freq * 1.006, time);
         var v = Math.max(0.0001, vol);
         g.gain.setValueAtTime(0.0001, time);
-        g.gain.exponentialRampToValueAtTime(v, time + 0.018);
-        g.gain.setValueAtTime(v * 0.88, time + dur * 0.5);
+        g.gain.exponentialRampToValueAtTime(v, time + 0.016);
+        g.gain.setValueAtTime(v * 0.9, time + dur * 0.45);
         g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
         oscA.connect(g);
         oscB.connect(g);
         g.connect(engine.bus);
         oscA.start(time);
         oscB.start(time);
-        oscA.stop(time + dur + 0.07);
-        oscB.stop(time + dur + 0.07);
+        oscA.stop(time + dur + 0.06);
+        oscB.stop(time + dur + 0.06);
     }
 
     function scheduleKick(time) {
@@ -113,18 +118,18 @@
         osc.frequency.setValueAtTime(110, time);
         osc.frequency.exponentialRampToValueAtTime(48, time + 0.09);
         g.gain.setValueAtTime(0.0001, time);
-        g.gain.exponentialRampToValueAtTime(0.34, time + 0.004);
-        g.gain.exponentialRampToValueAtTime(0.0001, time + 0.13);
+        g.gain.exponentialRampToValueAtTime(0.32, time + 0.004);
+        g.gain.exponentialRampToValueAtTime(0.0001, time + 0.12);
         osc.connect(g);
         g.connect(engine.bus);
         osc.start(time);
-        osc.stop(time + 0.18);
+        osc.stop(time + 0.17);
     }
 
     function scheduleHat(time, vol) {
         var ctx = engine.ctx;
         if (!ctx || !engine.bus) return;
-        var len = Math.max(1, Math.floor(ctx.sampleRate * 0.03));
+        var len = Math.max(1, Math.floor(ctx.sampleRate * 0.028));
         var buf = ctx.createBuffer(1, len, ctx.sampleRate);
         var d = buf.getChannelData(0);
         for (var i = 0; i < len; i++) {
@@ -137,12 +142,12 @@
         hp.type = "highpass";
         hp.frequency.value = 5200;
         g.gain.setValueAtTime(vol, time);
-        g.gain.exponentialRampToValueAtTime(0.0001, time + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001, time + 0.028);
         src.connect(hp);
         hp.connect(g);
         g.connect(engine.bus);
         src.start(time);
-        src.stop(time + 0.035);
+        src.stop(time + 0.032);
     }
 
     function schedulePad(time, chord, dur, vol) {
@@ -162,45 +167,33 @@
             var bar = Math.floor(step / 8) % 4;
             var t = engine.nextTick;
             var chord = CHORDS[bar];
-            var leadDeg = LEAD_DEG[step];
-            var harmDeg = HARM_DEG[step];
-            var highDeg = HIGH_DEG[step];
+            var half = stepLen * 0.48;
 
             if (step % 8 === 0) scheduleKick(t);
             if (step === 12 || step === 28) scheduleKick(t);
-
-            if (step % 2 === 0) scheduleHat(t, 0.048);
-            else scheduleHat(t, 0.03);
+            scheduleHat(t, step % 2 === 0 ? 0.044 : 0.032);
 
             if (step % 4 === 0) {
-                scheduleTone(t, noteFreq(BASS[bar]), stepLen * 1.7, "triangle", 0.1);
-            } else if (step % 2 === 0) {
-                var walk = BASS_WALK[step % 8];
-                scheduleTone(t, noteFreq(CHORDS[bar][0] + walk), stepLen * 0.9, "triangle", 0.055);
+                scheduleTone(t, noteFreq(BASS[bar]), stepLen * 1.65, "triangle", 0.092);
+            } else {
+                scheduleTone(t, noteFreq(CHORDS[bar][0] + BASS_WALK[step % 8]), stepLen * 0.85, "triangle", 0.05);
             }
 
-            var arpDeg = [0, 3, 5, 7, 5, 3, 5, 10][step % 8];
-            scheduleTone(t, melodyMidi(bar, arpDeg), stepLen * 0.55, "triangle", 0.052);
+            var arpDeg = (step % 2 === 0 ? ARP_A : ARP_B)[step % 8];
+            scheduleTone(t, melodyMidi(bar, arpDeg), stepLen * 0.5, "triangle", 0.048);
+            scheduleTone(t + half, melodyMidi(bar, arpDeg + 2), stepLen * 0.42, "triangle", 0.034);
 
-            if (step % 8 === 0) {
-                schedulePad(t, chord, spb * 3.8, 0.018);
-            }
+            if (step % 8 === 0) schedulePad(t, chord, spb * 3.6, 0.017);
 
-            if (leadDeg >= 0) {
-                scheduleMelody(t, melodyMidi(bar, leadDeg), stepLen * 1.05, 0.068);
-            }
-
-            if (harmDeg >= 0) {
-                scheduleMelody(t, melodyMidi(bar, harmDeg), stepLen * 0.85, 0.04);
-            }
-
-            if (highDeg >= 0) {
-                scheduleMelody(t, melodyMidi(bar, highDeg), stepLen * 0.65, 0.036);
-            }
+            scheduleMelody(t, melodyMidi(bar, LEAD_DEG[step]), stepLen * 1.02, 0.062);
+            scheduleMelody(t + half, melodyMidi(bar, LEAD2_DEG[step]), stepLen * 0.78, 0.048);
+            scheduleMelody(t, melodyMidi(bar, HARM_DEG[step]), stepLen * 0.88, 0.038);
+            scheduleMelody(t + half, melodyMidi(bar, HIGH_DEG[step]), stepLen * 0.62, 0.034);
 
             if (step === LOOP_STEPS - 1) {
-                scheduleMelody(t + stepLen * 0.5, melodyMidi(0, 0), stepLen * 2, 0.055);
-                scheduleMelody(t + stepLen * 0.5, melodyMidi(0, 3), stepLen * 1.6, 0.042);
+                scheduleMelody(t + half, melodyMidi(0, 0), stepLen * 1.8, 0.058);
+                scheduleMelody(t + half, melodyMidi(0, 5), stepLen * 1.4, 0.045);
+                scheduleMelody(t + stepLen, melodyMidi(0, 7), stepLen * 1.2, 0.04);
             }
 
             engine.step++;
@@ -247,7 +240,7 @@
     }
 
     function setRate(r) {
-        engine.rateMul = Math.max(0.78, Math.min(1.38, r || 1));
+        engine.rateMul = Math.max(0.82, Math.min(RATE_MAX, r || 1));
     }
 
     function isPlaying() {
