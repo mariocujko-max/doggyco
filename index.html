@@ -2534,22 +2534,21 @@ function getLevelProgress(lvl) {
     if (L <= 14) return (L - 1) / 13;
     return 1 + (L - 14) * 0.07;
 }
-/** Spieltempo: steigt schneller pro Level */
+/** Spieltempo: moderat mit dem Level */
 function getSpeedMult(lvl) {
-    let L = Math.max(1, lvl);
-    let speedAt1 = 1.38;
-    let speedAt12 = 1.35 + ((12 - 1) * (1.28 / 11));
-    let progress = Math.min(1, (L - 1) / 10);
-    let base = speedAt1 + progress * (speedAt12 - speedAt1);
-    if (L > 12) base += (L - 12) * 0.055;
+    let speedAt2 = 1.35 + ((2 - 1) * (1.15 / 11));
+    let speedAt12 = 1.35 + ((12 - 1) * (1.15 / 11));
+    let progress = getLevelProgress(lvl);
+    let base = speedAt2 + Math.min(progress, 1) * (speedAt12 - speedAt2);
+    if (lvl > 14) base += (lvl - 14) * 0.04;
     return base;
 }
-/** Musik-Tempo: steigt deutlich schneller je Level */
+/** Musik-Tempo: leicht schneller je Level (nicht hektisch) */
 function getMusicRate(lvl) {
     let L = Math.max(1, lvl);
-    let base = 0.94 + (L - 1) * 0.032;
-    if (L > 10) base += (L - 10) * 0.018;
-    return Math.min(1.52, base);
+    let base = 0.96 + (L - 1) * 0.01;
+    if (L > 12) base += (L - 12) * 0.006;
+    return Math.min(1.16, base);
 }
 
 function getPtsScaling(lvl, speedMult) {
@@ -3010,7 +3009,7 @@ function loop(t) {
         let targetRate = getMusicRate(capLvl);
         if (window.DoggyCoMusic && DoggyCoMusic.isPlaying()) {
             if (typeof window.__musicRate !== "number") window.__musicRate = targetRate;
-            window.__musicRate += (targetRate - window.__musicRate) * Math.min(1, dt * 4.2);
+            window.__musicRate += (targetRate - window.__musicRate) * Math.min(1, dt * 2.0);
             DoggyCoMusic.setRate(window.__musicRate);
         } else {
             let bgMusic = document.getElementById("snd-action");
