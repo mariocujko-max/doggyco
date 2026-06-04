@@ -2521,9 +2521,9 @@ function getSpeedMult(lvl) {
 /** Musik-Tempo: leicht schneller je Level (nicht hektisch) */
 function getMusicRate(lvl) {
     let L = Math.max(1, lvl);
-    let base = 0.96 + (L - 1) * 0.01;
-    if (L > 12) base += (L - 12) * 0.006;
-    return Math.min(1.16, base);
+    let base = 0.9 + (L - 1) * 0.005;
+    if (L > 12) base += (L - 12) * 0.003;
+    return Math.min(1.06, base);
 }
 
 function getPtsScaling(lvl, speedMult) {
