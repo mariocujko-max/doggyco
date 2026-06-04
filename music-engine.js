@@ -1,17 +1,18 @@
 /**
- * DOGGYCO MISSION – procedural arcade BGM
- * Seamless loop, soft dynamics (no MP3 crackle / loop gaps).
+ * DOGGYCO MISSION – Arcade-Hook (Am → F → C → G)
+ * Echte 8-Takt-Phrase, keine Zufallstöne. Nahtlose Schleife.
  */
 (function (global) {
     "use strict";
 
-    var BPM = 126;
-    var LOOKAHEAD = 0.18;
-    var TICK_MS = 20;
+    var BPM = 118;
+    var LOOKAHEAD = 0.14;
+    var TICK_MS = 24;
     var LOOP_STEPS = 32;
-    var MASTER_GAIN = 1.38;
-    var RATE_MAX = 1.55;
+    var MASTER_GAIN = 1.32;
+    var RATE_MAX = 1.22;
 
+    /** Akkorde: Am, F, C, G */
     var CHORDS = [
         [57, 60, 64],
         [53, 57, 60],
@@ -20,33 +21,30 @@
     ];
     var BASS = [45, 41, 36, 43];
 
+    /**
+     * Hauptmelodie – durchkomponiert, nur Akkordtöne (Grad zur Tonika je Takt)
+     * Takt 1–2: Am | 3–4: F | 5–6: C | 7–8: G → Auflösung
+     */
     var LEAD_DEG = [
-        0, 3, 5, 3, 5, 7, 5, 3,
-        2, 3, 5, 7, 8, 7, 5, 3,
-        0, 3, 5, 7, 8, 7, 5, 3,
-        2, 0, 3, 5, 7, 8, 7, 5
+        0, 3, 5, 7, 5, 3, 0, -1,
+        0, 3, 5, 3, 2, 0, -1, -1,
+        0, 3, 5, 7, 5, 3, 0, -1,
+        2, 0, -1, -1, 0, 3, 0, -1
     ];
-    var LEAD2_DEG = [
-        5, 7, 8, 7, 5, 3, 2, 0,
-        3, 5, 7, 5, 3, 2, 0, 2,
-        5, 7, 8, 10, 8, 7, 5, 3,
-        2, 3, 5, 7, 5, 3, 2, 0
-    ];
+    /** Leise Begleitung – Terzen zur Melodie */
     var HARM_DEG = [
-        2, 3, 5, 3, 2, 0, 2, 3,
-        0, 2, 3, 5, 3, 2, 0, 2,
-        2, 3, 5, 7, 5, 3, 2, 0,
-        0, 2, 3, 5, 3, 2, 0, 2
+        -1, -1, 3, -1, -1, 0, -1, -1,
+        -1, -1, 2, -1, -1, -1, -1, -1,
+        -1, -1, 3, -1, -1, 0, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1
     ];
+    /** Hohe Verzierung nur an Phrasenenden */
     var HIGH_DEG = [
-        7, 10, 12, 10, 7, 5, 7, 10,
-        12, 10, 7, 10, 12, 14, 12, 10,
-        7, 10, 12, 14, 12, 10, 7, 5,
-        7, 10, 12, 14, 12, 10, 7, 5
+        -1, -1, -1, -1, -1, -1, 7, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, 7, -1,
+        -1, -1, -1, -1, -1, -1, 10, -1
     ];
-    var ARP_A = [0, 3, 5, 7, 8, 7, 5, 3];
-    var ARP_B = [5, 7, 8, 10, 8, 7, 5, 3];
-    var BASS_WALK = [0, 2, 3, 5, 7, 5, 3, 2];
 
     var engine = {
         ctx: null,
@@ -76,12 +74,12 @@
         osc.frequency.setValueAtTime(freq, time);
         var v = Math.max(0.0001, vol);
         g.gain.setValueAtTime(0.0001, time);
-        g.gain.exponentialRampToValueAtTime(v, time + 0.014);
+        g.gain.exponentialRampToValueAtTime(v, time + 0.02);
         g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
         osc.connect(g);
         g.connect(engine.bus);
         osc.start(time);
-        osc.stop(time + dur + 0.05);
+        osc.stop(time + dur + 0.06);
     }
 
     function scheduleMelody(time, midi, dur, vol) {
@@ -94,19 +92,19 @@
         oscA.type = "triangle";
         oscB.type = "sine";
         oscA.frequency.setValueAtTime(freq, time);
-        oscB.frequency.setValueAtTime(freq * 1.006, time);
+        oscB.frequency.setValueAtTime(freq * 1.003, time);
         var v = Math.max(0.0001, vol);
         g.gain.setValueAtTime(0.0001, time);
-        g.gain.exponentialRampToValueAtTime(v, time + 0.016);
-        g.gain.setValueAtTime(v * 0.9, time + dur * 0.45);
+        g.gain.exponentialRampToValueAtTime(v, time + 0.022);
+        g.gain.setValueAtTime(v * 0.82, time + dur * 0.55);
         g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
         oscA.connect(g);
         oscB.connect(g);
         g.connect(engine.bus);
         oscA.start(time);
         oscB.start(time);
-        oscA.stop(time + dur + 0.06);
-        oscB.stop(time + dur + 0.06);
+        oscA.stop(time + dur + 0.08);
+        oscB.stop(time + dur + 0.08);
     }
 
     function scheduleKick(time) {
@@ -115,45 +113,53 @@
         var osc = ctx.createOscillator();
         var g = ctx.createGain();
         osc.type = "sine";
-        osc.frequency.setValueAtTime(110, time);
-        osc.frequency.exponentialRampToValueAtTime(48, time + 0.09);
+        osc.frequency.setValueAtTime(100, time);
+        osc.frequency.exponentialRampToValueAtTime(52, time + 0.1);
         g.gain.setValueAtTime(0.0001, time);
-        g.gain.exponentialRampToValueAtTime(0.32, time + 0.004);
-        g.gain.exponentialRampToValueAtTime(0.0001, time + 0.12);
+        g.gain.exponentialRampToValueAtTime(0.26, time + 0.005);
+        g.gain.exponentialRampToValueAtTime(0.0001, time + 0.14);
         osc.connect(g);
         g.connect(engine.bus);
         osc.start(time);
-        osc.stop(time + 0.17);
+        osc.stop(time + 0.2);
     }
 
     function scheduleHat(time, vol) {
         var ctx = engine.ctx;
         if (!ctx || !engine.bus) return;
-        var len = Math.max(1, Math.floor(ctx.sampleRate * 0.028));
+        var len = Math.max(1, Math.floor(ctx.sampleRate * 0.03));
         var buf = ctx.createBuffer(1, len, ctx.sampleRate);
         var d = buf.getChannelData(0);
         for (var i = 0; i < len; i++) {
-            d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+            d[i] = (Math.random() * 2 - 1) * (1 - i / len) * 0.7;
         }
         var src = ctx.createBufferSource();
         var g = ctx.createGain();
         var hp = ctx.createBiquadFilter();
         src.buffer = buf;
         hp.type = "highpass";
-        hp.frequency.value = 5200;
+        hp.frequency.value = 6000;
         g.gain.setValueAtTime(vol, time);
-        g.gain.exponentialRampToValueAtTime(0.0001, time + 0.028);
+        g.gain.exponentialRampToValueAtTime(0.0001, time + 0.03);
         src.connect(hp);
         hp.connect(g);
         g.connect(engine.bus);
         src.start(time);
-        src.stop(time + 0.032);
+        src.stop(time + 0.035);
     }
 
     function schedulePad(time, chord, dur, vol) {
         chord.forEach(function (n) {
             scheduleTone(time, noteFreq(n + 12), dur, "sine", vol);
         });
+    }
+
+    /** Arpeggio nur Akkord: Grund–Terz–Quinte */
+    function scheduleChordArp(time, bar, stepLen) {
+        var chord = CHORDS[bar];
+        scheduleTone(time, noteFreq(chord[0] + 12), stepLen * 0.45, "triangle", 0.032);
+        scheduleTone(time + stepLen * 0.5, noteFreq(chord[1] + 12), stepLen * 0.4, "triangle", 0.028);
+        scheduleTone(time + stepLen, noteFreq(chord[2] + 12), stepLen * 0.4, "triangle", 0.026);
     }
 
     function schedulerTick() {
@@ -167,33 +173,36 @@
             var bar = Math.floor(step / 8) % 4;
             var t = engine.nextTick;
             var chord = CHORDS[bar];
-            var half = stepLen * 0.48;
+            var leadDeg = LEAD_DEG[step];
+            var harmDeg = HARM_DEG[step];
+            var highDeg = HIGH_DEG[step];
 
             if (step % 8 === 0) scheduleKick(t);
-            if (step === 12 || step === 28) scheduleKick(t);
-            scheduleHat(t, step % 2 === 0 ? 0.044 : 0.032);
+            if (step % 4 === 0) scheduleHat(t, 0.034);
 
-            if (step % 4 === 0) {
-                scheduleTone(t, noteFreq(BASS[bar]), stepLen * 1.65, "triangle", 0.092);
-            } else {
-                scheduleTone(t, noteFreq(CHORDS[bar][0] + BASS_WALK[step % 8]), stepLen * 0.85, "triangle", 0.05);
+            if (step % 8 === 0) {
+                scheduleTone(t, noteFreq(BASS[bar]), stepLen * 3.2, "triangle", 0.088);
+                schedulePad(t, chord, spb * 3.9, 0.014);
             }
 
-            var arpDeg = (step % 2 === 0 ? ARP_A : ARP_B)[step % 8];
-            scheduleTone(t, melodyMidi(bar, arpDeg), stepLen * 0.5, "triangle", 0.048);
-            scheduleTone(t + half, melodyMidi(bar, arpDeg + 2), stepLen * 0.42, "triangle", 0.034);
+            if (step % 8 === 0) {
+                scheduleChordArp(t + stepLen * 2, bar, stepLen);
+            }
 
-            if (step % 8 === 0) schedulePad(t, chord, spb * 3.6, 0.017);
+            if (leadDeg >= 0) {
+                scheduleMelody(t, melodyMidi(bar, leadDeg), stepLen * 1.15, 0.058);
+            }
 
-            scheduleMelody(t, melodyMidi(bar, LEAD_DEG[step]), stepLen * 1.02, 0.062);
-            scheduleMelody(t + half, melodyMidi(bar, LEAD2_DEG[step]), stepLen * 0.78, 0.048);
-            scheduleMelody(t, melodyMidi(bar, HARM_DEG[step]), stepLen * 0.88, 0.038);
-            scheduleMelody(t + half, melodyMidi(bar, HIGH_DEG[step]), stepLen * 0.62, 0.034);
+            if (harmDeg >= 0) {
+                scheduleMelody(t, melodyMidi(bar, harmDeg), stepLen * 0.95, 0.03);
+            }
+
+            if (highDeg >= 0) {
+                scheduleMelody(t, melodyMidi(bar, highDeg), stepLen * 0.7, 0.028);
+            }
 
             if (step === LOOP_STEPS - 1) {
-                scheduleMelody(t + half, melodyMidi(0, 0), stepLen * 1.8, 0.058);
-                scheduleMelody(t + half, melodyMidi(0, 5), stepLen * 1.4, 0.045);
-                scheduleMelody(t + stepLen, melodyMidi(0, 7), stepLen * 1.2, 0.04);
+                scheduleMelody(t + stepLen * 0.5, melodyMidi(0, 0), stepLen * 1.6, 0.05);
             }
 
             engine.step++;
@@ -208,11 +217,11 @@
         engine.bus = ctx.createGain();
         engine.bus.gain.value = MASTER_GAIN;
         engine.comp = ctx.createDynamicsCompressor();
-        engine.comp.threshold.setValueAtTime(-18, ctx.currentTime);
-        engine.comp.knee.setValueAtTime(10, ctx.currentTime);
-        engine.comp.ratio.setValueAtTime(3, ctx.currentTime);
-        engine.comp.attack.setValueAtTime(0.003, ctx.currentTime);
-        engine.comp.release.setValueAtTime(0.1, ctx.currentTime);
+        engine.comp.threshold.setValueAtTime(-20, ctx.currentTime);
+        engine.comp.knee.setValueAtTime(12, ctx.currentTime);
+        engine.comp.ratio.setValueAtTime(3.2, ctx.currentTime);
+        engine.comp.attack.setValueAtTime(0.004, ctx.currentTime);
+        engine.comp.release.setValueAtTime(0.12, ctx.currentTime);
         engine.bus.connect(engine.comp);
         engine.comp.connect(destNode);
     }
@@ -240,7 +249,7 @@
     }
 
     function setRate(r) {
-        engine.rateMul = Math.max(0.82, Math.min(RATE_MAX, r || 1));
+        engine.rateMul = Math.max(0.88, Math.min(RATE_MAX, r || 1));
     }
 
     function isPlaying() {
