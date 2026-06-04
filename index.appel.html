@@ -288,15 +288,10 @@
             filter: drop-shadow(0 0 16px var(--neon));
         }
         .hud-pyramid-art .star-main {
-            filter: drop-shadow(0 0 8px var(--neon));
+            filter: drop-shadow(0 0 14px var(--neon)) drop-shadow(0 0 6px rgba(0,242,255,0.9));
         }
-        .hud-pyramid-art .star-flare {
-            fill: none;
-            stroke: rgba(0,242,255,0.92);
-            stroke-width: 1.8;
-            stroke-linecap: round;
-            stroke-dasharray: 2 3;
-            opacity: 0.9;
+        .hud-pyramid-art .star-inner {
+            opacity: 0.88;
         }
         .hud-pyramid-art {
             position: absolute;
@@ -442,6 +437,11 @@
             0% { transform: scale(1); filter: brightness(1); }
             35% { transform: scale(1.55); filter: brightness(1.45) drop-shadow(0 0 12px #00ff88); }
             100% { transform: scale(1); filter: brightness(1); }
+        }
+        #hp-txt.hp-3 {
+            font-size: clamp(16px, 3.8vw, 22px);
+            letter-spacing: -5px;
+            transform: scaleX(0.9);
         }
         #hp-txt.hp-txt-loss { animation: hpLossBurst 0.58s ease-out; }
         #hp-txt.hp-txt-gain { animation: hpGainPop 0.65s ease-out; }
@@ -623,7 +623,17 @@
         .panel-silver h3 { color: var(--silver); border-bottom-color: var(--silver); }
 
         .btn-char { padding: 12px 2px; border-radius: 15px; border: 2px solid var(--neon); background: rgba(0,0,0,0.4); color: #fff; cursor: pointer; font-family: 'Orbitron'; font-size: 11px; font-weight: bold; transition: 0.1s; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 0 var(--neon), 0 5px 10px rgba(0,0,0,0.2); transform: translateY(0); flex-shrink: 0; }
-        .btn-char span { font-size: 32px; margin-bottom: 5px; }
+        .btn-char .char-head { font-size: 32px; margin-bottom: 4px; line-height: 1; }
+        .btn-char .char-name { font-size: 11px; margin-bottom: 2px; line-height: 1; }
+        .btn-char .char-lvl {
+            font-size: 8px;
+            font-weight: 700;
+            opacity: 0.78;
+            letter-spacing: 0.3px;
+            margin-bottom: 0;
+            line-height: 1.1;
+            color: rgba(255,255,255,0.88);
+        }
         .char-head {
             display: inline-block;
             transform-origin: 50% 70%;
@@ -1098,18 +1108,16 @@
                                     <stop offset="100%" stop-color="#003844"/>
                                 </linearGradient>
                             </defs>
-                            <!-- Star (Level symbol) -->
-                            <polygon class="star-main" fill="url(#starGrad)" stroke="rgba(255,255,255,0.7)" stroke-width="1.8"
-                                points="32,3 39,21 59,21 43,33 49,55 32,43 15,55 21,33 5,21 25,21"/>
-                            <polygon fill="rgba(255,255,255,0.26)" stroke="none"
-                                points="32,11 36,22 48,22 38.5,29 42,42 32,35 22,42 25.5,29 16,22 28,22"/>
-                            <polygon class="star-flare" points="32,3 39,21 59,21 43,33 49,55 32,43 15,55 21,33 5,21 25,21"/>
+                            <polygon class="star-main" fill="url(#starGrad)" stroke="none"
+                                points="32,5 37.2,20.5 54,20.5 40.8,31.2 46,50 32,40.5 18,50 23.2,31.2 10,20.5 26.8,20.5"/>
+                            <polygon class="star-inner" fill="rgba(0,242,255,0.4)" stroke="none"
+                                points="32,13 35.5,21 45,21 38,27 41,38 32,32.5 23,38 26,27 19,21 28.5,21"/>
                         </svg>
                         <span id="lvl-txt">1</span>
                     </div>
                 </div>
                 <div class="hud-quarter" aria-label="Leben">
-                    <div id="hp-txt" class="stat hud-hp">❤️❤️❤️</div>
+                    <div id="hp-txt" class="stat hud-hp hp-3">❤️❤️❤️</div>
                 </div>
                 <div class="hud-quarter" aria-label="Punkte">
                     <div id="score-odo" class="hud-odometer" aria-live="polite"></div>
@@ -1163,18 +1171,20 @@
                 <!-- Level-Auswahl mit versiegeltem Cyborg-Button -->
                 <div style="display:flex; flex-direction:column; gap:10px; width:100%; align-items: center;">
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
-                        <button class="btn-char" style="border-color:var(--neon); flex:1;" onclick="start('dog', 1)"><span class="char-head head-1">🐶</span>DOG</button>
-                        <button class="btn-char" style="border-color:var(--cat); flex:1;" onclick="start('cat', 3)"><span class="char-head head-2">🐱</span>CAT</button>
-                        <button class="btn-char" style="border-color:var(--rabbit); flex:1;" onclick="start('rabbit', 5)"><span class="char-head head-3">🐰</span>RABBIT</button>
+                        <button class="btn-char" style="border-color:var(--neon); flex:1;" onclick="start('dog', 1)"><span class="char-head head-1">🐶</span><span class="char-name">DOG</span><span class="char-lvl">LVL 1&2</span></button>
+                        <button class="btn-char" style="border-color:var(--cat); flex:1;" onclick="start('cat', 3)"><span class="char-head head-2">🐱</span><span class="char-name">CAT</span><span class="char-lvl">LVL 3&4</span></button>
+                        <button class="btn-char" style="border-color:var(--rabbit); flex:1;" onclick="start('rabbit', 5)"><span class="char-head head-3">🐰</span><span class="char-name">RABBIT</span><span class="char-lvl">LVL 5&6</span></button>
                     </div>
                     <div style="display:flex; justify-content:center; gap:8px; width:100%;">
-                        <button class="btn-char" style="border-color:var(--fox); flex:1;" onclick="start('fox', 7)"><span class="char-head head-4">🦊</span>FOX</button>
-                        <button class="btn-char" style="border-color:var(--panda); flex:1;" onclick="start('panda', 9)"><span class="char-head head-5">🐼</span>PANDA</button>
-                        <button class="btn-char" style="border-color:var(--unicorn); flex:1;" onclick="start('unicorn', 11)"><span class="char-head head-6">🦄</span>UNICORN</button>
+                        <button class="btn-char" style="border-color:var(--fox); flex:1;" onclick="start('fox', 7)"><span class="char-head head-4">🦊</span><span class="char-name">FOX</span><span class="char-lvl">LVL 7&8</span></button>
+                        <button class="btn-char" style="border-color:var(--panda); flex:1;" onclick="start('panda', 9)"><span class="char-head head-5">🐼</span><span class="char-name">PANDA</span><span class="char-lvl">LVL 9&10</span></button>
+                        <button class="btn-char" style="border-color:var(--unicorn); flex:1;" onclick="start('unicorn', 11)"><span class="char-head head-6">🦄</span><span class="char-name">UNICORN</span><span class="char-lvl">LVL 11&12</span></button>
                     </div>
                     <div class="level-cyborg-row">
                         <button id="btn-cyborg" type="button" class="btn-char btn-cyborg-lock" onclick="startCyborg()" aria-label="Level 13 Cyborg">
                             <span id="cyborg-icon" class="char-head head-6">🔒</span>
+                            <span class="char-name">CYBORG</span>
+                            <span class="char-lvl">LVL 13</span>
                         </button>
                     </div>
                 </div>
@@ -2085,13 +2095,17 @@ window.addEventListener("keydown", function(e) {
 function triggerVibration(pattern) {
     if ("vibrate" in navigator) {
         try {
-            if (window.__isAndroid && typeof pattern === 'number') {
-                if (pattern <= 20) navigator.vibrate([10, 18, 14]);
-                else if (pattern <= 70) navigator.vibrate([28, 22, 55]);
-                else navigator.vibrate([70, 35, 110]);
-            } else {
-                navigator.vibrate(pattern);
+            var vibe = pattern;
+            if (window.__isAndroid) {
+                if (typeof pattern === "number") {
+                    vibe = Math.min(500, Math.round(pattern * 1.6));
+                } else if (Array.isArray(pattern)) {
+                    vibe = pattern.map(function (n, i) {
+                        return Math.min(500, Math.round(n * (i % 2 === 0 ? 1.35 : 1)));
+                    });
+                }
             }
+            navigator.vibrate(vibe);
             return;
         } catch(e) {}
     }
@@ -2236,8 +2250,15 @@ function sfxMagnet() {
     } catch(e){}
 }
 
-function sfxCollect() { playTone(600, 'sine', 0.1, 0.4); setTimeout(() => playTone(1200, 'sine', 0.15, 0.4), 80); }
-function sfxStarCollect() { [800, 1000, 1200].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.1, 0.4), i*50)); }
+function sfxCollect() {
+    playTone(600, 'sine', 0.1, 0.4);
+    setTimeout(() => playTone(1200, 'sine', 0.15, 0.4), 80);
+    if (window.__isAndroid) triggerVibration(24);
+}
+function sfxStarCollect() {
+    [800, 1000, 1200].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.1, 0.4), i*50));
+    if (window.__isAndroid) triggerVibration([28, 36, 48]);
+}
 function sfxHit() { playTone(150, 'sawtooth', 0.3, 0.6); setTimeout(() => playTone(100, 'square', 0.4, 0.6), 100); }
 function sfxHeartLost() {
     playTone(85, 'sawtooth', 0.18, 0.85 * sfxGainMul());
@@ -2263,7 +2284,10 @@ function spawnHeartBurst(x, y, isGain) {
 }
 function refreshHpHud(prevHp, fxX, fxY) {
     let el = document.getElementById("hp-txt");
-    if (el) el.innerText = "❤️".repeat(Math.max(0, hp));
+    if (el) {
+        el.innerText = "❤️".repeat(Math.max(0, hp));
+        el.classList.toggle("hp-3", hp === 3);
+    }
     let px = fxX !== undefined ? fxX : playerX;
     let py = fxY !== undefined ? fxY : (typeof getPlayerY === 'function' ? getPlayerY() : H / 2);
     if (hp < prevHp) {
@@ -3211,7 +3235,11 @@ function loop(t) {
             }
         }
 
-        document.getElementById("hp-txt").innerText = "❤️".repeat(Math.max(0, hp));
+        let hpEl = document.getElementById("hp-txt");
+        if (hpEl) {
+            hpEl.innerText = "❤️".repeat(Math.max(0, hp));
+            hpEl.classList.toggle("hp-3", hp === 3);
+        }
         updateScoreHud(score);
         updateTimeHud(timeLeft, missionComplete);
         updateLevelHud(level);
