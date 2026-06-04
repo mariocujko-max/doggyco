@@ -9,7 +9,7 @@
     var LOOKAHEAD = 0.18;
     var TICK_MS = 20;
     var LOOP_STEPS = 32;
-    var MASTER_GAIN = 1.42;
+    var MASTER_GAIN = 1.52;
     var RATE_MAX = 1.1;
 
     var CHORDS = [
@@ -70,10 +70,14 @@
     }
 
     function energyMul(energy) {
-        if (energy === 0) return { sub: 0.55, low: 0.5, high: 0.45, lead: 0.35, kick: 0.7, hat: 0.5 };
-        if (energy === 1) return { sub: 0.8, low: 0.75, high: 0.7, lead: 0.65, kick: 0.9, hat: 0.75 };
-        if (energy === 2) return { sub: 1.15, low: 1.1, high: 1.2, lead: 1.1, kick: 1.15, hat: 1.1 };
-        return { sub: 0.85, low: 0.8, high: 0.95, lead: 0.75, kick: 0.85, hat: 0.8 };
+        if (energy === 0) return { sub: 0.38, low: 0.35, high: 0.32, lead: 0.25, kick: 0.55, hat: 0.35, stab: 0.3 };
+        if (energy === 1) return { sub: 0.95, low: 0.9, high: 0.85, lead: 0.8, kick: 1.05, hat: 0.95, stab: 0.75 };
+        if (energy === 2) return { sub: 1.45, low: 1.4, high: 1.5, lead: 1.35, kick: 1.4, hat: 1.35, stab: 1.2 };
+        return { sub: 0.7, low: 0.65, high: 0.75, lead: 0.6, kick: 0.75, hat: 0.65, stab: 0.55 };
+    }
+
+    function stepInPhase(step) {
+        return step % 8;
     }
 
     function scheduleMelody(time, midi, dur, vol) {
@@ -201,8 +205,53 @@
     function scheduleStab(time, bar, vol) {
         var chord = CHORDS[bar];
         chord.forEach(function (n, i) {
-            scheduleHigh(time, n + 24, 0.12, vol * (i === 0 ? 1 : 0.6));
+            scheduleHigh(time, n + 24, 0.14, vol * (i === 0 ? 1 : 0.65));
         });
+        scheduleSub(time, BASS[bar], 0.2, vol * 0.9);
+    }
+
+    function scheduleImpact(time, vol) {
+        var ctx = engine.ctx;
+        if (!ctx || !engine.bus) return;
+        var osc = ctx.createOscillator();
+        var g = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(55, time);
+        osc.frequency.exponentialRampToValueAtTime(28, time + 0.25);
+        g.gain.setValueAtTime(0.0001, time);
+        g.gain.exponentialRampToValueAtTime(vol, time + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, time + 0.35);
+        osc.connect(g);
+        g.connect(engine.bus);
+        osc.start(time);
+        osc.stop(time + 0.4);
+    }
+
+    function scheduleRiser(time, dur, vol) {
+        var ctx = engine.ctx;
+        if (!ctx || !engine.bus) return;
+        var len = Math.max(1, Math.floor(ctx.sampleRate * dur));
+        var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+        var d = buf.getChannelData(0);
+        for (var i = 0; i < len; i++) {
+            d[i] = (Math.random() * 2 - 1) * (i / len);
+        }
+        var src = ctx.createBufferSource();
+        var bp = ctx.createBiquadFilter();
+        var g = ctx.createGain();
+        src.buffer = buf;
+        bp.type = "bandpass";
+        bp.frequency.setValueAtTime(400, time);
+        bp.frequency.exponentialRampToValueAtTime(6000, time + dur);
+        bp.Q.value = 2.5;
+        g.gain.setValueAtTime(0.0001, time);
+        g.gain.linearRampToValueAtTime(vol, time + dur * 0.85);
+        g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+        src.connect(bp);
+        bp.connect(g);
+        g.connect(engine.bus);
+        src.start(time);
+        src.stop(time + dur + 0.02);
     }
 
     function schedulerTick() {
@@ -223,16 +272,22 @@
             var lowDeg = LOW_PULSE[step % 8];
             var half = stepLen * 0.5;
 
-            if (step % 8 === 0) scheduleKick(t, 0.32 * em.kick);
-            if (energy >= 2 && step % 4 === 2) scheduleKick(t, 0.22 * em.kick);
+            var sip = stepInPhase(step);
+
+            if (step % 8 === 0) scheduleKick(t, 0.36 * em.kick);
+            if (energy >= 1 && step % 4 === 2) scheduleKick(t, 0.28 * em.kick);
+            if (energy === 2 && (step % 2 === 1)) scheduleKick(t, 0.26 * em.kick);
 
             if (energy === 0) {
-                if (step % 4 === 0) scheduleHat(t, 0.02 * em.hat);
+                if (step % 8 === 4) scheduleHat(t, 0.018 * em.hat);
             } else if (energy === 1) {
-                if (step % 2 === 1) scheduleHat(t, 0.03 * em.hat);
+                if (step % 2 === 1) scheduleHat(t, 0.042 * em.hat);
+                if (sip >= 5) scheduleHat(t + half, 0.055 * em.hat);
+            } else if (energy === 2) {
+                scheduleHat(t, 0.055 * em.hat);
+                if (step % 2 === 0) scheduleHat(t + half, 0.045 * em.hat);
             } else {
-                if (step % 2 === 1) scheduleHat(t, 0.048 * em.hat);
-                else if (step % 4 === 0) scheduleHat(t, 0.032 * em.hat);
+                if (step % 2 === 1) scheduleHat(t, 0.038 * em.hat);
             }
 
             if (step % 8 === 0) {
@@ -254,27 +309,52 @@
             }
 
             if (energy >= 1) {
-                scheduleHigh(t, highMidi(bar, highDeg), stepLen * 0.6, 0.05 * em.high);
+                scheduleHigh(t, highMidi(bar, highDeg), stepLen * 0.65, 0.058 * em.high);
                 if (energy >= 2) {
-                    scheduleHigh(t + half, highMidi(bar, highDeg + 3), stepLen * 0.4, 0.038 * em.high);
+                    scheduleHigh(t + half, highMidi(bar, highDeg + 3), stepLen * 0.45, 0.048 * em.high);
                 }
+            }
+            if (energy === 1 && sip >= 4) {
+                scheduleHigh(t, highMidi(bar, highDeg + 5), stepLen * 0.4, 0.05 * em.high);
             }
 
             if (leadDeg >= 0 && energy >= 1) {
-                scheduleMelody(t, toneMidi(bar, leadDeg), stepLen * 0.95, 0.055 * em.lead);
+                var leadVol = 0.062 * em.lead;
+                if (energy === 2) leadVol *= 1.15;
+                scheduleMelody(t, toneMidi(bar, leadDeg), stepLen * 0.95, leadVol);
+            }
+            if (energy === 2 && leadDeg >= 0 && sip % 2 === 0) {
+                scheduleMelody(t + half, toneMidi(bar, leadDeg + 2), stepLen * 0.5, 0.045 * em.lead);
             }
 
-            if (energy === 2 && step % 8 === 6) {
-                scheduleStab(t, bar, 0.07);
+            if (energy === 1 && sip === 6) {
+                scheduleRiser(t, stepLen * 4.2, 0.12 * em.high);
+            }
+            if (energy === 1 && sip === 7) {
+                scheduleImpact(t, 0.14 * em.stab);
+                scheduleMelody(t, toneMidi(bar, 12), stepLen * 0.5, 0.07 * em.lead);
             }
 
-            if (phase === 1 && step % 8 === 7) {
-                scheduleMelody(t, toneMidi(bar, 12), stepLen * 0.35, 0.04 * em.lead);
+            if (energy === 2 && sip === 0) {
+                scheduleImpact(t, 0.2 * em.stab);
+                scheduleStab(t, bar, 0.14 * em.stab);
+                scheduleKick(t, 0.4 * em.kick);
+            }
+            if (energy === 2 && (sip === 4 || sip === 6)) {
+                scheduleStab(t, bar, 0.11 * em.stab);
+            }
+
+            if (phase === 0 && sip === 7) {
+                scheduleImpact(t, 0.08);
+            }
+            if (phase === 3 && sip === 0) {
+                scheduleStab(t, bar, 0.09 * em.stab);
             }
 
             if (step === LOOP_STEPS - 1) {
-                scheduleMelody(t + half, toneMidi(0, 0), stepLen * 1.4, 0.06);
-                scheduleStab(t + stepLen, 0, 0.05);
+                scheduleImpact(t, 0.16);
+                scheduleMelody(t + half, toneMidi(0, 0), stepLen * 1.6, 0.08);
+                scheduleStab(t + stepLen, 0, 0.1 * em.stab);
             }
 
             engine.step++;
