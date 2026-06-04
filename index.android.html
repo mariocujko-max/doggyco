@@ -1276,7 +1276,8 @@
 
 </div>
 
-<audio id="snd-action" src="music.mp3" loop preload="metadata"></audio>
+<audio id="snd-action" preload="none" playsinline aria-hidden="true"></audio>
+<script src="music-engine.js"></script>
 
 <script>
 // Vollbild: nur auf Touch / nicht-PC-Geräten (Windows-Desktop mit Maus bleibt Fenster-Modus für Edge)
@@ -1349,6 +1350,7 @@ function forceFullscreen() {
 }
 
 function stopGameMusic() {
+    if (window.DoggyCoMusic) DoggyCoMusic.stop();
     let bgMusic = document.getElementById("snd-action");
     if (!bgMusic) return;
     try {
@@ -1402,7 +1404,7 @@ function manageMedia(action) {
 }
 
 /** Hintergrundmusik leiser, damit Spiel-SFX (Bewegung, Treffer) hörbar bleiben */
-var MUSIC_VOL_CAP = 0.14;
+var MUSIC_VOL_CAP = 0.29;
 var SFX_VOL_MUL = 1.35;
 var energyLowWarned = false;
 var cyborgWasLocked = true;
@@ -1601,16 +1603,14 @@ function revalidateWindowsShell() {
 }
 
 function playGameMusic() {
-    let bgMusic = document.getElementById("snd-action");
-    if (!bgMusic || isMenuVideoPlaying()) return;
+    if (isMenuVideoPlaying()) return;
     stopMenuVideos();
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
-    bgMusic.muted = false;
-    try { bgMusic.playbackRate = getMusicRate(Math.max(level, 1)); } catch(e) { bgMusic.playbackRate = 1.0; }
     applyMusicVolume();
-    if (!bgMusic.paused && bgMusic.currentTime > 0.2) return;
-    let p = bgMusic.play();
-    if (p && p.catch) p.catch(function () {});
+    if (window.DoggyCoMusic && useMusicWebAudio()) {
+        DoggyCoMusic.setRate(getMusicRate(Math.max(level, 1)));
+        if (!DoggyCoMusic.isPlaying()) DoggyCoMusic.start();
+    }
 }
 
 function needsLevelCountdown(startLvl) {
@@ -1643,8 +1643,6 @@ function prewarmGameAssets() {
     if (gameAssetsWarmed) return;
     gameAssetsWarmed = true;
     try { initGameCanvas(); resizeCanvas(); } catch (e) {}
-    let bg = document.getElementById('snd-action');
-    if (bg && bg.readyState < 2) { try { bg.load(); } catch (e) {} }
     [document.getElementById('dog-video'), document.getElementById('dog-video2')].forEach(function (v) {
         if (v && v.readyState < 1) { try { v.load(); } catch (e) {} }
     });
@@ -1733,13 +1731,11 @@ function initAudioContext() {
             }
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
-            let bgMusic = document.getElementById("snd-action");
-            if (bgMusic && !window.musicRouted) {
-                window.musicSource = audioCtx.createMediaElementSource(bgMusic);
+            if (!window.musicRouted && window.DoggyCoMusic) {
                 window.musicGain = audioCtx.createGain();
                 window.musicGain.gain.value = musicGainLevel();
-                window.musicSource.connect(window.musicGain);
                 window.musicGain.connect(audioCtx.destination);
+                DoggyCoMusic.init(audioCtx, window.musicGain);
                 window.musicRouted = true;
             }
         } catch(e) { console.log(e); }
@@ -1749,20 +1745,17 @@ function initAudioContext() {
 function unlockSystem() {
     initAudioContext();
     prewarmGameAssets();
-
-    let bgMusic = document.getElementById("snd-action");
-    if (bgMusic) {
-        stopGameMusic();
-        bgMusic.muted = true;
-        let p1 = bgMusic.play();
-        if (p1) {
-            p1.then(function () {
-                stopGameMusic();
-                bgMusic.muted = false;
-            }).catch(function () { bgMusic.muted = false; });
-        } else {
-            bgMusic.muted = false;
-        }
+    try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
+    if (audioCtx) {
+        try {
+            var u = audioCtx.createOscillator();
+            var ug = audioCtx.createGain();
+            ug.gain.value = 0.0001;
+            u.connect(ug);
+            ug.connect(audioCtx.destination);
+            u.start();
+            u.stop(audioCtx.currentTime + 0.02);
+        } catch (e) {}
     }
 
     if (!dogHasSpoken) {
@@ -2075,11 +2068,12 @@ function hapticGameOver() { triggerVibration([200, 60, 200, 60, 280]); }
 function resumeGameAudio() {
     try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
     if (isMenuVideoPlaying()) return;
-    let bgMusic = document.getElementById("snd-action");
-    if (!bgMusic || !active || missionComplete) return;
+    if (!active || missionComplete) return;
     applyMusicVolume();
-    try { bgMusic.playbackRate = getMusicRate(Math.max(level, 1)); } catch (e) {}
-    if (bgMusic.paused) bgMusic.play().catch(function () {});
+    if (window.DoggyCoMusic && useMusicWebAudio()) {
+        DoggyCoMusic.setRate(getMusicRate(Math.max(level, 1)));
+        if (!DoggyCoMusic.isPlaying()) DoggyCoMusic.start();
+    }
 }
 
 document.addEventListener("visibilitychange", function() {
@@ -2536,7 +2530,7 @@ function getLevelProgress(lvl) {
     if (L <= 14) return (L - 1) / 13;
     return 1 + (L - 14) * 0.07;
 }
-/** Spieltempo: steigt über Level 14 hinaus weiter */
+/** Spieltempo: moderat mit dem Level */
 function getSpeedMult(lvl) {
     let speedAt2 = 1.35 + ((2 - 1) * (1.15 / 11));
     let speedAt12 = 1.35 + ((12 - 1) * (1.15 / 11));
@@ -2545,14 +2539,12 @@ function getSpeedMult(lvl) {
     if (lvl > 14) base += (lvl - 14) * 0.04;
     return base;
 }
-/** Musik-Tempo parallel zum Spiel */
+/** Musik-Tempo: leicht schneller je Level (nicht hektisch) */
 function getMusicRate(lvl) {
-    let rateAt2 = 0.92;
-    let rateAt12 = 1.08;
-    let progress = getLevelProgress(lvl);
-    let base = rateAt2 + Math.min(progress, 1) * (rateAt12 - rateAt2);
-    if (lvl > 14) base = Math.min(1.35, base + (lvl - 14) * 0.02);
-    return base;
+    let L = Math.max(1, lvl);
+    let base = 0.96 + (L - 1) * 0.01;
+    if (L > 12) base += (L - 12) * 0.006;
+    return Math.min(1.16, base);
 }
 
 function getPtsScaling(lvl, speedMult) {
@@ -3009,16 +3001,11 @@ function loop(t) {
 
         let colDist = W / 10;
 
-        let bgMusic = document.getElementById("snd-action");
-        if (bgMusic && !bgMusic.paused) {
-            try {
-                let targetRate = getMusicRate(capLvl);
-                let step = (targetRate - bgMusic.playbackRate) * 2.0 * dt;
-                if(Math.abs(step) > 0.001) {
-                    let newRate = bgMusic.playbackRate + step;
-                    if(newRate >= 0.5 && newRate <= 2.0) bgMusic.playbackRate = newRate;
-                }
-            } catch(e) {}
+        if (window.DoggyCoMusic && DoggyCoMusic.isPlaying()) {
+            var targetRate = getMusicRate(capLvl);
+            if (typeof window.__musicRate !== "number") window.__musicRate = targetRate;
+            window.__musicRate += (targetRate - window.__musicRate) * Math.min(1, dt * 2.0);
+            DoggyCoMusic.setRate(window.__musicRate);
         }
 
         if(invincibleTimer > 0) {
@@ -3038,7 +3025,8 @@ function loop(t) {
             if (iosMusicCheck <= 0) {
                 iosMusicCheck = 1.8;
                 let bm = document.getElementById("snd-action");
-                if (!isMenuVideoPlaying() && (bm.paused || (audioCtx && audioCtx.state === "suspended"))) resumeGameAudio();
+                var musicOff = window.DoggyCoMusic ? !DoggyCoMusic.isPlaying() : true;
+                if (!isMenuVideoPlaying() && (musicOff || (audioCtx && audioCtx.state === "suspended"))) resumeGameAudio();
             }
         }
 
