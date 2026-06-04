@@ -10,7 +10,7 @@
     var LOOKAHEAD = 0.16;
     var TICK_MS = 22;
     var LOOP_STEPS = 32;
-    var MASTER_GAIN = 1.28;
+    var MASTER_GAIN = 1.44;
     var RATE_MAX = 1.18;
 
     var CHORDS = [
@@ -21,12 +21,26 @@
     ];
     var BASS = [38, 34, 29, 36];
 
-    /** Mission-Hook (Komposition, nur Skalen-/Akkordtöne) */
+    /** Mission-Hook – Hauptmelodie */
     var LEAD_DEG = [
         0, 2, 3, 5, 7, 5, 3, 2,
-        0, 2, 3, 5, 5, 3, 2, 0,
-        0, 2, 3, 5, 7, 5, 3, 2,
-        5, 3, 2, 0, -1, -1, 0, -1
+        3, 5, 7, 5, 3, 2, 0, 2,
+        0, 2, 3, 5, 7, 8, 7, 5,
+        5, 3, 2, 0, 2, 0, 3, 0
+    ];
+    /** Antwort-/Gegenmelodie (versetzt) */
+    var LEAD2_DEG = [
+        5, 3, 2, 0, 3, 2, 0, 3,
+        5, 3, 2, 0, 2, 0, 2, 3,
+        5, 7, 5, 3, 2, 3, 5, 3,
+        2, 0, -1, 0, 2, 3, 2, 0
+    ];
+    /** Harmonie (Terzen) */
+    var HARM_DEG = [
+        -1, 2, -1, 3, -1, 2, -1, 0,
+        -1, 2, -1, 3, -1, 0, -1, 2,
+        -1, 2, -1, 3, -1, 2, -1, 0,
+        -1, -1, 0, -1, -1, 2, -1, 0
     ];
     var BASS_PULSE = [0, -1, 5, -1, 3, -1, 5, -1];
 
@@ -47,6 +61,36 @@
 
     function toneMidi(bar, degree) {
         return CHORDS[bar][0] + 24 + degree;
+    }
+
+    function scheduleMelody(time, midi, dur, vol) {
+        var ctx = engine.ctx;
+        if (!ctx || !engine.bus) return;
+        var freq = noteFreq(midi);
+        var oscA = ctx.createOscillator();
+        var oscB = ctx.createOscillator();
+        var filt = ctx.createBiquadFilter();
+        var g = ctx.createGain();
+        oscA.type = "triangle";
+        oscB.type = "sine";
+        oscA.frequency.setValueAtTime(freq, time);
+        oscB.frequency.setValueAtTime(freq * 1.005, time);
+        filt.type = "lowpass";
+        filt.frequency.setValueAtTime(4200, time);
+        filt.frequency.exponentialRampToValueAtTime(1600, time + dur * 0.75);
+        var v = Math.max(0.0001, vol);
+        g.gain.setValueAtTime(0.0001, time);
+        g.gain.exponentialRampToValueAtTime(v, time + 0.018);
+        g.gain.setValueAtTime(v * 0.85, time + dur * 0.5);
+        g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+        oscA.connect(filt);
+        oscB.connect(filt);
+        filt.connect(g);
+        g.connect(engine.bus);
+        oscA.start(time);
+        oscB.start(time);
+        oscA.stop(time + dur + 0.07);
+        oscB.stop(time + dur + 0.07);
     }
 
     function schedulePluck(time, midi, dur, vol) {
@@ -162,32 +206,42 @@
             var t = engine.nextTick;
             var chord = CHORDS[bar];
             var leadDeg = LEAD_DEG[step];
+            var lead2Deg = LEAD2_DEG[step];
+            var harmDeg = HARM_DEG[step];
             var bassDeg = BASS_PULSE[step % 8];
+            var half = stepLen * 0.5;
 
             if (step % 8 === 0) scheduleKick(t);
             if (step % 4 === 2) scheduleHat(t, 0.038);
             if (step % 2 === 1) scheduleHat(t, 0.022);
 
             if (step % 8 === 0) {
-                scheduleSub(t, BASS[bar], stepLen * 3.4, 0.1);
-                schedulePad(t, chord, spb * 3.85, 0.013);
+                scheduleSub(t, BASS[bar], stepLen * 3.4, 0.11);
+                schedulePad(t, chord, spb * 3.85, 0.015);
             }
 
             if (bassDeg >= 0) {
-                schedulePluck(t, toneMidi(bar, bassDeg), stepLen * 0.55, 0.042);
+                schedulePluck(t, toneMidi(bar, bassDeg), stepLen * 0.55, 0.045);
             }
 
             if (step % 2 === 0) {
                 var arp = [0, 3, 5, 7][Math.floor(step / 2) % 4];
-                schedulePluck(t, toneMidi(bar, arp), stepLen * 0.48, 0.03);
+                schedulePluck(t, toneMidi(bar, arp), stepLen * 0.48, 0.034);
             }
 
-            if (leadDeg >= 0) {
-                schedulePluck(t, toneMidi(bar, leadDeg), stepLen * 1.05, 0.055);
+            scheduleMelody(t, toneMidi(bar, leadDeg), stepLen * 1.08, 0.068);
+
+            if (lead2Deg >= 0) {
+                scheduleMelody(t + half, toneMidi(bar, lead2Deg), stepLen * 0.82, 0.048);
+            }
+
+            if (harmDeg >= 0) {
+                scheduleMelody(t, toneMidi(bar, harmDeg), stepLen * 0.92, 0.038);
             }
 
             if (step === LOOP_STEPS - 1) {
-                schedulePluck(t + stepLen * 0.5, toneMidi(0, 0), stepLen * 1.5, 0.05);
+                scheduleMelody(t + half, toneMidi(0, 0), stepLen * 1.6, 0.062);
+                scheduleMelody(t + half, toneMidi(0, 5), stepLen * 1.2, 0.048);
             }
 
             engine.step++;
