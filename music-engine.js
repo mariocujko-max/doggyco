@@ -178,6 +178,30 @@
         osc.stop(time + dur + 0.1);
     }
 
+    function schedulePad(time, chord, dur, vol) {
+        var ctx = engine.ctx;
+        if (!ctx || !engine.bus || !chord) return;
+        chord.forEach(function (n, i) {
+            var osc = ctx.createOscillator();
+            var g = ctx.createGain();
+            var f = ctx.createBiquadFilter();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(noteFreq(n + 12), time);
+            f.type = "lowpass";
+            f.frequency.value = 1400;
+            var v = vol * (i === 0 ? 1 : 0.55);
+            g.gain.setValueAtTime(0.0001, time);
+            g.gain.linearRampToValueAtTime(v, time + 0.06);
+            g.gain.setValueAtTime(v * 0.35, time + dur * 0.5);
+            g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+            osc.connect(f);
+            f.connect(g);
+            g.connect(engine.bus);
+            osc.start(time);
+            osc.stop(time + dur + 0.08);
+        });
+    }
+
     function scheduleKick(time, vol) {
         var ctx = engine.ctx;
         if (!ctx || !engine.bus) return;
@@ -304,7 +328,7 @@
 
             if (step % 8 === 0) {
                 scheduleSub(t, BASS[bar], stepLen * 3.5, 0.13 * em.sub);
-                schedulePad(t, chord, spb * 3.9, 0.014 * em.sub);
+                schedulePad(t, CHORDS[bar], spb * 3.9, 0.014 * em.sub);
                 if (energy >= 1) scheduleSub(t, BASS[bar] - 12, stepLen * 2.8, 0.08 * em.sub);
             }
             if (step % 4 === 0) {
