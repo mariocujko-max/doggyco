@@ -20,12 +20,12 @@
     ];
     var BASS = [38, 34, 29, 36];
 
-    /** Spielerische Melodie – Sprünge & Pausen */
+    /** Melodie – wenig Pausen, Aufbau wird dichter */
     var LEAD_DEG = [
-        -1, -1, 0, 3, -1, 5, 3, -1,
-        -1, 0, 3, 5, 7, 5, -1, -1,
-        0, 3, 7, 10, 7, 3, 0, -1,
-        5, 3, 0, -1, -1, 2, 0, -1
+        0, 2, 0, 3, 2, 3, 5, 3,
+        0, 2, 3, 5, 3, 5, 7, 5,
+        3, 5, 7, 10, 7, 5, 7, 10,
+        7, 5, 3, 2, 0, 2, 3, 0
     ];
     var HIGH_DEG = [
         7, 5, 7, 10, 12, 10, 7, 5,
@@ -70,14 +70,31 @@
     }
 
     function energyMul(energy) {
-        if (energy === 0) return { sub: 0.38, low: 0.35, high: 0.32, lead: 0.25, kick: 0.55, hat: 0.35, stab: 0.3 };
-        if (energy === 1) return { sub: 0.95, low: 0.9, high: 0.85, lead: 0.8, kick: 1.05, hat: 0.95, stab: 0.75 };
-        if (energy === 2) return { sub: 1.45, low: 1.4, high: 1.5, lead: 1.35, kick: 1.4, hat: 1.35, stab: 1.2 };
-        return { sub: 0.7, low: 0.65, high: 0.75, lead: 0.6, kick: 0.75, hat: 0.65, stab: 0.55 };
+        if (energy === 0) return { sub: 0.55, low: 0.5, high: 0.48, lead: 0.45, kick: 0.58, hat: 0.44, stab: 0.38 };
+        if (energy === 1) return { sub: 0.88, low: 0.84, high: 0.8, lead: 0.76, kick: 0.92, hat: 0.86, stab: 0.72 };
+        if (energy === 2) return { sub: 1.75, low: 1.7, high: 1.85, lead: 1.65, kick: 1.8, hat: 1.75, stab: 1.55 };
+        return { sub: 0.62, low: 0.56, high: 0.54, lead: 0.52, kick: 0.65, hat: 0.5, stab: 0.48 };
     }
 
     function stepInPhase(step) {
         return step % 8;
+    }
+
+    /** Aufbau: kontinuierlich steigern, aber nie zu leise */
+    function buildTensionMul(sip) {
+        return 0.82 + (sip / 7) * 0.45;
+    }
+
+    function scaleEm(em, mul) {
+        return {
+            sub: em.sub * mul,
+            low: em.low * mul,
+            high: em.high * mul,
+            lead: em.lead * mul,
+            kick: em.kick * mul,
+            hat: em.hat * mul,
+            stab: em.stab * mul
+        };
     }
 
     function scheduleMelody(time, midi, dur, vol) {
@@ -266,73 +283,69 @@
             var phase = Math.floor(step / 8);
             var energy = getSection(step);
             var em = energyMul(energy);
+            var sip = stepInPhase(step);
+            if (energy === 1) {
+                em = scaleEm(em, buildTensionMul(sip));
+            }
             var t = engine.nextTick;
             var leadDeg = LEAD_DEG[step];
             var highDeg = HIGH_DEG[step];
             var lowDeg = LOW_PULSE[step % 8];
             var half = stepLen * 0.5;
 
-            var sip = stepInPhase(step);
-
             if (step % 8 === 0) scheduleKick(t, 0.36 * em.kick);
             if (energy >= 1 && step % 4 === 2) scheduleKick(t, 0.28 * em.kick);
+            if (energy === 1 && sip >= 2 && step % 4 === 0) scheduleKick(t, 0.22 * em.kick);
             if (energy === 2 && (step % 2 === 1)) scheduleKick(t, 0.26 * em.kick);
 
-            if (energy === 0) {
-                if (step % 8 === 4) scheduleHat(t, 0.018 * em.hat);
-            } else if (energy === 1) {
-                if (step % 2 === 1) scheduleHat(t, 0.042 * em.hat);
-                if (sip >= 5) scheduleHat(t + half, 0.055 * em.hat);
-            } else if (energy === 2) {
-                scheduleHat(t, 0.055 * em.hat);
-                if (step % 2 === 0) scheduleHat(t + half, 0.045 * em.hat);
-            } else {
-                if (step % 2 === 1) scheduleHat(t, 0.038 * em.hat);
-            }
+            if (step % 2 === 1) scheduleHat(t, 0.032 * em.hat);
+            if (energy >= 1 && step % 2 === 0) scheduleHat(t + half, 0.038 * em.hat);
+            if (energy === 2) scheduleHat(t + half, 0.042 * em.hat);
 
             if (step % 8 === 0) {
                 scheduleSub(t, BASS[bar], stepLen * 3.5, 0.13 * em.sub);
+                schedulePad(t, chord, spb * 3.9, 0.014 * em.sub);
                 if (energy >= 1) scheduleSub(t, BASS[bar] - 12, stepLen * 2.8, 0.08 * em.sub);
+            }
+            if (step % 4 === 0) {
+                scheduleSub(t, BASS[bar], stepLen * 1.5, 0.075 * em.sub);
             }
 
             if (energy >= 1 && step % 4 === 0) {
                 scheduleSub(t, BASS[bar], stepLen * 1.6, 0.09 * em.sub);
             }
+            if (energy === 1 && step % 2 === 0) {
+                scheduleSub(t, BASS[bar], stepLen * 1.2, 0.07 * em.sub);
+            }
 
+            if (step % 2 === 0) {
+                scheduleLow(t, lowMidi(bar, lowDeg), stepLen * 0.68, 0.062 * em.low);
+            }
             if (energy >= 1 && step % 2 === 0) {
-                scheduleLow(t, lowMidi(bar, lowDeg), stepLen * 0.65, 0.07 * em.low);
-            }
-
-            if (energy === 2 && step % 2 === 0) {
                 var arp = [0, 3, 5, 7][step % 4];
-                scheduleLow(t, lowMidi(bar, arp), stepLen * 0.45, 0.06 * em.low);
+                scheduleLow(t, lowMidi(bar, arp), stepLen * 0.48, 0.052 * em.low);
             }
 
-            if (energy >= 1) {
-                scheduleHigh(t, highMidi(bar, highDeg), stepLen * 0.65, 0.058 * em.high);
-                if (energy >= 2) {
-                    scheduleHigh(t + half, highMidi(bar, highDeg + 3), stepLen * 0.45, 0.048 * em.high);
-                }
-            }
-            if (energy === 1 && sip >= 4) {
-                scheduleHigh(t, highMidi(bar, highDeg + 5), stepLen * 0.4, 0.05 * em.high);
+            scheduleHigh(t, highMidi(bar, highDeg), stepLen * 0.72, 0.05 * em.high);
+            scheduleHigh(t + half, highMidi(bar, highDeg + 2), stepLen * 0.52, 0.038 * em.high);
+            if (energy >= 1 && sip >= 3) {
+                scheduleHigh(t, highMidi(bar, highDeg + 5), stepLen * 0.48, 0.042 * em.high);
             }
 
-            if (leadDeg >= 0 && energy >= 1) {
-                var leadVol = 0.062 * em.lead;
-                if (energy === 2) leadVol *= 1.15;
-                scheduleMelody(t, toneMidi(bar, leadDeg), stepLen * 0.95, leadVol);
-            }
-            if (energy === 2 && leadDeg >= 0 && sip % 2 === 0) {
-                scheduleMelody(t + half, toneMidi(bar, leadDeg + 2), stepLen * 0.5, 0.045 * em.lead);
-            }
+            var leadVol = 0.052 * em.lead;
+            if (energy === 2) leadVol = 0.072 * em.lead;
+            scheduleMelody(t, toneMidi(bar, leadDeg), stepLen * 1.1, leadVol);
+            scheduleMelody(t + half, toneMidi(bar, leadDeg + (energy >= 2 ? 2 : 1)), stepLen * 0.8, leadVol * 0.72);
 
-            if (energy === 1 && sip === 6) {
-                scheduleRiser(t, stepLen * 4.2, 0.12 * em.high);
+            if (energy === 1 && sip === 2) {
+                scheduleRiser(t, stepLen * 3, 0.04 * em.high);
+            }
+            if (energy === 1 && sip === 4) {
+                scheduleRiser(t, stepLen * 8, 0.14 * em.high);
             }
             if (energy === 1 && sip === 7) {
-                scheduleImpact(t, 0.14 * em.stab);
-                scheduleMelody(t, toneMidi(bar, 12), stepLen * 0.5, 0.07 * em.lead);
+                scheduleImpact(t, 0.16 * em.stab);
+                scheduleMelody(t, toneMidi(bar, 12), stepLen * 0.55, 0.08 * em.lead);
             }
 
             if (energy === 2 && sip === 0) {
@@ -345,10 +358,13 @@
             }
 
             if (phase === 0 && sip === 7) {
-                scheduleImpact(t, 0.08);
+                scheduleRiser(t, stepLen * 2.5, 0.035);
             }
-            if (phase === 3 && sip === 0) {
-                scheduleStab(t, bar, 0.09 * em.stab);
+            if (energy === 2 && sip === 7) {
+                scheduleImpact(t, 0.12 * em.stab);
+            }
+            if (energy === 3 && sip === 0) {
+                scheduleImpact(t, 0.1 * em.stab);
             }
 
             if (step === LOOP_STEPS - 1) {
