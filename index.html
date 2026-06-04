@@ -1270,7 +1270,8 @@
 
 </div>
 
-<audio id="snd-action" src="music.mp3" loop preload="metadata"></audio>
+<audio id="snd-action" preload="none" playsinline></audio>
+<script src="music-engine.js"></script>
 
 <script>
 // Vollbild: nur auf Touch / nicht-PC-Geräten (Windows-Desktop mit Maus bleibt Fenster-Modus für Edge)
@@ -1343,6 +1344,7 @@ function forceFullscreen() {
 }
 
 function stopGameMusic() {
+    if (window.DoggyCoMusic) DoggyCoMusic.stop();
     let bgMusic = document.getElementById("snd-action");
     if (!bgMusic) return;
     try {
@@ -1579,13 +1581,19 @@ function revalidateWindowsShell() {
 }
 
 function playGameMusic() {
-    let bgMusic = document.getElementById("snd-action");
-    if (!bgMusic || isMenuVideoPlaying()) return;
+    if (isMenuVideoPlaying()) return;
     stopMenuVideos();
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
+    applyMusicVolume();
+    if (window.DoggyCoMusic && useMusicWebAudio()) {
+        DoggyCoMusic.setRate(getMusicRate(Math.max(level, 1)));
+        if (!DoggyCoMusic.isPlaying()) DoggyCoMusic.start();
+        return;
+    }
+    let bgMusic = document.getElementById("snd-action");
+    if (!bgMusic || !bgMusic.getAttribute("src")) return;
     bgMusic.muted = false;
     try { bgMusic.playbackRate = getMusicRate(Math.max(level, 1)); } catch(e) { bgMusic.playbackRate = 1.0; }
-    applyMusicVolume();
     if (!bgMusic.paused && bgMusic.currentTime > 0.2) return;
     let p = bgMusic.play();
     if (p && p.catch) p.catch(function () {});
@@ -1622,7 +1630,7 @@ function prewarmGameAssets() {
     gameAssetsWarmed = true;
     try { initGameCanvas(); resizeCanvas(); } catch (e) {}
     let bg = document.getElementById('snd-action');
-    if (bg && bg.readyState < 2) { try { bg.load(); } catch (e) {} }
+    if (bg && bg.getAttribute('src') && bg.readyState < 2) { try { bg.load(); } catch (e) {} }
     [document.getElementById('dog-video'), document.getElementById('dog-video2')].forEach(function (v) {
         if (v && v.readyState < 1) { try { v.load(); } catch (e) {} }
     });
@@ -1711,13 +1719,19 @@ function initAudioContext() {
             }
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
-            let bgMusic = document.getElementById("snd-action");
-            if (bgMusic && !window.musicRouted) {
-                window.musicSource = audioCtx.createMediaElementSource(bgMusic);
+            if (!window.musicRouted) {
                 window.musicGain = audioCtx.createGain();
                 window.musicGain.gain.value = musicGainLevel();
-                window.musicSource.connect(window.musicGain);
                 window.musicGain.connect(audioCtx.destination);
+                if (window.DoggyCoMusic) {
+                    DoggyCoMusic.init(audioCtx, window.musicGain);
+                } else {
+                    let bgMusic = document.getElementById("snd-action");
+                    if (bgMusic && bgMusic.getAttribute("src")) {
+                        window.musicSource = audioCtx.createMediaElementSource(bgMusic);
+                        window.musicSource.connect(window.musicGain);
+                    }
+                }
                 window.musicRouted = true;
             }
         } catch(e) { console.log(e); }
@@ -1729,7 +1743,7 @@ function unlockSystem() {
     prewarmGameAssets();
 
     let bgMusic = document.getElementById("snd-action");
-    if (bgMusic) {
+    if (bgMusic && bgMusic.getAttribute("src")) {
         stopGameMusic();
         bgMusic.muted = true;
         let p1 = bgMusic.play();
@@ -2053,9 +2067,15 @@ function hapticGameOver() { triggerVibration([200, 60, 200, 60, 280]); }
 function resumeGameAudio() {
     try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
     if (isMenuVideoPlaying()) return;
-    let bgMusic = document.getElementById("snd-action");
-    if (!bgMusic || !active || missionComplete) return;
+    if (!active || missionComplete) return;
     applyMusicVolume();
+    if (window.DoggyCoMusic && useMusicWebAudio()) {
+        DoggyCoMusic.setRate(getMusicRate(Math.max(level, 1)));
+        if (!DoggyCoMusic.isPlaying()) DoggyCoMusic.start();
+        return;
+    }
+    let bgMusic = document.getElementById("snd-action");
+    if (!bgMusic || !bgMusic.getAttribute("src")) return;
     try { bgMusic.playbackRate = getMusicRate(Math.max(level, 1)); } catch (e) {}
     if (bgMusic.paused) bgMusic.play().catch(function () {});
 }
@@ -2988,16 +3008,22 @@ function loop(t) {
 
         let colDist = W / 10;
 
-        let bgMusic = document.getElementById("snd-action");
-        if (bgMusic && !bgMusic.paused) {
-            try {
-                let targetRate = getMusicRate(capLvl);
-                let step = (targetRate - bgMusic.playbackRate) * 2.0 * dt;
-                if(Math.abs(step) > 0.001) {
-                    let newRate = bgMusic.playbackRate + step;
-                    if(newRate >= 0.5 && newRate <= 2.0) bgMusic.playbackRate = newRate;
-                }
-            } catch(e) {}
+        let targetRate = getMusicRate(capLvl);
+        if (window.DoggyCoMusic && DoggyCoMusic.isPlaying()) {
+            if (typeof window.__musicRate !== "number") window.__musicRate = targetRate;
+            window.__musicRate += (targetRate - window.__musicRate) * Math.min(1, dt * 2.2);
+            DoggyCoMusic.setRate(window.__musicRate);
+        } else {
+            let bgMusic = document.getElementById("snd-action");
+            if (bgMusic && !bgMusic.paused) {
+                try {
+                    let step = (targetRate - bgMusic.playbackRate) * 2.0 * dt;
+                    if (Math.abs(step) > 0.001) {
+                        let newRate = bgMusic.playbackRate + step;
+                        if (newRate >= 0.5 && newRate <= 2.0) bgMusic.playbackRate = newRate;
+                    }
+                } catch (e) {}
+            }
         }
 
         if(invincibleTimer > 0) {
@@ -3016,8 +3042,11 @@ function loop(t) {
             iosMusicCheck -= dt;
             if (iosMusicCheck <= 0) {
                 iosMusicCheck = 1.8;
-                let bm = document.getElementById("snd-action");
-                if (!isMenuVideoPlaying() && (bm.paused || (audioCtx && audioCtx.state === "suspended"))) resumeGameAudio();
+                let musicPaused = window.DoggyCoMusic ? !DoggyCoMusic.isPlaying() : (function () {
+                    let bm = document.getElementById("snd-action");
+                    return bm && bm.paused;
+                })();
+                if (!isMenuVideoPlaying() && (musicPaused || (audioCtx && audioCtx.state === "suspended"))) resumeGameAudio();
             }
         }
 
