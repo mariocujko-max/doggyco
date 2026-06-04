@@ -5,11 +5,11 @@
 (function (global) {
     "use strict";
 
-    var BPM = 122;
-    var LOOKAHEAD = 0.14;
-    var TICK_MS = 24;
-    var LOOP_BEATS = 16;
-    var MASTER_GAIN = 1.22;
+    var BPM = 124;
+    var LOOKAHEAD = 0.16;
+    var TICK_MS = 22;
+    var LOOP_STEPS = 32;
+    var MASTER_GAIN = 1.38;
 
     var CHORDS = [
         [57, 60, 64],
@@ -19,20 +19,29 @@
     ];
     var BASS = [45, 41, 36, 43];
 
-    /** Lead hook: scale degrees per beat (-1 = rest) */
+    /** Main melody – 32 sixteenth steps (-1 = rest) */
     var LEAD_DEG = [
-        0, -1, 3, 5,
-        5, -1, 3, 0,
-        -2, -1, 0, 3,
-        5, 7, 5, 3
+        0, 3, 5, 3, 5, 7, 5, 3,
+        0, 2, 3, 5, 7, 5, 3, 2,
+        0, 3, 5, 7, 5, 3, 2, 0,
+        -2, 0, 3, 5, 7, 5, 3, 0
     ];
-    /** Counter-melody (8th feel, sparse) */
-    var COUNTER_DEG = [
-        -1, 2, -1, -1,
-        -1, 2, -1, 5,
-        -1, -1, 2, -1,
-        -1, -1, 2, -1
+    /** Harmony line (thirds/sixths under lead) */
+    var HARM_DEG = [
+        -1, -1, 2, -1, 2, -1, 0, -1,
+        -1, -1, 0, 2, -1, 0, -1, -1,
+        -1, -1, 2, -1, 0, -1, -1, -1,
+        -1, -1, 0, 2, -1, 0, -1, -1
     ];
+    /** Upper sparkle / counter */
+    var HIGH_DEG = [
+        7, -1, 10, -1, 7, -1, 12, -1,
+        7, -1, 10, -1, 12, -1, 10, -1,
+        7, -1, 10, 12, -1, 10, -1, 7,
+        -1, 7, -1, 10, 12, 10, 7, -1
+    ];
+    /** Walking bass fill degrees (every 2 steps) */
+    var BASS_WALK = [0, 2, 3, 5, 3, 2, 0, -2];
 
     var engine = {
         ctx: null,
@@ -42,7 +51,7 @@
         rateMul: 1,
         timer: null,
         nextTick: 0,
-        beat: 0
+        step: 0
     };
 
     function noteFreq(midi) {
@@ -62,12 +71,12 @@
         osc.frequency.setValueAtTime(freq, time);
         var v = Math.max(0.0001, vol);
         g.gain.setValueAtTime(0.0001, time);
-        g.gain.exponentialRampToValueAtTime(v, time + 0.018);
+        g.gain.exponentialRampToValueAtTime(v, time + 0.016);
         g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
         osc.connect(g);
         g.connect(engine.bus);
         osc.start(time);
-        osc.stop(time + dur + 0.06);
+        osc.stop(time + dur + 0.05);
     }
 
     function scheduleMelody(time, midi, dur, vol) {
@@ -80,19 +89,19 @@
         oscA.type = "triangle";
         oscB.type = "sine";
         oscA.frequency.setValueAtTime(freq, time);
-        oscB.frequency.setValueAtTime(freq * 1.004, time);
+        oscB.frequency.setValueAtTime(freq * 1.005, time);
         var v = Math.max(0.0001, vol);
         g.gain.setValueAtTime(0.0001, time);
-        g.gain.exponentialRampToValueAtTime(v, time + 0.02);
-        g.gain.setValueAtTime(v * 0.85, time + dur * 0.55);
+        g.gain.exponentialRampToValueAtTime(v, time + 0.018);
+        g.gain.setValueAtTime(v * 0.88, time + dur * 0.5);
         g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
         oscA.connect(g);
         oscB.connect(g);
         g.connect(engine.bus);
         oscA.start(time);
         oscB.start(time);
-        oscA.stop(time + dur + 0.08);
-        oscB.stop(time + dur + 0.08);
+        oscA.stop(time + dur + 0.07);
+        oscB.stop(time + dur + 0.07);
     }
 
     function scheduleKick(time) {
@@ -104,7 +113,7 @@
         osc.frequency.setValueAtTime(110, time);
         osc.frequency.exponentialRampToValueAtTime(48, time + 0.09);
         g.gain.setValueAtTime(0.0001, time);
-        g.gain.exponentialRampToValueAtTime(0.32, time + 0.004);
+        g.gain.exponentialRampToValueAtTime(0.34, time + 0.004);
         g.gain.exponentialRampToValueAtTime(0.0001, time + 0.13);
         osc.connect(g);
         g.connect(engine.bus);
@@ -115,7 +124,7 @@
     function scheduleHat(time, vol) {
         var ctx = engine.ctx;
         if (!ctx || !engine.bus) return;
-        var len = Math.max(1, Math.floor(ctx.sampleRate * 0.035));
+        var len = Math.max(1, Math.floor(ctx.sampleRate * 0.03));
         var buf = ctx.createBuffer(1, len, ctx.sampleRate);
         var d = buf.getChannelData(0);
         for (var i = 0; i < len; i++) {
@@ -126,14 +135,14 @@
         var hp = ctx.createBiquadFilter();
         src.buffer = buf;
         hp.type = "highpass";
-        hp.frequency.value = 5500;
+        hp.frequency.value = 5200;
         g.gain.setValueAtTime(vol, time);
-        g.gain.exponentialRampToValueAtTime(0.0001, time + 0.035);
+        g.gain.exponentialRampToValueAtTime(0.0001, time + 0.03);
         src.connect(hp);
         hp.connect(g);
         g.connect(engine.bus);
         src.start(time);
-        src.stop(time + 0.04);
+        src.stop(time + 0.035);
     }
 
     function schedulePad(time, chord, dur, vol) {
@@ -144,48 +153,58 @@
 
     function schedulerTick() {
         if (!engine.playing || !engine.ctx) return;
-        var ctx = engine.ctx;
         var spb = 60 / (BPM * engine.rateMul);
-        var now = ctx.currentTime;
+        var stepLen = spb / 2;
+        var now = engine.ctx.currentTime;
 
         while (engine.nextTick < now + LOOKAHEAD) {
-            var beat = engine.beat % LOOP_BEATS;
-            var bar = Math.floor(beat / 4) % 4;
+            var step = engine.step % LOOP_STEPS;
+            var bar = Math.floor(step / 8) % 4;
             var t = engine.nextTick;
             var chord = CHORDS[bar];
-            var leadDeg = LEAD_DEG[beat];
-            var counterDeg = COUNTER_DEG[beat];
+            var leadDeg = LEAD_DEG[step];
+            var harmDeg = HARM_DEG[step];
+            var highDeg = HIGH_DEG[step];
 
-            if (beat % 4 === 0) scheduleKick(t);
-            if (beat === 6 || beat === 14) scheduleKick(t);
+            if (step % 8 === 0) scheduleKick(t);
+            if (step === 12 || step === 28) scheduleKick(t);
 
-            if (beat % 2 === 0) scheduleHat(t, 0.042);
-            else scheduleHat(t, 0.026);
+            if (step % 2 === 0) scheduleHat(t, 0.048);
+            else scheduleHat(t, 0.03);
 
-            scheduleTone(t, noteFreq(BASS[bar]), spb * 0.78, "triangle", 0.085);
+            if (step % 4 === 0) {
+                scheduleTone(t, noteFreq(BASS[bar]), stepLen * 1.7, "triangle", 0.1);
+            } else if (step % 2 === 0) {
+                var walk = BASS_WALK[step % 8];
+                scheduleTone(t, noteFreq(CHORDS[bar][0] + walk), stepLen * 0.9, "triangle", 0.055);
+            }
 
-            var arpMidi = chord[beat % 3] + (beat < 8 ? 12 : 19);
-            scheduleTone(t, noteFreq(arpMidi), spb * 0.32, "triangle", 0.038);
+            var arpDeg = [0, 3, 5, 7, 5, 3, 5, 10][step % 8];
+            scheduleTone(t, melodyMidi(bar, arpDeg), stepLen * 0.55, "triangle", 0.052);
 
-            if (beat % 4 === 0) {
-                schedulePad(t, chord, spb * 3.6, 0.015);
+            if (step % 8 === 0) {
+                schedulePad(t, chord, spb * 3.8, 0.018);
             }
 
             if (leadDeg >= 0) {
-                scheduleMelody(t, melodyMidi(bar, leadDeg), spb * 0.92, 0.052);
+                scheduleMelody(t, melodyMidi(bar, leadDeg), stepLen * 1.05, 0.068);
             }
 
-            if (counterDeg >= 0) {
-                scheduleMelody(t + spb * 0.5, melodyMidi(bar, counterDeg), spb * 0.42, 0.028);
+            if (harmDeg >= 0) {
+                scheduleMelody(t, melodyMidi(bar, harmDeg), stepLen * 0.85, 0.04);
             }
 
-            if (beat === LOOP_BEATS - 1) {
-                schedulePad(t + spb * 0.5, CHORDS[0], spb * 2, 0.012);
-                scheduleMelody(t + spb * 0.25, melodyMidi(0, 0), spb * 1.1, 0.04);
+            if (highDeg >= 0) {
+                scheduleMelody(t, melodyMidi(bar, highDeg), stepLen * 0.65, 0.036);
             }
 
-            engine.beat++;
-            engine.nextTick += spb;
+            if (step === LOOP_STEPS - 1) {
+                scheduleMelody(t + stepLen * 0.5, melodyMidi(0, 0), stepLen * 2, 0.055);
+                scheduleMelody(t + stepLen * 0.5, melodyMidi(0, 3), stepLen * 1.6, 0.042);
+            }
+
+            engine.step++;
+            engine.nextTick += stepLen;
         }
     }
 
@@ -196,11 +215,11 @@
         engine.bus = ctx.createGain();
         engine.bus.gain.value = MASTER_GAIN;
         engine.comp = ctx.createDynamicsCompressor();
-        engine.comp.threshold.setValueAtTime(-20, ctx.currentTime);
-        engine.comp.knee.setValueAtTime(12, ctx.currentTime);
-        engine.comp.ratio.setValueAtTime(3.2, ctx.currentTime);
-        engine.comp.attack.setValueAtTime(0.004, ctx.currentTime);
-        engine.comp.release.setValueAtTime(0.12, ctx.currentTime);
+        engine.comp.threshold.setValueAtTime(-18, ctx.currentTime);
+        engine.comp.knee.setValueAtTime(10, ctx.currentTime);
+        engine.comp.ratio.setValueAtTime(3, ctx.currentTime);
+        engine.comp.attack.setValueAtTime(0.003, ctx.currentTime);
+        engine.comp.release.setValueAtTime(0.1, ctx.currentTime);
         engine.bus.connect(engine.comp);
         engine.comp.connect(destNode);
     }
@@ -209,7 +228,7 @@
         if (!engine.ctx || !engine.bus) return;
         if (engine.playing) return;
         engine.playing = true;
-        engine.beat = 0;
+        engine.step = 0;
         engine.nextTick = engine.ctx.currentTime + 0.06;
         if (engine.timer) clearInterval(engine.timer);
         engine.timer = setInterval(schedulerTick, TICK_MS);
