@@ -6,12 +6,12 @@
 (function (global) {
     "use strict";
 
-    var BPM = 126;
+    var BPM = 108;
     var LOOKAHEAD = 0.16;
     var TICK_MS = 22;
     var LOOP_STEPS = 32;
     var MASTER_GAIN = 1.44;
-    var RATE_MAX = 1.18;
+    var RATE_MAX = 1.1;
 
     var CHORDS = [
         [50, 53, 57],
@@ -28,19 +28,26 @@
         0, 2, 3, 5, 7, 8, 7, 5,
         5, 3, 2, 0, 2, 0, 3, 0
     ];
-    /** Antwort-/Gegenmelodie (versetzt) */
+    /** Gegenmelodie (Offbeat) */
     var LEAD2_DEG = [
         5, 3, 2, 0, 3, 2, 0, 3,
         5, 3, 2, 0, 2, 0, 2, 3,
-        5, 7, 5, 3, 2, 3, 5, 3,
-        2, 0, -1, 0, 2, 3, 2, 0
+        5, 7, 5, 3, 2, 3, 5, 7,
+        2, 0, 3, 2, 0, 3, 2, 0
     ];
-    /** Harmonie (Terzen) */
+    /** Harmonie */
     var HARM_DEG = [
-        -1, 2, -1, 3, -1, 2, -1, 0,
-        -1, 2, -1, 3, -1, 0, -1, 2,
-        -1, 2, -1, 3, -1, 2, -1, 0,
-        -1, -1, 0, -1, -1, 2, -1, 0
+        2, 3, 2, 3, 2, 0, 2, 3,
+        2, 3, 2, 0, 2, 0, 2, 3,
+        2, 3, 2, 3, 2, 0, 2, 3,
+        0, 2, 0, 2, 0, 2, 0, 2
+    ];
+    /** Hohe Linie (Verzierung) */
+    var HIGH_DEG = [
+        7, 5, 7, 10, 7, 5, 7, 5,
+        7, 5, 7, 10, 8, 7, 5, 7,
+        7, 10, 12, 10, 7, 10, 7, 5,
+        5, 7, 5, 3, 2, 3, 5, 7
     ];
     var BASS_PULSE = [0, -1, 5, -1, 3, -1, 5, -1];
 
@@ -208,12 +215,12 @@
             var leadDeg = LEAD_DEG[step];
             var lead2Deg = LEAD2_DEG[step];
             var harmDeg = HARM_DEG[step];
+            var highDeg = HIGH_DEG[step];
             var bassDeg = BASS_PULSE[step % 8];
             var half = stepLen * 0.5;
 
             if (step % 8 === 0) scheduleKick(t);
-            if (step % 4 === 2) scheduleHat(t, 0.038);
-            if (step % 2 === 1) scheduleHat(t, 0.022);
+            if (step % 8 === 4) scheduleHat(t, 0.032);
 
             if (step % 8 === 0) {
                 scheduleSub(t, BASS[bar], stepLen * 3.4, 0.11);
@@ -229,19 +236,14 @@
                 schedulePluck(t, toneMidi(bar, arp), stepLen * 0.48, 0.034);
             }
 
-            scheduleMelody(t, toneMidi(bar, leadDeg), stepLen * 1.08, 0.068);
-
-            if (lead2Deg >= 0) {
-                scheduleMelody(t + half, toneMidi(bar, lead2Deg), stepLen * 0.82, 0.048);
-            }
-
-            if (harmDeg >= 0) {
-                scheduleMelody(t, toneMidi(bar, harmDeg), stepLen * 0.92, 0.038);
-            }
+            scheduleMelody(t, toneMidi(bar, leadDeg), stepLen * 1.35, 0.072);
+            scheduleMelody(t + half, toneMidi(bar, lead2Deg), stepLen * 1.1, 0.052);
+            scheduleMelody(t, toneMidi(bar, harmDeg), stepLen * 1.15, 0.042);
+            scheduleMelody(t + half, toneMidi(bar, highDeg), stepLen * 0.75, 0.036);
 
             if (step === LOOP_STEPS - 1) {
-                scheduleMelody(t + half, toneMidi(0, 0), stepLen * 1.6, 0.062);
-                scheduleMelody(t + half, toneMidi(0, 5), stepLen * 1.2, 0.048);
+                scheduleMelody(t + half, toneMidi(0, 0), stepLen * 2, 0.065);
+                scheduleMelody(t + stepLen, toneMidi(0, 5), stepLen * 1.5, 0.05);
             }
 
             engine.step++;
@@ -288,7 +290,7 @@
     }
 
     function setRate(r) {
-        engine.rateMul = Math.max(0.88, Math.min(RATE_MAX, r || 1));
+        engine.rateMul = Math.max(0.82, Math.min(RATE_MAX, r || 1));
     }
 
     function isPlaying() {
