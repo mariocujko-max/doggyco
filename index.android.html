@@ -474,17 +474,36 @@
             padding: max(8px, env(safe-area-inset-top)) 0 max(8px, env(safe-area-inset-bottom));
             transition: opacity 0.5s ease;
             overflow: hidden;
+            pointer-events: auto;
+            touch-action: manipulation;
         }
         .gate-tap-layer {
-            position: fixed; inset: 0; z-index: 100;
+            position: absolute; inset: 0; z-index: 50;
             width: 100%; height: 100%;
             border: none; margin: 0; padding: 0;
             background: transparent; cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             color: transparent; font-size: 0;
+            pointer-events: auto;
+        }
+        .gate-tap-hint {
+            position: absolute;
+            left: 0; right: 0;
+            bottom: max(28px, env(safe-area-inset-bottom, 0px));
+            z-index: 40;
+            margin: 0;
+            text-align: center;
+            pointer-events: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(17px, 4.8vw, 24px);
+            font-weight: 700;
+            color: var(--neon);
+            letter-spacing: 0.14em;
+            text-shadow: 0 0 18px var(--neon), 0 0 36px var(--neon);
+            animation: pulseTap 1.1s ease-in-out infinite alternate;
         }
         .sw-crawl-wrap {
-            position: absolute; inset: 0;
+            position: absolute; inset: 0; z-index: 1;
             width: 100%; height: 100%;
             perspective: 900px;
             overflow: hidden;
@@ -1122,7 +1141,6 @@
 </div>
 
 <div id="scr-gatekeeper">
-    <button type="button" class="gate-tap-layer" id="gate-tap-btn" aria-label="Tap to start DOGGYCO Mission">Start</button>
     <div class="sw-crawl-wrap" aria-hidden="true">
         <div class="sw-crawl">
             <div class="sw-crawl-inner">
@@ -1133,10 +1151,11 @@
                 <p>🚀 Rocket = mega shield!<br>👽 Alien = magnet power!<br>🛸 UFO = bonus hearts!</p>
                 <p>Beat 12 crazy levels. Score 8,000 points to unlock secret CYBORG mode 🤖</p>
                 <p>Pick a codename. Pick a level. Let's roll!</p>
-                <span class="sw-tap">▶ TAP TO START ◀</span>
             </div>
         </div>
     </div>
+    <p class="gate-tap-hint" id="gate-tap-hint">TAP TO START</p>
+    <button type="button" class="gate-tap-layer" id="gate-tap-btn" aria-label="Tap to start DOGGYCO Mission">Start</button>
 </div>
 
 <div id="phone-container">
@@ -1897,14 +1916,32 @@ function initAudioContext() {
     } catch(e) { console.log(e); }
 }
 
+function showLevelSelectAfterGate() {
+    let gate = document.getElementById("scr-gatekeeper");
+    let startScr = document.getElementById("scr-start");
+    if (gate) {
+        gate.style.opacity = "0";
+        gate.style.pointerEvents = "none";
+    }
+    setTimeout(function () {
+        if (gate) gate.style.display = "none";
+        if (startScr) {
+            startScr.style.display = "block";
+            startScr.style.pointerEvents = "auto";
+            setTimeout(function () { startScr.style.opacity = "1"; }, 50);
+        }
+    }, 350);
+}
+
 function unlockSystem() {
     if (window.__gateUnlocked) return;
     window.__gateUnlocked = true;
+    showLevelSelectAfterGate();
     try { initAudioContext(); } catch (e) {}
     try { prewarmGameAssets(); } catch (e) {}
     try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
-    if (audioCtx) {
-        try {
+    try {
+        if (audioCtx) {
             var u = audioCtx.createOscillator();
             var ug = audioCtx.createGain();
             ug.gain.value = 0.0001;
@@ -1912,8 +1949,8 @@ function unlockSystem() {
             ug.connect(audioCtx.destination);
             u.start();
             u.stop(audioCtx.currentTime + 0.02);
-        } catch (e) {}
-    }
+        }
+    } catch (e) {}
     try {
         if (!window.__isNativeApp && window.DoggyCoMp3) {
             DoggyCoMp3.setupBrowserVideos();
@@ -1933,23 +1970,29 @@ function unlockSystem() {
             stopMenuVideos();
         }
     } catch (e) {}
-
-    let gate = document.getElementById("scr-gatekeeper");
-    let startScr = document.getElementById("scr-start");
     try { lockMobilePortrait(); } catch (e) {}
     try { forceFullscreen(); } catch (e) {}
+}
 
-    if (gate) {
-        gate.style.opacity = "0";
-        gate.style.pointerEvents = "none";
-    }
-    setTimeout(function () {
-        if (gate) gate.style.display = "none";
-        if (startScr) {
-            startScr.style.display = "block";
-            setTimeout(function () { startScr.style.opacity = "1"; }, 50);
-        }
-    }, 400);
+function bindGateTapHandlers() {
+    var gateTapLock = false;
+    var handleGateTap = function (e) {
+        if (window.__gateUnlocked || gateTapLock) return;
+        var gate = document.getElementById("scr-gatekeeper");
+        if (!gate || gate.style.display === "none") return;
+        gateTapLock = true;
+        if (e && e.cancelable) e.preventDefault();
+        if (e) e.stopPropagation();
+        unlockSystem();
+        setTimeout(function () { gateTapLock = false; }, 600);
+    };
+    var btn = document.getElementById("gate-tap-btn");
+    var gate = document.getElementById("scr-gatekeeper");
+    ["touchstart", "pointerup", "click"].forEach(function (type) {
+        var opts = type === "touchstart" ? { passive: false, capture: true } : false;
+        if (btn) btn.addEventListener(type, handleGateTap, opts);
+        if (gate) gate.addEventListener(type, handleGateTap, opts);
+    });
 }
 
 function updateCyborgButton() {
@@ -1993,17 +2036,7 @@ window.onload = function() {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    var gateTapBtn = document.getElementById("gate-tap-btn");
-    if (gateTapBtn) {
-        gateTapBtn.addEventListener("click", function (e) {
-            e.preventDefault();
-            unlockSystem();
-        });
-        gateTapBtn.addEventListener("touchend", function (e) {
-            e.preventDefault();
-            unlockSystem();
-        }, { passive: false });
-    }
+    bindGateTapHandlers();
 
     document.addEventListener("keydown", function (e) {
         let g = document.getElementById("scr-gatekeeper");
