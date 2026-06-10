@@ -1408,6 +1408,13 @@ function forceFullscreen() {
 }
 
 function stopGameMusic() {
+    if (window.DoggyCoMp3) {
+        DoggyCoMp3.pause();
+        if (DoggyCoMp3.usesDirectVolume && DoggyCoMp3.usesDirectVolume()) {
+            DoggyCoMp3.setDirectVolume(0);
+            return;
+        }
+    }
     if (!window.musicGain || !audioCtx) return;
     try {
         window.musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
@@ -1478,12 +1485,23 @@ function sfxGainMul() {
     return SFX_VOL_MUL;
 }
 
-function applyMusicVolume() {
-    if (!useMusicWebAudio() || !window.musicGain || !audioCtx) return;
+function applyMusicVolume(fast) {
     let lvl = musicGainLevel();
+    if (window.DoggyCoMp3 && DoggyCoMp3.usesDirectVolume && DoggyCoMp3.usesDirectVolume()) {
+        DoggyCoMp3.setDirectVolume(lvl);
+        return;
+    }
+    if (!useMusicWebAudio() || !window.musicGain || !audioCtx) {
+        if (window.DoggyCoMp3) DoggyCoMp3.setDirectVolume(lvl);
+        return;
+    }
     try {
         window.musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
-        window.musicGain.gain.setTargetAtTime(lvl, audioCtx.currentTime, 0.04);
+        if (fast) {
+            window.musicGain.gain.setValueAtTime(lvl, audioCtx.currentTime);
+        } else {
+            window.musicGain.gain.setTargetAtTime(lvl, audioCtx.currentTime, 0.04);
+        }
     } catch (e) {
         try { window.musicGain.gain.value = lvl; } catch (e2) {}
     }
@@ -1646,11 +1664,9 @@ function playGameMusic() {
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
     if (!window.DoggyCoMp3) return;
     DoggyCoMp3.setRate(getMusicRate(Math.max(level, 1)));
-    var fadeIn = function () { applyMusicVolume(); };
+    applyMusicVolume(true);
     if (!DoggyCoMp3.isPlaying()) {
-        DoggyCoMp3.start().then(fadeIn).catch(fadeIn);
-    } else {
-        fadeIn();
+        DoggyCoMp3.start().then(function () { applyMusicVolume(true); }).catch(function () { applyMusicVolume(true); });
     }
 }
 
@@ -1771,17 +1787,30 @@ function initAudioContext() {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if(AudioContext) audioCtx = new AudioContext();
             }
-            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-
-            if (!window.musicRouted && window.DoggyCoMp3 && audioCtx) {
+        } catch(e) { console.log(e); }
+    }
+    try {
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        if (!window.musicRouted && window.DoggyCoMp3) {
+            var useDirect = !!(window.__isIOS || window.__isAndroid ||
+                document.documentElement.classList.contains('platform-ios') ||
+                document.documentElement.classList.contains('platform-android'));
+            if (useDirect) {
+                DoggyCoMp3.initDirect();
+            } else if (audioCtx) {
                 window.musicGain = audioCtx.createGain();
                 window.musicGain.gain.value = 0;
                 window.musicGain.connect(audioCtx.destination);
                 DoggyCoMp3.init(audioCtx, window.musicGain);
-                window.musicRouted = true;
+                if (DoggyCoMp3.usesDirectVolume && DoggyCoMp3.usesDirectVolume()) {
+                    DoggyCoMp3.initDirect();
+                }
+            } else {
+                DoggyCoMp3.initDirect();
             }
-        } catch(e) { console.log(e); }
-    }
+            window.musicRouted = true;
+        }
+    } catch(e) { console.log(e); }
 }
 
 function unlockSystem() {
@@ -3394,9 +3423,9 @@ function loop(t) {
                 let dy = getPlayerY() - e.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist > 30) {
-                    let magnetPullMult = speedMult * 1.1;
-                    e.x += (dx / dist) * W * 1.5 * magnetPullMult * dt;
-                    e.y += (dy / dist) * H * 0.8 * magnetPullMult * dt;
+                    let magnetSpd = e.s * 1.1;
+                    e.x += (dx / dist) * magnetSpd * dt;
+                    e.y += (dy / dist) * magnetSpd * dt;
                     e.l = getNearestLaneIndex(e.x);
                     e.x = clampDrawX(e.x);
                 } else {
