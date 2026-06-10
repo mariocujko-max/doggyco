@@ -182,6 +182,16 @@
         }
 
         #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
+        #phone-container.is-playing #game-wrap {
+            z-index: 150;
+            visibility: visible !important;
+            pointer-events: auto !important;
+        }
+        #phone-container.is-playing #scr-start {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
         #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; touch-action: none; transition: filter 0.3s; display: block; }
         #canvas.blur { filter: blur(5px); }
 
@@ -488,20 +498,76 @@
         }
 
         #scr-gatekeeper {
-            position: absolute; inset: 0; z-index: 9999;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: max(8px, env(safe-area-inset-top)) 0 max(8px, env(safe-area-inset-bottom));
             transition: opacity 0.5s ease;
+            overflow: hidden;
         }
-        .gate-btn {
-            background: var(--neon); color: #000; font-family: 'Orbitron'; font-weight: 900; font-size: 24px;
-            padding: 20px 40px; border-radius: 20px; border: none; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5), 0 6px 0 #008b99;
-            animation: pulseGate 1.5s infinite alternate; transition: 0.1s;
+        .gate-tap-layer {
+            position: fixed; inset: 0; z-index: 100;
+            width: 100%; height: 100%;
+            border: none; margin: 0; padding: 0;
+            background: transparent; cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            color: transparent; font-size: 0;
         }
-        .gate-btn:active { transform: translateY(6px); box-shadow: 0 0 10px rgba(0, 242, 255, 0.5), 0 0px 0 #008b99; }
-        @keyframes pulseGate { 0% { transform: scale(0.95); } 100% { transform: scale(1.05); } }
+        .sw-crawl-wrap {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            perspective: 900px;
+            overflow: hidden;
+            pointer-events: none;
+            mask-image: linear-gradient(transparent, #000 3%, #000 97%, transparent);
+            -webkit-mask-image: linear-gradient(transparent, #000 3%, #000 97%, transparent);
+        }
+        .sw-crawl {
+            position: absolute; left: 50%; bottom: 0;
+            width: min(90vw, 440px);
+            transform: translateX(-50%);
+            transform-origin: 50% 100%;
+            animation: swCrawl 26s linear infinite;
+        }
+        .sw-crawl-inner {
+            transform: rotateX(8deg);
+            text-align: center;
+            color: var(--gold);
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(16px, 5vw, 24px);
+            line-height: 1.65;
+            letter-spacing: 0.02em;
+            text-shadow: 0 0 14px rgba(255, 215, 0, 0.5);
+        }
+        .sw-episode {
+            font-size: 0.9em; margin: 0 0 1.6em;
+            color: var(--neon); text-shadow: 0 0 14px var(--neon);
+        }
+        .sw-title {
+            font-size: 2.2em; margin: 0 0 1em;
+            letter-spacing: 0.08em; color: var(--gold);
+            line-height: 1.15;
+            text-shadow: 0 0 24px var(--gold);
+        }
+        .sw-tap {
+            display: block;
+            font-size: 1.4em; margin: 1.8em 0 0.5em;
+            color: var(--neon); letter-spacing: 0.12em;
+            text-shadow: 0 0 20px var(--neon), 0 0 40px var(--neon);
+            animation: pulseTap 1.1s ease-in-out infinite alternate;
+        }
+        .sw-crawl-inner p { margin: 0 0 0.85em; }
+        @keyframes swCrawl {
+            0% { transform: translateX(-50%) translateY(88vh) rotateX(8deg); opacity: 0; }
+            3% { opacity: 1; }
+            97% { opacity: 1; }
+            100% { transform: translateX(-50%) translateY(-95%) rotateX(8deg); opacity: 0; }
+        }
+        @keyframes pulseTap {
+            0% { opacity: 0.65; transform: scale(0.98); }
+            100% { opacity: 1; transform: scale(1.04); }
+        }
 
         /* Secret Unlock Popup */
         #secret-popup {
@@ -821,22 +887,7 @@
         html.ms-store-app #scr-gatekeeper {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        html.pc-ms .gate-btn,
-        html.ms-store-app .gate-btn {
             cursor: pointer;
-            background: var(--neon);
-            color: #000;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 24px;
-            padding: 20px 40px;
-            border-radius: 20px;
-            border: none;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5), 0 6px 0 #008b99;
-            animation: pulseGate 1.5s infinite alternate;
         }
         html.pc-ms .btn-char, html.pc-ms .btn-main, html.pc-ms .btn-restart-green,
         html.ms-store-app .btn-char, html.ms-store-app .btn-main, html.ms-store-app .btn-restart-green { cursor: pointer; }
@@ -1070,8 +1121,21 @@
 </div>
 
 <div id="scr-gatekeeper">
-    <h1 style="font-family:'Orbitron'; font-size:40px; color:var(--gold); margin-bottom:40px; text-align:center; text-shadow:0 0 20px var(--gold);">DOGGYCO<br>MISSION</h1>
-    <button class="gate-btn" id="gate-start-btn" onclick="unlockSystem()">TAP TO START</button>
+    <button type="button" class="gate-tap-layer" id="gate-tap-btn" aria-label="Tap to start DOGGYCO Mission">Start</button>
+    <div class="sw-crawl-wrap" aria-hidden="true">
+        <div class="sw-crawl">
+            <div class="sw-crawl-inner">
+                <p class="sw-episode">A long time ago in a galaxy not so far away...</p>
+                <h2 class="sw-title">DOGGYCO<br>MISSION</h2>
+                <p>Hey there, future snack hero! 🐶</p>
+                <p>Tasty stuff falls from the sky. Ninjas are mean. Spiders are hangry. Your job? Dodge, munch, and look cool!</p>
+                <p>🚀 Rocket = mega shield!<br>👽 Alien = magnet power!<br>🛸 UFO = bonus hearts!</p>
+                <p>Beat 12 crazy levels. Score 8,000 points to unlock secret CYBORG mode 🤖</p>
+                <p>Pick a codename. Pick a level. Let's roll!</p>
+                <span class="sw-tap">▶ TAP TO START ◀</span>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="phone-container">
@@ -1290,6 +1354,7 @@
 
 </div>
 
+<audio id="bgm-track" src="music.mp3" loop preload="auto" playsinline webkit-playsinline style="display:none" aria-hidden="true"></audio>
 <script src="music-mp3.js"></script>
 
 <script>
@@ -1394,6 +1459,13 @@ function enterIosPlayMode() {
 }
 
 function stopGameMusic() {
+    if (window.DoggyCoMp3) {
+        DoggyCoMp3.pause();
+        if (DoggyCoMp3.usesDirectVolume && DoggyCoMp3.usesDirectVolume()) {
+            DoggyCoMp3.setDirectVolume(0);
+            return;
+        }
+    }
     if (!window.musicGain || !audioCtx) return;
     try {
         window.musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
@@ -1452,6 +1524,7 @@ var cyborgUnlockAnnounced = false;
 var cyborg8000CrossedThisRun = false;
 var cyborgScoreLaunch = false;
 var iosMusicCheck = 0;
+var musicRateTimer = 0;
 var levelCountdown = 0;
 var lastCountdownLabel = '';
 var gameAssetsWarmed = false;
@@ -1464,12 +1537,23 @@ function sfxGainMul() {
     return SFX_VOL_MUL;
 }
 
-function applyMusicVolume() {
-    if (!useMusicWebAudio() || !window.musicGain || !audioCtx) return;
+function applyMusicVolume(fast) {
     let lvl = musicGainLevel();
+    if (window.DoggyCoMp3 && DoggyCoMp3.usesDirectVolume && DoggyCoMp3.usesDirectVolume()) {
+        DoggyCoMp3.setDirectVolume(lvl);
+        return;
+    }
+    if (!useMusicWebAudio() || !window.musicGain || !audioCtx) {
+        if (window.DoggyCoMp3) DoggyCoMp3.setDirectVolume(lvl);
+        return;
+    }
     try {
         window.musicGain.gain.cancelScheduledValues(audioCtx.currentTime);
-        window.musicGain.gain.setTargetAtTime(lvl, audioCtx.currentTime, 0.04);
+        if (fast) {
+            window.musicGain.gain.setValueAtTime(lvl, audioCtx.currentTime);
+        } else {
+            window.musicGain.gain.setTargetAtTime(lvl, audioCtx.currentTime, 0.02);
+        }
     } catch (e) {
         try { window.musicGain.gain.value = lvl; } catch (e2) {}
     }
@@ -1627,11 +1711,13 @@ function revalidateWindowsShell() {
 function playGameMusic() {
     if (isMenuVideoPlaying()) return;
     stopMenuVideos();
+    if (!systemActive) initAudioContext();
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
-    if (window.DoggyCoMp3) {
-        DoggyCoMp3.setRate(getMusicRate(Math.max(level, 1)));
-        if (!DoggyCoMp3.isActive()) DoggyCoMp3.start();
-        applyMusicVolume();
+    if (!window.DoggyCoMp3) return;
+    DoggyCoMp3.setRate(getMusicRate(Math.max(level, 1)));
+    applyMusicVolume(true);
+    if (!DoggyCoMp3.isPlaying()) {
+        DoggyCoMp3.start().then(function () { applyMusicVolume(true); }).catch(function () { applyMusicVolume(true); });
     }
 }
 
@@ -1752,22 +1838,34 @@ function initAudioContext() {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if(AudioContext) audioCtx = new AudioContext();
             }
-            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-
-            if (!window.musicRouted && window.DoggyCoMp3 && audioCtx) {
+        } catch(e) { console.log(e); }
+    }
+    try {
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        if (!window.musicRouted && window.DoggyCoMp3) {
+            if (isIOSDevice() || window.__isIOS || document.documentElement.classList.contains('platform-ios')) {
+                DoggyCoMp3.initDirect();
+            } else if (audioCtx) {
                 window.musicGain = audioCtx.createGain();
                 window.musicGain.gain.value = 0;
                 window.musicGain.connect(audioCtx.destination);
                 DoggyCoMp3.init(audioCtx, window.musicGain);
-                window.musicRouted = true;
+                if (DoggyCoMp3.usesDirectVolume && DoggyCoMp3.usesDirectVolume()) {
+                    DoggyCoMp3.initDirect();
+                }
+            } else {
+                DoggyCoMp3.initDirect();
             }
-        } catch(e) { console.log(e); }
-    }
+            window.musicRouted = true;
+        }
+    } catch(e) { console.log(e); }
 }
 
 function unlockSystem() {
-    initAudioContext();
-    prewarmGameAssets();
+    if (window.__gateUnlocked) return;
+    window.__gateUnlocked = true;
+    try { initAudioContext(); } catch (e) {}
+    try { prewarmGameAssets(); } catch (e) {}
     try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
     if (audioCtx) {
         try {
@@ -1780,27 +1878,36 @@ function unlockSystem() {
             u.stop(audioCtx.currentTime + 0.02);
         } catch (e) {}
     }
+    try {
+        if (window.DoggyCoMp3) {
+            DoggyCoMp3.preload("music.mp3");
+            DoggyCoMp3.prime().catch(function () {});
+        }
+    } catch (e) {}
+    try {
+        if (!dogHasSpoken) {
+            dogHasSpoken = true;
+            manageMedia('vid1');
+        } else {
+            stopMenuVideos();
+        }
+    } catch (e) {}
 
-    if (window.DoggyCoMp3) DoggyCoMp3.preload("music.mp3");
-
-    if (!dogHasSpoken) {
-        dogHasSpoken = true;
-        manageMedia('vid1');
-    } else {
-        stopMenuVideos();
-    }
-    
     let gate = document.getElementById("scr-gatekeeper");
     let startScr = document.getElementById("scr-start");
-    
-    enterIosPlayMode();
+    try { enterIosPlayMode(); } catch (e) {}
 
-    gate.style.opacity = "0";
-    setTimeout(() => { 
-        gate.style.display = "none"; 
-        startScr.style.display = "block";
-        setTimeout(() => { startScr.style.opacity = "1"; }, 50);
-    }, 500);
+    if (gate) {
+        gate.style.opacity = "0";
+        gate.style.pointerEvents = "none";
+    }
+    setTimeout(function () {
+        if (gate) gate.style.display = "none";
+        if (startScr) {
+            startScr.style.display = "block";
+            setTimeout(function () { startScr.style.opacity = "1"; }, 50);
+        }
+    }, 400);
 }
 
 function updateCyborgButton() {
@@ -1825,6 +1932,10 @@ function updateCyborgButton() {
 }
 
 window.onload = function() {
+    if (window.DoggyCoMp3) DoggyCoMp3.preload("music.mp3");
+    var bgmEarly = document.getElementById("bgm-track");
+    if (bgmEarly) { try { bgmEarly.load(); } catch (e) {} }
+
     initCyborgProgress();
     ensureCyborgUnlockFromProgress();
     try {
@@ -1842,6 +1953,18 @@ window.onload = function() {
         if (window.__isIOS) resizeCanvasSoon();
         else resizeCanvas();
     });
+
+    var gateTapBtn = document.getElementById("gate-tap-btn");
+    if (gateTapBtn) {
+        gateTapBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            unlockSystem();
+        });
+        gateTapBtn.addEventListener("touchend", function (e) {
+            e.preventDefault();
+            unlockSystem();
+        }, { passive: false });
+    }
 
     document.addEventListener("keydown", function (e) {
         let g = document.getElementById("scr-gatekeeper");
@@ -1985,6 +2108,10 @@ function goToLevelSelect() {
     enterIosPlayMode(); // Sichert das Vollbild ab
     document.documentElement.style.setProperty('--neon', '#00f2ff');
 
+    active = false;
+    missionComplete = false;
+    if (globalAnimationId) { cancelAnimationFrame(globalAnimationId); globalAnimationId = null; }
+
     document.getElementById("scr-end").style.display = "none";
     
     document.getElementById("controls").style.display = "flex";
@@ -2114,13 +2241,9 @@ function hapticGameOver() { triggerVibration([200, 60, 200, 60, 280]); }
 
 function resumeGameAudio() {
     try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
-    if (isMenuVideoPlaying()) return;
-    if (!active || missionComplete) return;
-    if (window.DoggyCoMp3) {
-        DoggyCoMp3.setRate(getMusicRate(Math.max(level, 1)));
-        if (!DoggyCoMp3.isActive()) DoggyCoMp3.start();
-        applyMusicVolume();
-    }
+    if (isMenuVideoPlaying() || !active || missionComplete) return;
+    if (!window.DoggyCoMp3 || DoggyCoMp3.isPlaying()) return;
+    playGameMusic();
 }
 
 document.addEventListener("visibilitychange", function() {
@@ -2657,7 +2780,6 @@ function getSpeedMult(lvl) {
     if (lvl > 14) base += (lvl - 14) * 0.04;
     return base;
 }
-/** Musik-Tempo: leicht schneller je Level (nicht hektisch) */
 /** Musik-Tempo parallel zum Spiel */
 function getMusicRate(lvl) {
     let rateAt2 = 0.92;
@@ -2886,7 +3008,6 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
-    enterIosPlayMode(); // Sichert das Vollbild beim Spielstart ab
     let nameInput = document.getElementById("pName");
     let pName = nameInput.value.trim().toUpperCase();
     if(!pName) {
@@ -2899,7 +3020,8 @@ function start(m, startLvl) {
     agent = pName;
     try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
 
-    if(globalAnimationId) cancelAnimationFrame(globalAnimationId);
+    initAudioContext();
+    if(globalAnimationId) { cancelAnimationFrame(globalAnimationId); globalAnimationId = null; }
 
     mode = m;
     level = startLvl;
@@ -2907,13 +3029,15 @@ function start(m, startLvl) {
     hp = 3; energy = 100; score = 0; timeLeft = 30;
     energyLowWarned = false;
     iosMusicCheck = 0;
+    musicRateTimer = 0;
     levelCountdown = 0;
     lastCountdownLabel = '';
     cyborgUnlockAnnounced = false;
     cyborg8000CrossedThisRun = false;
     if (cyborgScoreLaunch && m === 'cyborg' && startLvl === 13) markCyborg8000Used();
     cyborgScoreLaunch = false;
-    entities = []; floaters = []; fireworks = []; fxParticles = []; missionComplete = false;
+    entities = []; floaters = []; fireworks = []; fxParticles = [];
+    missionComplete = false;
     
     invincibleTimer = 0; alarmTimer = 0; magnetTimer = 0; magnetSoundTimer = 0;
     rocketSpawned = false; ufoSpawned = false; magnetSpawned = false;
@@ -2923,23 +3047,39 @@ function start(m, startLvl) {
     currLane = 2;
     playerX = snapToLane(2);
     targetX = playerX;
-    updateLevelHud(level);
+    updateLevelHud(startLvl);
     
     let scrStart = document.getElementById("scr-start");
     let gameWrap = document.getElementById("game-wrap");
-    
-    if(scrStart) scrStart.style.display = "none";
+    let hud = document.getElementById("hud");
+    let controls = document.getElementById("controls");
+    let cv = document.getElementById("canvas");
+
+    if(scrStart) {
+        scrStart.style.display = "none";
+        scrStart.style.pointerEvents = "none";
+        scrStart.style.visibility = "hidden";
+    }
+    document.getElementById("scr-end").style.display = "none";
     if(gameWrap) {
         gameWrap.style.visibility = "visible";
         gameWrap.style.pointerEvents = "auto";
+    }
+    if (hud) hud.style.display = "block";
+    if (controls) controls.style.display = "flex";
+    if (cv) {
+        cv.style.display = "block";
+        cv.style.visibility = "visible";
+        cv.style.opacity = "1";
+        cv.classList.remove("blur");
     }
 
     document.getElementById("phone-container").classList.add("is-playing");
     enterIosPlayMode();
     active = true;
 
-    prewarmGameWorld();
-    manageMedia('game');
+    try { prewarmGameWorld(); } catch (e) { console.error("prewarmGameWorld", e); }
+    try { manageMedia('game'); } catch (e) { console.error("manageMedia", e); }
 
     if (needsLevelCountdown(startLvl)) {
         levelCountdown = 3.2;
@@ -3120,11 +3260,15 @@ function loop(t) {
 
         let colDist = W / 10;
 
-        if (window.DoggyCoMp3 && DoggyCoMp3.isActive()) {
+        musicRateTimer -= dt;
+        if (musicRateTimer <= 0 && window.DoggyCoMp3 && DoggyCoMp3.isPlaying()) {
+            musicRateTimer = 0.5;
             let targetRate = getMusicRate(capLvl);
             if (typeof window.__musicRate !== "number") window.__musicRate = targetRate;
-            window.__musicRate += (targetRate - window.__musicRate) * Math.min(1, dt * 1.2);
-            DoggyCoMp3.setRate(window.__musicRate);
+            if (Math.abs(window.__musicRate - targetRate) > 0.01) {
+                window.__musicRate += (targetRate - window.__musicRate) * 0.35;
+                DoggyCoMp3.setRate(window.__musicRate);
+            }
         }
 
         if(invincibleTimer > 0) {
@@ -3142,8 +3286,10 @@ function loop(t) {
         if ((window.__isIOS || document.documentElement.classList.contains('platform-ios')) && active && !missionComplete) {
             iosMusicCheck -= dt;
             if (iosMusicCheck <= 0) {
-                iosMusicCheck = 1.8;
-                if (!isMenuVideoPlaying() && window.DoggyCoMp3 && (!DoggyCoMp3.isActive() || (audioCtx && audioCtx.state === "suspended"))) resumeGameAudio();
+                iosMusicCheck = 3;
+                if (!isMenuVideoPlaying() && window.DoggyCoMp3 && !DoggyCoMp3.isPlaying()) {
+                    playGameMusic();
+                }
             }
         }
 
@@ -3416,8 +3562,9 @@ function loop(t) {
                 let dy = getPlayerY() - e.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist > 30) {
-                    e.x += (dx / dist) * W * 1.5 * dt;
-                    e.y += (dy / dist) * H * 0.8 * dt;
+                    let magnetSpd = e.s * 1.1;
+                    e.x += (dx / dist) * magnetSpd * dt;
+                    e.y += (dy / dist) * magnetSpd * dt;
                     e.l = getNearestLaneIndex(e.x);
                     e.x = clampDrawX(e.x);
                 } else {
