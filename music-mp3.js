@@ -1,172 +1,255 @@
 /**
- * DOGGYCO MISSION – MP3 ohne Knistern/Aussetzer
- * Dekodiert music.mp3 einmal, loop mit Crossfade über Web Audio (kein HTML-<audio>-Loop).
+ * DOGGYCO MISSION – music.mp3 + Browser-Video (ein Modul, kein Extra-Script)
  */
 (function (global) {
     "use strict";
 
-    var MUSIC_URL = "music.mp3";
-    var XFADE = 0.05;
-    var LOOKAHEAD = 0.2;
-    var TICK_MS = 25;
+    var MUSIC_FILE = "music.mp3";
+    var BGM_VOL = 0.24;
 
     var state = {
         ctx: null,
         dest: null,
-        buffer: null,
-        loadP: null,
+        media: null,
+        source: null,
+        routed: false,
+        directVol: false,
+        primed: false,
         active: false,
-        paused: true,
-        rate: 1,
-        timer: null,
-        nextTime: 0,
-        segId: 0,
-        sources: []
+        rate: 1
     };
 
-    function preload(url) {
-        url = url || MUSIC_URL;
-        if (state.buffer) return Promise.resolve(state.buffer);
-        if (state.loadP) return state.loadP;
-        if (!state.ctx) return Promise.reject(new Error("no audio ctx"));
-        state.loadP = fetch(url)
-            .then(function (r) {
-                if (!r.ok) throw new Error("music fetch failed");
-                return r.arrayBuffer();
-            })
-            .then(function (ab) {
-                return state.ctx.decodeAudioData(ab);
-            })
-            .then(function (buf) {
-                state.buffer = buf;
-                return buf;
-            });
-        return state.loadP;
+    function isWebBrowser() {
+        return !global.__isNativeApp;
+    }
+
+    function track() {
+        if (state.media) return state.media;
+        state.media = document.getElementById("bgm-track");
+        if (!state.media) {
+            state.media = document.createElement("audio");
+            state.media.id = "bgm-track";
+            state.media.src = MUSIC_FILE;
+            state.media.loop = true;
+            state.media.preload = "auto";
+            state.media.playsInline = true;
+            state.media.setAttribute("playsinline", "");
+            state.media.setAttribute("webkit-playsinline", "");
+            document.body.appendChild(state.media);
+        }
+        if (!state.media.getAttribute("src") && !state.media.querySelector("source")) {
+            state.media.src = MUSIC_FILE;
+        }
+        return state.media;
+    }
+
+    function resumeCtx() {
+        try {
+            if (state.ctx && state.ctx.state === "suspended") state.ctx.resume();
+        } catch (e) {}
+    }
+
+    function routeAudio() {
+        if (state.routed || !state.ctx || !state.dest) return;
+        if (isWebBrowser()) {
+            state.directVol = true;
+            state.routed = true;
+            return;
+        }
+        var a = track();
+        try {
+            state.source = state.ctx.createMediaElementSource(a);
+            state.source.connect(state.dest);
+            state.routed = true;
+        } catch (e) {
+            state.directVol = true;
+            state.routed = true;
+        }
+    }
+
+    function initDirect() {
+        state.directVol = true;
+        state.routed = true;
+        try { track().load(); } catch (e) {}
     }
 
     function init(ctx, destNode) {
+        if (isWebBrowser()) {
+            initDirect();
+            return;
+        }
         if (!ctx || !destNode) return;
         state.ctx = ctx;
         state.dest = destNode;
+        routeAudio();
+        try { track().load(); } catch (e) {}
     }
 
-    function crossfadeSec() {
-        if (!state.buffer) return XFADE;
-        return Math.min(XFADE, Math.max(0.02, state.buffer.duration * 0.06));
+    function preload() {
+        try { track().load(); } catch (e) {}
+        return Promise.resolve();
     }
 
-    function segmentLen() {
-        if (!state.buffer) return 0;
-        return Math.max(0.25, state.buffer.duration - crossfadeSec());
-    }
-
-    function clearSources() {
-        state.sources.slice().forEach(function (x) {
-            try { x.src.stop(); } catch (e) {}
-            try { x.g.disconnect(); } catch (e) {}
+    function prime() {
+        var a = track();
+        try { a.load(); } catch (e) {}
+        if (state.primed) {
+            resumeCtx();
+            routeAudio();
+            return Promise.resolve();
+        }
+        resumeCtx();
+        routeAudio();
+        var muted = a.muted;
+        a.muted = true;
+        return a.play().then(function () {
+            try { a.pause(); a.currentTime = 0; } catch (e) {}
+            a.muted = muted;
+            state.primed = true;
+            state.active = false;
+        }).catch(function () {
+            a.muted = muted;
+            state.primed = true;
         });
-        state.sources = [];
     }
 
-    function spawnSegment(when) {
-        var ctx = state.ctx;
-        var buf = state.buffer;
-        if (!ctx || !buf || !state.dest || state.paused) return;
-
-        var fade = crossfadeSec();
-        var playDur = segmentLen();
-        var id = ++state.segId;
-        var end = when + playDur / state.rate;
-
-        var src = ctx.createBufferSource();
-        var g = ctx.createGain();
-        src.buffer = buf;
-        src.playbackRate.value = state.rate;
-        src.connect(g);
-        g.connect(state.dest);
-
-        g.gain.setValueAtTime(0.0001, when);
-        g.gain.linearRampToValueAtTime(1, when + fade);
-        g.gain.setValueAtTime(1, end - fade);
-        g.gain.linearRampToValueAtTime(0.0001, end);
-
+    function applyAudibleVolume() {
+        var a = track();
         try {
-            src.start(when, 0, playDur);
-            src.stop(end + 0.03);
-        } catch (e) {
-            return;
-        }
-
-        state.sources.push({ src: src, g: g, id: id });
-        src.onended = function () {
-            state.sources = state.sources.filter(function (x) { return x.id !== id; });
-        };
-
-        state.nextTime = end - fade;
-    }
-
-    function schedulerTick() {
-        if (state.paused || !state.active || !state.buffer || !state.ctx) return;
-        var now = state.ctx.currentTime;
-        while (state.nextTime < now + LOOKAHEAD) {
-            if (state.nextTime < now) state.nextTime = now + 0.02;
-            spawnSegment(state.nextTime);
-        }
+            a.muted = false;
+            a.volume = Math.max(0.1, BGM_VOL);
+            a.playbackRate = state.rate;
+        } catch (e) {}
     }
 
     function start() {
-        if (!state.ctx || !state.dest) return;
-        state.active = true;
-        var go = function () {
-            if (!state.buffer || !state.paused) return;
-            state.paused = false;
-            if (state.nextTime <= state.ctx.currentTime) {
-                state.nextTime = state.ctx.currentTime + 0.05;
-            }
-            if (state.timer) clearInterval(state.timer);
-            state.timer = setInterval(schedulerTick, TICK_MS);
-            schedulerTick();
-            try {
-                if (state.ctx.state === "suspended") state.ctx.resume();
-            } catch (e) {}
-        };
-        if (state.buffer) go();
-        else preload().then(go).catch(function () {});
+        resumeCtx();
+        routeAudio();
+        if (isWebBrowser()) state.directVol = true;
+        var a = track();
+        try { if (a.readyState < 2) a.load(); } catch (e) {}
+        applyAudibleVolume();
+        if (!a.paused) {
+            state.active = true;
+            return Promise.resolve();
+        }
+        return a.play().then(function () {
+            state.active = true;
+        }).catch(function () {
+            state.active = false;
+        });
     }
 
     function pause() {
-        state.paused = true;
         state.active = false;
-        if (state.timer) {
-            clearInterval(state.timer);
-            state.timer = null;
-        }
-        clearSources();
-        state.nextTime = 0;
+        try { if (state.media) state.media.pause(); } catch (e) {}
     }
 
     function setRate(r) {
         state.rate = Math.max(0.5, Math.min(2, r || 1));
-        state.sources.forEach(function (x) {
-            try { x.src.playbackRate.value = state.rate; } catch (e) {}
-        });
+        if (state.media) {
+            try { state.media.playbackRate = state.rate; } catch (e) {}
+        }
+    }
+
+    function setDirectVolume(level) {
+        if (state.media) {
+            try { state.media.volume = Math.max(0, Math.min(1, level)); } catch (e) {}
+        }
     }
 
     function isActive() {
-        return state.active && !state.paused;
+        return state.active;
     }
 
     function isPlaying() {
-        return isActive() && state.sources.length > 0;
+        return !!(state.media && !state.media.paused && !state.media.ended);
+    }
+
+    function isReady() {
+        var a = state.media || document.getElementById("bgm-track");
+        return !!(state.primed || (a && a.readyState >= 2));
+    }
+
+    function usesDirectVolume() {
+        return state.directVol || isWebBrowser();
+    }
+
+    function setupBrowserVideos() {
+        if (!isWebBrowser()) return;
+        document.documentElement.classList.add("web-browser");
+        [
+            { v: "dog-video", c: "dog-video-canvas" },
+            { v: "dog-video2", c: "dog-video-canvas2" }
+        ].forEach(function (pair) {
+            var el = document.getElementById(pair.v);
+            var canvas = document.getElementById(pair.c);
+            if (!el) return;
+            try { el.removeAttribute("crossorigin"); } catch (e) {}
+            el.setAttribute("playsinline", "");
+            el.setAttribute("webkit-playsinline", "");
+            el.preload = "auto";
+            el.style.display = "block";
+            el.style.width = "min(90vw, 320px)";
+            el.style.height = "auto";
+            el.style.maxHeight = "320px";
+            el.style.objectFit = "contain";
+            el.style.borderRadius = "12px";
+            el.style.filter = "drop-shadow(0 10px 20px rgba(0,0,0,0.6))";
+            if (canvas) {
+                canvas.style.display = "none";
+                canvas.style.visibility = "hidden";
+            }
+        });
+    }
+
+    function playMenuVideo(which) {
+        if (!isWebBrowser()) return;
+        var id = which === 2 ? "dog-video2" : "dog-video";
+        var v = document.getElementById(id);
+        if (!v) return;
+        setupBrowserVideos();
+        try { v.removeAttribute("crossorigin"); } catch (e) {}
+        v.muted = false;
+        v.currentTime = 0;
+        var p = v.play();
+        if (p && p.catch) {
+            p.catch(function () {
+                v.muted = true;
+                v.play().catch(function () {});
+            });
+        }
+    }
+
+    function bootWebMedia() {
+        if (!isWebBrowser()) return;
+        setupBrowserVideos();
+        try { track().load(); } catch (e) {}
+    }
+
+    if (typeof document !== "undefined") {
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", bootWebMedia);
+        } else {
+            bootWebMedia();
+        }
     }
 
     global.DoggyCoMp3 = {
         init: init,
+        initDirect: initDirect,
         preload: preload,
+        prime: prime,
         start: start,
         pause: pause,
         setRate: setRate,
+        setDirectVolume: setDirectVolume,
         isActive: isActive,
-        isPlaying: isPlaying
+        isPlaying: isPlaying,
+        isReady: isReady,
+        usesDirectVolume: usesDirectVolume,
+        isWebBrowser: isWebBrowser,
+        setupBrowserVideos: setupBrowserVideos,
+        playMenuVideo: playMenuVideo
     };
 })(typeof window !== "undefined" ? window : this);
