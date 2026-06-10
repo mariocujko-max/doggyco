@@ -177,7 +177,6 @@
 
     function setupBrowserVideos() {
         if (!isWebBrowser()) return;
-        document.documentElement.classList.add("web-browser");
         [
             { v: "dog-video", c: "dog-video-canvas" },
             { v: "dog-video2", c: "dog-video-canvas2" }
@@ -189,36 +188,16 @@
             el.setAttribute("playsinline", "");
             el.setAttribute("webkit-playsinline", "");
             el.preload = "auto";
-            el.style.display = "block";
-            el.style.width = "min(90vw, 320px)";
-            el.style.height = "auto";
-            el.style.maxHeight = "320px";
-            el.style.objectFit = "contain";
-            el.style.borderRadius = "12px";
-            el.style.filter = "drop-shadow(0 10px 20px rgba(0,0,0,0.6))";
+            el.style.display = "none";
             if (canvas) {
-                canvas.style.display = "none";
-                canvas.style.visibility = "hidden";
+                canvas.style.display = "";
+                canvas.style.visibility = "visible";
             }
         });
     }
 
     function playMenuVideo(which) {
-        if (!isWebBrowser()) return;
-        var id = which === 2 ? "dog-video2" : "dog-video";
-        var v = document.getElementById(id);
-        if (!v) return;
-        setupBrowserVideos();
-        try { v.removeAttribute("crossorigin"); } catch (e) {}
-        v.muted = false;
-        v.currentTime = 0;
-        var p = v.play();
-        if (p && p.catch) {
-            p.catch(function () {
-                v.muted = true;
-                v.play().catch(function () {});
-            });
-        }
+        /* Greenscreen canvas playback is handled in index*.html manageMedia() */
     }
 
     function bootWebMedia() {
