@@ -50,25 +50,17 @@
             var iosStandalone = window.navigator.standalone === true ||
                 (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
             if (iosStandalone) document.documentElement.classList.add('ios-store-app');
-            var isSafariBrowser = /Safari/i.test(ua) && !/Chrome|CriOS|FxiOS|EdgiOS|EdgA|OPR|OPiOS|wv/i.test(ua);
-            var isFirefoxBrowser = /Firefox|FxiOS/i.test(ua);
-            var isChromeBrowser = /Chrome|CriOS/i.test(ua) && !/;\s*wv\)/.test(ua);
-            var inAppShell = iosStandalone || document.documentElement.classList.contains('ios-store-app');
-            if (!inAppShell && !isSafariBrowser && !isFirefoxBrowser && !isChromeBrowser) {
-                window.__isAppShell = true;
-            } else {
-                window.__isAppShell = false;
-            }
-            window.__isMobileBrowser = !window.__isAppShell &&
-                (isSafariBrowser || isFirefoxBrowser || isChromeBrowser);
-            if (window.__isMobileBrowser) document.documentElement.classList.add('runtime-browser');
+            var nativeBridge = !!(window.webkit && window.webkit.messageHandlers);
+            window.__isNativeApp = !!(iosStandalone || nativeBridge);
+            if (window.__isNativeApp) document.documentElement.classList.add('native-app');
+            else document.documentElement.classList.add('web-browser');
         } catch (e) {
             window.__pcMs = false;
             window.__isIOS = true;
             window.__isAndroid = false;
             window.__msStoreApp = false;
-            window.__isAppShell = false;
-            window.__isMobileBrowser = false;
+            window.__isNativeApp = false;
+            document.documentElement.classList.add('web-browser');
         }
     })();
     </script>
@@ -659,14 +651,16 @@
             object-fit: contain;
             filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6));
         }
-        html.runtime-browser .dog-video-wrapper video {
+        html.web-browser .dog-video-wrapper video {
             display: block !important;
-            width: 220px; height: 220px; max-width: 100%;
+            width: min(90vw, 320px) !important;
+            height: auto !important;
+            max-height: 320px;
             object-fit: contain;
             border-radius: 12px;
             filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6));
         }
-        html.runtime-browser .dog-video-canvas { display: none !important; }
+        html.web-browser .dog-video-canvas { display: none !important; visibility: hidden !important; }
 
         #auth-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
         
@@ -1240,7 +1234,7 @@
                 <div id="video-host-1" style="width: 100%;">
                     <div class="dog-video-wrapper" id="main-vid-wrapper">
                         <canvas id="dog-video-canvas" width="250" height="250" class="dog-video-canvas"></canvas>
-                        <video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="metadata" muted crossorigin="anonymous" style="display:none;"></video>
+                        <video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="auto" muted style="display:none;"></video>
                     </div>
                 </div>
 
@@ -1362,7 +1356,7 @@
                 
                 <div class="dog-video-wrapper" style="margin-bottom: 10px;">
                     <canvas id="dog-video-canvas2" width="220" height="220" class="dog-video-canvas"></canvas>
-                    <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="metadata" muted crossorigin="anonymous" style="display:none;"></video>
+                    <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted style="display:none;"></video>
                 </div>
 
                 <h1 id="f-score" style="font-family: 'Orbitron'; font-size: 42px; margin: 10px 0 20px 0; line-height: 1; text-align: center; color: var(--gold); text-shadow: 0 0 15px var(--gold);">0 PTS</h1>
@@ -1378,7 +1372,6 @@
 
 <audio id="bgm-track" src="music.mp3" loop preload="auto" playsinline webkit-playsinline style="display:none" aria-hidden="true"></audio>
 <script src="music-mp3.js"></script>
-<script src="browser-runtime.js"></script>
 
 <script>
 // Vollbild: nur auf Touch / nicht-PC-Geräten (Windows-Desktop mit Maus bleibt Fenster-Modus für Edge)
@@ -1482,8 +1475,8 @@ function enterIosPlayMode() {
 }
 
 function stopGameMusic() {
-    if (window.__isMobileBrowser && window.DoggyCoBrowser) {
-        DoggyCoBrowser.pauseBgm();
+    if (!window.__isNativeApp && window.DoggyCoMp3) {
+        DoggyCoMp3.pause();
         return;
     }
     if (window.DoggyCoMp3) {
@@ -1536,14 +1529,14 @@ function manageMedia(action) {
     stopMenuVideos();
 
     if (action === 'vid1') {
-        if (window.__isMobileBrowser && window.DoggyCoBrowser) {
-            DoggyCoBrowser.playMenuVideo(1);
+        if (!window.__isNativeApp && window.DoggyCoMp3) {
+            DoggyCoMp3.playMenuVideo(1);
         } else if (vid1) {
             vid1.muted = false; vid1.currentTime = 0; vid1.play().catch(function () {}); processVideoFrame();
         }
     } else if (action === 'vid2') {
-        if (window.__isMobileBrowser && window.DoggyCoBrowser) {
-            DoggyCoBrowser.playMenuVideo(2);
+        if (!window.__isNativeApp && window.DoggyCoMp3) {
+            DoggyCoMp3.playMenuVideo(2);
         } else if (vid2) {
             vid2.muted = false; vid2.currentTime = 0; vid2.play().catch(function () {}); processVideoFrame2();
         }
@@ -1762,9 +1755,14 @@ function kickGameMusic() {
 function playGameMusic() {
     try {
         stopMenuVideos();
-        if (window.__isMobileBrowser && window.DoggyCoBrowser) {
-            if (isMenuVideoPlaying()) return;
-            DoggyCoBrowser.playBgm(0.24).catch(function () {});
+        if (!window.__isNativeApp) {
+            if (!systemActive) initAudioContext();
+            if (window.DoggyCoMp3) {
+                DoggyCoMp3.initDirect();
+                DoggyCoMp3.setRate(getMusicRate(Math.max(level, 1)));
+                DoggyCoMp3.setDirectVolume(0.24);
+                DoggyCoMp3.start().catch(function () {});
+            }
             return;
         }
         if (isMenuVideoPlaying()) return;
@@ -1877,15 +1875,22 @@ function resetVideoToStart(vEl, vCanvas, vCtx) {
     setTimeout(() => { processGreenScreen(vEl, vCanvas, vCtx); }, 100);
 }
 
-videoEl.addEventListener('loadeddata', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
-videoEl.addEventListener('seeked', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
-videoEl.addEventListener('play', processVideoFrame);
-videoEl.addEventListener('ended', () => resetVideoToStart(videoEl, videoCanvas, videoCtx));
-
-videoEl2.addEventListener('loadeddata', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
-videoEl2.addEventListener('seeked', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
-videoEl2.addEventListener('play', processVideoFrame2);
-videoEl2.addEventListener('ended', () => resetVideoToStart(videoEl2, videoCanvas2, videoCtx2));
+if (window.__isNativeApp) {
+    if (videoEl) {
+        videoEl.setAttribute('crossorigin', 'anonymous');
+        videoEl.addEventListener('loadeddata', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
+        videoEl.addEventListener('seeked', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
+        videoEl.addEventListener('play', processVideoFrame);
+        videoEl.addEventListener('ended', () => resetVideoToStart(videoEl, videoCanvas, videoCtx));
+    }
+    if (videoEl2) {
+        videoEl2.setAttribute('crossorigin', 'anonymous');
+        videoEl2.addEventListener('loadeddata', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+        videoEl2.addEventListener('seeked', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+        videoEl2.addEventListener('play', processVideoFrame2);
+        videoEl2.addEventListener('ended', () => resetVideoToStart(videoEl2, videoCanvas2, videoCtx2));
+    }
+}
 
 let systemActive = false;
 let dogHasSpoken = false;
@@ -1904,7 +1909,7 @@ function initAudioContext() {
     try {
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         if (!window.musicRouted && window.DoggyCoMp3) {
-            if (isMobileDevice()) {
+            if (!window.__isNativeApp || isMobileDevice()) {
                 DoggyCoMp3.initDirect();
             } else if (audioCtx) {
                 window.musicGain = audioCtx.createGain();
@@ -1940,9 +1945,10 @@ function unlockSystem() {
         } catch (e) {}
     }
     try {
-        if (window.__isMobileBrowser && window.DoggyCoBrowser) {
-            DoggyCoBrowser.setupBrowserVideos();
-            DoggyCoBrowser.primeBgm().catch(function () {});
+        if (!window.__isNativeApp && window.DoggyCoMp3) {
+            DoggyCoMp3.setupBrowserVideos();
+            DoggyCoMp3.preload("music.mp3");
+            DoggyCoMp3.prime().catch(function () {});
         } else if (window.DoggyCoMp3) {
             ensureMobileMusicRoute();
             DoggyCoMp3.preload("music.mp3");
@@ -1997,8 +2003,8 @@ function updateCyborgButton() {
 }
 
 window.onload = function() {
-    if (window.__isMobileBrowser && window.DoggyCoBrowser) {
-        DoggyCoBrowser.setupBrowserVideos();
+    if (!window.__isNativeApp && window.DoggyCoMp3) {
+        DoggyCoMp3.setupBrowserVideos();
     }
     if (window.DoggyCoMp3) DoggyCoMp3.preload("music.mp3");
     var bgmEarly = document.getElementById("bgm-track");
@@ -3339,8 +3345,8 @@ function loop(t) {
             if (Math.abs(window.__musicRate - targetRate) > 0.01) {
                 window.__musicRate += (targetRate - window.__musicRate) * 0.35;
             }
-            if (window.__isMobileBrowser && window.DoggyCoBrowser) {
-                DoggyCoBrowser.setBgmRate(window.__musicRate);
+            if (!window.__isNativeApp && window.DoggyCoMp3) {
+                DoggyCoMp3.setRate(window.__musicRate);
             } else if (window.DoggyCoMp3 && DoggyCoMp3.isPlaying()) {
                 DoggyCoMp3.setRate(window.__musicRate);
             }
@@ -3362,8 +3368,13 @@ function loop(t) {
             iosMusicCheck -= dt;
             if (iosMusicCheck <= 0) {
                 iosMusicCheck = 2.5;
-                if (!isMenuVideoPlaying() && window.DoggyCoMp3 && !DoggyCoMp3.isPlaying()) {
-                    playGameMusic();
+                if (!isMenuVideoPlaying()) {
+                    if (!window.__isNativeApp) {
+                        var bgm = document.getElementById('bgm-track');
+                        if (bgm && bgm.paused) playGameMusic();
+                    } else if (window.DoggyCoMp3 && !DoggyCoMp3.isPlaying()) {
+                        playGameMusic();
+                    }
                 }
             }
         }
