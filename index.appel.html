@@ -147,8 +147,7 @@
         .landscape-text {
             margin-top: 12px; font-size: 14px; line-height: 1.5; color: #bbb; max-width: 280px;
         }
-        html.is-landscape #phone-container,
-        html.is-landscape #scr-gatekeeper { pointer-events: none; }
+        html.is-landscape #phone-container { pointer-events: none; }
         
         ::-webkit-scrollbar { display: none; }
 
@@ -509,19 +508,11 @@
             backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: max(8px, env(safe-area-inset-top)) 0 max(8px, env(safe-area-inset-bottom));
-            transition: opacity 0.5s ease;
+            transition: opacity 0.35s ease;
             overflow: hidden;
-            pointer-events: auto;
-            touch-action: manipulation;
-        }
-        .gate-tap-layer {
-            position: absolute; inset: 0; z-index: 50;
-            width: 100%; height: 100%;
-            border: none; margin: 0; padding: 0;
-            background: transparent; cursor: pointer;
+            cursor: pointer;
             -webkit-tap-highlight-color: transparent;
-            color: transparent; font-size: 0;
-            pointer-events: auto;
+            touch-action: manipulation;
         }
         .gate-tap-hint {
             position: absolute;
@@ -1155,7 +1146,7 @@
     <div class="landscape-text">Bitte das iPhone hochkant halten.<br>Querformat ist blockiert.</div>
 </div>
 
-<div id="scr-gatekeeper">
+<div id="scr-gatekeeper" role="button" tabindex="0" aria-label="Tap to start DOGGYCO Mission" onclick="unlockSystem()" ontouchend="unlockSystem(); event.preventDefault();">
     <div class="sw-crawl-wrap" aria-hidden="true">
         <div class="sw-crawl">
             <div class="sw-crawl-inner">
@@ -1170,7 +1161,6 @@
         </div>
     </div>
     <p class="gate-tap-hint" id="gate-tap-hint">TAP TO START</p>
-    <button type="button" class="gate-tap-layer" id="gate-tap-btn" aria-label="Tap to start DOGGYCO Mission">Start</button>
 </div>
 
 <div id="phone-container">
@@ -1947,20 +1937,18 @@ function initAudioContext() {
 }
 
 function showLevelSelectAfterGate() {
-    let gate = document.getElementById("scr-gatekeeper");
-    let startScr = document.getElementById("scr-start");
+    var gate = document.getElementById("scr-gatekeeper");
+    var startScr = document.getElementById("scr-start");
     if (gate) {
+        gate.style.display = "none";
         gate.style.opacity = "0";
         gate.style.pointerEvents = "none";
     }
-    setTimeout(function () {
-        if (gate) gate.style.display = "none";
-        if (startScr) {
-            startScr.style.display = "block";
-            startScr.style.pointerEvents = "auto";
-            setTimeout(function () { startScr.style.opacity = "1"; }, 50);
-        }
-    }, 350);
+    if (startScr) {
+        startScr.style.display = "block";
+        startScr.style.opacity = "1";
+        startScr.style.pointerEvents = "auto";
+    }
 }
 
 function unlockSystem() {
@@ -2001,27 +1989,6 @@ function unlockSystem() {
         }
     } catch (e) {}
     try { enterIosPlayMode(); } catch (e) {}
-}
-
-function bindGateTapHandlers() {
-    var gateTapLock = false;
-    var handleGateTap = function (e) {
-        if (window.__gateUnlocked || gateTapLock) return;
-        var gate = document.getElementById("scr-gatekeeper");
-        if (!gate || gate.style.display === "none") return;
-        gateTapLock = true;
-        if (e && e.cancelable) e.preventDefault();
-        if (e) e.stopPropagation();
-        unlockSystem();
-        setTimeout(function () { gateTapLock = false; }, 600);
-    };
-    var btn = document.getElementById("gate-tap-btn");
-    var gate = document.getElementById("scr-gatekeeper");
-    ["touchstart", "pointerup", "click"].forEach(function (type) {
-        var opts = type === "touchstart" ? { passive: false, capture: true } : false;
-        if (btn) btn.addEventListener(type, handleGateTap, opts);
-        if (gate) gate.addEventListener(type, handleGateTap, opts);
-    });
 }
 
 function updateCyborgButton() {
@@ -2070,8 +2037,6 @@ window.onload = function() {
         if (window.__isIOS) resizeCanvasSoon();
         else resizeCanvas();
     });
-
-    bindGateTapHandlers();
 
     document.addEventListener("keydown", function (e) {
         let g = document.getElementById("scr-gatekeeper");
