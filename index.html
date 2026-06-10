@@ -1823,19 +1823,23 @@ function initAudioContext() {
     } catch(e) { console.log(e); }
 }
 
+function showLevelSelectScreen() {
+    var startScr = document.getElementById("scr-start");
+    if (!startScr) return;
+    startScr.style.display = "block";
+    startScr.style.visibility = "visible";
+    startScr.style.opacity = "1";
+    startScr.style.pointerEvents = "auto";
+}
+
 function showLevelSelectAfterGate() {
     var gate = document.getElementById("scr-gatekeeper");
-    var startScr = document.getElementById("scr-start");
     if (gate) {
         gate.style.display = "none";
         gate.style.opacity = "0";
         gate.style.pointerEvents = "none";
     }
-    if (startScr) {
-        startScr.style.display = "block";
-        startScr.style.opacity = "1";
-        startScr.style.pointerEvents = "auto";
-    }
+    showLevelSelectScreen();
 }
 
 function unlockSystem() {
@@ -2054,7 +2058,7 @@ function goToLevelSelect() {
     document.getElementById("time-txt").innerText = "30";
     updateTimeHud(30, false);
     
-    document.getElementById("scr-start").style.display = "block";
+    showLevelSelectScreen();
     resizeCanvas();
     document.getElementById("scr-start").scrollTop = 0;
     
