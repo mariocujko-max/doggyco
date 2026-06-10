@@ -487,64 +487,71 @@
         }
 
         #scr-gatekeeper {
-            position: absolute; inset: 0; z-index: 9999;
+            position: fixed; inset: 0; z-index: 99999;
             background: rgba(0, 0, 0, 0.55);
             backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-            display: flex; flex-direction: column;
-            padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: max(8px, env(safe-area-inset-top)) 0 max(8px, env(safe-area-inset-bottom));
             transition: opacity 0.5s ease;
             overflow: hidden;
-            cursor: pointer;
+        }
+        .gate-tap-layer {
+            position: fixed; inset: 0; z-index: 100;
+            width: 100%; height: 100%;
+            border: none; margin: 0; padding: 0;
+            background: transparent; cursor: pointer;
             -webkit-tap-highlight-color: transparent;
+            color: transparent; font-size: 0;
         }
         .sw-crawl-wrap {
-            flex: 1; width: 100%; height: 100%;
-            min-height: 0;
-            perspective: 680px;
-            overflow: hidden; position: relative;
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            perspective: 900px;
+            overflow: hidden;
             pointer-events: none;
-            mask-image: linear-gradient(transparent, #000 4%, #000 96%, transparent);
-            -webkit-mask-image: linear-gradient(transparent, #000 4%, #000 96%, transparent);
+            mask-image: linear-gradient(transparent, #000 3%, #000 97%, transparent);
+            -webkit-mask-image: linear-gradient(transparent, #000 3%, #000 97%, transparent);
         }
         .sw-crawl {
             position: absolute; left: 50%; bottom: 0;
-            width: 92%; max-width: 480px; margin-left: -46%;
+            width: min(90vw, 440px);
+            transform: translateX(-50%);
             transform-origin: 50% 100%;
-            animation: swCrawl 48s linear infinite;
+            animation: swCrawl 26s linear infinite;
         }
         .sw-crawl-inner {
-            transform: rotateX(11deg);
-            text-align: justify;
+            transform: rotateX(8deg);
+            text-align: center;
             color: var(--gold);
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(15px, 4.6vw, 22px);
-            line-height: 1.75;
-            letter-spacing: 0.03em;
-            text-shadow: 0 0 12px rgba(255, 215, 0, 0.45);
+            font-size: clamp(16px, 5vw, 24px);
+            line-height: 1.65;
+            letter-spacing: 0.02em;
+            text-shadow: 0 0 14px rgba(255, 215, 0, 0.5);
         }
         .sw-episode {
-            text-align: center; font-size: 0.88em; margin: 0 0 2em;
+            font-size: 0.9em; margin: 0 0 1.6em;
             color: var(--neon); text-shadow: 0 0 14px var(--neon);
         }
         .sw-title {
-            text-align: center; font-size: 2.1em; margin: 0 0 1.2em;
-            letter-spacing: 0.1em; color: var(--gold);
-            line-height: 1.2;
-            text-shadow: 0 0 22px var(--gold);
+            font-size: 2.2em; margin: 0 0 1em;
+            letter-spacing: 0.08em; color: var(--gold);
+            line-height: 1.15;
+            text-shadow: 0 0 24px var(--gold);
         }
         .sw-tap {
-            display: block; text-align: center;
-            font-size: 1.35em; margin: 2.2em 0 1em;
-            color: var(--neon); letter-spacing: 0.15em;
-            text-shadow: 0 0 18px var(--neon), 0 0 36px var(--neon);
-            animation: pulseTap 1.3s ease-in-out infinite alternate;
+            display: block;
+            font-size: 1.4em; margin: 1.8em 0 0.5em;
+            color: var(--neon); letter-spacing: 0.12em;
+            text-shadow: 0 0 20px var(--neon), 0 0 40px var(--neon);
+            animation: pulseTap 1.1s ease-in-out infinite alternate;
         }
-        .sw-crawl-inner p { margin: 0 0 1em; }
+        .sw-crawl-inner p { margin: 0 0 0.85em; }
         @keyframes swCrawl {
-            0% { transform: translateY(92vh) rotateX(11deg); opacity: 0; }
-            4% { opacity: 1; }
-            96% { opacity: 1; }
-            100% { transform: translateY(-110%) rotateX(11deg); opacity: 0; }
+            0% { transform: translateX(-50%) translateY(88vh) rotateX(8deg); opacity: 0; }
+            3% { opacity: 1; }
+            97% { opacity: 1; }
+            100% { transform: translateX(-50%) translateY(-95%) rotateX(8deg); opacity: 0; }
         }
         @keyframes pulseTap {
             0% { opacity: 0.65; transform: scale(0.98); }
@@ -1078,18 +1085,18 @@
     <div id="level-countdown-num">3</div>
 </div>
 
-<div id="scr-gatekeeper" onclick="unlockSystem()" role="button" tabindex="0" aria-label="Tap to start DOGGYCO Mission">
+<div id="scr-gatekeeper">
+    <button type="button" class="gate-tap-layer" id="gate-tap-btn" aria-label="Tap to start DOGGYCO Mission">Start</button>
     <div class="sw-crawl-wrap" aria-hidden="true">
         <div class="sw-crawl">
             <div class="sw-crawl-inner">
                 <p class="sw-episode">A long time ago in a galaxy not so far away...</p>
                 <h2 class="sw-title">DOGGYCO<br>MISSION</h2>
-                <p>Welcome to the <strong>DOGGYCO Global Academy</strong> — where elite agents train to survive the snack apocalypse.</p>
-                <p>Your mission: navigate five lanes, dodge cyber-ninjas and venomous spiders, and collect provisions to power your run.</p>
-                <p>Grab the <strong>Rocket Core</strong> for a radioactive shield. Capture the <strong>Alien Core</strong> for magnetic pull. Catch <strong>UFO drops</strong> for bonus hearts.</p>
-                <p>Survive all twelve levels to complete your mission. Reach <strong>8,000 PTS</strong> to unlock classified <strong>Level 13 — CYBORG</strong> mode.</p>
-                <p>The academy awaits, Agent. Enter your codename and choose your starting level.</p>
-                <p style="text-align:center; margin-top:1.5em;">May the treats be with you.</p>
+                <p>Hey there, future snack hero! 🐶</p>
+                <p>Tasty stuff falls from the sky. Ninjas are mean. Spiders are hangry. Your job? Dodge, munch, and look cool!</p>
+                <p>🚀 Rocket = mega shield!<br>👽 Alien = magnet power!<br>🛸 UFO = bonus hearts!</p>
+                <p>Beat 12 crazy levels. Score 8,000 points to unlock secret CYBORG mode 🤖</p>
+                <p>Pick a codename. Pick a level. Let's roll!</p>
                 <span class="sw-tap">▶ TAP TO START ◀</span>
             </div>
         </div>
@@ -1768,8 +1775,10 @@ function initAudioContext() {
 }
 
 function unlockSystem() {
-    initAudioContext();
-    prewarmGameAssets();
+    if (window.__gateUnlocked) return;
+    window.__gateUnlocked = true;
+    try { initAudioContext(); } catch (e) {}
+    try { prewarmGameAssets(); } catch (e) {}
     try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
     if (audioCtx) {
         try {
@@ -1782,31 +1791,37 @@ function unlockSystem() {
             u.stop(audioCtx.currentTime + 0.02);
         } catch (e) {}
     }
+    try {
+        if (window.DoggyCoMp3) {
+            DoggyCoMp3.preload("music.mp3");
+            DoggyCoMp3.prime().catch(function () {});
+        }
+    } catch (e) {}
+    try {
+        if (!dogHasSpoken) {
+            dogHasSpoken = true;
+            manageMedia('vid1');
+        } else {
+            stopMenuVideos();
+        }
+    } catch (e) {}
 
-    if (window.DoggyCoMp3) {
-        DoggyCoMp3.preload("music.mp3");
-        DoggyCoMp3.prime().catch(function () {});
-    }
-
-    if (!dogHasSpoken) {
-        dogHasSpoken = true;
-        manageMedia('vid1');
-    } else {
-        stopMenuVideos();
-    }
-    
     let gate = document.getElementById("scr-gatekeeper");
     let startScr = document.getElementById("scr-start");
-    
-    lockMobilePortrait();
-    forceFullscreen();
+    try { lockMobilePortrait(); } catch (e) {}
+    try { forceFullscreen(); } catch (e) {}
 
-    gate.style.opacity = "0";
-    setTimeout(() => { 
-        gate.style.display = "none"; 
-        startScr.style.display = "block";
-        setTimeout(() => { startScr.style.opacity = "1"; }, 50);
-    }, 500);
+    if (gate) {
+        gate.style.opacity = "0";
+        gate.style.pointerEvents = "none";
+    }
+    setTimeout(function () {
+        if (gate) gate.style.display = "none";
+        if (startScr) {
+            startScr.style.display = "block";
+            setTimeout(function () { startScr.style.opacity = "1"; }, 50);
+        }
+    }, 400);
 }
 
 function updateCyborgButton() {
@@ -1845,6 +1860,18 @@ window.onload = function() {
 
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
+
+    var gateTapBtn = document.getElementById("gate-tap-btn");
+    if (gateTapBtn) {
+        gateTapBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            unlockSystem();
+        });
+        gateTapBtn.addEventListener("touchend", function (e) {
+            e.preventDefault();
+            unlockSystem();
+        }, { passive: false });
+    }
 
     document.addEventListener("keydown", function (e) {
         let g = document.getElementById("scr-gatekeeper");
