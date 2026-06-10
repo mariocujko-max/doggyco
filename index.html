@@ -490,8 +490,52 @@
             position: absolute; inset: 0; z-index: 9999;
             background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+            padding: max(16px, env(safe-area-inset-top)) 12px max(24px, env(safe-area-inset-bottom));
             transition: opacity 0.5s ease;
+            overflow: hidden;
+        }
+        .gate-header h1 {
+            font-family: 'Orbitron'; font-size: clamp(26px, 6vw, 40px); color: var(--gold);
+            margin: 0; text-align: center; text-shadow: 0 0 20px var(--gold);
+            line-height: 1.15;
+        }
+        .sw-crawl-wrap {
+            flex: 1; width: 100%; max-width: 420px; min-height: 0;
+            perspective: 320px; overflow: hidden; position: relative;
+            mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent);
+            -webkit-mask-image: linear-gradient(transparent, #000 8%, #000 92%, transparent);
+        }
+        .sw-crawl {
+            position: absolute; left: 50%; bottom: -8%;
+            width: 86%; margin-left: -43%;
+            transform-origin: 50% 100%;
+            animation: swCrawl 38s linear infinite;
+        }
+        .sw-crawl-inner {
+            transform: rotateX(24deg);
+            text-align: justify;
+            color: var(--gold);
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(10px, 2.9vw, 13px);
+            line-height: 1.7;
+            letter-spacing: 0.04em;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.35);
+        }
+        .sw-episode {
+            text-align: center; font-size: 0.92em; margin: 0 0 2.5em;
+            color: var(--neon); text-shadow: 0 0 12px var(--neon);
+        }
+        .sw-title {
+            text-align: center; font-size: 1.45em; margin: 0 0 1.4em;
+            letter-spacing: 0.14em; color: var(--gold);
+        }
+        .sw-crawl-inner p { margin: 0 0 1.1em; }
+        @keyframes swCrawl {
+            0% { transform: translateY(72vh) rotateX(24deg); opacity: 0; }
+            6% { opacity: 1; }
+            94% { opacity: 1; }
+            100% { transform: translateY(-165%) rotateX(24deg); opacity: 0; }
         }
         .gate-btn {
             background: var(--neon); color: #000; font-family: 'Orbitron'; font-weight: 900; font-size: 24px;
@@ -1045,7 +1089,23 @@
 </div>
 
 <div id="scr-gatekeeper">
-    <h1 style="font-family:'Orbitron'; font-size:40px; color:var(--gold); margin-bottom:40px; text-align:center; text-shadow:0 0 20px var(--gold);">DOGGYCO<br>MISSION</h1>
+    <div class="gate-header">
+        <h1>DOGGYCO<br>MISSION</h1>
+    </div>
+    <div class="sw-crawl-wrap" aria-hidden="true">
+        <div class="sw-crawl">
+            <div class="sw-crawl-inner">
+                <p class="sw-episode">A long time ago in a galaxy not so far away...</p>
+                <h2 class="sw-title">DOGGYCO MISSION</h2>
+                <p>Welcome to the <strong>DOGGYCO Global Academy</strong> — where elite agents train to survive the snack apocalypse.</p>
+                <p>Your mission: navigate five lanes, dodge cyber-ninjas and venomous spiders, and collect provisions to power your run.</p>
+                <p>Grab the <strong>Rocket Core</strong> for a radioactive shield. Capture the <strong>Alien Core</strong> for magnetic pull. Catch <strong>UFO drops</strong> for bonus hearts.</p>
+                <p>Survive all twelve levels to complete your mission. Reach <strong>8,000 PTS</strong> to unlock classified <strong>Level 13 — CYBORG</strong> mode.</p>
+                <p>The academy awaits, Agent. Enter your codename and choose your starting level.</p>
+                <p style="text-align:center; margin-top:2em;">May the treats be with you.</p>
+            </div>
+        </div>
+    </div>
     <button class="gate-btn" id="gate-start-btn" onclick="unlockSystem()">TAP TO START</button>
 </div>
 
@@ -1270,6 +1330,7 @@
 
 </div>
 
+<audio id="bgm-track" src="music.mp3" loop preload="auto" playsinline webkit-playsinline style="display:none" aria-hidden="true"></audio>
 <script src="music-mp3.js"></script>
 
 <script>
@@ -1577,11 +1638,15 @@ function revalidateWindowsShell() {
 function playGameMusic() {
     if (isMenuVideoPlaying()) return;
     stopMenuVideos();
+    if (!systemActive) initAudioContext();
     try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
-    if (window.DoggyCoMp3) {
-        DoggyCoMp3.setRate(getMusicRate(Math.max(level, 1)));
-        if (!DoggyCoMp3.isActive()) DoggyCoMp3.start();
-        applyMusicVolume();
+    if (!window.DoggyCoMp3) return;
+    DoggyCoMp3.setRate(getMusicRate(Math.max(level, 1)));
+    var fadeIn = function () { applyMusicVolume(); };
+    if (!DoggyCoMp3.isPlaying()) {
+        DoggyCoMp3.start().then(fadeIn).catch(fadeIn);
+    } else {
+        fadeIn();
     }
 }
 
@@ -1731,7 +1796,10 @@ function unlockSystem() {
         } catch (e) {}
     }
 
-    if (window.DoggyCoMp3) DoggyCoMp3.preload("music.mp3");
+    if (window.DoggyCoMp3) {
+        DoggyCoMp3.preload("music.mp3");
+        DoggyCoMp3.prime().catch(function () {});
+    }
 
     if (!dogHasSpoken) {
         dogHasSpoken = true;
@@ -2044,10 +2112,13 @@ function resumeGameAudio() {
     try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
     if (isMenuVideoPlaying()) return;
     if (!active || missionComplete) return;
-    if (window.DoggyCoMp3) {
-        DoggyCoMp3.setRate(getMusicRate(Math.max(level, 1)));
-        if (!DoggyCoMp3.isActive()) DoggyCoMp3.start();
-        applyMusicVolume();
+    if (!window.DoggyCoMp3) return;
+    DoggyCoMp3.setRate(getMusicRate(Math.max(level, 1)));
+    var fadeIn = function () { applyMusicVolume(); };
+    if (!DoggyCoMp3.isPlaying()) {
+        DoggyCoMp3.start().then(fadeIn).catch(fadeIn);
+    } else {
+        fadeIn();
     }
 }
 
@@ -3002,7 +3073,10 @@ function loop(t) {
             iosMusicCheck -= dt;
             if (iosMusicCheck <= 0) {
                 iosMusicCheck = 1.8;
-                if (!isMenuVideoPlaying() && window.DoggyCoMp3 && (!DoggyCoMp3.isActive() || (audioCtx && audioCtx.state === "suspended"))) resumeGameAudio();
+                if (!isMenuVideoPlaying() && window.DoggyCoMp3 &&
+                    (!DoggyCoMp3.isPlaying() || (audioCtx && audioCtx.state === "suspended"))) {
+                    resumeGameAudio();
+                }
             }
         }
 
@@ -3275,8 +3349,9 @@ function loop(t) {
                 let dy = getPlayerY() - e.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist > 30) {
-                    e.x += (dx / dist) * W * 1.5 * dt;
-                    e.y += (dy / dist) * H * 0.8 * dt;
+                    let magnetPullMult = speedMult * 1.1;
+                    e.x += (dx / dist) * W * 1.5 * magnetPullMult * dt;
+                    e.y += (dy / dist) * H * 0.8 * magnetPullMult * dt;
                     e.l = getNearestLaneIndex(e.x);
                     e.x = clampDrawX(e.x);
                 } else {
