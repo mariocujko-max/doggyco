@@ -149,6 +149,16 @@
         }
 
         #game-wrap { position: absolute; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); touch-action: none; overflow: hidden; visibility: hidden; pointer-events: none; z-index: 20; }
+        #phone-container.is-playing #game-wrap {
+            z-index: 150;
+            visibility: visible !important;
+            pointer-events: auto !important;
+        }
+        #phone-container.is-playing #scr-start {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
         #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; touch-action: none; transition: filter 0.3s; display: block; }
         #canvas.blur { filter: blur(5px); }
 
@@ -1994,6 +2004,10 @@ function goToLevelSelect() {
     forceFullscreen(); // Sichert das Vollbild ab
     document.documentElement.style.setProperty('--neon', '#00f2ff');
 
+    active = false;
+    missionComplete = false;
+    if (globalAnimationId) { cancelAnimationFrame(globalAnimationId); globalAnimationId = null; }
+
     document.getElementById("scr-end").style.display = "none";
     
     document.getElementById("controls").style.display = "flex";
@@ -2842,7 +2856,7 @@ function updateTheme(newMode) {
 }
 
 function start(m, startLvl) {
-    forceFullscreen(); // Sichert das Vollbild beim Spielstart ab
+    forceFullscreen();
     let nameInput = document.getElementById("pName");
     let pName = nameInput.value.trim().toUpperCase();
     if(!pName) {
@@ -2855,7 +2869,8 @@ function start(m, startLvl) {
     agent = pName;
     try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
 
-    if(globalAnimationId) cancelAnimationFrame(globalAnimationId);
+    initAudioContext();
+    if(globalAnimationId) { cancelAnimationFrame(globalAnimationId); globalAnimationId = null; }
 
     mode = m;
     level = startLvl;
@@ -2869,7 +2884,8 @@ function start(m, startLvl) {
     cyborg8000CrossedThisRun = false;
     if (cyborgScoreLaunch && m === 'cyborg' && startLvl === 13) markCyborg8000Used();
     cyborgScoreLaunch = false;
-    entities = []; floaters = []; fireworks = []; fxParticles = []; missionComplete = false;
+    entities = []; floaters = []; fireworks = []; fxParticles = [];
+    missionComplete = false;
     
     invincibleTimer = 0; alarmTimer = 0; magnetTimer = 0; magnetSoundTimer = 0;
     rocketSpawned = false; ufoSpawned = false; magnetSpawned = false;
@@ -2877,18 +2893,33 @@ function start(m, startLvl) {
     
     updateTheme(mode);
     currLane = 2;
-    playerX = snapToLane(2);
-    targetX = playerX;
-    let lvlTxt = document.getElementById("lvl-txt");
-    if (lvlTxt) updateLevelHud(startLvl);
+    targetX = snapToLane(2);
+    playerX = targetX;
+    updateLevelHud(startLvl);
     
     let scrStart = document.getElementById("scr-start");
     let gameWrap = document.getElementById("game-wrap");
-    
-    if(scrStart) scrStart.style.display = "none";
+    let hud = document.getElementById("hud");
+    let controls = document.getElementById("controls");
+    let cv = document.getElementById("canvas");
+
+    if(scrStart) {
+        scrStart.style.display = "none";
+        scrStart.style.pointerEvents = "none";
+        scrStart.style.visibility = "hidden";
+    }
+    document.getElementById("scr-end").style.display = "none";
     if(gameWrap) {
         gameWrap.style.visibility = "visible";
         gameWrap.style.pointerEvents = "auto";
+    }
+    if (hud) hud.style.display = "block";
+    if (controls) controls.style.display = "flex";
+    if (cv) {
+        cv.style.display = "block";
+        cv.style.visibility = "visible";
+        cv.style.opacity = "1";
+        cv.classList.remove("blur");
     }
 
     document.getElementById("phone-container").classList.add("is-playing");
@@ -2896,8 +2927,8 @@ function start(m, startLvl) {
     revalidateWindowsShell();
     active = true;
 
-    prewarmGameWorld();
-    manageMedia('game');
+    try { prewarmGameWorld(); } catch (e) {}
+    try { manageMedia('game'); } catch (e) {}
 
     if (needsLevelCountdown(startLvl)) {
         levelCountdown = 3.2;
