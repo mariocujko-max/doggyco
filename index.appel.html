@@ -1717,20 +1717,29 @@ function ensureMobileMusicRoute() {
     }
 }
 
+function kickGameMusic() {
+    try {
+        stopMenuVideos();
+        playGameMusic();
+    } catch (e) {}
+}
+
 function playGameMusic() {
-    stopMenuVideos();
-    if (isMenuVideoPlaying()) return;
-    if (!systemActive) initAudioContext();
-    ensureMobileMusicRoute();
-    try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
-    if (!window.DoggyCoMp3) return;
-    DoggyCoMp3.setRate(getMusicRate(Math.max(level, 1)));
-    applyMusicVolume(true);
-    if (!DoggyCoMp3.isPlaying()) {
-        DoggyCoMp3.start().then(function () { applyMusicVolume(true); }).catch(function () { applyMusicVolume(true); });
-    } else {
+    try {
+        stopMenuVideos();
+        if (isMenuVideoPlaying()) return;
+        if (!systemActive) initAudioContext();
+        ensureMobileMusicRoute();
+        try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
+        if (!window.DoggyCoMp3) return;
+        DoggyCoMp3.setRate(getMusicRate(Math.max(level, 1)));
         applyMusicVolume(true);
-    }
+        if (!DoggyCoMp3.isPlaying()) {
+            DoggyCoMp3.start().then(function () { applyMusicVolume(true); }).catch(function () { applyMusicVolume(true); });
+        } else {
+            applyMusicVolume(true);
+        }
+    } catch (e) {}
 }
 
 function needsLevelCountdown(startLvl) {
@@ -1782,16 +1791,16 @@ function prewarmGameWorld() {
 
 let videoEl = document.getElementById('dog-video');
 let videoCanvas = document.getElementById('dog-video-canvas');
-let videoCtx = videoCanvas.getContext('2d', { willReadFrequently: true });
+let videoCtx = videoCanvas ? videoCanvas.getContext('2d', { willReadFrequently: true }) : null;
 let videoAnimationId = null;
 
 let videoEl2 = document.getElementById('dog-video2');
 let videoCanvas2 = document.getElementById('dog-video-canvas2');
-let videoCtx2 = videoCanvas2.getContext('2d', { willReadFrequently: true });
+let videoCtx2 = videoCanvas2 ? videoCanvas2.getContext('2d', { willReadFrequently: true }) : null;
 let videoAnimationId2 = null;
 
 function processGreenScreen(vEl, vCanvas, vCtx) {
-    if (!vEl.videoWidth) return;
+    if (!vEl || !vCanvas || !vCtx || !vEl.videoWidth) return;
     let vw = vEl.videoWidth; let vh = vEl.videoHeight;
     let size = Math.min(vw, vh);
     let startX = (vw - size) / 2; let startY = (vh - size) / 2;
@@ -1855,7 +1864,7 @@ function initAudioContext() {
     try {
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         if (!window.musicRouted && window.DoggyCoMp3) {
-            if (isIOSDevice() || window.__isIOS || document.documentElement.classList.contains('platform-ios')) {
+            if (isMobileDevice()) {
                 DoggyCoMp3.initDirect();
             } else if (audioCtx) {
                 window.musicGain = audioCtx.createGain();
@@ -3034,13 +3043,10 @@ function start(m, startLvl) {
     try { localStorage.setItem("doggycoAgent", agent); } catch(e) {}
 
     initAudioContext();
-    try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {}
+    if(globalAnimationId) { cancelAnimationFrame(globalAnimationId); globalAnimationId = null; }
+
     mode = m;
     level = startLvl;
-    stopMenuVideos();
-    playGameMusic();
-
-    if(globalAnimationId) { cancelAnimationFrame(globalAnimationId); globalAnimationId = null; }
     
     hp = 3; energy = 100; score = 0; timeLeft = 30;
     energyLowWarned = false;
@@ -3076,7 +3082,8 @@ function start(m, startLvl) {
         scrStart.style.pointerEvents = "none";
         scrStart.style.visibility = "hidden";
     }
-    document.getElementById("scr-end").style.display = "none";
+    let scrEnd = document.getElementById("scr-end");
+    if (scrEnd) scrEnd.style.display = "none";
     if(gameWrap) {
         gameWrap.style.visibility = "visible";
         gameWrap.style.pointerEvents = "auto";
@@ -3090,10 +3097,12 @@ function start(m, startLvl) {
         cv.classList.remove("blur");
     }
 
-    document.getElementById("phone-container").classList.add("is-playing");
-    enterIosPlayMode();
+    let phonePc = document.getElementById("phone-container");
+    if (phonePc) phonePc.classList.add("is-playing");
+    try { enterIosPlayMode(); } catch (e) {}
     active = true;
 
+    kickGameMusic();
     try { prewarmGameWorld(); } catch (e) { console.error("prewarmGameWorld", e); }
     try { manageMedia('game'); } catch (e) { console.error("manageMedia", e); }
 
