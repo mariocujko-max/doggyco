@@ -8,11 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#111111">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-orientation" content="portrait">
+
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="msapplication-TileColor" content="#111111">
     <meta name="format-detection" content="telephone=no">
     
-    <title>DOGGYCO MISSION</title>
+    <title>DOGGYCO MISSION - iPhone</title>
     
     <script>
     window.__BUILD = 'v16';
@@ -26,16 +30,19 @@
             var ua = navigator.userAgent || '';
             var q = location.search || '';
             var h = location.hash || '';
+            var path = (location.pathname || '').toLowerCase();
+            var file = path.split('/').pop() || '';
             var isIOS = /iPhone|iPad|iPod/i.test(ua) ||
                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            var isAndroid = /Android/i.test(ua);
             var m = window.matchMedia;
             var fineHover = m && m('(hover: hover) and (pointer: fine)').matches;
             var coarse = m && m('(pointer: coarse)').matches;
             var isWin = /Windows/i.test(ua);
-            var isPcDesktop = !!(isWin && fineHover && !coarse && !isIOS);
+            var isPcDesktop = !!(isWin && fineHover && !coarse && !isIOS && !isAndroid);
 
-            if (isIOS) {
-                location.replace('index.appel.html' + q + h);
+            if (isAndroid) {
+                location.replace('index.android.html' + q + h);
                 return;
             }
             if (isPcDesktop) {
@@ -43,27 +50,24 @@
                 return;
             }
 
-            window.__isAndroid = true;
-            window.__isIOS = false;
+            window.__isIOS = true;
+            window.__isAndroid = false;
             window.__pcMs = false;
             window.__msStoreApp = false;
-            window.__androidStoreApp = false;
-            document.documentElement.classList.remove('pc-ms', 'ms-store-app', 'android-store-app');
-            document.documentElement.classList.add('platform-android', 'is-android');
-            var webView = /;\s*wv\)/.test(ua);
-            if (webView || window.__PLAY_STORE_APP === true) {
-                window.__androidStoreApp = true;
-                document.documentElement.classList.add('android-store-app');
-            }
-            window.__isNativeApp = !!(webView || window.__PLAY_STORE_APP === true);
+            document.documentElement.classList.remove('pc-ms', 'ms-store-app');
+            document.documentElement.classList.add('platform-ios', 'is-ios');
+            var iosStandalone = window.navigator.standalone === true ||
+                (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+            if (iosStandalone) document.documentElement.classList.add('ios-store-app');
+            var nativeBridge = !!(window.webkit && window.webkit.messageHandlers);
+            window.__isNativeApp = !!(iosStandalone || nativeBridge);
             if (window.__isNativeApp) document.documentElement.classList.add('native-app');
             else document.documentElement.classList.add('web-browser');
         } catch (e) {
             window.__pcMs = false;
-            window.__isAndroid = true;
-            window.__isIOS = false;
+            window.__isIOS = true;
+            window.__isAndroid = false;
             window.__msStoreApp = false;
-            window.__androidStoreApp = false;
             window.__isNativeApp = false;
             document.documentElement.classList.add('web-browser');
         }
@@ -118,11 +122,41 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
+            min-height: -webkit-fill-available;
             overflow: hidden;
             position: fixed;
+            inset: 0;
             background: #111; font-family: 'Orbitron', sans-serif; color: #fff;
             display: flex; justify-content: center; align-items: center;
         }
+
+        #landscape-block {
+            position: fixed; inset: 0; z-index: 100000;
+            background: rgba(0, 0, 0, 0.96);
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center;
+            padding: max(env(safe-area-inset-top, 16px), 24px) 24px max(env(safe-area-inset-bottom, 16px), 24px);
+            pointer-events: auto;
+        }
+        #landscape-block.show { display: flex; }
+        .landscape-icon {
+            font-size: 72px; margin-bottom: 18px;
+            animation: landscape-wiggle 1.4s ease-in-out infinite;
+        }
+        @keyframes landscape-wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            35%, 65% { transform: rotate(-90deg); }
+        }
+        .landscape-title {
+            font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 900;
+            color: var(--neon); text-shadow: 0 0 16px var(--neon);
+            letter-spacing: 1px;
+        }
+        .landscape-text {
+            margin-top: 12px; font-size: 14px; line-height: 1.5; color: #bbb; max-width: 280px;
+        }
+        html.is-landscape #phone-container { pointer-events: none; }
         
         ::-webkit-scrollbar { display: none; }
 
@@ -175,7 +209,9 @@
         #canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 50; touch-action: none; transition: filter 0.3s; display: block; }
         #canvas.blur { filter: blur(5px); }
 
-        #hud { position: absolute; top: 50px; width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; transition: opacity 0.3s; }
+        #hud { position: absolute; top: max(env(safe-area-inset-top, 0px), 50px); width: 100%; z-index: 200; pointer-events: none; padding-top: 10px; transition: opacity 0.3s; }
+        html.platform-ios #canvas { z-index: 50; }
+        html.platform-ios #hud { z-index: 200; }
         
         #mission-title { text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; color: var(--neon); text-shadow: 0 0 10px var(--neon), 0 0 20px var(--neon); animation: pulseNeon 1.5s infinite alternate; }
         @keyframes pulseNeon { 0% { opacity: 0.7; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1.02); } }
@@ -908,7 +944,7 @@
         .play-store-btn.apple-btn img { background: #000; padding: 6px; box-sizing: border-box; }
         .play-store-btn:hover { transform: scale(1.04); }
         .play-store-btn:active { transform: scale(0.97); }
-        html.android-store-app .browser-only-panel { display: none !important; }
+        html.ios-store-app .browser-only-panel { display: none !important; }
         html:not(.pc-ms) .pc-only-panel,
         html.platform-android .pc-only-panel,
         html.platform-ios .pc-only-panel,
@@ -917,7 +953,7 @@
         html.platform-ios .pc-only-panel,
         html.platform-ios .browser-edition-links { display: none !important; }
 
-        html.platform-android #phone-container {
+        html.platform-ios #phone-container {
             width: 100% !important;
             max-width: 100% !important;
             height: 100% !important;
@@ -925,43 +961,25 @@
             max-height: 100dvh !important;
             margin: 0 !important;
             border-radius: 0 !important;
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
         }
-        html.platform-android #phone-container.is-playing {
+        html.platform-ios #phone-container.is-playing {
             box-shadow: none !important;
             border: none !important;
         }
-        html.platform-android #hud {
-            top: max(env(safe-area-inset-top, 8px), 8px);
+        html.platform-ios .screen-inner {
+            padding-top: max(env(safe-area-inset-top, 16px), 48px);
         }
-        html.platform-android #stats-bar {
+        html.platform-ios #stats-bar {
             --odo-h: 32px;
             --odo-w: 21px;
             --odo-fs: 21px;
             min-height: 60px;
             grid-template-columns: 1fr 1.15fr 1.75fr 1.1fr;
         }
-        html.platform-android .hud-pyramid { width: 60px; height: 54px; padding-bottom: 0; }
-        html.platform-android #lvl-txt { font-size: 19px; }
-        html.platform-android .hud-clock { width: 46px; height: 46px; }
-        html.platform-android .hud-clock-num { font-size: 14px; }
-        html.platform-android #controls {
-            padding-bottom: max(env(safe-area-inset-bottom, 12px), 12px);
-        }
-        html.platform-android .screen-inner {
-            padding-top: max(env(safe-area-inset-top, 16px), 72px);
-        }
-        html.platform-android #canvas {
-            touch-action: none;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
+        html.platform-ios .hud-pyramid { width: 60px; height: 54px; padding-bottom: 0; }
+        html.platform-ios #lvl-txt { font-size: 19px; }
+        html.platform-ios .hud-clock { width: 46px; height: 46px; }
+        html.platform-ios .hud-clock-num { font-size: 14px; }
         #privacy-fullscreen {
             position: fixed; inset: 0; z-index: 10001;
             background: #0d1117; display: none; flex-direction: column;
@@ -1121,23 +1139,13 @@
 
     <footer>
         <p>
-            <a id="privacy-back-link" href="index.android.html">← Zurück zum Spiel</a>
+            <a id="privacy-back-link" href="#">← Zurück zum Spiel</a>
             · <a href="index.html">Web-Version</a>
             · <a href="https://www.doggyco.de/">doggyco.de</a>
         </p>
         <p>© 2026 DOGGYCO GLOBAL ACADEMY — Fan project. Concept, development &amp; design by M. Čujko.</p>
     </footer>
-    <script>
-    (function () {
-        try {
-            var back = sessionStorage.getItem('doggycoPrivacyBack');
-            if (back) {
-                var a = document.getElementById('privacy-back-link');
-                if (a) { a.href = back; a.textContent = '← Zurück zum Spiel'; }
-            }
-        } catch (e) {}
-    })();
-    </script></template>
+    </template>
 
 <div id="bg-fx"></div>
 <div id="bg-overlay"></div>
@@ -1148,6 +1156,12 @@
 
 <div id="level-countdown-overlay" aria-hidden="true">
     <div id="level-countdown-num">3</div>
+</div>
+
+<div id="landscape-block" aria-hidden="true">
+    <div class="landscape-icon">📱</div>
+    <div class="landscape-title">NUR HOCHFORMAT</div>
+    <div class="landscape-text">Bitte das iPhone hochkant halten.<br>Querformat ist blockiert.</div>
 </div>
 
 <div id="scr-gatekeeper" role="button" tabindex="0" aria-label="Tap to start DOGGYCO Mission" onclick="unlockSystem()" ontouchend="unlockSystem(); event.preventDefault();">
@@ -1304,13 +1318,13 @@
             <!-- STORE_PANEL_START -->
             <div class="info-panel panel-green browser-only-panel" style="text-align: center;">
                 <h3>📱 GET THE APP</h3>
-                <p class="text-sm" style="margin-bottom: 12px;">Play DOGGYCO MISSION on Android:</p>
+                <p class="text-sm" style="margin-bottom: 12px;">Play DOGGYCO MISSION on iPhone:</p>
                 <div class="store-badges">
-                    <div class="play-store-btn" role="link" tabindex="0" onclick="openExternalLink('https://play.google.com/store/apps/details?id=com.doggycogames.doggyco')">
-                        <img alt="Get it on Google Play" src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg">
+                    <div class="play-store-btn apple-btn" role="link" tabindex="0" onclick="openExternalLink('https://apps.apple.com/de/app/doggyco-mission/id6763249087')">
+                        <img alt="Download on the App Store" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg">
                     </div>
                     <p class="text-sm" style="margin-top:8px;color:#aaa;font-size:12px;">
-                        Google Play
+                        App Store
                     </p>
                 </div>
             </div>
@@ -1451,22 +1465,53 @@ function isPhonePlayLayout() {
     return isMobileDevice() && !usePcSquareLayout();
 }
 
-/** Handy: Vollbild + Hochformat per API — ohne Dreh-Hinweis (verursacht Abstürze) */
+/** iPhone: Querformat erkannt? */
+function isLandscapeBlocked() {
+    return window.innerWidth > window.innerHeight;
+}
+
+function updateLandscapeBlock() {
+    let el = document.getElementById('landscape-block');
+    if (!el) return;
+    let landscape = isLandscapeBlocked();
+    el.classList.toggle('show', landscape);
+    el.setAttribute('aria-hidden', landscape ? 'false' : 'true');
+    document.documentElement.classList.toggle('is-landscape', landscape);
+}
+
+/** iPhone: Vollbild + Hochformat — Querformat per Overlay blockiert */
 function lockMobilePortrait() {
-    if (!isMobileDevice()) return;
+    updateLandscapeBlock();
+    if (isLandscapeBlocked()) return;
     try {
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('portrait').catch(function () {});
+        if (screen.orientation && typeof screen.orientation.lock === 'function') {
+            screen.orientation.lock('portrait-primary').catch(function () {
+                screen.orientation.lock('portrait').catch(function () {});
+            });
         }
     } catch (e) {}
 }
 
 function forceFullscreen() {
     if (window.__pcMs && !window.__msStoreApp) return;
-    if (!isMobileDevice()) return;
-    let elem = document.documentElement;
-    let req = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.webkitEnterFullscreen || elem.msRequestFullscreen;
-    if (req) { req.call(elem).catch(function () {}); }
+    try {
+        let elem = document.documentElement;
+        let req = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.webkitEnterFullscreen || elem.msRequestFullscreen;
+        if (req) req.call(elem).catch(function () {});
+    } catch (e) {}
+    if (window.__isIOS) {
+        try {
+            document.documentElement.style.height = '100%';
+            document.body.style.minHeight = window.innerHeight + 'px';
+            window.scrollTo(0, 0);
+        } catch (e2) {}
+    }
+}
+
+function enterIosPlayMode() {
+    forceFullscreen();
+    lockMobilePortrait();
+    updateLandscapeBlock();
 }
 
 function stopGameMusic() {
@@ -1539,6 +1584,7 @@ var cyborgUnlockAnnounced = false;
 var cyborg8000CrossedThisRun = false;
 var cyborgScoreLaunch = false;
 var iosMusicCheck = 0;
+var musicRateTimer = 0;
 var levelCountdown = 0;
 var lastCountdownLabel = '';
 var gameAssetsWarmed = false;
@@ -1566,7 +1612,7 @@ function applyMusicVolume(fast) {
         if (fast) {
             window.musicGain.gain.setValueAtTime(lvl, audioCtx.currentTime);
         } else {
-            window.musicGain.gain.setTargetAtTime(lvl, audioCtx.currentTime, 0.04);
+            window.musicGain.gain.setTargetAtTime(lvl, audioCtx.currentTime, 0.02);
         }
     } catch (e) {
         try { window.musicGain.gain.value = lvl; } catch (e2) {}
@@ -1694,30 +1740,13 @@ function isIOSDevice() {
 }
 
 function needsSafeCanvas2d() {
-    return !!(window.__msStoreApp || window.__isAndroid ||
+    return !!(window.__msStoreApp || window.__isIOS || window.__isAndroid ||
         /Windows/i.test(navigator.userAgent || ''));
 }
 
 /** PC-Browser + Store-App: gleiches quadratisches Spielfeld */
 function usePcSquareLayout() {
     return !!((window.__pcMs || window.__msStoreApp) && active);
-}
-
-/** Play-Store-App / WebView: Store-Links ausblenden (nur Browser zeigt sie) */
-function revalidateAndroidShell() {
-    try {
-        var ua = navigator.userAgent || '';
-        if (!/Android/i.test(ua)) return;
-        var webView = /;\s*wv\)/.test(ua);
-        var inShell = webView || window.__PLAY_STORE_APP === true;
-        if (inShell) {
-            window.__androidStoreApp = true;
-            document.documentElement.classList.add('android-store-app');
-        } else {
-            window.__androidStoreApp = false;
-            document.documentElement.classList.remove('android-store-app');
-        }
-    } catch (e) {}
 }
 
 /** Store-/WebView-App: Erkennung auch nach Laden (wichtig für Microsoft Store) */
@@ -1812,7 +1841,7 @@ function updateCountdownUI() {
 function prewarmGameAssets() {
     if (gameAssetsWarmed) return;
     gameAssetsWarmed = true;
-    try { initGameCanvas(); resizeCanvas(); } catch (e) {}
+    try { initGameCanvas(); if (typeof resizeCanvasSoon === 'function') resizeCanvasSoon(); else resizeCanvas(); } catch (e) {}
     if (window.DoggyCoMp3) DoggyCoMp3.preload("music.mp3");
     [document.getElementById('dog-video'), document.getElementById('dog-video2')].forEach(function (v) {
         if (v && v.readyState < 1) { try { v.load(); } catch (e) {} }
@@ -1821,8 +1850,8 @@ function prewarmGameAssets() {
 
 function prewarmGameWorld() {
     initGameCanvas();
-    resizeCanvas();
-    if (typeof syncPlayfieldMetrics === 'function') syncPlayfieldMetrics();
+    if (typeof resizeCanvasSoon === 'function') resizeCanvasSoon();
+    else resizeCanvas();
     initBackgroundGraphics();
     initPermSpiders();
     document.getElementById("canvas").classList.remove("blur");
@@ -1984,8 +2013,7 @@ function unlockSystem() {
             stopMenuVideos();
         }
     } catch (e) {}
-    try { lockMobilePortrait(); } catch (e) {}
-    try { forceFullscreen(); } catch (e) {}
+    try { enterIosPlayMode(); } catch (e) {}
 }
 
 function updateCyborgButton() {
@@ -2013,7 +2041,10 @@ window.onload = function() {
     if (!window.__isNativeApp && window.DoggyCoMp3) {
         DoggyCoMp3.setupBrowserVideos();
     }
-    revalidateAndroidShell();
+    if (window.DoggyCoMp3) DoggyCoMp3.preload("music.mp3");
+    var bgmEarly = document.getElementById("bgm-track");
+    if (bgmEarly) { try { bgmEarly.load(); } catch (e) {} }
+
     initCyborgProgress();
     ensureCyborgUnlockFromProgress();
     try {
@@ -2027,7 +2058,10 @@ window.onload = function() {
     } catch(e) {}
 
     resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("resize", function () {
+        if (window.__isIOS) resizeCanvasSoon();
+        else resizeCanvas();
+    });
 
     document.addEventListener("keydown", function (e) {
         let g = document.getElementById("scr-gatekeeper");
@@ -2077,12 +2111,31 @@ function closeSecret() {
 
 var PRIVACY_POLICY_URL = 'https://www.doggyco.de/privacy.html';
 
+function wirePrivacyBackLink(root) {
+    if (!root) return;
+    var a = root.querySelector ? root.querySelector('#privacy-back-link') : null;
+    if (!a) return;
+    a.href = '#';
+    a.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        if (typeof closePrivacyFullscreen === 'function') {
+            closePrivacyFullscreen();
+        } else if (window.history.length > 1) {
+            history.back();
+        } else {
+            location.href = 'index.appel.html';
+        }
+        return false;
+    });
+}
+
 function loadPrivacyFullText() {
     var scroll = document.getElementById('privacy-full-scroll');
     if (!scroll || scroll.dataset.loaded === '1') return;
     var tpl = document.getElementById('privacy-embed-fallback');
     if (tpl && tpl.innerHTML.trim()) {
         scroll.innerHTML = tpl.innerHTML;
+        wirePrivacyBackLink(scroll);
         scroll.dataset.loaded = '1';
         return;
     }
@@ -2090,9 +2143,11 @@ function loadPrivacyFullText() {
         var doc = new DOMParser().parseFromString(html, 'text/html');
         var wrap = doc.querySelector('.wrap');
         scroll.innerHTML = wrap ? wrap.innerHTML : html;
+        wirePrivacyBackLink(scroll);
         scroll.dataset.loaded = '1';
     }).catch(function () {
-        scroll.innerHTML = '<p>Datenschutz konnte nicht geladen werden. Bitte öffne <a href="https://www.doggyco.de/privacy.html">www.doggyco.de/privacy.html</a> im Browser.</p>';
+        scroll.innerHTML = '<p>Datenschutz konnte nicht geladen werden. Bitte öffne <a href="https://www.doggyco.de/privacy.html">www.doggyco.de/privacy.html</a> im Browser.</p><p><a href="#" id="privacy-back-link">← Zurück zum Spiel</a></p>';
+        wirePrivacyBackLink(scroll);
         scroll.dataset.loaded = '1';
     });
 }
@@ -2147,7 +2202,7 @@ function checkSecretCode() {
 }
 
 function goToLevelSelect() {
-    forceFullscreen(); // Sichert das Vollbild ab
+    enterIosPlayMode(); // Sichert das Vollbild ab
     document.documentElement.style.setProperty('--neon', '#00f2ff');
 
     active = false;
@@ -2192,7 +2247,7 @@ function clampPlayerToLanes() {
 }
 
 function move(dir) {
-    if(!active || levelCountdown > 0) return;
+    if(!active || levelCountdown > 0 || isLandscapeBlocked()) return;
     currLane = Math.max(0, Math.min(4, currLane + dir));
     targetX = snapToLane(currLane);
 }
@@ -2208,7 +2263,7 @@ function dustParticleY() {
 }
 
 function triggerMove(dir, btnId) {
-    if(!active || missionComplete || levelCountdown > 0) return;
+    if(!active || missionComplete || levelCountdown > 0 || isLandscapeBlocked()) return;
     try { if(audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); } } catch(e) {}
     hapticMove();
     sfxMove();
@@ -2529,17 +2584,53 @@ var EMOJI_FB = {
     '\uD83E\uDD16': '#00e5ff', '\uD83D\uDD77': '#bc13fe', '\uD83D\uDE80': '#ff5252',
     '\uD83D\uDC7D': '#69f0ae', '\u2622': '#adff2f', '\uD83E\uDDF2': '#00f2ff',
     '\uD83D\uDC7B': '#7c4dff', '\uD83D\uDEF8': '#80cbc4', '\u2764': '#ff3131',
-    '\u2601': '#b0bec5', '\uD83E\uDD77': '#37474f'
+    '\u2601': '#b0bec5', '\uD83E\uDD77': '#37474f',
+    '🕷️': '#bc13fe', '☢️': '#adff2f', '❤️': '#ff3131', '⚙️': '#00e5ff', '🧲': '#00f2ff'
 };
+
+function laneX(laneIndex) {
+    if (laneIndex < 0 || laneIndex > 4) return playerX;
+    return lanes[laneIndex];
+}
 
 function drawEmoji(text, x, y, sizePx, baseline) {
     if (!ctx || text == null || text === '') return;
+    baseline = baseline || 'middle';
     ctx.save();
     var font = sizePx + 'px "Segoe UI Emoji", "Segoe UI Symbol", "Apple Color Emoji", Arial, sans-serif';
     ctx.font = font;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = baseline || 'middle';
     ctx.fillStyle = '#ffffff';
+
+    if (window.__isIOS) {
+        ctx.textAlign = 'left';
+        ctx.textBaseline = baseline;
+        var m = ctx.measureText(text);
+        var bl = m.actualBoundingBoxLeft || 0;
+        var br = m.actualBoundingBoxRight || m.width || sizePx * 0.65;
+        var drawLeft = x - (bl + br) / 2;
+        var drew = false;
+        try {
+            ctx.fillText(text, drawLeft, y);
+            drew = true;
+        } catch (e) {}
+        if (!drew || (m.width || 0) < 3) {
+            var col = EMOJI_FB[text] || '#00f2ff';
+            var r = Math.max(10, sizePx * 0.38);
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = col;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+            ctx.lineWidth = Math.max(2, sizePx * 0.04);
+            ctx.stroke();
+        }
+        ctx.restore();
+        return;
+    }
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = baseline;
     var drew = false;
     try {
         ctx.fillText(text, x, y);
@@ -2566,11 +2657,11 @@ function drawEmoji(text, x, y, sizePx, baseline) {
 
 function applyCanvasSize() {
     if (!ctx || !canvas) return;
+    let pixelLayout = usePcSquareLayout();
+    let mobile = isMobileDevice() && !pixelLayout;
     let dpr = 1;
-    if (isPhonePlayLayout()) {
-        if (!needsSafeCanvas2d()) {
-            dpr = Math.min(window.devicePixelRatio || 1, isIOSDevice() ? 2 : 2.5);
-        }
+    if (mobile && !needsSafeCanvas2d()) {
+        dpr = Math.min(window.devicePixelRatio || 1, 2.5);
         canvas.style.width = '100%';
         canvas.style.height = '100%';
     } else {
@@ -2580,27 +2671,16 @@ function applyCanvasSize() {
     canvasDpr = dpr;
     canvas.width = Math.max(1, Math.round(W * dpr));
     canvas.height = Math.max(1, Math.round(H * dpr));
-    ensureCanvasTransform();
-}
-
-/** W/H = echte Canvas-Pixel (Safari + App) */
-function syncPlayfieldMetrics() {
-    if (!canvas || !isPhonePlayLayout()) return;
-    let r = canvas.getBoundingClientRect();
-    let w = Math.round(r.width);
-    let h = Math.round(r.height);
-    if (w < 50 || h < 50) return;
-    if (w === W && h === H) return;
-    W = w;
-    H = h;
-    applyCanvasSize();
-    rebuildLanes();
-    targetX = snapToLane(currLane);
-    if (!active) playerX = targetX;
-    else {
-        clampPlayerToLanes();
-        resnapAllLaneObjects();
+    if (window.__isIOS && !pixelLayout) {
+        let r = canvas.getBoundingClientRect();
+        W = Math.max(50, Math.round(r.width));
+        canvasDpr = 1;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        canvas.width = W;
+        canvas.height = H;
     }
+    ensureCanvasTransform();
 }
 
 let W = 400;
@@ -2678,14 +2758,14 @@ function resizeCanvas() {
             canvas.style.height = "";
         } else {
             W = gw.clientWidth || window.innerWidth;
-            H = Math.max(280, gw.clientHeight);
+            let hudBlock = getHudBlockHeight();
+            H = Math.max(280, gw.clientHeight - ctrlH - hudBlock);
             canvas.style.position = "absolute";
-            canvas.style.top = "0";
+            canvas.style.top = window.__isIOS ? (hudBlock + "px") : "0";
             canvas.style.left = "0";
-            canvas.style.right = "0";
-            canvas.style.transform = "none";
+            canvas.style.transform = "";
             canvas.style.width = "100%";
-            canvas.style.height = "100%";
+            canvas.style.height = window.__isIOS ? (H + "px") : "100%";
             canvas.style.display = "block";
             canvas.style.visibility = "visible";
             canvas.style.opacity = "1";
@@ -2693,7 +2773,6 @@ function resizeCanvas() {
     }
 
     applyCanvasSize();
-    syncPlayfieldMetrics();
 
     rebuildLanes();
     targetX = snapToLane(currLane);
@@ -2731,6 +2810,53 @@ let currentOpponentIcon = '🐦';
 function getHudHeight() {
     let hud = document.getElementById("hud");
     return hud ? hud.offsetHeight : 95;
+}
+
+/** iPhone: unterer Rand des HUD (Titel + Energie + Stats) — auch 17 Pro Max / Dynamic Island */
+function getHudBlockHeight() {
+    let hud = document.getElementById("hud");
+    let gw = document.getElementById("game-wrap");
+    if (!hud || !window.__isIOS) return 0;
+    try {
+        let hr = hud.getBoundingClientRect();
+        let gr = gw ? gw.getBoundingClientRect() : { top: 0 };
+        let block = Math.ceil(hr.bottom - gr.top + 8);
+        if (block >= 100) return block;
+    } catch (e) {}
+    return Math.max(130, Math.ceil(hud.offsetTop + hud.offsetHeight + 8));
+}
+
+/** Oberkante des aktiven Spielfelds in Canvas-Koordinaten */
+function getPlayfieldTop() {
+    if (!window.__isIOS) return 0;
+    let hud = document.getElementById("hud");
+    if (!hud || !canvas) return 4;
+    try {
+        let hr = hud.getBoundingClientRect();
+        let cr = canvas.getBoundingClientRect();
+        if (cr.height > 20) {
+            let top = Math.round(hr.bottom - cr.top + 2);
+            if (top >= 4 && top < cr.height * 0.45) return top;
+        }
+        let gw = document.getElementById("game-wrap");
+        if (gw) {
+            let gr = gw.getBoundingClientRect();
+            let topGw = Math.round(hr.bottom - gr.top - (cr.top - gr.top) + 2);
+            if (topGw >= 4) return topGw;
+        }
+    } catch (e) {}
+    return 4;
+}
+
+function resizeCanvasSoon() {
+    resizeCanvas();
+    requestAnimationFrame(function () {
+        resizeCanvas();
+        requestAnimationFrame(function () {
+            resizeCanvas();
+            if (active) initPermSpiders();
+        });
+    });
 }
 function getControlsHeight() {
     let ctrl = document.getElementById("controls");
@@ -2780,17 +2906,10 @@ function getFlyY() {
     let extra = (window.__isIOS || document.documentElement.classList.contains('platform-ios')) ? 68 : 52;
     return getHudHeight() + extra;
 }
-/** Spieler: knapp über den Pfeilen (Canvas ↔ Controls per DOM) */
+/** Spieler: knapp über den Pfeilen (iPhone-Canvas endet oberhalb der Steuerung) */
 function getPlayerY() {
-    if (isPhonePlayLayout() && canvas) {
-        let ctrl = document.getElementById("controls");
-        if (ctrl) {
-            try {
-                let cr = canvas.getBoundingClientRect();
-                let tr = ctrl.getBoundingClientRect();
-                return Math.max(60, Math.round(tr.top - cr.top - 16));
-            } catch (e) {}
-        }
+    if (window.__isIOS) {
+        return H - 16 - 35;
     }
     return H - getControlsHeight() - 16;
 }
@@ -2849,15 +2968,7 @@ function resnapAllLaneObjects() {
 }
 
 function getSpiderPlayTop() {
-    let hud = document.getElementById("hud");
-    if (hud && canvas) {
-        try {
-            let hr = hud.getBoundingClientRect();
-            let cr = canvas.getBoundingClientRect();
-            if (cr.height > 20) return Math.max(2, Math.round(hr.bottom - cr.top + 2));
-        } catch (e) {}
-    }
-    return Math.max(48, Math.round(getHudHeight() + 8));
+    return getPlayfieldTop();
 }
 
 function getSpiderBounds() {
@@ -3015,6 +3126,7 @@ function start(m, startLvl) {
     hp = 3; energy = 100; score = 0; timeLeft = 30;
     energyLowWarned = false;
     iosMusicCheck = 0;
+    musicRateTimer = 0;
     levelCountdown = 0;
     lastCountdownLabel = '';
     cyborgUnlockAnnounced = false;
@@ -3030,8 +3142,8 @@ function start(m, startLvl) {
     
     updateTheme(mode);
     currLane = 2;
-    targetX = snapToLane(2);
-    playerX = targetX;
+    playerX = snapToLane(2);
+    targetX = playerX;
     updateLevelHud(startLvl);
     
     let scrStart = document.getElementById("scr-start");
@@ -3062,12 +3174,12 @@ function start(m, startLvl) {
 
     let phonePc = document.getElementById("phone-container");
     if (phonePc) phonePc.classList.add("is-playing");
-    try { forceFullscreen(); lockMobilePortrait(); revalidateWindowsShell(); } catch (e) {}
+    try { enterIosPlayMode(); } catch (e) {}
     active = true;
 
     kickGameMusic();
-    try { prewarmGameWorld(); } catch (e) {}
-    try { manageMedia('game'); } catch (e) {}
+    try { prewarmGameWorld(); } catch (e) { console.error("prewarmGameWorld", e); }
+    try { manageMedia('game'); } catch (e) { console.error("manageMedia", e); }
 
     if (needsLevelCountdown(startLvl)) {
         levelCountdown = 3.2;
@@ -3174,6 +3286,11 @@ async function showEndScreen(win) {
 
 function loop(t) {
     if(!active) return;
+    if (isLandscapeBlocked()) {
+        updateLandscapeBlock();
+        globalAnimationId = requestAnimationFrame(loop);
+        return;
+    }
     if (!ctx) { initGameCanvas(); if (!ctx) return; }
     globalAnimationId = requestAnimationFrame(loop);
     
@@ -3188,6 +3305,14 @@ function loop(t) {
         ctx.globalAlpha = 1;
         ensureCanvasTransform();
         ctx.clearRect(0, 0, W, H);
+
+        let playTop = window.__isIOS ? getPlayfieldTop() : 0;
+        if (playTop > 0) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, playTop, W, H - playTop);
+            ctx.clip();
+        }
 
         if (levelCountdown > 0) {
             levelCountdown -= dt;
@@ -3213,6 +3338,7 @@ function loop(t) {
                 lastCountdownLabel = '';
                 lastT = t;
             }
+            if (playTop > 0) ctx.restore();
             return;
         }
         showCountdownUI(false);
@@ -3234,13 +3360,17 @@ function loop(t) {
 
         let colDist = W / 10;
 
-        {
+        musicRateTimer -= dt;
+        if (musicRateTimer <= 0) {
+            musicRateTimer = 0.5;
             let targetRate = getMusicRate(capLvl);
             if (typeof window.__musicRate !== "number") window.__musicRate = targetRate;
-            window.__musicRate += (targetRate - window.__musicRate) * Math.min(1, dt * 1.2);
+            if (Math.abs(window.__musicRate - targetRate) > 0.01) {
+                window.__musicRate += (targetRate - window.__musicRate) * 0.35;
+            }
             if (!window.__isNativeApp && window.DoggyCoMp3) {
                 DoggyCoMp3.setRate(window.__musicRate);
-            } else if (window.DoggyCoMp3 && DoggyCoMp3.isActive()) {
+            } else if (window.DoggyCoMp3 && DoggyCoMp3.isPlaying()) {
                 DoggyCoMp3.setRate(window.__musicRate);
             }
         }
@@ -3395,7 +3525,7 @@ function loop(t) {
 
         if (fallingCore && !missionComplete) {
             fallingCore.y += fallingCore.s * dt;
-            let fx = snapToLane(fallingCore.lane);
+            let fx = laneX(fallingCore.lane);
             fallingCore.x = fx;
             ctx.save(); ctx.shadowColor = "#adff2f"; ctx.shadowBlur = 5;
             ctx.fillStyle = "#adff2f";
@@ -3411,7 +3541,7 @@ function loop(t) {
         
         if (fallingAlien && !missionComplete) {
             fallingAlien.y += fallingAlien.s * dt;
-            let fx = snapToLane(fallingAlien.lane);
+            let fx = laneX(fallingAlien.lane);
             fallingAlien.x = fx;
             ctx.save(); ctx.shadowColor = "#00f2ff"; ctx.shadowBlur = 5;
             ctx.fillStyle = "#00f2ff";
@@ -3453,9 +3583,9 @@ function loop(t) {
 
         for(let i = fallingHearts.length - 1; i >= 0; i--) {
             let s = fallingHearts[i];
-            if (s.lane !== undefined) s.x = snapToLane(s.lane);
+            if (s.lane !== undefined) s.x = laneX(s.lane);
             if(!missionComplete) s.y += s.s * dt;
-            drawEmoji('❤️', s.x, s.y, 40, 'middle');
+            drawEmoji('❤️', laneX(s.lane), s.y, 40, 'middle');
             if(!missionComplete && Math.abs(s.x - playerX) < colDist && s.y > hitTop && s.y < hitBottom) {
                 if (hp < 3) {
                     changeHp(1, s.x + 40, s.y);
@@ -3486,8 +3616,8 @@ function loop(t) {
                         let r = Math.random(); let tier = r < 0.5 ? 0 : (r < 0.8 ? 1 : 2);
                         let pack = items[mode] || items['dog'];
                         let item = pack[tier] || pack[0];
-                        entities.push({ l: safeL, x: snapToLane(safeL), y: -50, t: item.i, pts: item.p, bad: false, s: 230 * speedMult });
-                    } else { entities.push({ l: safeL, x: snapToLane(safeL), y: -50, t: '🥷', pts: 0, bad: true, s: 260 * speedMult }); }
+                        entities.push({ l: safeL, x: snapToLane(safeL), y: -40, t: item.i, pts: item.p, bad: false, s: 230 * speedMult });
+                    } else { entities.push({ l: safeL, x: snapToLane(safeL), y: -40, t: '🥷', pts: 0, bad: true, s: 260 * speedMult }); }
                 }
                 spawnDelay = 0.35;
             }
@@ -3505,7 +3635,7 @@ function loop(t) {
                 if(s.y <= spiderTop) { s.dy = 1; s.lane = getSafeSpiderLane(s); s.y = spiderTop; s.hit = false; }
             }
 
-            let sx = lanes[s.lane];
+            let sx = laneX(s.lane);
             ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(sx, spiderTop);
@@ -3610,6 +3740,8 @@ function loop(t) {
 
         drawEmoji(charIcon, drawX, drawY, 70, 'middle');
 
+        if (playTop > 0) ctx.restore();
+
         for(let i = fxParticles.length - 1; i >= 0; i--) {
             let p = fxParticles[i];
             p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
@@ -3685,10 +3817,26 @@ function fixViewportHeight() {
 window.addEventListener('resize', fixViewportHeight);
 window.addEventListener('orientationchange', function () {
     fixViewportHeight();
-    lockMobilePortrait();
-    if (active) resizeCanvas();
+    enterIosPlayMode();
+    if (active) resizeCanvasSoon();
 });
 fixViewportHeight();
+updateLandscapeBlock();
+
+(function setupIosImmersive() {
+    if (!window.__isIOS) return;
+    var lastImmersive = 0;
+    function onGesture() {
+        var now = Date.now();
+        if (now - lastImmersive < 900) return;
+        lastImmersive = now;
+        enterIosPlayMode();
+    }
+    document.addEventListener('touchstart', onGesture, { capture: true, passive: true });
+    document.addEventListener('click', onGesture, { capture: true, passive: true });
+    window.addEventListener('pageshow', enterIosPlayMode);
+    window.addEventListener('focus', enterIosPlayMode);
+})();
 
 function copyText(btn, text) {
     navigator.clipboard.writeText(text).catch(e=>{});
