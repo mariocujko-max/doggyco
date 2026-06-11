@@ -541,7 +541,7 @@
         .sw-crawl-wrap {
             position: absolute; inset: 0; z-index: 1;
             width: 100%; height: 100%;
-            perspective: 720px;
+            perspective: 640px;
             overflow: hidden;
             pointer-events: none;
             mask-image: linear-gradient(to bottom, transparent 0%, #000 3%, #000 100%);
@@ -554,16 +554,19 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            transform: translateX(-50%) rotateX(15deg);
+            transform: translateX(-50%) rotateX(20deg);
             transform-origin: 50% 100%;
         }
         .sw-crawl-track {
-            animation: swCrawlLoop 38s linear infinite;
+            animation: swCrawlLoop 30s linear infinite;
             will-change: transform;
+        }
+        .sw-crawl-gap {
+            height: 50vh;
+            flex-shrink: 0;
         }
         .sw-crawl-inner {
             text-align: center;
-            padding-bottom: 3vh;
             color: var(--gold);
             font-family: 'Orbitron', sans-serif;
             font-size: clamp(16px, 5vw, 24px);
@@ -1129,23 +1132,29 @@
     <div class="sw-crawl-wrap" aria-hidden="true">
         <div class="sw-crawl">
             <div class="sw-crawl-track">
-                <div class="sw-crawl-inner">
-                    <p class="sw-episode">A long time ago in a galaxy not so far away...</p>
-                    <h2 class="sw-title">DOGGYCO<br>MISSION</h2>
-                    <p>Hey there, future snack hero! 🐶</p>
-                    <p>Tasty stuff falls from the sky. Ninjas are mean. Spiders are hangry. Your job? Dodge, munch, and look cool!</p>
-                    <p>🚀 Rocket = mega shield!<br>👽 Alien = magnet power!<br>🛸 UFO = bonus hearts!</p>
-                    <p>Beat 12 crazy levels. Score 8,000 points to unlock secret CYBORG mode 🤖</p>
-                    <p>Pick a codename. Pick a level. Let's roll!</p>
+                <div class="sw-crawl-block">
+                    <div class="sw-crawl-inner">
+                        <p class="sw-episode">A long time ago in a galaxy not so far away...</p>
+                        <h2 class="sw-title">DOGGYCO<br>MISSION</h2>
+                        <p>Hey there, future snack hero! 🐶</p>
+                        <p>Tasty stuff falls from the sky. Ninjas are mean. Spiders are hangry. Your job? Dodge, munch, and look cool!</p>
+                        <p>🚀 Rocket = mega shield!<br>👽 Alien = magnet power!<br>🛸 UFO = bonus hearts!</p>
+                        <p>Beat 12 crazy levels. Score 8,000 points to unlock secret CYBORG mode 🤖</p>
+                        <p>Pick a codename. Pick a level. Let's roll!</p>
+                    </div>
+                    <div class="sw-crawl-gap" aria-hidden="true"></div>
                 </div>
-                <div class="sw-crawl-inner" aria-hidden="true">
-                    <p class="sw-episode">A long time ago in a galaxy not so far away...</p>
-                    <h2 class="sw-title">DOGGYCO<br>MISSION</h2>
-                    <p>Hey there, future snack hero! 🐶</p>
-                    <p>Tasty stuff falls from the sky. Ninjas are mean. Spiders are hangry. Your job? Dodge, munch, and look cool!</p>
-                    <p>🚀 Rocket = mega shield!<br>👽 Alien = magnet power!<br>🛸 UFO = bonus hearts!</p>
-                    <p>Beat 12 crazy levels. Score 8,000 points to unlock secret CYBORG mode 🤖</p>
-                    <p>Pick a codename. Pick a level. Let's roll!</p>
+                <div class="sw-crawl-block" aria-hidden="true">
+                    <div class="sw-crawl-inner">
+                        <p class="sw-episode">A long time ago in a galaxy not so far away...</p>
+                        <h2 class="sw-title">DOGGYCO<br>MISSION</h2>
+                        <p>Hey there, future snack hero! 🐶</p>
+                        <p>Tasty stuff falls from the sky. Ninjas are mean. Spiders are hangry. Your job? Dodge, munch, and look cool!</p>
+                        <p>🚀 Rocket = mega shield!<br>👽 Alien = magnet power!<br>🛸 UFO = bonus hearts!</p>
+                        <p>Beat 12 crazy levels. Score 8,000 points to unlock secret CYBORG mode 🤖</p>
+                        <p>Pick a codename. Pick a level. Let's roll!</p>
+                    </div>
+                    <div class="sw-crawl-gap" aria-hidden="true"></div>
                 </div>
             </div>
         </div>
