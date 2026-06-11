@@ -541,14 +541,28 @@
         .sw-crawl-wrap {
             position: absolute; inset: 0; z-index: 1;
             width: 100%; height: 100%;
-            perspective: 640px;
+            perspective: 1000px;
             overflow: hidden;
             pointer-events: none;
+            -webkit-mask-image: linear-gradient(
+                to bottom,
+                transparent 0%,
+                #000 24%,
+                #000 76%,
+                transparent 100%
+            );
+            mask-image: linear-gradient(
+                to bottom,
+                transparent 0%,
+                #000 24%,
+                #000 76%,
+                transparent 100%
+            );
         }
         .sw-crawl {
             position: absolute; left: 50%; top: 0; bottom: 0;
             width: min(92vw, 460px);
-            transform: translateX(-50%) rotateX(20deg);
+            transform: translateX(-50%) rotateX(18deg);
             transform-origin: 50% 100%;
         }
         .sw-crawl-track {
@@ -557,7 +571,7 @@
             will-change: transform;
         }
         .sw-crawl-gap {
-            height: 50vh;
+            height: 22vh;
             flex-shrink: 0;
         }
         .sw-crawl-inner {
