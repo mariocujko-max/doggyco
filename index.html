@@ -536,7 +536,7 @@
                 inset 0 2px 0 rgba(255, 255, 255, 0.55),
                 inset 0 -2px 8px rgba(255, 255, 255, 0.08);
             transform: translate(-50%, -50%);
-            animation: pulseTap 1.2s ease-in-out infinite alternate;
+            animation: pulseTap 0.75s ease-in-out infinite alternate;
         }
         .sw-crawl-wrap {
             position: absolute; inset: 0; z-index: 1;
@@ -544,8 +544,6 @@
             perspective: 640px;
             overflow: hidden;
             pointer-events: none;
-            mask-image: linear-gradient(to bottom, transparent 0%, #000 3%, #000 100%);
-            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 3%, #000 100%);
         }
         .sw-crawl {
             position: absolute; left: 50%; top: 0; bottom: 0;
