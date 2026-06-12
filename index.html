@@ -15,7 +15,7 @@
     <title>DOGGYCO MISSION — Windows PC</title>
     
     <script>
-    window.__BUILD = 'v18';
+    window.__BUILD = 'v19';
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations()
             .then(function (regs) { regs.forEach(function (r) { r.unregister(); }); })
@@ -558,13 +558,17 @@
         .sw-crawl {
             position: absolute;
             left: 50%;
-            top: 0;
+            bottom: 0;
             width: min(86vw, 400px);
             height: 100%;
             transform: translateX(-50%);
             overflow: hidden;
         }
         .sw-crawl-track {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
             width: 100%;
             animation: swCrawlLoop 20s linear infinite;
             -webkit-backface-visibility: hidden;
@@ -579,7 +583,7 @@
             line-height: 1.65;
             letter-spacing: 0.02em;
             text-shadow: 0 0 12px rgba(255, 215, 0, 0.45);
-            padding: 0 6px 32vh;
+            padding: 60vh 6px 32vh;
             box-sizing: border-box;
         }
         .sw-episode {
@@ -684,6 +688,15 @@
             width: 220px; height: 220px;
             object-fit: contain;
             filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6));
+        }
+        .dog-video-src {
+            position: fixed;
+            left: 0; top: 0;
+            width: 4px; height: 4px;
+            opacity: 0.001;
+            pointer-events: none;
+            z-index: -9999;
+            object-fit: contain;
         }
 
         #auth-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
@@ -1244,7 +1257,7 @@
                 <div id="video-host-1" style="width: 100%;">
                     <div class="dog-video-wrapper" id="main-vid-wrapper">
                         <canvas id="dog-video-canvas" width="250" height="250" class="dog-video-canvas"></canvas>
-                        <video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="metadata" muted crossorigin="anonymous" style="display:none;"></video>
+                        <video id="dog-video" class="dog-video-src" src="dog.video.mp4" playsinline webkit-playsinline preload="auto" muted width="320" height="320"></video>
                     </div>
                 </div>
 
@@ -1371,7 +1384,7 @@
                 
                 <div class="dog-video-wrapper" style="margin-bottom: 10px;">
                     <canvas id="dog-video-canvas2" width="220" height="220" class="dog-video-canvas"></canvas>
-                    <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="metadata" muted crossorigin="anonymous" style="display:none;"></video>
+                    <video id="dog-video2" class="dog-video-src" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted width="320" height="320"></video>
                 </div>
 
                 <h1 id="f-score" style="font-family: 'Orbitron'; font-size: 42px; margin: 10px 0 20px 0; line-height: 1; text-align: center; color: var(--gold); text-shadow: 0 0 15px var(--gold);">0 PTS</h1>
@@ -1386,7 +1399,7 @@
 </div>
 
 <audio id="bgm-track" src="music.mp3" loop preload="auto" playsinline webkit-playsinline style="display:none" aria-hidden="true"></audio>
-<script src="music-mp3.js?v=18"></script>
+<script src="music-mp3.js?v=19"></script>
 
 <script>
 // Vollbild: nur auf Touch / nicht-PC-Geräten (Windows-Desktop mit Maus bleibt Fenster-Modus für Edge)
@@ -1509,9 +1522,9 @@ function manageMedia(action) {
     stopMenuVideos();
 
     if (action === 'vid1') {
-        if (vid1) { vid1.muted = false; vid1.currentTime = 0; vid1.play().catch(function () {}); processVideoFrame(); }
+        playMenuVideoEl(vid1, processVideoFrame);
     } else if (action === 'vid2') {
-        if (vid2) { vid2.muted = false; vid2.currentTime = 0; vid2.play().catch(function () {}); processVideoFrame2(); }
+        playMenuVideoEl(vid2, processVideoFrame2);
     }
 }
 
@@ -1779,35 +1792,57 @@ let videoCtx2 = videoCanvas2.getContext('2d', { willReadFrequently: true });
 let videoAnimationId2 = null;
 
 function processGreenScreen(vEl, vCanvas, vCtx) {
-    if (!vEl.videoWidth) return;
-    let vw = vEl.videoWidth; let vh = vEl.videoHeight;
+    if (!vEl || !vCanvas || !vCtx || vEl.readyState < 2) return false;
+    let vw = vEl.videoWidth, vh = vEl.videoHeight;
+    if (!vw || !vh) return false;
     let size = Math.min(vw, vh);
-    let startX = (vw - size) / 2; let startY = (vh - size) / 2;
-    
-    vCtx.drawImage(vEl, startX, startY, size, size, 0, 0, vCanvas.width, vCanvas.height);
+    let startX = (vw - size) / 2, startY = (vh - size) / 2;
+    try {
+        vCtx.clearRect(0, 0, vCanvas.width, vCanvas.height);
+        vCtx.drawImage(vEl, startX, startY, size, size, 0, 0, vCanvas.width, vCanvas.height);
+    } catch (e) { return false; }
     try {
         let frame = vCtx.getImageData(0, 0, vCanvas.width, vCanvas.height);
         let data = frame.data;
         for (let i = 0; i < data.length; i += 4) {
-            let r = data[i]; let g = data[i + 1]; let b = data[i + 2];
-            if (g > 90 && g > r * 1.1 && g > b * 1.1) { data[i + 3] = 0; }
+            let r = data[i], g = data[i + 1], b = data[i + 2];
+            if (g > 90 && g > r * 1.1 && g > b * 1.1) data[i + 3] = 0;
         }
         vCtx.putImageData(frame, 0, 0);
-    } catch(e) {}
+    } catch (e) { /* Bild bleibt ohne Greenscreen */ }
+    return true;
+}
+
+function playMenuVideoEl(vEl, frameFn) {
+    if (!vEl) return;
+    vEl.muted = false;
+    vEl.setAttribute('playsinline', '');
+    vEl.setAttribute('webkit-playsinline', '');
+    try { vEl.currentTime = 0; } catch (e) {}
+    var begin = function () { if (frameFn) frameFn(); };
+    var p = vEl.play();
+    if (p && p.then) p.then(begin).catch(function () {});
+    else begin();
 }
 
 function processVideoFrame() {
-    if (!videoEl.paused && !videoEl.ended) {
+    if (videoAnimationId) cancelAnimationFrame(videoAnimationId);
+    function tick() {
+        if (!videoEl || videoEl.paused || videoEl.ended) { videoAnimationId = null; return; }
         processGreenScreen(videoEl, videoCanvas, videoCtx);
-        videoAnimationId = requestAnimationFrame(processVideoFrame);
+        videoAnimationId = requestAnimationFrame(tick);
     }
+    tick();
 }
 
 function processVideoFrame2() {
-    if (!videoEl2.paused && !videoEl2.ended) {
+    if (videoAnimationId2) cancelAnimationFrame(videoAnimationId2);
+    function tick() {
+        if (!videoEl2 || videoEl2.paused || videoEl2.ended) { videoAnimationId2 = null; return; }
         processGreenScreen(videoEl2, videoCanvas2, videoCtx2);
-        videoAnimationId2 = requestAnimationFrame(processVideoFrame2);
+        videoAnimationId2 = requestAnimationFrame(tick);
     }
+    tick();
 }
 
 function resetVideoToStart(vEl, vCanvas, vCtx) {
@@ -1817,12 +1852,16 @@ function resetVideoToStart(vEl, vCanvas, vCtx) {
 }
 
 videoEl.addEventListener('loadeddata', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
+videoEl.addEventListener('loadedmetadata', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
 videoEl.addEventListener('seeked', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
+videoEl.addEventListener('playing', processVideoFrame);
 videoEl.addEventListener('play', processVideoFrame);
 videoEl.addEventListener('ended', () => resetVideoToStart(videoEl, videoCanvas, videoCtx));
 
 videoEl2.addEventListener('loadeddata', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+videoEl2.addEventListener('loadedmetadata', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
 videoEl2.addEventListener('seeked', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+videoEl2.addEventListener('playing', processVideoFrame2);
 videoEl2.addEventListener('play', processVideoFrame2);
 videoEl2.addEventListener('ended', () => resetVideoToStart(videoEl2, videoCanvas2, videoCtx2));
 
