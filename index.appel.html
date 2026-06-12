@@ -19,7 +19,7 @@
     <title>DOGGYCO MISSION - iPhone</title>
     
     <script>
-    window.__BUILD = 'v16';
+    window.__BUILD = 'v22';
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations()
             .then(function (regs) { regs.forEach(function (r) { r.unregister(); }); })
@@ -572,20 +572,18 @@
         }
         .sw-crawl-track {
             width: 100%;
-            animation: swCrawlLoop 32s linear infinite;
-        }
-        .sw-crawl-gap {
-            height: 32vh;
+            animation: swCrawlLoop 20s linear infinite;
         }
         .sw-crawl-inner {
             text-align: center;
             color: var(--gold);
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(15px, 4vw, 20px);
+            font-size: clamp(19px, 4.8vw, 24px);
             line-height: 1.65;
             letter-spacing: 0.02em;
             text-shadow: 0 0 12px rgba(255, 215, 0, 0.45);
-            padding: 0 6px;
+            padding: 0 6px 32vh;
+            box-sizing: border-box;
         }
         .sw-episode {
             font-size: 0.92em; margin: 0 0 1.2em;
@@ -606,8 +604,8 @@
         }
         .sw-crawl-inner p { margin: 0 0 0.75em; }
         @keyframes swCrawlLoop {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-50%); }
+            from { transform: translate3d(0, 0, 0); }
+            to { transform: translate3d(0, -50%, 0); }
         }
         @keyframes pulseTap {
             0% { opacity: 0.78; transform: translate(-50%, -50%) scale(0.98); }
@@ -689,6 +687,15 @@
             width: 220px; height: 220px;
             object-fit: contain;
             filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6));
+        }
+        .dog-video-src {
+            position: fixed;
+            left: 0; top: 0;
+            width: 4px; height: 4px;
+            opacity: 0.001;
+            pointer-events: none;
+            z-index: -9999;
+            object-fit: contain;
         }
         #auth-panel { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
         
@@ -1168,7 +1175,6 @@
     <div class="sw-crawl-wrap" aria-hidden="true">
         <div class="sw-crawl">
             <div class="sw-crawl-track">
-                <div class="sw-crawl-gap" aria-hidden="true"></div>
                 <div class="sw-crawl-inner">
                     <p class="sw-episode">A long time ago in a galaxy not so far away...</p>
                     <h2 class="sw-title">DOGGYCO<br>MISSION</h2>
@@ -1178,7 +1184,6 @@
                     <p>Beat 12 crazy levels. Score 8,000 points to unlock secret CYBORG mode 🤖</p>
                     <p>Pick a codename. Pick a level. Let's roll!</p>
                 </div>
-                <div class="sw-crawl-gap" aria-hidden="true"></div>
                 <div class="sw-crawl-inner" aria-hidden="true">
                     <p class="sw-episode">A long time ago in a galaxy not so far away...</p>
                     <h2 class="sw-title">DOGGYCO<br>MISSION</h2>
@@ -1274,7 +1279,7 @@
                 <div id="video-host-1" style="width: 100%;">
                     <div class="dog-video-wrapper" id="main-vid-wrapper">
                         <canvas id="dog-video-canvas" width="250" height="250" class="dog-video-canvas"></canvas>
-                        <video id="dog-video" src="dog.video.mp4" playsinline webkit-playsinline preload="auto" muted style="display:none;"></video>
+                        <video id="dog-video" class="dog-video-src" src="dog.video.mp4" playsinline webkit-playsinline preload="auto" muted width="320" height="320"></video>
                     </div>
                 </div>
 
@@ -1396,7 +1401,7 @@
                 
                 <div class="dog-video-wrapper" style="margin-bottom: 10px;">
                     <canvas id="dog-video-canvas2" width="220" height="220" class="dog-video-canvas"></canvas>
-                    <video id="dog-video2" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted style="display:none;"></video>
+                    <video id="dog-video2" class="dog-video-src" src="dog.video2.mp4" playsinline webkit-playsinline preload="auto" muted width="320" height="320"></video>
                 </div>
 
                 <h1 id="f-score" style="font-family: 'Orbitron'; font-size: 42px; margin: 10px 0 20px 0; line-height: 1; text-align: center; color: var(--gold); text-shadow: 0 0 15px var(--gold);">0 PTS</h1>
@@ -1411,7 +1416,7 @@
 </div>
 
 <audio id="bgm-track" src="music.mp3" loop preload="auto" playsinline webkit-playsinline style="display:none" aria-hidden="true"></audio>
-<script src="music-mp3.js?v=16"></script>
+<script src="music-mp3.js?v=22"></script>
 
 <script>
 // Vollbild: nur auf Touch / nicht-PC-Geräten (Windows-Desktop mit Maus bleibt Fenster-Modus für Edge)
@@ -1569,9 +1574,9 @@ function manageMedia(action) {
     stopMenuVideos();
 
     if (action === 'vid1') {
-        if (vid1) { vid1.muted = false; vid1.currentTime = 0; vid1.play().catch(function () {}); processVideoFrame(); }
+        playMenuVideoEl(vid1, processVideoFrame);
     } else if (action === 'vid2') {
-        if (vid2) { vid2.muted = false; vid2.currentTime = 0; vid2.play().catch(function () {}); processVideoFrame2(); }
+        playMenuVideoEl(vid2, processVideoFrame2);
     }
 }
 
@@ -1870,35 +1875,57 @@ let videoCtx2 = videoCanvas2 ? videoCanvas2.getContext('2d', { willReadFrequentl
 let videoAnimationId2 = null;
 
 function processGreenScreen(vEl, vCanvas, vCtx) {
-    if (!vEl || !vCanvas || !vCtx || !vEl.videoWidth) return;
-    let vw = vEl.videoWidth; let vh = vEl.videoHeight;
+    if (!vEl || !vCanvas || !vCtx || vEl.readyState < 2) return false;
+    let vw = vEl.videoWidth, vh = vEl.videoHeight;
+    if (!vw || !vh) return false;
     let size = Math.min(vw, vh);
-    let startX = (vw - size) / 2; let startY = (vh - size) / 2;
-    
-    vCtx.drawImage(vEl, startX, startY, size, size, 0, 0, vCanvas.width, vCanvas.height);
+    let startX = (vw - size) / 2, startY = (vh - size) / 2;
+    try {
+        vCtx.clearRect(0, 0, vCanvas.width, vCanvas.height);
+        vCtx.drawImage(vEl, startX, startY, size, size, 0, 0, vCanvas.width, vCanvas.height);
+    } catch (e) { return false; }
     try {
         let frame = vCtx.getImageData(0, 0, vCanvas.width, vCanvas.height);
         let data = frame.data;
         for (let i = 0; i < data.length; i += 4) {
-            let r = data[i]; let g = data[i + 1]; let b = data[i + 2];
-            if (g > 90 && g > r * 1.1 && g > b * 1.1) { data[i + 3] = 0; }
+            let r = data[i], g = data[i + 1], b = data[i + 2];
+            if (g > 90 && g > r * 1.1 && g > b * 1.1) data[i + 3] = 0;
         }
         vCtx.putImageData(frame, 0, 0);
-    } catch(e) {}
+    } catch (e) { /* Bild bleibt ohne Greenscreen */ }
+    return true;
+}
+
+function playMenuVideoEl(vEl, frameFn) {
+    if (!vEl) return;
+    vEl.muted = false;
+    vEl.setAttribute('playsinline', '');
+    vEl.setAttribute('webkit-playsinline', '');
+    try { vEl.currentTime = 0; } catch (e) {}
+    var begin = function () { if (frameFn) frameFn(); };
+    var p = vEl.play();
+    if (p && p.then) p.then(begin).catch(function () {});
+    else begin();
 }
 
 function processVideoFrame() {
-    if (!videoEl.paused && !videoEl.ended) {
+    if (videoAnimationId) cancelAnimationFrame(videoAnimationId);
+    function tick() {
+        if (!videoEl || videoEl.paused || videoEl.ended) { videoAnimationId = null; return; }
         processGreenScreen(videoEl, videoCanvas, videoCtx);
-        videoAnimationId = requestAnimationFrame(processVideoFrame);
+        videoAnimationId = requestAnimationFrame(tick);
     }
+    tick();
 }
 
 function processVideoFrame2() {
-    if (!videoEl2.paused && !videoEl2.ended) {
+    if (videoAnimationId2) cancelAnimationFrame(videoAnimationId2);
+    function tick() {
+        if (!videoEl2 || videoEl2.paused || videoEl2.ended) { videoAnimationId2 = null; return; }
         processGreenScreen(videoEl2, videoCanvas2, videoCtx2);
-        videoAnimationId2 = requestAnimationFrame(processVideoFrame2);
+        videoAnimationId2 = requestAnimationFrame(tick);
     }
+    tick();
 }
 
 function resetVideoToStart(vEl, vCanvas, vCtx) {
@@ -1910,14 +1937,18 @@ function resetVideoToStart(vEl, vCanvas, vCtx) {
 if (videoEl) {
     if (window.__isNativeApp) videoEl.setAttribute('crossorigin', 'anonymous');
     videoEl.addEventListener('loadeddata', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
+    videoEl.addEventListener('loadedmetadata', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
     videoEl.addEventListener('seeked', () => processGreenScreen(videoEl, videoCanvas, videoCtx));
+    videoEl.addEventListener('playing', processVideoFrame);
     videoEl.addEventListener('play', processVideoFrame);
     videoEl.addEventListener('ended', () => resetVideoToStart(videoEl, videoCanvas, videoCtx));
 }
 if (videoEl2) {
     if (window.__isNativeApp) videoEl2.setAttribute('crossorigin', 'anonymous');
     videoEl2.addEventListener('loadeddata', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+    videoEl2.addEventListener('loadedmetadata', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
     videoEl2.addEventListener('seeked', () => processGreenScreen(videoEl2, videoCanvas2, videoCtx2));
+    videoEl2.addEventListener('playing', processVideoFrame2);
     videoEl2.addEventListener('play', processVideoFrame2);
     videoEl2.addEventListener('ended', () => resetVideoToStart(videoEl2, videoCanvas2, videoCtx2));
 }
