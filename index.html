@@ -15,7 +15,7 @@
     <title>DOGGYCO MISSION — Windows PC</title>
     
     <script>
-    window.__BUILD = 'v21';
+    window.__BUILD = 'v22';
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations()
             .then(function (regs) { regs.forEach(function (r) { r.unregister(); }); })
@@ -565,12 +565,8 @@
             overflow: hidden;
         }
         .sw-crawl-track {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
             width: 100%;
-            will-change: transform;
+            animation: swCrawlLoop 20s linear infinite;
         }
         .sw-crawl-inner {
             text-align: center;
@@ -601,6 +597,10 @@
             animation: pulseTap 1.1s ease-in-out infinite alternate;
         }
         .sw-crawl-inner p { margin: 0 0 0.75em; }
+        @keyframes swCrawlLoop {
+            from { transform: translate3d(0, 0, 0); }
+            to { transform: translate3d(0, -50%, 0); }
+        }
         @keyframes pulseTap {
             0% { opacity: 0.78; transform: translate(-50%, -50%) scale(0.98); }
             100% { opacity: 1; transform: translate(-50%, -50%) scale(1.03); }
@@ -1392,7 +1392,7 @@
 </div>
 
 <audio id="bgm-track" src="music.mp3" loop preload="auto" playsinline webkit-playsinline style="display:none" aria-hidden="true"></audio>
-<script src="music-mp3.js?v=21"></script>
+<script src="music-mp3.js?v=22"></script>
 
 <script>
 // Vollbild: nur auf Touch / nicht-PC-Geräten (Windows-Desktop mit Maus bleibt Fenster-Modus für Edge)
@@ -1913,48 +1913,6 @@ function showLevelSelectAfterGate() {
         gate.style.pointerEvents = "none";
     }
     showLevelSelectScreen();
-}
-
-function initGateCrawl() {
-    var wrap = document.querySelector("#scr-gatekeeper .sw-crawl");
-    var track = document.querySelector("#scr-gatekeeper .sw-crawl-track");
-    if (!wrap || !track || track.__crawlOn) return;
-    track.__crawlOn = true;
-    track.style.animation = "none";
-
-    var halfH = 0;
-    var y = 0;
-    var msPerCycle = 20000;
-    var last = performance.now();
-
-    function measure() {
-        halfH = track.scrollHeight / 2;
-        if (halfH < 1) halfH = 1;
-        if (!y) y = wrap.clientHeight || window.innerHeight;
-    }
-    measure();
-    setTimeout(measure, 120);
-    setTimeout(measure, 600);
-    window.addEventListener("resize", measure);
-
-    function tick(now) {
-        if (!track.isConnected) return;
-        measure();
-        var dt = Math.min(now - last, 50);
-        last = now;
-        var limit = (wrap.clientHeight || window.innerHeight) - halfH;
-        y -= (halfH / msPerCycle) * dt;
-        if (y < limit) y += halfH;
-        track.style.transform = "translate3d(0," + y + "px,0)";
-        requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-}
-
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initGateCrawl);
-} else {
-    initGateCrawl();
 }
 
 function unlockSystem() {
