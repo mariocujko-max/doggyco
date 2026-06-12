@@ -15,7 +15,7 @@
     <title>DOGGYCO MISSION — Windows PC</title>
     
     <script>
-    window.__BUILD = 'v16';
+    window.__BUILD = 'v17';
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations()
             .then(function (regs) { regs.forEach(function (r) { r.unregister(); }); })
@@ -566,7 +566,7 @@
         }
         .sw-crawl-track {
             width: 100%;
-            animation: swCrawlLoop 32s linear infinite;
+            animation: swCrawlLoop 25s linear infinite;
         }
         .sw-crawl-gap {
             height: 32vh;
@@ -575,7 +575,7 @@
             text-align: center;
             color: var(--gold);
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(15px, 4vw, 20px);
+            font-size: clamp(17px, 4.4vw, 22px);
             line-height: 1.65;
             letter-spacing: 0.02em;
             text-shadow: 0 0 12px rgba(255, 215, 0, 0.45);
@@ -1387,7 +1387,7 @@
 </div>
 
 <audio id="bgm-track" src="music.mp3" loop preload="auto" playsinline webkit-playsinline style="display:none" aria-hidden="true"></audio>
-<script src="music-mp3.js?v=16"></script>
+<script src="music-mp3.js?v=17"></script>
 
 <script>
 // Vollbild: nur auf Touch / nicht-PC-Geräten (Windows-Desktop mit Maus bleibt Fenster-Modus für Edge)
